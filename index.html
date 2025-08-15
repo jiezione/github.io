@@ -45,30 +45,12 @@
             'spin-slow': 'spin 8s linear infinite'
           },
           keyframes: {
-            float: {
-              '0%, 100%': { transform: 'translateY(0)' },
-              '50%': { transform: 'translateY(-10px)' }
-            },
-            twinkle: {
-              '0%, 100%': { opacity: 1 },
-              '50%': { opacity: 0.5 }
-            },
-            orbit: {
-              '0%': { transform: 'rotate(0deg) translateX(50px) rotate(0deg)' },
-              '100%': { transform: 'rotate(360deg) translateX(50px) rotate(-360deg)' }
-            },
-            'pulse-soft': {
-              '0%, 100%': { opacity: 1 },
-              '50%': { opacity: 0.7 }
-            },
-            fadeIn: {
-              '0%': { opacity: 0 },
-              '100%': { opacity: 1 }
-            },
-            slideUp: {
-              '0%': { transform: 'translateY(10px)', opacity: 0 },
-              '100%': { transform: 'translateY(0)', opacity: 1 }
-            }
+            float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+            twinkle: { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.5 } },
+            orbit: { '0%': { transform: 'rotate(0deg) translateX(50px) rotate(0deg)' }, '100%': { transform: 'rotate(360deg) translateX(50px) rotate(-360deg)' } },
+            'pulse-soft': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.7 } },
+            fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
+            slideUp: { '0%': { transform: 'translateY(10px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } }
           }
         }
       }
@@ -76,101 +58,28 @@
   </script>
   <style type="text/tailwindcss">
     @layer utilities {
-      .content-auto {
-        content-visibility: auto;
-      }
-      .star {
-        position: absolute;
-        background-color: white;
-        border-radius: 50%;
-        animation: twinkle 2s infinite ease-in-out;
-      }
-      .glass {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-      }
-      .glass-dark {
-        background: rgba(10, 15, 30, 0.7);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-      .card-hover {
-        transition: all 0.3s ease;
-      }
-      .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px -5px rgba(74, 108, 247, 0.3);
-      }
-      .text-shadow {
-        text-shadow: 0 0 10px rgba(123, 147, 255, 0.7);
-      }
-      .text-ellipsis-1 {
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      .touch-friendly {
-        min-height: 44px;
-        min-width: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        position: relative;
-        z-index: 10;
-      }
-      .time-pill {
-        position: relative;
-        overflow: hidden;
-      }
-      .time-pill::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-        transition: 0.5s;
-      }
-      .time-pill:hover::before {
-        left: 100%;
-      }
-      .bookmark-tag {
-        @apply text-xs px-2 py-0.5 rounded bg-space-medium/30 inline-block mr-1 text-center whitespace-nowrap;
-      }
-      .group-header {
-        @apply bg-gradient-to-r from-space-medium to-space-light px-4 py-2 rounded-lg inline-block text-white font-bold mb-4 shadow-md;
-      }
-      .widget {
-        @apply relative overflow-hidden rounded-xl p-5 shadow-lg transition-all duration-300 hover:shadow-xl;
-      }
-      .widget::before {
-        content: '';
-        @apply absolute top-0 left-0 w-full h-1 bg-gradient-to-r;
-      }
-      .widget-icon-container {
-        @apply absolute top-0 right-0 w-16 h-16 flex items-center justify-center opacity-10;
-      }
-      .widget-icon {
-        @apply text-4xl;
-      }
-      .bookmark-btn {
-        @apply flex flex-col h-32 rounded-lg p-3 card-hover transition-all;
-      }
-      .bookmark-tags-container {
-        @apply flex flex-wrap mt-1 gap-1;
-      }
-      .favicon-container {
-        @apply w-8 h-8 rounded flex items-center justify-center overflow-hidden bg-gray-200 dark:bg-space-medium/50;
-      }
-      .favicon {
-        @apply w-full h-full object-contain;
-      }
+      .content-auto { content-visibility: auto; }
+      .star { position: absolute; background-color: white; border-radius: 50%; animation: twinkle 2s infinite ease-in-out; }
+      .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.18); }
+      .glass-dark { background: rgba(10, 15, 30, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); }
+      .card-hover { transition: all 0.3s ease; }
+      .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(74, 108, 247, 0.3); }
+      .text-shadow { text-shadow: 0 0 10px rgba(123, 147, 255, 0.7); }
+      .text-ellipsis-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+      .touch-friendly { min-height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; z-index: 10; }
+      .time-pill { position: relative; overflow: hidden; }
+      .time-pill::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transition: 0.5s; }
+      .time-pill:hover::before { left: 100%; }
+      .bookmark-tag { @apply text-xs px-2 py-0.5 rounded bg-space-medium/30 inline-block mr-1 text-center whitespace-nowrap; }
+      .group-header { @apply bg-gradient-to-r from-space-medium to-space-light px-4 py-2 rounded-lg inline-block text-white font-bold mb-4 shadow-md; }
+      .widget { @apply relative overflow-hidden rounded-xl p-5 shadow-lg transition-all duration-300 hover:shadow-xl; }
+      .widget::before { content: ''; @apply absolute top-0 left-0 w-full h-1 bg-gradient-to-r; }
+      .widget-icon-container { @apply absolute top-0 right-0 w-16 h-16 flex items-center justify-center opacity-10; }
+      .widget-icon { @apply text-4xl; }
+      .bookmark-btn { @apply flex flex-col h-32 rounded-lg p-3 card-hover transition-all border border-transparent hover:border-cosmic-blue/30; }
+      .bookmark-tags-container { @apply flex flex-wrap mt-1 gap-1; }
+      .favicon-container { @apply w-8 h-8 rounded flex items-center justify-center overflow-hidden bg-gray-200 dark:bg-space-medium/50; }
+      .favicon { @apply w-full h-full object-contain; }
     }
   </style>
 </head>
@@ -647,13 +556,12 @@
     
     let isAuthenticated = false;
     
-    function utf8ToBase64(str) {
+    function safeBase64Encode(str) {
       try {
         return btoa(unescape(encodeURIComponent(str)));
       } catch (e) {
-        console.error('Base64编码错误:', e);
-        console.error('错误字符:', str);
-        throw new Error('包含无法编码的特殊字符，请检查数据');
+        console.error('Base64编码错误，使用替代方案:', e);
+        return btoa(Array.from(str).map(c => String.fromCharCode(c.charCodeAt(0) % 256)).join(''));
       }
     }
     
@@ -748,7 +656,7 @@
           throw new Error(`检查现有文件失败: ${getResponse.statusText}`);
         }
         
-        const content = utf8ToBase64(JSON.stringify(appData, null, 2));
+        const content = safeBase64Encode(JSON.stringify(appData, null, 2));
         
         const putResponse = await fetch(url, {
           method: 'PUT',
