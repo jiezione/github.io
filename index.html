@@ -159,7 +159,7 @@
         <!-- 功能按钮组 -->
         <div class="flex items-center space-x-3 md:space-x-6">
           <!-- GitHub 登录按钮 -->
-          <button id="github-login" class="touch-friendly w-10 h-10 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all duration-300 relative group hidden">
+          <button id="github-login" class="touch-friendly w-10 h-10 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all duration-300 relative group">
             <i class="fa fa-github text-lg"></i>
             <span class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-space-dark dark:bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
               连接GitHub
@@ -712,6 +712,25 @@
       dataFile: 'star-navigation-data.json' // 数据文件在仓库中的路径
     };
     
+    // 处理Unicode的Base64编码和解码函数
+    function utf8ToBase64(str) {
+      try {
+        return btoa(unescape(encodeURIComponent(str)));
+      } catch (e) {
+        console.error('UTF8 to Base64 encoding failed:', e);
+        throw e;
+      }
+    }
+    
+    function base64ToUtf8(str) {
+      try {
+        return decodeURIComponent(escape(atob(str)));
+      } catch (e) {
+        console.error('Base64 to UTF8 decoding failed:', e);
+        throw e;
+      }
+    }
+    
     // 从本地存储加载GitHub配置
     function loadGithubConfig() {
       const savedConfig = localStorage.getItem('githubConfig');
@@ -772,7 +791,7 @@
         }
         
         const data = await response.json();
-        const content = atob(data.content); // 解码base64内容
+        const content = base64ToUtf8(data.content); // 使用改进的解码函数
         appData = JSON.parse(content);
         
         console.log('Data loaded from GitHub successfully');
@@ -812,8 +831,8 @@
           throw new Error(`Failed to check existing file: ${getResponse.statusText}`);
         }
         
-        // 准备要保存的数据
-        const content = btoa(JSON.stringify(appData, null, 2)); // 编码为base64
+        // 准备要保存的数据，使用改进的编码函数处理Unicode
+        const content = utf8ToBase64(JSON.stringify(appData, null, 2));
         
         // 保存数据
         const putResponse = await fetch(url, {
@@ -1397,6 +1416,11 @@
       // 主题切换按钮
       document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
       
+      // GitHub按钮点击事件 - 修复按钮无响应问题
+      document.getElementById('github-login').addEventListener('click', () => {
+        document.getElementById('github-config-modal').classList.remove('hidden');
+      });
+      
       // 设置按钮点击事件
       document.getElementById('settings-btn').addEventListener('click', () => {
         if (!isGithubConfigured()) {
@@ -1531,7 +1555,7 @@
         document.getElementById('password-modal').classList.add('hidden');
       });
       
-      // 确认密码验证 - 这里简化处理，实际应用中应该与后端验证
+      // 确认密码验证
       document.getElementById('confirm-password').addEventListener('click', () => {
         const password = document.getElementById('admin-password').value;
         // 这里只是示例，实际应用中应该有真实的密码验证逻辑
