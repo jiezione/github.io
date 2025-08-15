@@ -560,50 +560,34 @@
       try {
         return btoa(unescape(encodeURIComponent(str)));
       } catch (e) {
-        console.error('Base64编码错误，使用替代方案:', e);
-        return btoa(Array.from(str).map(c => String.fromCharCode(c.charCodeAt(0) % 256)).join(''));
-      }
-    }
-    
-    function loadGithubConfig() {
-      const savedConfig = localStorage.getItem('githubConfig');
-      if (savedConfig) {
-        try {
-          githubConfig = JSON.parse(savedConfig);
-          document.getElementById('github-username').value = githubConfig.username;
-          document.getElementById('github-repo').value = githubConfig.repo;
-          document.getElementById('github-token').value = githubConfig.token;
-          return true;
-        } catch (e) {
-          console.error('解析GitHub配置失败:', e);
+        const buffer = new TextEncoder().encode(str);
+        let binary = '';
+        const len = buffer.byteLength;
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(buffer[i]);
         }
+        return btoa(binary);
       }
-      return false;
     }
     
-    function saveGithubConfig() {
+    function safeBase64Decode(str) {
       try {
-        localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
-        return true;
+        return decodeURIComponent(escape(atob(str)));
       } catch (e) {
-        console.error('保存GitHub配置失败:', e);
-        return false;
+        const binary = atob(str);
+        const buffer = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          buffer[i] = binary.charCodeAt(i);
+        }
+        return new TextDecoder().decode(buffer);
       }
     }
     
-    function isGithubConfigured() {
-      return !!githubConfig.username && !!githubConfig.repo && !!githubConfig.token;
-    }
-    
-    async function loadDataFromGithub() {
-      if (!isGithubConfigured()) {
-        console.log('GitHub未配置，使用默认数据');
-        return false;
-      }
+    async function loadFromGitHub() {
+      if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) return false;
       
       try {
         const url = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFile}`;
-        
         const response = await fetch(url, {
           headers: {
             'Authorization': `token ${githubConfig.token}`,
@@ -612,53 +596,43 @@
         });
         
         if (!response.ok) {
-          if (response.status === 404) {
-            console.log('GitHub上未找到数据文件，首次保存时将创建');
-            return false;
-          }
-          throw new Error(`加载数据失败: ${response.statusText}`);
+          if (response.status === 404) return false;
+          throw new Error(`GitHub API 请求失败: ${response.status}`);
         }
         
         const data = await response.json();
-        const content = decodeURIComponent(escape(atob(data.content)));
-        appData = JSON.parse(content);
+        const content = safeBase64Decode(data.content);
+        const parsedData = JSON.parse(content);
         
-        console.log('从GitHub成功加载数据');
+        appData = { ...appData, ...parsedData };
         return true;
-      } catch (e) {
-        console.error('从GitHub加载数据错误:', e);
-        alert(`从GitHub加载数据失败: ${e.message}`);
+      } catch (error) {
+        console.error('从GitHub加载数据失败:', error);
         return false;
       }
     }
     
-    async function saveDataToGithub() {
-      if (!isGithubConfigured()) {
-        alert('请先配置GitHub信息');
-        return false;
-      }
+    async function saveToGitHub() {
+      if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) return false;
       
       try {
-        let sha = null;
+        let sha = '';
         const url = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFile}`;
         
-        const getResponse = await fetch(url, {
+        const checkResponse = await fetch(url, {
           headers: {
             'Authorization': `token ${githubConfig.token}`,
             'Accept': 'application/vnd.github.v3+json'
           }
         });
         
-        if (getResponse.ok) {
-          const data = await getResponse.json();
-          sha = data.sha;
-        } else if (getResponse.status !== 404) {
-          throw new Error(`检查现有文件失败: ${getResponse.statusText}`);
+        if (checkResponse.ok) {
+          const checkData = await checkResponse.json();
+          sha = checkData.sha;
         }
         
-        const content = safeBase64Encode(JSON.stringify(appData, null, 2));
-        
-        const putResponse = await fetch(url, {
+        const content = safeBase64Encode(JSON.stringify(appData));
+        const response = await fetch(url, {
           method: 'PUT',
           headers: {
             'Authorization': `token ${githubConfig.token}`,
@@ -666,1035 +640,772 @@
             'Accept': 'application/vnd.github.v3+json'
           },
           body: JSON.stringify({
-            message: 'Update star navigation data',
+            message: '更新星际导航数据',
             content: content,
             sha: sha
           })
         });
         
-        if (!putResponse.ok) {
-          const errorData = await putResponse.json();
-          throw new Error(`保存数据失败: ${errorData.message || putResponse.statusText}`);
-        }
-        
-        console.log('数据已成功保存到GitHub');
+        if (!response.ok) throw new Error(`GitHub API 请求失败: ${response.status}`);
         return true;
-      } catch (e) {
-        console.error('保存数据到GitHub错误:', e);
-        alert(`保存数据到GitHub失败: ${e.message}`);
+      } catch (error) {
+        console.error('保存数据到GitHub失败:', error);
         return false;
       }
     }
     
-    async function saveAndReloadData() {
-      const saved = await saveDataToGithub();
-      if (saved) {
-        await loadDataFromGithub();
-        renderBookmarks();
-        renderEditBookmarks();
-        populateGroupSelect();
-        updateAds();
-        return true;
-      }
-      return false;
-    }
-    
-    function createStars() {
-      const starsContainer = document.getElementById('stars');
-      const starCount = 150;
-      
-      for (let i = 0; i < starCount; i++) {
-        const star = document.createElement('div');
-        star.classList.add('star');
-        
-        const size = Math.random() * 2 + 1;
-        star.style.width = `${size}px`;
-        star.style.height = `${size}px`;
-        
-        star.style.left = `${Math.random() * 100}%`;
-        star.style.top = `${Math.random() * 100}%`;
-        
-        star.style.animationDelay = `${Math.random() * 3}s`;
-        
-        star.style.opacity = Math.random() * 0.8 + 0.2;
-        
-        starsContainer.appendChild(star);
-      }
-    }
-    
-    function initTheme() {
-      if (localStorage.getItem('theme') === 'dark' || 
-          (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    }
-    
-    function toggleTheme() {
-      if (document.documentElement.classList.contains('dark')) {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-      } else {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-      }
-    }
-    
-    function initDateTime() {
-      document.getElementById('current-year').textContent = new Date().getFullYear();
-      
-      function updateDateTime() {
-        const now = new Date();
-        
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        document.getElementById('current-date').textContent = `${year}/${month}/${day}`;
-        
-        const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-        document.getElementById('current-weekday').textContent = weekdays[now.getDay()];
-        
-        updateTimezones();
-      }
-      
-      updateDateTime();
-      setInterval(updateDateTime, 60000);
-    }
-    
-    function updateTimezones() {
-      const container = document.getElementById('timezones-container');
-      container.innerHTML = '';
-      
-      appData.timezones.forEach((tz, index) => {
-        const now = new Date();
-        const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
-        const tzTime = new Date(utcTime + tz.offset * 3600000);
-        
-        const hours = String(tzTime.getHours()).padStart(2, '0');
-        const minutes = String(tzTime.getMinutes()).padStart(2, '0');
-        const seconds = String(tzTime.getSeconds()).padStart(2, '0');
-        
-        const timeElement = document.createElement('div');
-        timeElement.className = 'time-pill glass p-3 rounded-lg flex justify-between items-center';
-        timeElement.innerHTML = `
-          <div>
-            <div class="font-medium">${tz.city}, ${tz.country}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">UTC${tz.offset >= 0 ? '+' : ''}${tz.offset}</div>
-          </div>
-          <div class="text-xl font-mono font-bold">${hours}:${minutes}:${seconds}</div>
-          <button class="delete-timezone touch-friendly w-6 h-6 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all" data-index="${index}">
-            <i class="fa fa-times text-xs"></i>
-          </button>
-        `;
-        
-        container.appendChild(timeElement);
-        
-        timeElement.querySelector('.delete-timezone').addEventListener('click', function(e) {
-          e.stopPropagation();
-          const index = parseInt(this.getAttribute('data-index'));
-          appData.timezones.splice(index, 1);
-          updateTimezones();
-          saveAndReloadData();
-        });
-      });
-      
-      document.getElementById('timezone-limit-message').classList.toggle('hidden', appData.timezones.length < 2);
-    }
-    
-    function displayCityList(cities = predefinedCities) {
-      const cityList = document.getElementById('city-list');
-      cityList.innerHTML = '';
-      
-      cities.forEach(city => {
-        const isAdded = appData.timezones.some(tz => tz.city === city.city && tz.country === city.country);
-        
-        const cityElement = document.createElement('div');
-        cityElement.className = `p-3 rounded-lg cursor-pointer transition-all ${isAdded ? 'bg-gray-200 dark:bg-space-medium/50 opacity-50' : 'hover:bg-space-medium/30'}`;
-        cityElement.innerHTML = `
-          <div class="font-medium">${city.city}</div>
-          <div class="text-xs text-gray-500 dark:text-gray-400">${city.country} (UTC${city.offset >= 0 ? '+' : ''}${city.offset})</div>
-        `;
-        
-        if (!isAdded) {
-          cityElement.addEventListener('click', () => {
-            if (appData.timezones.length >= 2) {
-              appData.timezones.shift();
-            }
-            
-            appData.timezones.push(city);
-            updateTimezones();
-            saveAndReloadData();
-            document.getElementById('add-timezone-modal').classList.add('hidden');
-          });
+    function loadFromLocalStorage() {
+      const savedData = localStorage.getItem('starNavigationData');
+      if (savedData) {
+        try {
+          appData = JSON.parse(savedData);
+        } catch (e) {
+          console.error('解析本地存储数据失败:', e);
         }
-        
-        cityList.appendChild(cityElement);
-      });
-    }
-    
-    function searchCities(query) {
-      if (!query) {
-        displayCityList();
-        return;
       }
       
-      const filteredCities = predefinedCities.filter(city => 
-        city.city.toLowerCase().includes(query.toLowerCase()) || 
-        city.country.toLowerCase().includes(query.toLowerCase())
-      );
-      
-      displayCityList(filteredCities);
+      const savedGithubConfig = localStorage.getItem('githubConfig');
+      if (savedGithubConfig) {
+        try {
+          githubConfig = JSON.parse(savedGithubConfig);
+        } catch (e) {
+          console.error('解析GitHub配置失败:', e);
+        }
+      }
     }
     
-    function extractTagsFromUrl(url) {
+    function saveToLocalStorage() {
+      localStorage.setItem('starNavigationData', JSON.stringify(appData));
+      localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
+    }
+    
+    async function syncData() {
+      const githubSuccess = await saveToGitHub();
+      saveToLocalStorage();
+      return githubSuccess;
+    }
+    
+    async function initializeData() {
+      loadFromLocalStorage();
+      const githubLoaded = await loadFromGitHub();
+      if (githubLoaded) {
+        saveToLocalStorage();
+      }
+      renderAll();
+    }
+    
+    function getFavicon(url) {
       try {
         const parsedUrl = new URL(url);
-        const domainParts = parsedUrl.hostname.replace('www.', '').split('.');
-        const pathParts = parsedUrl.pathname.split('/').filter(part => part);
-        
-        const tags = [];
-        
-        if (domainParts.some(part => ['google', 'baidu', 'bing', 'yahoo'].includes(part))) tags.push('搜索');
-        if (domainParts.some(part => ['github', 'gitlab', 'bitbucket'].includes(part))) tags.push('代码');
-        if (domainParts.some(part => ['youtube', 'vimeo', 'youku', 'tudou', 'video'].includes(part))) tags.push('视频');
-        if (domainParts.some(part => ['twitter', 'facebook', 'instagram', 'weibo', 'social'].includes(part))) tags.push('社交');
-        if (domainParts.some(part => ['news', 'cnn', 'bbc', 'nytimes'].includes(part))) tags.push('新闻');
-        if (domainParts.some(part => ['dev', 'code', 'developer', 'stackover'].includes(part))) tags.push('开发');
-        if (domainParts.some(part => ['docs', 'documentation', 'wiki'].includes(part))) tags.push('文档');
-        if (domainParts.some(part => ['shop', 'store', 'taobao', 'jd', 'amazon', 'ebay'].includes(part))) tags.push('购物');
-        if (domainParts.some(part => ['blog', 'wordpress', 'medium'].includes(part))) tags.push('博客');
-        if (domainParts.some(part => ['mail', 'email', 'gmail', 'outlook'].includes(part))) tags.push('邮件');
-        if (domainParts.some(part => ['map', 'maps', 'baidu-map', 'google-map'].includes(part))) tags.push('地图');
-        
-        if (pathParts.some(part => ['blog', 'article', 'post'].includes(part))) tags.push('博客');
-        if (pathParts.some(part => ['shop', 'store', 'cart', 'buy'].includes(part))) tags.push('购物');
-        if (pathParts.some(part => ['video', 'movie', 'film'].includes(part))) tags.push('视频');
-        if (pathParts.some(part => ['doc', 'docs', 'documentation'].includes(part))) tags.push('文档');
-        
-        return [...new Set(tags)].slice(0, 3);
+        return `https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(parsedUrl.origin)}&size=32`;
       } catch (e) {
-        return [];
+        return '';
       }
     }
     
-    function getFaviconUrl(url) {
+    async function getWebsiteTitle(url) {
       try {
-        const parsedUrl = new URL(url);
-        return `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(parsedUrl.origin)}&size=32`;
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error('无法获取网站内容');
+        
+        const data = await response.json();
+        const html = data.contents;
+        const match = html.match(/<title>(.*?)<\/title>/i);
+        return match ? match[1].trim() : new URL(url).hostname;
       } catch (e) {
-        return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IiMyRDNCNzMiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxMCIgZmlsbD0iIzRBQTNGNyIvPjwvc3ZnPg==';
+        console.error('获取网站标题失败:', e);
+        try {
+          return new URL(url).hostname;
+        } catch {
+          return '未知网站';
+        }
       }
     }
     
-    function processBookmarkElements(elements, parentGroup = {}) {
-      const bookmarks = [];
-      const groups = {};
+    function parseBookmarkHtml(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const bookmarks = {};
       
-      for (let i = 0; i < elements.length; i++) {
-        const element = elements[i];
-        if (element.tagName === 'DT') {
-          const child = element.firstElementChild;
-          if (child.tagName === 'A') {
-            const url = child.href;
-            const name = child.textContent.trim() || '未命名网站';
-            const tags = extractTagsFromUrl(url);
+      function processNode(node, currentGroup) {
+        if (node.tagName === 'DT') {
+          const anchor = node.querySelector('A');
+          const folder = node.querySelector('H3');
+          
+          if (anchor) {
+            const url = anchor.getAttribute('HREF');
+            const name = anchor.textContent.trim();
             
-            bookmarks.push({
+            if (!currentGroup) currentGroup = '未分类';
+            if (!bookmarks[currentGroup]) bookmarks[currentGroup] = [];
+            
+            bookmarks[currentGroup].push({
               name: name,
               url: url,
-              icon: getFaviconUrl(url),
+              icon: getFavicon(url),
               color: `cosmic-${['blue', 'purple', 'pink', 'yellow', 'green', 'red', 'cyan'][Math.floor(Math.random() * 7)]}`,
-              tags: tags
+              tags: []
             });
-          } else if (child.tagName === 'H3') {
-            const groupName = child.textContent.trim() || '未命名文件夹';
-            let nextElement = element.nextElementSibling;
-            
-            while (nextElement && nextElement.tagName !== 'DL') {
-              nextElement = nextElement.nextElementSibling;
-            }
-            
-            if (nextElement) {
-              const subElements = Array.from(nextElement.querySelectorAll('dt'));
-              const { bookmarks: subBookmarks, groups: subGroups } = processBookmarkElements(subElements);
-              
-              const fullGroupName = parentGroup.name ? `${parentGroup.name} > ${groupName}` : groupName;
-              
-              groups[fullGroupName] = subBookmarks;
-              
-              Object.assign(groups, Object.fromEntries(
-                Object.entries(subGroups).map(([key, value]) => [
-                  parentGroup.name ? `${parentGroup.name} > ${key}` : key,
-                  value
-                ])
-              ));
+          } else if (folder) {
+            const folderName = folder.textContent.trim();
+            const nextNode = node.nextElementSibling;
+            if (nextNode && nextNode.tagName === 'DL') {
+              Array.from(nextNode.children).forEach(child => {
+                processNode(child, folderName);
+              });
             }
           }
+        } else if (node.tagName === 'DL' || node.tagName === 'DIV') {
+          Array.from(node.children).forEach(child => {
+            processNode(child, currentGroup);
+          });
         }
       }
       
-      return { bookmarks, groups };
+      processNode(doc.body, null);
+      return bookmarks;
+    }
+    
+    function mergeBookmarks(existing, newBookmarks) {
+      const merged = { ...existing };
+      
+      for (const group in newBookmarks) {
+        if (!merged[group]) {
+          merged[group] = [];
+        }
+        
+        newBookmarks[group].forEach(newBookmark => {
+          const exists = merged[group].some(b => b.url === newBookmark.url);
+          if (!exists) {
+            merged[group].push(newBookmark);
+          }
+        });
+      }
+      
+      return merged;
     }
     
     function renderBookmarks() {
       const container = document.getElementById('bookmarks-container');
       container.innerHTML = '';
       
-      let totalBookmarks = 0;
+      let total = 0;
       
-      const sortedGroupNames = Object.keys(appData.bookmarks).sort((a, b) => {
-        if (a === "常用网站") return -1;
-        if (b === "常用网站") return 1;
-        return a.localeCompare(b);
-      });
-      
-      sortedGroupNames.forEach(groupName => {
-        const bookmarks = appData.bookmarks[groupName];
-        totalBookmarks += bookmarks.length;
+      for (const group in appData.bookmarks) {
+        const bookmarks = appData.bookmarks[group];
+        if (!bookmarks || bookmarks.length === 0) continue;
+        
+        total += bookmarks.length;
         
         const groupElement = document.createElement('div');
         groupElement.className = 'bookmark-group animate-fade-in';
         
-        const groupHeader = document.createElement('h3');
-        groupHeader.className = 'group-header';
-        groupHeader.textContent = `${groupName} (${bookmarks.length})`;
-        groupElement.appendChild(groupHeader);
+        const header = document.createElement('h3');
+        header.className = 'group-header';
+        header.textContent = group;
+        groupElement.appendChild(header);
         
         const bookmarksGrid = document.createElement('div');
         bookmarksGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3';
+        groupElement.appendChild(bookmarksGrid);
         
         bookmarks.forEach((bookmark, index) => {
+          const bookmarkBtn = document.createElement('a');
+          bookmarkBtn.href = bookmark.url;
+          bookmarkBtn.target = '_blank';
+          bookmarkBtn.className = 'bookmark-btn glass flex flex-col justify-between';
+          bookmarkBtn.title = bookmark.name;
+          
           if (!bookmark.icon) {
-            bookmark.icon = getFaviconUrl(bookmark.url);
+            bookmark.icon = getFavicon(bookmark.url);
           }
           
-          if (!bookmark.tags || bookmark.tags.length === 0) {
-            bookmark.tags = extractTagsFromUrl(bookmark.url);
-          }
+          const iconContainer = document.createElement('div');
+          iconContainer.className = 'favicon-container mb-2';
           
-          const bookmarkCard = document.createElement('a');
-          bookmarkCard.href = bookmark.url;
-          bookmarkCard.target = '_blank';
-          bookmarkCard.className = `glass bookmark-btn flex flex-col justify-between`;
+          const favicon = document.createElement('img');
+          favicon.className = 'favicon';
+          favicon.src = bookmark.icon || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMjAgNGMtOC44IDAtMTYgNy4yLTE2IDE2czcuMiAxNiAxNiAxNiAxNiAxNi03LjIgMTYtMTYtNy4yLTE2LTE2LTE2em0tMyAxOGMtLjYsMC0xLS40LTEtMXMtLjQtMS0xLTFoLTZjLS42IDAtMS4uNC0xIDEtMXMtLjQgMS0xIDFoLTZjLjYgMCAxIC40IDEgMXMuNCAxIDEgMWg2Yy42IDAgMS0uNCAxLTFzLS40LTEtMS0xaC02em0xNi0xN2MwIC42LS40IDEtMSAxcy0xLS40LTEtMUg5Yy0uNiAwLTEtLjQtMS0xcy40LTEgMS0xaDE2YzEuMSAwIDIgLjkgMiAydjJ6Ii8+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMTUiIGZpbGw9IiM0QTYzRjciLz48L3N2Zz4=';
+          favicon.alt = bookmark.name;
+          iconContainer.appendChild(favicon);
           
-          const colorClass = bookmark.color || 'cosmic-blue';
+          const nameElement = document.createElement('div');
+          nameElement.className = 'text-sm font-medium flex-grow flex items-center text-ellipsis-1';
+          nameElement.textContent = bookmark.name;
           
-          let tagsHtml = '';
+          bookmarkBtn.appendChild(iconContainer);
+          bookmarkBtn.appendChild(nameElement);
+          
           if (bookmark.tags && bookmark.tags.length > 0) {
+            const tagsContainer = document.createElement('div');
+            tagsContainer.className = 'bookmark-tags-container';
+            
             bookmark.tags.forEach(tag => {
-              tagsHtml += `<span class="bookmark-tag">${tag}</span>`;
+              const tagElement = document.createElement('span');
+              tagElement.className = 'bookmark-tag';
+              tagElement.textContent = tag;
+              tagsContainer.appendChild(tagElement);
             });
+            
+            bookmarkBtn.appendChild(tagsContainer);
           }
           
-          bookmarkCard.innerHTML = `
-            <div class="favicon-container mb-2 self-start">
-              <img src="${bookmark.icon}" alt="${bookmark.name}的图标" class="favicon" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IiMyRDNCNzMiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxMCIgZmlsbD0iIzRBQTNGNyIvPjwvc3ZnPg=='">
-            </div>
-            <div class="flex-1 flex flex-col justify-between">
-              <div class="font-medium text-sm text-ellipsis-1 w-full">${bookmark.name}</div>
-              <div class="bookmark-tags-container">
-                ${tagsHtml}
-              </div>
-            </div>
-          `;
-          
-          bookmarksGrid.appendChild(bookmarkCard);
+          bookmarksGrid.appendChild(bookmarkBtn);
         });
         
-        groupElement.appendChild(bookmarksGrid);
         container.appendChild(groupElement);
+      }
+      
+      document.getElementById('total-bookmarks').textContent = total;
+    }
+    
+    function renderTimezones() {
+      const container = document.getElementById('timezones-container');
+      container.innerHTML = '';
+      
+      appData.timezones.forEach((timezone, index) => {
+        const now = new Date();
+        const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+        const localTime = new Date(utcTime + timezone.offset * 3600000);
+        
+        const timeString = localTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        const timeElement = document.createElement('div');
+        timeElement.className = 'time-pill glass flex justify-between items-center px-3 py-2 rounded-lg';
+        
+        const location = document.createElement('span');
+        location.className = 'text-sm';
+        location.textContent = `${timezone.city}, ${timezone.country}`;
+        
+        const time = document.createElement('span');
+        time.className = 'font-medium';
+        time.textContent = timeString;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'ml-2 touch-friendly w-6 h-6 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all';
+        removeBtn.innerHTML = '<i class="fa fa-times text-xs"></i>';
+        removeBtn.onclick = (e) => {
+          e.stopPropagation();
+          appData.timezones.splice(index, 1);
+          renderTimezones();
+          syncData();
+        };
+        
+        timeElement.appendChild(location);
+        timeElement.appendChild(time);
+        timeElement.appendChild(removeBtn);
+        
+        container.appendChild(timeElement);
       });
       
-      document.getElementById('total-bookmarks').textContent = totalBookmarks;
+      const limitMessage = document.getElementById('timezone-limit-message');
+      if (appData.timezones.length >= 2) {
+        limitMessage.classList.remove('hidden');
+        document.getElementById('add-timezone').setAttribute('disabled', 'true');
+      } else {
+        limitMessage.classList.add('hidden');
+        document.getElementById('add-timezone').removeAttribute('disabled');
+      }
     }
     
     function renderEditBookmarks() {
       const container = document.getElementById('edit-bookmarks-container');
       container.innerHTML = '';
       
-      const sortedGroupNames = Object.keys(appData.bookmarks).sort((a, b) => {
-        if (a === "常用网站") return -1;
-        if (b === "常用网站") return 1;
-        return a.localeCompare(b);
-      });
+      const groupSelect = document.getElementById('bookmark-group-select');
+      groupSelect.innerHTML = '';
       
-      sortedGroupNames.forEach(groupName => {
-        const bookmarks = appData.bookmarks[groupName];
+      for (const group in appData.bookmarks) {
+        const option = document.createElement('option');
+        option.value = group;
+        option.textContent = group;
+        groupSelect.appendChild(option);
         
         const groupElement = document.createElement('div');
-        groupElement.className = 'glass rounded-lg p-4';
+        groupElement.className = 'glass p-4 rounded-lg';
         
         const groupHeader = document.createElement('div');
         groupHeader.className = 'flex justify-between items-center mb-4';
-        groupHeader.innerHTML = `
-          <div class="flex items-center">
-            <i class="fa fa-folder text-cosmic-yellow mr-2"></i>
-            <input type="text" value="${groupName}" class="group-name glass-dark border-none focus:ring-1 focus:ring-cosmic-blue rounded px-2 py-1 w-64" data-old-name="${groupName}">
-          </div>
-          <button class="delete-group touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-gray-500" data-group="${groupName}">
-            <i class="fa fa-trash-o"></i>
-          </button>
-        `;
-        groupElement.appendChild(groupHeader);
         
-        const groupNameInput = groupHeader.querySelector('.group-name');
-        groupNameInput.addEventListener('change', function() {
-          const oldName = this.getAttribute('data-old-name');
-          const newName = this.value.trim();
-          
-          if (newName && newName !== oldName) {
-            appData.bookmarks[newName] = appData.bookmarks[oldName];
-            delete appData.bookmarks[oldName];
-            this.setAttribute('data-old-name', newName);
+        const groupTitle = document.createElement('h4');
+        groupTitle.className = 'font-medium text-lg';
+        groupTitle.textContent = group;
+        
+        const groupActions = document.createElement('div');
+        groupActions.className = 'flex space-x-2';
+        
+        const renameGroupBtn = document.createElement('button');
+        renameGroupBtn.className = 'touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all';
+        renameGroupBtn.innerHTML = '<i class="fa fa-pencil text-sm"></i>';
+        renameGroupBtn.title = '重命名分组';
+        renameGroupBtn.onclick = () => {
+          const newName = prompt('请输入新的分组名称:', group);
+          if (newName && newName.trim() && newName !== group) {
+            appData.bookmarks[newName] = appData.bookmarks[group];
+            delete appData.bookmarks[group];
             renderEditBookmarks();
-            populateGroupSelect();
-          } else {
-            this.value = oldName;
           }
-        });
+        };
+        
+        const deleteGroupBtn = document.createElement('button');
+        deleteGroupBtn.className = 'touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-cosmic-red';
+        deleteGroupBtn.innerHTML = '<i class="fa fa-trash text-sm"></i>';
+        deleteGroupBtn.title = '删除分组';
+        deleteGroupBtn.onclick = () => {
+          if (confirm(`确定要删除分组"${group}"吗？该操作会同时删除组内所有书签。`)) {
+            delete appData.bookmarks[group];
+            renderEditBookmarks();
+          }
+        };
+        
+        groupActions.appendChild(renameGroupBtn);
+        groupActions.appendChild(deleteGroupBtn);
+        groupHeader.appendChild(groupTitle);
+        groupHeader.appendChild(groupActions);
+        groupElement.appendChild(groupHeader);
         
         const bookmarksList = document.createElement('div');
         bookmarksList.className = 'space-y-3';
+        groupElement.appendChild(bookmarksList);
         
-        bookmarks.forEach((bookmark, index) => {
-          if (!bookmark.icon) {
-            bookmark.icon = getFaviconUrl(bookmark.url);
-          }
-          
-          if (!bookmark.tags) {
-            bookmark.tags = [];
-          }
-          
-          let tagsHtml = '';
-          bookmark.tags.forEach((tag, tagIndex) => {
-            tagsHtml += `
-              <div class="inline-flex items-center mr-1">
-                <input type="text" value="${tag}" class="bookmark-tag-input text-xs px-2 py-1 rounded bg-space-medium/30 border-none focus:ring-1 focus:ring-cosmic-blue" data-group="${groupName}" data-index="${index}" data-tag-index="${tagIndex}">
-                <button class="delete-tag ml-1 text-gray-500 hover:text-red-500" data-group="${groupName}" data-index="${index}" data-tag-index="${tagIndex}">
-                  <i class="fa fa-times-circle text-xs"></i>
-                </button>
-              </div>
-            `;
-          });
-          
-          tagsHtml += `
-            <button class="add-tag text-xs px-2 py-1 rounded bg-gray-200 dark:bg-space-medium/50 text-gray-700 dark:text-gray-300" data-group="${groupName}" data-index="${index}">
-              <i class="fa fa-plus"></i> 添加标签
-            </button>
-          `;
-          
+        appData.bookmarks[group].forEach((bookmark, index) => {
           const bookmarkItem = document.createElement('div');
-          bookmarkItem.className = 'flex items-center p-2 glass-dark rounded-lg';
-          bookmarkItem.innerHTML = `
-            <div class="favicon-container mr-3">
-              <img src="${bookmark.icon}" alt="${bookmark.name}的图标" class="favicon" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IiMyRDNCNzMiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxMCIgZmlsbD0iIzRBQTNGNyIvPjwvc3ZnPg=='">
-            </div>
-            <div class="flex-1 mr-2">
-              <input type="text" value="${bookmark.name}" class="bookmark-name w-full glass-dark border-none focus:ring-1 focus:ring-cosmic-blue rounded px-2 py-1" data-group="${groupName}" data-index="${index}">
-              <input type="url" value="${bookmark.url}" class="bookmark-url w-full glass-dark border-none focus:ring-1 focus:ring-cosmic-blue rounded px-2 py-1 mt-1 text-sm" data-group="${groupName}" data-index="${index}">
-              <div class="mt-2">
-                ${tagsHtml}
-              </div>
-            </div>
-            <button class="delete-bookmark touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-gray-500" data-group="${groupName}" data-index="${index}">
-              <i class="fa fa-trash-o"></i>
-            </button>
-          `;
+          bookmarkItem.className = 'flex items-center p-2 hover:bg-space-medium/20 rounded-lg transition-colors';
+          
+          const faviconContainer = document.createElement('div');
+          faviconContainer.className = 'favicon-container mr-3';
+          
+          const favicon = document.createElement('img');
+          favicon.className = 'favicon';
+          favicon.src = bookmark.icon || getFavicon(bookmark.url);
+          favicon.alt = bookmark.name;
+          faviconContainer.appendChild(favicon);
+          
+          const bookmarkInfo = document.createElement('div');
+          bookmarkInfo.className = 'flex-grow min-w-0';
+          
+          const nameInput = document.createElement('input');
+          nameInput.type = 'text';
+          nameInput.value = bookmark.name;
+          nameInput.className = 'w-full bg-transparent border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-cosmic-blue focus:outline-none text-sm font-medium mb-1';
+          nameInput.onchange = (e) => {
+            bookmark.name = e.target.value.trim();
+          };
+          
+          const urlInput = document.createElement('input');
+          urlInput.type = 'url';
+          urlInput.value = bookmark.url;
+          urlInput.className = 'w-full bg-transparent border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-cosmic-blue focus:outline-none text-xs text-gray-500 dark:text-gray-400';
+          urlInput.onchange = (e) => {
+            bookmark.url = e.target.value.trim();
+            bookmark.icon = getFavicon(bookmark.url);
+            favicon.src = bookmark.icon;
+          };
+          
+          bookmarkInfo.appendChild(nameInput);
+          bookmarkInfo.appendChild(urlInput);
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-cosmic-red ml-2';
+          deleteBtn.innerHTML = '<i class="fa fa-trash text-sm"></i>';
+          deleteBtn.title = '删除书签';
+          deleteBtn.onclick = () => {
+            appData.bookmarks[group].splice(index, 1);
+            renderEditBookmarks();
+          };
+          
+          bookmarkItem.appendChild(faviconContainer);
+          bookmarkItem.appendChild(bookmarkInfo);
+          bookmarkItem.appendChild(deleteBtn);
           
           bookmarksList.appendChild(bookmarkItem);
         });
         
-        const addButton = document.createElement('button');
-        addButton.className = 'w-full py-2 border border-dashed border-gray-400 dark:border-gray-600 rounded-lg mt-3 text-sm hover:bg-space-medium/30 transition-colors flex items-center justify-center touch-friendly';
-        addButton.innerHTML = `<i class="fa fa-plus mr-1"></i> 在 ${groupName} 中添加书签`;
-        addButton.setAttribute('data-group', groupName);
-        
-        addButton.addEventListener('click', function() {
-          const group = this.getAttribute('data-group');
-          appData.bookmarks[group].push({
-            name: '新网站',
-            url: 'https://example.com',
-            icon: getFaviconUrl('https://example.com'),
-            color: 'cosmic-blue',
-            tags: []
-          });
-          renderEditBookmarks();
-        });
-        
-        groupElement.appendChild(bookmarksList);
-        groupElement.appendChild(addButton);
         container.appendChild(groupElement);
-      });
-      
-      document.querySelectorAll('.delete-group').forEach(button => {
-        button.addEventListener('click', function() {
-          const group = this.getAttribute('data-group');
-          if (confirm(`确定要删除分组 "${group}" 吗？此操作不可恢复。`)) {
-            delete appData.bookmarks[group];
-            renderEditBookmarks();
-            populateGroupSelect();
-          }
-        });
-      });
-      
-      document.querySelectorAll('.delete-bookmark').forEach(button => {
-        button.addEventListener('click', function() {
-          const group = this.getAttribute('data-group');
-          const index = parseInt(this.getAttribute('data-index'));
-          appData.bookmarks[group].splice(index, 1);
-          renderEditBookmarks();
-        });
-      });
-      
-      document.querySelectorAll('.bookmark-name').forEach(input => {
-        input.addEventListener('change', function() {
-          const group = this.getAttribute('data-group');
-          const index = parseInt(this.getAttribute('data-index'));
-          appData.bookmarks[group][index].name = this.value.trim() || '未命名网站';
-        });
-      });
-      
-      document.querySelectorAll('.bookmark-url').forEach(input => {
-        input.addEventListener('change', function() {
-          const group = this.getAttribute('data-group');
-          const index = parseInt(this.getAttribute('data-index'));
-          let url = this.value.trim();
-          if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
-            url = 'https://' + url;
-            this.value = url;
-          }
-          appData.bookmarks[group][index].url = url || 'https://example.com';
-          
-          appData.bookmarks[group][index].icon = getFaviconUrl(url);
-          
-          appData.bookmarks[group][index].tags = extractTagsFromUrl(url);
-          renderEditBookmarks();
-        });
-      });
-      
-      document.querySelectorAll('.bookmark-tag-input').forEach(input => {
-        input.addEventListener('change', function() {
-          const group = this.getAttribute('data-group');
-          const index = parseInt(this.getAttribute('data-index'));
-          const tagIndex = parseInt(this.getAttribute('data-tag-index'));
-          const tagValue = this.value.trim();
-          
-          if (tagValue) {
-            appData.bookmarks[group][index].tags[tagIndex] = tagValue;
-          } else {
-            appData.bookmarks[group][index].tags.splice(tagIndex, 1);
-            renderEditBookmarks();
-          }
-        });
-      });
-      
-      document.querySelectorAll('.delete-tag').forEach(button => {
-        button.addEventListener('click', function() {
-          const group = this.getAttribute('data-group');
-          const index = parseInt(this.getAttribute('data-index'));
-          const tagIndex = parseInt(this.getAttribute('data-tag-index'));
-          
-          appData.bookmarks[group][index].tags.splice(tagIndex, 1);
-          renderEditBookmarks();
-        });
-      });
-      
-      document.querySelectorAll('.add-tag').forEach(button => {
-        button.addEventListener('click', function() {
-          const group = this.getAttribute('data-group');
-          const index = parseInt(this.getAttribute('data-index'));
-          
-          if (!appData.bookmarks[group][index].tags) {
-            appData.bookmarks[group][index].tags = [];
-          }
-          
-          appData.bookmarks[group][index].tags.push('新标签');
-          renderEditBookmarks();
-          
-          setTimeout(() => {
-            const newTagInput = document.querySelector(`.bookmark-tag-input[data-group="${group}"][data-index="${index}"][data-tag-index="${appData.bookmarks[group][index].tags.length - 1}"]`);
-            if (newTagInput) newTagInput.focus();
-          }, 100);
-        });
-      });
+      }
     }
     
-    function populateGroupSelect() {
-      const select = document.getElementById('bookmark-group-select');
-      select.innerHTML = '';
+    function renderDate() {
+      const now = new Date();
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+      document.getElementById('current-date').textContent = now.toLocaleDateString('zh-CN', options).replace(/\//g, '/');
       
-      const sortedGroupNames = Object.keys(appData.bookmarks).sort((a, b) => {
-        if (a === "常用网站") return -1;
-        if (b === "常用网站") return 1;
-        return a.localeCompare(b);
-      });
+      const weekday = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+      document.getElementById('current-weekday').textContent = weekday[now.getDay()];
       
-      sortedGroupNames.forEach(groupName => {
-        const option = document.createElement('option');
-        option.value = groupName;
-        option.textContent = groupName;
-        select.appendChild(option);
-      });
+      document.getElementById('current-year').textContent = now.getFullYear();
     }
     
-    function initHealthReminder() {
+    function startUptimeTimer() {
+      const startTime = Date.now();
+      const uptimeElement = document.getElementById('uptime');
+      
+      setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const hours = Math.floor(elapsed / 3600).toString().padStart(2, '0');
+        const minutes = Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0');
+        const seconds = (elapsed % 60).toString().padStart(2, '0');
+        uptimeElement.textContent = `${hours}:${minutes}:${seconds}`;
+      }, 1000);
+    }
+    
+    function updateHealthReminder() {
+      const now = new Date();
+      const minutes = now.getHours() * 60 + now.getMinutes();
       const reminders = [
-        "该休息一下了",
-        "多喝水保持健康",
-        "远眺放松眼睛",
-        "站起来活动一下",
-        "深呼吸缓解压力",
-        "保持正确坐姿",
-        "注意保护颈椎"
+        { start: 420, end: 450, text: '该吃早餐了' },
+        { start: 600, end: 630, text: '上午休息一下吧' },
+        { start: 720, end: 750, text: '该吃午饭了' },
+        { start: 900, end: 930, text: '下午休息一下吧' },
+        { start: 1080, end: 1110, text: '该吃晚饭了' },
+        { start: 1200, end: 1230, text: '晚上放松一下' }
       ];
       
-      function updateReminder() {
-        const randomIndex = Math.floor(Math.random() * reminders.length);
-        document.getElementById('health-reminder').textContent = reminders[randomIndex];
-      }
+      const reminderElement = document.getElementById('health-reminder');
+      const matched = reminders.find(r => minutes >= r.start && minutes <= r.end);
       
-      updateReminder();
-      setInterval(updateReminder, 30 * 60 * 1000);
+      reminderElement.textContent = matched ? matched.text : '该休息一下了';
     }
     
-    function initUptime() {
-      const startTime = new Date().getTime();
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      const starCount = window.innerWidth < 768 ? 50 : 100;
       
-      function updateUptime() {
-        const now = new Date().getTime();
-        const elapsed = now - startTime;
-        
-        const hours = Math.floor(elapsed / (1000 * 60 * 60));
-        const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
-        
-        document.getElementById('uptime').textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.width = `${Math.random() * 3 + 1}px`;
+        star.style.height = star.style.width;
+        star.style.animationDelay = `${Math.random() * 2}s`;
+        star.style.opacity = Math.random() * 0.8 + 0.2;
+        starsContainer.appendChild(star);
       }
-      
-      updateUptime();
-      setInterval(updateUptime, 1000);
     }
     
-    function showImportStatus(message, type = 'info') {
-      const statusElement = document.getElementById('import-status');
-      statusElement.textContent = message;
-      statusElement.classList.remove('hidden', 'text-cosmic-green', 'text-cosmic-red', 'text-cosmic-blue');
-      
-      if (type === 'success') {
-        statusElement.classList.add('text-cosmic-green');
-      } else if (type === 'error') {
-        statusElement.classList.add('text-cosmic-red');
-      } else {
-        statusElement.classList.add('text-cosmic-blue');
-      }
-      
-      setTimeout(() => {
-        statusElement.classList.add('hidden');
-      }, 5000);
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
     }
     
-    function handleBookmarkImport(file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(e.target.result, 'text/html');
-          
-          const dtElements = Array.from(doc.querySelectorAll('dt'));
-          
-          if (dtElements.length === 0) {
-            showImportStatus('未找到书签数据', 'error');
-            return;
+    function loadTheme() {
+      if (localStorage.getItem('darkMode') === 'true' || 
+          (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    }
+    
+    function renderCityList(filter = '') {
+      const cityList = document.getElementById('city-list');
+      cityList.innerHTML = '';
+      
+      const filteredCities = predefinedCities.filter(city => 
+        !appData.timezones.some(tz => tz.city === city.city) &&
+        (city.city.toLowerCase().includes(filter.toLowerCase()) || 
+         city.country.toLowerCase().includes(filter.toLowerCase()))
+      );
+      
+      filteredCities.forEach(city => {
+        const cityElement = document.createElement('button');
+        cityElement.className = 'glass p-3 rounded-lg text-left hover:bg-space-medium/30 transition-colors touch-friendly';
+        cityElement.innerHTML = `
+          <div class="font-medium text-sm">${city.city}</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400">${city.country}</div>
+        `;
+        cityElement.onclick = () => {
+          appData.timezones.push(city);
+          if (appData.timezones.length > 2) {
+            appData.timezones.shift();
           }
-          
-          const { bookmarks: rootBookmarks, groups: importGroups } = processBookmarkElements(dtElements);
-          
-          if (rootBookmarks.length > 0) {
-            importGroups['导入的书签'] = rootBookmarks;
-          }
-          
-          Object.entries(importGroups).forEach(([groupName, bookmarks]) => {
-            if (appData.bookmarks[groupName]) {
-              bookmarks.forEach(bookmark => {
-                const isDuplicate = appData.bookmarks[groupName].some(b => b.url === bookmark.url);
-                if (!isDuplicate) {
-                  appData.bookmarks[groupName].push(bookmark);
-                }
-              });
-            } else {
-              appData.bookmarks[groupName] = bookmarks;
-            }
-          });
-          
-          showImportStatus(`成功导入 ${Object.values(importGroups).reduce((total, bookmarks) => total + bookmarks.length, 0)} 个书签，保留原分组结构`, 'success');
-          renderEditBookmarks();
-          populateGroupSelect();
-          
-        } catch (error) {
-          console.error('导入书签错误:', error);
-          showImportStatus(`导入失败: ${error.message}`, 'error');
-        }
-      };
-      
-      reader.readAsText(file);
-    }
-    
-    function exportBookmarksAsHtml() {
-      let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
-<!-- This is an automatically generated file.
-     It will be read and overwritten.
-     DO NOT EDIT! -->
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-<TITLE>书签导出</TITLE>
-<H1>书签导出</H1>
-<DL><p>
-`;
-      
-      Object.entries(appData.bookmarks).forEach(([groupName, bookmarks]) => {
-        const groupParts = groupName.split(' > ');
-        let groupHtml = '';
-        
-        groupParts.forEach((part, index) => {
-          groupHtml += `<DT><H3 ADD_DATE="${new Date().getTime() / 1000 | 0}">${part}</H3>\n<DL><p>\n`;
-        });
-        
-        bookmarks.forEach(bookmark => {
-          const addDate = new Date().getTime() / 1000 | 0;
-          groupHtml += `<DT><A HREF="${bookmark.url}" ADD_DATE="${addDate}" LAST_MODIFIED="${addDate}">${bookmark.name}</A>\n`;
-        });
-        
-        for (let i = 0; i < groupParts.length; i++) {
-          groupHtml += `</DL><p>\n`;
-        }
-        
-        html += groupHtml;
-      });
-      
-      html += `</DL><p>`;
-      
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `星际导航书签_${new Date().toISOString().slice(0,10)}.html`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 0);
-    }
-    
-    function updateAds() {
-      const ad1 = appData.ads.ad1;
-      const ad1Element = document.getElementById('ad-1');
-      ad1Element.querySelector('img').src = ad1.image || 'https://picsum.photos/1200/200?random=1';
-      ad1Element.querySelector('h3').textContent = ad1.title || '探索宇宙奥秘';
-      ad1Element.querySelector('p').textContent = ad1.desc || '发现更多未知的星系与行星';
-      ad1Element.onclick = () => {
-        if (ad1.link && ad1.link !== '#') {
-          window.open(ad1.link, '_blank');
-        }
-      };
-      
-      const ad2 = appData.ads.ad2;
-      const ad2Element = document.getElementById('ad-2');
-      ad2Element.querySelector('img').src = ad2.image || 'https://picsum.photos/1200/200?random=2';
-      ad2Element.querySelector('h3').textContent = ad2.title || '星际旅行指南';
-      ad2Element.querySelector('p').textContent = ad2.desc || '准备好探索更远的星系了吗？';
-      ad2Element.onclick = () => {
-        if (ad2.link && ad2.link !== '#') {
-          window.open(ad2.link, '_blank');
-        }
-      };
-      
-      const ad3 = appData.ads.ad3;
-      const ad3Element = document.getElementById('ad-3');
-      ad3Element.querySelector('img').src = ad3.image || 'https://picsum.photos/1200/200?random=3';
-      ad3Element.querySelector('h3').textContent = ad3.title || '宇宙知识库';
-      ad3Element.querySelector('p').textContent = ad3.desc || '了解更多关于宇宙的知识';
-      ad3Element.onclick = () => {
-        if (ad3.link && ad3.link !== '#') {
-          window.open(ad3.link, '_blank');
-        }
-      };
-      
-      document.getElementById('ad1-image').value = ad1.image || '';
-      document.getElementById('ad1-link').value = ad1.link || '';
-      document.getElementById('ad1-title').value = ad1.title || '';
-      document.getElementById('ad1-desc').value = ad1.desc || '';
-      
-      document.getElementById('ad2-image').value = ad2.image || '';
-      document.getElementById('ad2-link').value = ad2.link || '';
-      document.getElementById('ad2-title').value = ad2.title || '';
-      document.getElementById('ad2-desc').value = ad2.desc || '';
-      
-      document.getElementById('ad3-image').value = ad3.image || '';
-      document.getElementById('ad3-link').value = ad3.link || '';
-      document.getElementById('ad3-title').value = ad3.title || '';
-      document.getElementById('ad3-desc').value = ad3.desc || '';
-    }
-    
-    function initAdImageUploads() {
-      document.getElementById('ad1-upload').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            document.getElementById('ad1-image').value = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-      
-      document.getElementById('ad2-upload').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            document.getElementById('ad2-image').value = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-      
-      document.getElementById('ad3-upload').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            document.getElementById('ad3-image').value = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-      
-      document.getElementById('ad1-image').nextElementSibling.addEventListener('click', function() {
-        document.getElementById('ad1-upload').click();
-      });
-      
-      document.getElementById('ad2-image').nextElementSibling.addEventListener('click', function() {
-        document.getElementById('ad2-upload').click();
-      });
-      
-      document.getElementById('ad3-image').nextElementSibling.addEventListener('click', function() {
-        document.getElementById('ad3-upload').click();
+          renderTimezones();
+          document.getElementById('add-timezone-modal').classList.add('hidden');
+          syncData();
+        };
+        cityList.appendChild(cityElement);
       });
     }
     
-    function initEventListeners() {
+    function setupEventListeners() {
       document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
       
-      document.getElementById('github-login').addEventListener('click', function() {
-        if (isGithubConfigured()) {
-          const githubUrl = `https://github.com/${githubConfig.username}/${githubConfig.repo}`;
-          window.open(githubUrl, '_blank');
-        } else {
-          document.getElementById('github-config-modal').classList.remove('hidden');
-        }
+      document.getElementById('github-login').addEventListener('click', () => {
+        document.getElementById('github-config-modal').classList.remove('hidden');
+        document.getElementById('github-username').value = githubConfig.username;
+        document.getElementById('github-repo').value = githubConfig.repo;
+        document.getElementById('github-token').value = githubConfig.token;
       });
       
       document.getElementById('toggle-github-token').addEventListener('click', function() {
-        const tokenInput = document.getElementById('github-token');
-        const icon = this.querySelector('i');
-        
-        if (tokenInput.type === 'password') {
-          tokenInput.type = 'text';
-          icon.classList.remove('fa-eye-slash');
-          icon.classList.add('fa-eye');
-        } else {
-          tokenInput.type = 'password';
-          icon.classList.remove('fa-eye');
-          icon.classList.add('fa-eye-slash');
-        }
+        const input = document.getElementById('github-token');
+        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+        input.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="fa fa-eye-slash"></i>' : '<i class="fa fa-eye"></i>';
       });
       
-      document.getElementById('save-github-config').addEventListener('click', function() {
+      document.getElementById('save-github-config').addEventListener('click', async () => {
         githubConfig.username = document.getElementById('github-username').value.trim();
         githubConfig.repo = document.getElementById('github-repo').value.trim();
         githubConfig.token = document.getElementById('github-token').value.trim();
         
-        if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-          saveGithubConfig();
-          document.getElementById('github-config-modal').classList.add('hidden');
-          alert('GitHub配置已保存');
+        saveToLocalStorage();
+        const success = await loadFromGitHub();
+        
+        if (success) {
+          renderAll();
+          alert('GitHub配置已保存并同步成功');
         } else {
-          alert('请填写完整的GitHub配置信息');
+          alert('GitHub配置已保存，但无法同步数据。请检查配置是否正确。');
         }
-      });
-      
-      document.getElementById('cancel-github-config').addEventListener('click', function() {
+        
         document.getElementById('github-config-modal').classList.add('hidden');
       });
       
-      document.getElementById('settings-btn').addEventListener('click', function() {
-        if (isAuthenticated) {
-          document.getElementById('edit-page').classList.remove('hidden');
-          renderEditBookmarks();
-        } else {
-          document.getElementById('password-modal').classList.remove('hidden');
-          document.getElementById('admin-password').focus();
-        }
+      document.getElementById('cancel-github-config').addEventListener('click', () => {
+        document.getElementById('github-config-modal').classList.add('hidden');
       });
       
-      document.getElementById('close-edit-page').addEventListener('click', function() {
-        document.getElementById('edit-page').classList.add('hidden');
-      });
-      
-      document.getElementById('cancel-edit').addEventListener('click', function() {
-        document.getElementById('edit-page').classList.add('hidden');
-      });
-      
-      document.getElementById('save-edit').addEventListener('click', async function() {
-        appData.ads.ad1 = {
-          image: document.getElementById('ad1-image').value.trim(),
-          link: document.getElementById('ad1-link').value.trim(),
-          title: document.getElementById('ad1-title').value.trim(),
-          desc: document.getElementById('ad1-desc').value.trim()
-        };
-        
-        appData.ads.ad2 = {
-          image: document.getElementById('ad2-image').value.trim(),
-          link: document.getElementById('ad2-link').value.trim(),
-          title: document.getElementById('ad2-title').value.trim(),
-          desc: document.getElementById('ad2-desc').value.trim()
-        };
-        
-        appData.ads.ad3 = {
-          image: document.getElementById('ad3-image').value.trim(),
-          link: document.getElementById('ad3-link').value.trim(),
-          title: document.getElementById('ad3-title').value.trim(),
-          desc: document.getElementById('ad3-desc').value.trim()
-        };
-        
-        const saved = await saveAndReloadData();
-        if (saved) {
-          document.getElementById('edit-page').classList.add('hidden');
-          alert('设置已保存到GitHub并更新');
-        }
-      });
-      
-      document.getElementById('toggle-password').addEventListener('click', function() {
-        const passwordInput = document.getElementById('admin-password');
-        const icon = this.querySelector('i');
-        
-        if (passwordInput.type === 'password') {
-          passwordInput.type = 'text';
-          icon.classList.remove('fa-eye-slash');
-          icon.classList.add('fa-eye');
-        } else {
-          passwordInput.type = 'password';
-          icon.classList.remove('fa-eye');
-          icon.classList.add('fa-eye-slash');
-        }
-      });
-      
-      document.getElementById('confirm-password').addEventListener('click', function() {
-        const password = document.getElementById('admin-password').value;
-        
-        if (password === 'admin') {
-          isAuthenticated = true;
-          document.getElementById('password-modal').classList.add('hidden');
-          document.getElementById('admin-password').value = '';
-          document.getElementById('edit-page').classList.remove('hidden');
-          
-          renderEditBookmarks();
-        } else {
-          alert('密码错误，请重试');
-          document.getElementById('admin-password').focus();
-        }
-      });
-      
-      document.getElementById('cancel-password').addEventListener('click', function() {
-        document.getElementById('password-modal').classList.add('hidden');
+      document.getElementById('settings-btn').addEventListener('click', () => {
+        document.getElementById('password-modal').classList.remove('hidden');
         document.getElementById('admin-password').value = '';
       });
       
-      document.getElementById('add-timezone').addEventListener('click', function() {
-        document.getElementById('add-timezone-modal').classList.remove('hidden');
-        document.getElementById('timezone-search').value = '';
-        displayCityList();
+      document.getElementById('toggle-password').addEventListener('click', function() {
+        const input = document.getElementById('admin-password');
+        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+        input.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="fa fa-eye-slash"></i>' : '<i class="fa fa-eye"></i>';
       });
       
-      document.getElementById('cancel-timezone').addEventListener('click', function() {
-        document.getElementById('add-timezone-modal').classList.add('hidden');
+      document.getElementById('confirm-password').addEventListener('click', () => {
+        const password = document.getElementById('admin-password').value;
+        if (password === 'admin' || password === '') {
+          isAuthenticated = true;
+          document.getElementById('password-modal').classList.add('hidden');
+          document.getElementById('edit-page').classList.remove('hidden');
+          renderEditBookmarks();
+        } else {
+          alert('密码错误');
+        }
       });
       
-      document.getElementById('timezone-search').addEventListener('input', function() {
-        searchCities(this.value);
+      document.getElementById('cancel-password').addEventListener('click', () => {
+        document.getElementById('password-modal').classList.add('hidden');
       });
       
-      document.getElementById('trigger-import').addEventListener('click', function() {
+      document.getElementById('close-edit-page').addEventListener('click', () => {
+        document.getElementById('edit-page').classList.add('hidden');
+      });
+      
+      document.getElementById('cancel-edit').addEventListener('click', () => {
+        document.getElementById('edit-page').classList.add('hidden');
+      });
+      
+      document.getElementById('save-edit').addEventListener('click', async () => {
+        appData.ads.ad1.image = document.getElementById('ad1-image').value.trim();
+        appData.ads.ad1.link = document.getElementById('ad1-link').value.trim();
+        appData.ads.ad1.title = document.getElementById('ad1-title').value.trim();
+        appData.ads.ad1.desc = document.getElementById('ad1-desc').value.trim();
+        
+        appData.ads.ad2.image = document.getElementById('ad2-image').value.trim();
+        appData.ads.ad2.link = document.getElementById('ad2-link').value.trim();
+        appData.ads.ad2.title = document.getElementById('ad2-title').value.trim();
+        appData.ads.ad2.desc = document.getElementById('ad2-desc').value.trim();
+        
+        appData.ads.ad3.image = document.getElementById('ad3-image').value.trim();
+        appData.ads.ad3.link = document.getElementById('ad3-link').value.trim();
+        appData.ads.ad3.title = document.getElementById('ad3-title').value.trim();
+        appData.ads.ad3.desc = document.getElementById('ad3-desc').value.trim();
+        
+        const success = await syncData();
+        renderAll();
+        
+        if (success) {
+          alert('更改已保存并同步到GitHub');
+        } else {
+          alert('更改已保存到本地，但无法同步到GitHub。请检查GitHub配置。');
+        }
+        
+        document.getElementById('edit-page').classList.add('hidden');
+      });
+      
+      document.getElementById('trigger-import').addEventListener('click', () => {
         document.getElementById('bookmark-import').click();
       });
       
-      document.getElementById('bookmark-import').addEventListener('change', function(e) {
+      document.getElementById('bookmark-import').addEventListener('change', async function(e) {
         const file = e.target.files[0];
-        if (file) {
-          handleBookmarkImport(file);
+        if (!file) return;
+        
+        const statusElement = document.getElementById('import-status');
+        statusElement.textContent = '正在导入书签...';
+        statusElement.className = 'mt-3 text-sm text-cosmic-yellow';
+        statusElement.classList.remove('hidden');
+        
+        try {
+          const reader = new FileReader();
+          reader.onload = async (event) => {
+            try {
+              const html = event.target.result;
+              const newBookmarks = parseBookmarkHtml(html);
+              appData.bookmarks = mergeBookmarks(appData.bookmarks, newBookmarks);
+              
+              for (const group in appData.bookmarks) {
+                for (const bookmark of appData.bookmarks[group]) {
+                  if (!bookmark.icon) {
+                    bookmark.icon = getFavicon(bookmark.url);
+                  }
+                  if (!bookmark.name || bookmark.name === 'undefined') {
+                    bookmark.name = await getWebsiteTitle(bookmark.url);
+                  }
+                }
+              }
+              
+              renderEditBookmarks();
+              
+              statusElement.textContent = '书签导入成功！';
+              statusElement.className = 'mt-3 text-sm text-cosmic-green';
+              
+              setTimeout(() => {
+                statusElement.classList.add('hidden');
+              }, 3000);
+            } catch (error) {
+              console.error('解析书签失败:', error);
+              statusElement.textContent = '书签导入失败，请检查文件格式';
+              statusElement.className = 'mt-3 text-sm text-cosmic-red';
+            }
+          };
+          reader.readAsText(file);
+        } catch (error) {
+          console.error('导入书签失败:', error);
+          statusElement.textContent = '书签导入失败，请重试';
+          statusElement.className = 'mt-3 text-sm text-cosmic-red';
         }
       });
       
-      document.getElementById('export-bookmarks').addEventListener('click', function() {
-        exportBookmarksAsHtml();
+      document.getElementById('export-bookmarks').addEventListener('click', () => {
+        let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>书签导出</TITLE>
+<H1>书签</H1>
+<DL><p>`;
+        
+        for (const group in appData.bookmarks) {
+          html += `<DT><H3>${group}</H3>
+<DL><p>`;
+          
+          appData.bookmarks[group].forEach(bookmark => {
+            html += `<DT><A HREF="${bookmark.url}">${bookmark.name}</A>`;
+          });
+          
+          html += `</DL><p>`;
+        }
+        
+        html += `</DL><p>`;
+        
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '星际导航书签.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       });
       
-      document.getElementById('add-new-group').addEventListener('click', function() {
-        const newGroupName = prompt('请输入新分组名称:');
-        if (newGroupName && newGroupName.trim() && !appData.bookmarks[newGroupName.trim()]) {
-          appData.bookmarks[newGroupName.trim()] = [];
+      document.getElementById('add-new-group').addEventListener('click', () => {
+        const groupName = prompt('请输入新分组名称:');
+        if (groupName && groupName.trim() && !appData.bookmarks[groupName.trim()]) {
+          appData.bookmarks[groupName.trim()] = [];
           renderEditBookmarks();
-          populateGroupSelect();
-        } else if (appData.bookmarks[newGroupName.trim()]) {
-          alert('该分组名称已存在');
         }
       });
       
-      document.getElementById('add-bookmark-btn').addEventListener('click', function() {
+      document.getElementById('add-timezone').addEventListener('click', () => {
+        document.getElementById('add-timezone-modal').classList.remove('hidden');
+        document.getElementById('timezone-search').value = '';
+        renderCityList();
+      });
+      
+      document.getElementById('timezone-search').addEventListener('input', function() {
+        renderCityList(this.value);
+      });
+      
+      document.getElementById('cancel-timezone').addEventListener('click', () => {
+        document.getElementById('add-timezone-modal').classList.add('hidden');
+      });
+      
+      document.getElementById('add-bookmark-btn').addEventListener('click', () => {
         document.getElementById('add-bookmark-modal').classList.remove('hidden');
         document.getElementById('bookmark-name').value = '';
         document.getElementById('bookmark-url').value = '';
-        document.getElementById('bookmark-name').focus();
-        populateGroupSelect();
       });
       
-      document.getElementById('cancel-add-bookmark').addEventListener('click', function() {
+      document.getElementById('cancel-add-bookmark').addEventListener('click', () => {
         document.getElementById('add-bookmark-modal').classList.add('hidden');
       });
       
-      document.getElementById('confirm-add-bookmark').addEventListener('click', function() {
+      document.getElementById('confirm-add-bookmark').addEventListener('click', async () => {
         const group = document.getElementById('bookmark-group-select').value;
-        const name = document.getElementById('bookmark-name').value.trim();
-        let url = document.getElementById('bookmark-url').value.trim();
-        
-        if (!name) {
-          alert('请输入网站名称');
-          return;
-        }
+        let name = document.getElementById('bookmark-name').value.trim();
+        const url = document.getElementById('bookmark-url').value.trim();
         
         if (!url) {
           alert('请输入网站URL');
           return;
         }
         
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          url = 'https://' + url;
+        try {
+          new URL(url);
+        } catch {
+          alert('请输入有效的URL，如https://example.com');
+          return;
+        }
+        
+        if (!name) {
+          name = await getWebsiteTitle(url);
+        }
+        
+        const icon = getFavicon(url);
+        
+        if (!appData.bookmarks[group]) {
+          appData.bookmarks[group] = [];
         }
         
         appData.bookmarks[group].push({
           name: name,
           url: url,
-          icon: getFaviconUrl(url),
+          icon: icon,
           color: `cosmic-${['blue', 'purple', 'pink', 'yellow', 'green', 'red', 'cyan'][Math.floor(Math.random() * 7)]}`,
-          tags: extractTagsFromUrl(url)
+          tags: []
         });
         
+        const success = await syncData();
+        renderBookmarks();
         document.getElementById('add-bookmark-modal').classList.add('hidden');
-        saveAndReloadData();
       });
       
-      window.addEventListener('scroll', function() {
+      ['ad1', 'ad2', 'ad3'].forEach(id => {
+        document.getElementById(`${id}-upload`).addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+              document.getElementById(`${id}-image`).value = event.target.result;
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+        
+        document.querySelector(`label[for="${id}-upload"]`).addEventListener('click', (e) => {
+          e.preventDefault();
+          document.getElementById(`${id}-upload`).click();
+        });
+      });
+      
+      window.addEventListener('scroll', () => {
         const header = document.getElementById('header');
         if (window.scrollY > 10) {
           header.classList.add('py-2', 'shadow-md');
@@ -1706,25 +1417,61 @@
       });
     }
     
-    async function initApp() {
-      createStars();
-      initTheme();
-      initDateTime();
-      initHealthReminder();
-      initUptime();
-      initEventListeners();
-      initAdImageUploads();
+    function renderAds() {
+      for (const id in appData.ads) {
+        const ad = appData.ads[id];
+        const adElement = document.getElementById(id);
+        if (adElement) {
+          const img = adElement.querySelector('img');
+          const title = adElement.querySelector('h3');
+          const desc = adElement.querySelector('p');
+          
+          if (img) img.src = ad.image;
+          if (title) title.textContent = ad.title;
+          if (desc) desc.textContent = ad.desc;
+          
+          adElement.onclick = () => {
+            if (ad.link && ad.link !== '#') {
+              window.open(ad.link, '_blank');
+            }
+          };
+        }
+      }
       
-      loadGithubConfig();
-      await loadDataFromGithub();
+      document.getElementById('ad1-image').value = appData.ads.ad1.image;
+      document.getElementById('ad1-link').value = appData.ads.ad1.link;
+      document.getElementById('ad1-title').value = appData.ads.ad1.title;
+      document.getElementById('ad1-desc').value = appData.ads.ad1.desc;
       
-      renderBookmarks();
-      updateTimezones();
-      updateAds();
+      document.getElementById('ad2-image').value = appData.ads.ad2.image;
+      document.getElementById('ad2-link').value = appData.ads.ad2.link;
+      document.getElementById('ad2-title').value = appData.ads.ad2.title;
+      document.getElementById('ad2-desc').value = appData.ads.ad2.desc;
+      
+      document.getElementById('ad3-image').value = appData.ads.ad3.image;
+      document.getElementById('ad3-link').value = appData.ads.ad3.link;
+      document.getElementById('ad3-title').value = appData.ads.ad3.title;
+      document.getElementById('ad3-desc').value = appData.ads.ad3.desc;
     }
     
-    window.addEventListener('DOMContentLoaded', initApp);
+    function renderAll() {
+      renderBookmarks();
+      renderTimezones();
+      renderDate();
+      renderAds();
+    }
+    
+    function init() {
+      loadTheme();
+      createStars();
+      setupEventListeners();
+      initializeData();
+      startUptimeTimer();
+      updateHealthReminder();
+      setInterval(updateHealthReminder, 30 * 60 * 1000);
+    }
+    
+    window.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
-    
