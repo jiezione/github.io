@@ -89,18 +89,18 @@
     <div class="container mx-auto">
       <div class="flex justify-between items-center">
         <div class="flex items-center space-x-2">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cosmic-blue to-cosmic-purple flex itemsitems-center justify-center animate-pulse-slow">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cosmic-blue to-cosmic-purple flex items-center justify-center animate-pulse-slow">
             <i class="fa fa-compass text-white text-xl"></i>
           </div>
           <h1 class="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cosmic-blue to-cosmic-purple">星际导航</h1>
         </div>
         <div class="flex items-center space-x-3 md:space-x-6">
-          <button id="github-login" class="touch-friendly w-10 h-10 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all duration-300 relative group">
+          <a href="https://github.com" target="_blank" class="touch-friendly w-10 h-10 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all duration-300 relative group">
             <i class="fa fa-github text-lg"></i>
             <span class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-space-dark dark:bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-              查看仓库
+              GitHub仓库
             </span>
-          </button>
+          </a>
           <button id="theme-toggle" class="touch-friendly w-10 h-10 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all duration-300 relative group">
             <i class="fa fa-moon-o dark:hidden text-lg"></i>
             <i class="fa fa-sun-o hidden dark:block text-lg text-cosmic-yellow"></i>
@@ -270,9 +270,15 @@
     <div class="glass w-full max-w-6xl max-h-[90vh] rounded-xl overflow-hidden flex flex-col animate-slide-up">
       <div class="p-4 border-b border-gray-200/10 flex justify-between items-center">
         <h2 class="text-xl font-bold">书签编辑中心</h2>
-        <button id="close-edit-page" class="touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all">
-          <i class="fa fa-times"></i>
-        </button>
+        <div class="flex items-center space-x-2">
+          <button id="github-config-btn" class="touch-friendly px-4 py-2 rounded-lg hover:bg-space-medium/50 transition-all flex items-center">
+            <i class="fa fa-github mr-2"></i>
+            GitHub配置
+          </button>
+          <button id="close-edit-page" class="touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
       </div>
       <div class="flex-1 overflow-y-auto p-4">
         <div class="mb-8">
@@ -720,7 +726,7 @@
       const doc = parser.parseFromString(html, 'text/html');
       const bookmarks = {};
       
-      function processNode(node, currentGroups = []) {
+      function processNode(node, currentGroup, parentGroups = []) {
         if (node.tagName === 'DT') {
           const anchor = node.querySelector('A');
           const folder = node.querySelector('H3');
@@ -729,13 +735,15 @@
             const url = anchor.getAttribute('HREF');
             const name = anchor.textContent.trim();
             
-            const groupPath = currentGroups.length > 0 ? currentGroups.join(' / ') : '未分类';
+            let groupPath = [...parentGroups];
+            if (currentGroup) groupPath.push(currentGroup);
+            if (groupPath.length === 0) groupPath.push('未分类');
             
-            if (!bookmarks[groupPath]) {
-              bookmarks[groupPath] = [];
-            }
+            const groupName = groupPath.join(' / ');
             
-            bookmarks[groupPath].push({
+            if (!bookmarks[groupName]) bookmarks[groupName] = [];
+            
+            bookmarks[groupName].push({
               name: name,
               url: url,
               icon: getFavicon(url),
@@ -744,22 +752,24 @@
             });
           } else if (folder) {
             const folderName = folder.textContent.trim();
-            const newGroups = [...currentGroups, folderName];
+            const newParentGroups = [...parentGroups];
+            if (currentGroup) newParentGroups.push(currentGroup);
+            
             const nextNode = node.nextElementSibling;
             if (nextNode && nextNode.tagName === 'DL') {
               Array.from(nextNode.children).forEach(child => {
-                processNode(child, newGroups);
+                processNode(child, folderName, newParentGroups);
               });
             }
           }
         } else if (node.tagName === 'DL' || node.tagName === 'DIV') {
           Array.from(node.children).forEach(child => {
-            processNode(child, currentGroups);
+            processNode(child, currentGroup, parentGroups);
           });
         }
       }
       
-      processNode(doc.body);
+      processNode(doc.body, null, []);
       return bookmarks;
     }
     
@@ -1130,7 +1140,7 @@
     function setupEventListeners() {
       document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
       
-      document.getElementById('github-login').addEventListener('click', () => {
+      document.getElementById('github-config-btn').addEventListener('click', () => {
         document.getElementById('github-config-modal').classList.remove('hidden');
         document.getElementById('github-username').value = githubConfig.username;
         document.getElementById('github-repo').value = githubConfig.repo;
@@ -1263,15 +1273,8 @@
               }
               
               renderEditBookmarks();
-              renderBookmarks();
               
-              const success = await syncData();
-              
-              if (success) {
-                statusElement.textContent = '书签导入成功并已同步到GitHub！';
-              } else {
-                statusElement.textContent = '书签导入成功，已保存到本地！';
-              }
+              statusElement.textContent = '书签导入成功！';
               statusElement.className = 'mt-3 text-sm text-cosmic-green';
               
               setTimeout(() => {
@@ -1301,12 +1304,12 @@
         for (const group in appData.bookmarks) {
           const groupParts = group.split(' / ');
           let currentLevel = html;
+          let currentGroupPath = [];
           
-          groupParts.forEach((part, index) => {
-            if (index === 0) {
-              html += `<DT><H3>${part}</H3>
-<DL><p>`;
-            } else {
+          groupParts.forEach(part => {
+            currentGroupPath.push(part);
+            const fullPath = currentGroupPath.join(' / ');
+            if (!html.includes(`<H3>${part}</H3>`)) {
               html += `<DT><H3>${part}</H3>
 <DL><p>`;
             }
