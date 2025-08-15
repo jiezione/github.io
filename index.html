@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>星际导航 - 探索网络宇宙</title>
-  <!-- 炫酷Favicon - 星际主题图标 -->
-  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMjAgNGMtOC44IDAtMTYgNy4yLTE2IDE2czcuMiAxNiAxNiAxNiAxNiAxNi03LjIgMTYtMTYtNy4yLTE2LTE2LTE2em0tMyAxOGMtLjYsMC0xLS40LTEtMXMtLjQtMS0xLTFoLTZjLS42IDAtMS4uNC0xIDEtMXMtLjQgMS0xIDFoLTZjLjYgMCAxIC40IDEgMXMuNCAxIDEgMWg2Yy42IDAgMS0uNCAxLTFzLS40LTEtMS0xaC02em0xNi0xN2MwIC42LS40IDEtMSAxcy0xLS40LTEtMUg5Yy0uNiAwLTEtLjQtMS0xcy40LTEgMS0xaDE2YzEuMSAwIDIgLjkgMiAydjJ6Ii8+PC9zdmc+" type="image/svg+xml">
+  <!-- 炫酷Favicon - 星际主题动态图标 -->
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMjAgNGMtOC44IDAtMTYgNy4yLTE2IDE2czcuMiAxNiAxNiAxNiAxNiAxNi03LjIgMTYtMTYtNy4yLTE2LTE2LTE2em0tMyAxOGMtLjYsMC0xLS40LTEtMXMtLjQtMS0xLTFoLTZjLS42IDAtMS4uNC0xIDEtMXMtLjQgMS0xIDFoLTZjLjYgMCAxIC40IDEgMXMuNCAxIDEgMWg2Yy42IDAgMS0uNCAxLTFzLS40LTEtMS0xaC02em0xNi0xN2MwIC42LS40IDEtMSAxcy0xLS40LTEtMUg5Yy0uNiAwLTEtLjQtMS0xcy40LTEgMS0xaDE2YzEuMSAwIDIgLjkgMiAydjJ6Ii8+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMTUiIGZpbGw9IiM0QTYzRjciLz48L3N2Zz4=" type="image/svg+xml">
   
   <!-- 外部资源 -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -44,7 +44,10 @@
             'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             'twinkle': 'twinkle 3s ease-in-out infinite',
             'orbit': 'orbit 15s linear infinite',
-            'pulse-soft': 'pulse-soft 2s infinite'
+            'pulse-soft': 'pulse-soft 2s infinite',
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.3s ease-out',
+            'spin-slow': 'spin 8s linear infinite'
           },
           keyframes: {
             float: {
@@ -62,6 +65,14 @@
             'pulse-soft': {
               '0%, 100%': { opacity: 1 },
               '50%': { opacity: 0.7 }
+            },
+            fadeIn: {
+              '0%': { opacity: 0 },
+              '100%': { opacity: 1 }
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(10px)', opacity: 0 },
+              '100%': { transform: 'translateY(0)', opacity: 1 }
             }
           }
         }
@@ -137,10 +148,23 @@
         left: 100%;
       }
       .bookmark-tag {
-        @apply text-xs px-2 py-0.5 rounded-full bg-space-medium/30 mt-1;
+        @apply text-xs px-2 py-0.5 rounded-full bg-space-medium/30 mt-1 inline-block mr-1;
       }
       .group-header {
-        @apply bg-gradient-to-r from-space-medium/50 to-transparent px-4 py-2 rounded-lg inline-block;
+        @apply bg-gradient-to-r from-space-medium to-space-light px-4 py-2 rounded-lg inline-block text-white font-bold mb-4 shadow-md;
+      }
+      .widget {
+        @apply relative overflow-hidden rounded-xl p-5 shadow-lg transition-all duration-300 hover:shadow-xl;
+      }
+      .widget::before {
+        content: '';
+        @apply absolute top-0 left-0 w-full h-1 bg-gradient-to-r;
+      }
+      .widget-icon-container {
+        @apply absolute top-0 right-0 w-16 h-16 flex items-center justify-center opacity-10;
+      }
+      .widget-icon {
+        @apply text-4xl;
       }
     }
   </style>
@@ -197,8 +221,8 @@
   </header>
   
   <!-- GitHub 配置模态框 -->
-  <div id="github-config-modal" class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 hidden">
-    <div class="glass w-full max-w-md rounded-xl p-6">
+  <div id="github-config-modal" class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 hidden animate-fade-in">
+    <div class="glass w-full max-w-md rounded-xl p-6 animate-slide-up">
       <h3 class="text-xl font-bold mb-4">GitHub 配置</h3>
       
       <div class="space-y-4">
@@ -235,74 +259,62 @@
     </div>
   </div>
   
-  <!-- 顶部小组件区域 -->
+  <!-- 顶部小组件区域 - 全新独特样式 -->
   <div class="pt-20 pb-6 px-4 md:px-8">
     <div class="container mx-auto">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- 运行时长 -->
-        <div class="glass rounded-xl p-4 shadow-lg card-hover">
-          <div class="flex justify-between items-start">
-            <div>
-              <h3 class="text-sm text-gray-400 dark:text-gray-500">运行时长</h3>
-              <p id="uptime" class="text-2xl font-bold mt-1">00:00:00</p>
-            </div>
-            <div class="w-10 h-10 rounded-full bg-cosmic-blue/20 flex items-center justify-center">
-              <i class="fa fa-clock-o text-cosmic-blue"></i>
-            </div>
+        <div class="widget glass bg-gradient-to-br from-space-dark to-space-medium" style="--tw-gradient-from: #165DFF; --tw-gradient-to: #0FC6C2;">
+          <div class="widget-icon-container">
+            <i class="fa fa-clock-o widget-icon text-cosmic-cyan animate-spin-slow"></i>
+          </div>
+          <h3 class="text-sm text-gray-400 dark:text-gray-500 mb-1">运行时长</h3>
+          <p id="uptime" class="text-2xl font-bold">00:00:00</p>
+          <div class="mt-4 text-xs text-gray-500 dark:text-gray-400">
+            <i class="fa fa-info-circle mr-1"></i>自页面加载开始计时
           </div>
         </div>
         
         <!-- 健康提醒 -->
-        <div class="glass rounded-xl p-4 shadow-lg card-hover">
-          <div class="flex justify-between items-start">
-            <div>
-              <h3 class="text-sm text-gray-400 dark:text-gray-500">健康提醒</h3>
-              <p id="health-reminder" class="text-lg font-bold mt-1 text-ellipsis-1">该休息一下了</p>
-            </div>
-            <div class="w-10 h-10 rounded-full bg-cosmic-green/20 flex items-center justify-center">
-              <i class="fa fa-heartbeat text-cosmic-green"></i>
-            </div>
+        <div class="widget glass bg-gradient-to-br from-space-dark to-space-medium" style="--tw-gradient-from: #00B42A; --tw-gradient-to: #165DFF;">
+          <div class="widget-icon-container">
+            <i class="fa fa-heartbeat widget-icon text-cosmic-green animate-pulse-slow"></i>
+          </div>
+          <h3 class="text-sm text-gray-400 dark:text-gray-500 mb-1">健康提醒</h3>
+          <p id="health-reminder" class="text-lg font-bold">该休息一下了</p>
+          <div class="mt-4 text-xs text-gray-500 dark:text-gray-400">
+            <i class="fa fa-refresh mr-1"></i>每30分钟更新一次
           </div>
         </div>
         
         <!-- 日历 -->
-        <div class="glass rounded-xl p-4 shadow-lg card-hover">
-          <div class="flex justify-between items-start">
-            <div>
-              <h3 class="text-sm text-gray-400 dark:text-gray-500">今日</h3>
-              <p id="current-date" class="text-2xl font-bold mt-1">2023/01/01</p>
-              <p id="current-weekday" class="text-sm text-gray-500 dark:text-gray-400">星期日</p>
-            </div>
-            <div class="w-10 h-10 rounded-full bg-cosmic-yellow/20 flex items-center justify-center">
-              <i class="fa fa-calendar text-cosmic-yellow"></i>
-            </div>
+        <div class="widget glass bg-gradient-to-br from-space-dark to-space-medium" style="--tw-gradient-from: #FFB547; --tw-gradient-to: #FF2F92;">
+          <div class="widget-icon-container">
+            <i class="fa fa-calendar widget-icon text-cosmic-yellow animate-float"></i>
           </div>
+          <h3 class="text-sm text-gray-400 dark:text-gray-500 mb-1">今日</h3>
+          <p id="current-date" class="text-2xl font-bold">2023/01/01</p>
+          <p id="current-weekday" class="text-sm text-gray-500 dark:text-gray-400">星期日</p>
         </div>
         
-        <!-- 世界时间 - 新样式 -->
-        <div class="glass rounded-xl p-4 shadow-lg card-hover">
-          <div class="flex justify-between items-start">
-            <div>
-              <div class="flex items-center justify-between">
-                <h3 class="text-sm text-gray-400 dark:text-gray-500 flex items-center">
-                  世界时间
-                </h3>
-                <button id="add-timezone" class="touch-friendly w-6 h-6 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all">
-                  <i class="fa fa-plus text-xs"></i>
-                </button>
-              </div>
-              
-              <div id="timezones-container" class="mt-3 space-y-3">
-                <!-- 时区将通过JS动态生成 -->
-              </div>
-              
-              <div id="timezone-limit-message" class="mt-2 text-xs text-cosmic-yellow hidden">
-                <i class="fa fa-info-circle mr-1"></i>最多显示2个城市时间
-              </div>
-            </div>
-            <div class="w-10 h-10 rounded-full bg-cosmic-purple/20 flex items-center justify-center animate-orbit">
-              <i class="fa fa-globe text-cosmic-purple"></i>
-            </div>
+        <!-- 世界时间 -->
+        <div class="widget glass bg-gradient-to-br from-space-dark to-space-medium" style="--tw-gradient-from: #7B2FFD; --tw-gradient-to: #165DFF;">
+          <div class="widget-icon-container">
+            <i class="fa fa-globe widget-icon text-cosmic-purple animate-orbit"></i>
+          </div>
+          <div class="flex justify-between items-center mb-1">
+            <h3 class="text-sm text-gray-400 dark:text-gray-500">世界时间</h3>
+            <button id="add-timezone" class="touch-friendly w-6 h-6 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all">
+              <i class="fa fa-plus text-xs"></i>
+            </button>
+          </div>
+          
+          <div id="timezones-container" class="space-y-2 mt-1">
+            <!-- 时区将通过JS动态生成 -->
+          </div>
+          
+          <div id="timezone-limit-message" class="mt-2 text-xs text-cosmic-yellow hidden">
+            <i class="fa fa-info-circle mr-1"></i>最多显示2个城市时间
           </div>
         </div>
       </div>
@@ -388,8 +400,8 @@
   </footer>
   
   <!-- 编辑页面 (默认隐藏) -->
-  <div id="edit-page" class="fixed inset-0 z-50 bg-space-black/95 dark:bg-gray-900/95 flex items-center justify-center p-4 hidden">
-    <div class="glass w-full max-w-6xl max-h-[90vh] rounded-xl overflow-hidden flex flex-col">
+  <div id="edit-page" class="fixed inset-0 z-50 bg-space-black/95 dark:bg-gray-900/95 flex items-center justify-center p-4 hidden animate-fade-in">
+    <div class="glass w-full max-w-6xl max-h-[90vh] rounded-xl overflow-hidden flex flex-col animate-slide-up">
       <!-- 编辑页面标题栏 -->
       <div class="p-4 border-b border-gray-200/10 flex justify-between items-center">
         <h2 class="text-xl font-bold">书签编辑中心</h2>
@@ -558,8 +570,8 @@
   </div>
   
   <!-- 密码输入模态框 (默认隐藏) -->
-  <div id="password-modal" class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 hidden">
-    <div class="glass w-full max-w-md rounded-xl p-6">
+  <div id="password-modal" class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 hidden animate-fade-in">
+    <div class="glass w-full max-w-md rounded-xl p-6 animate-slide-up">
       <h3 class="text-xl font-bold mb-4 text-center">请输入密码</h3>
       <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 text-center">进入编辑模式需要验证密码</p>
       
@@ -583,9 +595,9 @@
     </div>
   </div>
   
-  <!-- 添加时区模态框 (傻瓜式选择城市) -->
-  <div id="add-timezone-modal" class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 hidden">
-    <div class="glass w-full max-w-md rounded-xl p-6 max-h-[80vh] overflow-hidden flex flex-col">
+  <!-- 添加时区模态框 -->
+  <div id="add-timezone-modal" class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 hidden animate-fade-in">
+    <div class="glass w-full max-w-md rounded-xl p-6 max-h-[80vh] overflow-hidden flex flex-col animate-slide-up">
       <h3 class="text-xl font-bold mb-4">选择城市</h3>
       
       <div class="mb-4">
@@ -607,8 +619,8 @@
   </div>
   
   <!-- 添加书签模态框 (默认隐藏) -->
-  <div id="add-bookmark-modal" class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 hidden">
-    <div class="glass w-full max-w-md rounded-xl p-6">
+  <div id="add-bookmark-modal" class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 hidden animate-fade-in">
+    <div class="glass w-full max-w-md rounded-xl p-6 animate-slide-up">
       <h3 class="text-xl font-bold mb-4">添加新书签</h3>
       
       <div class="space-y-4">
@@ -642,7 +654,7 @@
   </div>
   
   <script>
-    // 预设城市列表 - 用于傻瓜式选择
+    // 预设城市列表
     const predefinedCities = [
       { city: "北京", offset: 8, country: "中国" },
       { city: "上海", offset: 8, country: "中国" },
@@ -674,14 +686,14 @@
     let appData = {
       bookmarks: {
         "常用网站": [
-          { name: "Google", url: "https://www.google.com", icon: "", color: "cosmic-blue" },
-          { name: "GitHub", url: "https://www.github.com", icon: "", color: "cosmic-green" },
-          { name: "YouTube", url: "https://www.youtube.com", icon: "", color: "cosmic-red" },
-          { name: "Twitter", url: "https://www.twitter.com", icon: "", color: "cosmic-cyan" }
+          { name: "Google", url: "https://www.google.com", icon: "", color: "cosmic-blue", tags: ["搜索", "工具"] },
+          { name: "GitHub", url: "https://www.github.com", icon: "", color: "cosmic-green", tags: ["代码", "开发"] },
+          { name: "YouTube", url: "https://www.youtube.com", icon: "", color: "cosmic-red", tags: ["视频", "娱乐"] },
+          { name: "Twitter", url: "https://www.twitter.com", icon: "", color: "cosmic-cyan", tags: ["社交", "新闻"] }
         ],
         "开发资源": [
-          { name: "MDN Web Docs", url: "https://developer.mozilla.org", icon: "", color: "cosmic-blue" },
-          { name: "Tailwind CSS", url: "https://tailwindcss.com", icon: "", color: "cosmic-purple" }
+          { name: "MDN Web Docs", url: "https://developer.mozilla.org", icon: "", color: "cosmic-blue", tags: ["文档", "开发"] },
+          { name: "Tailwind CSS", url: "https://tailwindcss.com", icon: "", color: "cosmic-purple", tags: ["CSS", "开发"] }
         ]
       },
       ads: {
@@ -718,9 +730,16 @@
       dataFile: 'star-navigation-data.json' // 数据文件在仓库中的路径
     };
     
-    // 处理UTF-8字符的Base64编码
+    // 处理UTF-8字符的Base64编码 - 解决特殊字符问题
     function utf8ToBase64(str) {
-      return btoa(unescape(encodeURIComponent(str)));
+      try {
+        // 先编码为UTF-8，再转换为Base64
+        return btoa(unescape(encodeURIComponent(str)));
+      } catch (e) {
+        console.error('Base64编码错误:', e);
+        console.error('错误字符:', str);
+        throw new Error('包含无法编码的特殊字符，请检查数据');
+      }
     }
     
     // 从本地存储加载GitHub配置
@@ -734,7 +753,7 @@
           document.getElementById('github-token').value = githubConfig.token;
           return true;
         } catch (e) {
-          console.error('Failed to parse GitHub config:', e);
+          console.error('解析GitHub配置失败:', e);
         }
       }
       return false;
@@ -746,7 +765,7 @@
         localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
         return true;
       } catch (e) {
-        console.error('Failed to save GitHub config:', e);
+        console.error('保存GitHub配置失败:', e);
         return false;
       }
     }
@@ -759,7 +778,7 @@
     // 从GitHub加载数据
     async function loadDataFromGithub() {
       if (!isGithubConfigured()) {
-        console.log('GitHub is not configured, using default data');
+        console.log('GitHub未配置，使用默认数据');
         return false;
       }
       
@@ -776,20 +795,21 @@
         if (!response.ok) {
           // 如果文件不存在，返回false，将使用默认数据并在保存时创建文件
           if (response.status === 404) {
-            console.log('Data file not found on GitHub, will create it on first save');
+            console.log('GitHub上未找到数据文件，首次保存时将创建');
             return false;
           }
-          throw new Error(`Failed to load data: ${response.statusText}`);
+          throw new Error(`加载数据失败: ${response.statusText}`);
         }
         
         const data = await response.json();
-        const content = atob(data.content); // 解码base64内容
+        // 正确解码UTF-8内容
+        const content = decodeURIComponent(escape(atob(data.content)));
         appData = JSON.parse(content);
         
-        console.log('Data loaded from GitHub successfully');
+        console.log('从GitHub成功加载数据');
         return true;
       } catch (e) {
-        console.error('Error loading data from GitHub:', e);
+        console.error('从GitHub加载数据错误:', e);
         alert(`从GitHub加载数据失败: ${e.message}`);
         return false;
       }
@@ -820,7 +840,7 @@
           sha = data.sha;
         } else if (getResponse.status !== 404) {
           // 除了文件不存在的错误，其他错误都抛出
-          throw new Error(`Failed to check existing file: ${getResponse.statusText}`);
+          throw new Error(`检查现有文件失败: ${getResponse.statusText}`);
         }
         
         // 准备要保存的数据，使用处理UTF-8的函数
@@ -843,13 +863,13 @@
         
         if (!putResponse.ok) {
           const errorData = await putResponse.json();
-          throw new Error(`Failed to save data: ${errorData.message || putResponse.statusText}`);
+          throw new Error(`保存数据失败: ${errorData.message || putResponse.statusText}`);
         }
         
-        console.log('Data saved to GitHub successfully');
+        console.log('数据已成功保存到GitHub');
         return true;
       } catch (e) {
-        console.error('Error saving data to GitHub:', e);
+        console.error('保存数据到GitHub错误:', e);
         alert(`保存数据到GitHub失败: ${e.message}`);
         return false;
       }
@@ -934,7 +954,7 @@
       setInterval(updateDateTime, 60000);
     }
     
-    // 更新时区时间显示 - 新样式
+    // 更新时区时间显示
     function updateTimezones() {
       const container = document.getElementById('timezones-container');
       container.innerHTML = '';
@@ -972,7 +992,7 @@
           const index = parseInt(this.getAttribute('data-index'));
           appData.timezones.splice(index, 1);
           updateTimezones();
-          saveDataToLocalStorage();
+          saveDataToGithub(); // 直接保存到GitHub
         });
       });
       
@@ -1006,7 +1026,7 @@
             
             appData.timezones.push(city);
             updateTimezones();
-            saveDataToLocalStorage();
+            saveDataToGithub(); // 直接保存到GitHub
             document.getElementById('add-timezone-modal').classList.add('hidden');
           });
         }
@@ -1030,7 +1050,43 @@
       displayCityList(filteredCities);
     }
     
-    // 渲染书签
+    // 从URL提取网站标签 - 增强版
+    function extractTagsFromUrl(url) {
+      try {
+        const parsedUrl = new URL(url);
+        const domainParts = parsedUrl.hostname.replace('www.', '').split('.');
+        const pathParts = parsedUrl.pathname.split('/').filter(part => part);
+        
+        // 简单提取一些可能的标签
+        const tags = [];
+        
+        // 基于域名猜测标签
+        if (domainParts.some(part => ['google', 'baidu', 'bing', 'yahoo'].includes(part))) tags.push('搜索');
+        if (domainParts.some(part => ['github', 'gitlab', 'bitbucket'].includes(part))) tags.push('代码');
+        if (domainParts.some(part => ['youtube', 'vimeo', 'youku', 'tudou', 'video'].includes(part))) tags.push('视频');
+        if (domainParts.some(part => ['twitter', 'facebook', 'instagram', 'weibo', 'social'].includes(part))) tags.push('社交');
+        if (domainParts.some(part => ['news', 'cnn', 'bbc', 'nytimes'].includes(part))) tags.push('新闻');
+        if (domainParts.some(part => ['dev', 'code', 'developer', 'stackover'].includes(part))) tags.push('开发');
+        if (domainParts.some(part => ['docs', 'documentation', 'wiki'].includes(part))) tags.push('文档');
+        if (domainParts.some(part => ['shop', 'store', 'taobao', 'jd', 'amazon', 'ebay'].includes(part))) tags.push('购物');
+        if (domainParts.some(part => ['blog', 'wordpress', 'medium'].includes(part))) tags.push('博客');
+        if (domainParts.some(part => ['mail', 'email', 'gmail', 'outlook'].includes(part))) tags.push('邮件');
+        if (domainParts.some(part => ['map', 'maps', 'baidu-map', 'google-map'].includes(part))) tags.push('地图');
+        
+        // 基于路径猜测标签
+        if (pathParts.some(part => ['blog', 'article', 'post'].includes(part))) tags.push('博客');
+        if (pathParts.some(part => ['shop', 'store', 'cart', 'buy'].includes(part))) tags.push('购物');
+        if (pathParts.some(part => ['video', 'movie', 'film'].includes(part))) tags.push('视频');
+        if (pathParts.some(part => ['doc', 'docs', 'documentation'].includes(part))) tags.push('文档');
+        
+        // 去重并限制最多3个标签
+        return [...new Set(tags)].slice(0, 3);
+      } catch (e) {
+        return [];
+      }
+    }
+    
+    // 渲染书签 - 长方形按钮
     function renderBookmarks() {
       const container = document.getElementById('bookmarks-container');
       container.innerHTML = '';
@@ -1044,11 +1100,11 @@
         
         // 创建分组容器
         const groupElement = document.createElement('div');
-        groupElement.className = 'bookmark-group';
+        groupElement.className = 'bookmark-group animate-fade-in';
         
-        // 创建分组标题
+        // 创建分组标题 - 醒目的渐变背景
         const groupHeader = document.createElement('h3');
-        groupHeader.className = 'group-header font-bold text-lg mb-4';
+        groupHeader.className = 'group-header';
         groupHeader.textContent = `${groupName} (${bookmarks.length})`;
         groupElement.appendChild(groupHeader);
         
@@ -1071,20 +1127,36 @@
             domain = '?';
           }
           
-          // 创建书签卡片
+          // 确保书签有标签，如果没有则自动提取
+          if (!bookmark.tags || bookmark.tags.length === 0) {
+            bookmark.tags = extractTagsFromUrl(bookmark.url);
+          }
+          
+          // 创建书签卡片 - 长方形，尺寸适中
           const bookmarkCard = document.createElement('a');
           bookmarkCard.href = bookmark.url;
           bookmarkCard.target = '_blank';
-          bookmarkCard.className = `glass rounded-lg p-3 card-hover flex flex-col items-center justify-center text-center transition-all h-24`;
+          bookmarkCard.className = `glass rounded-lg p-3 card-hover flex flex-col items-center justify-center text-center transition-all h-32`;
           
           // 书签图标/颜色
           const colorClass = bookmark.color || 'cosmic-blue';
+          
+          // 构建标签HTML
+          let tagsHtml = '';
+          if (bookmark.tags && bookmark.tags.length > 0) {
+            bookmark.tags.forEach(tag => {
+              tagsHtml += `<span class="bookmark-tag">${tag}</span>`;
+            });
+          }
           
           bookmarkCard.innerHTML = `
             <div class="w-10 h-10 rounded-lg bg-${colorClass}/20 flex items-center justify-center mb-2">
               <span class="font-bold text-${colorClass}">${domain}</span>
             </div>
             <div class="font-medium text-sm text-ellipsis-1 w-full">${bookmark.name}</div>
+            <div class="flex flex-wrap justify-center">
+              ${tagsHtml}
+            </div>
           `;
           
           bookmarksGrid.appendChild(bookmarkCard);
@@ -1153,12 +1225,40 @@
         
         // 添加书签到列表
         bookmarks.forEach((bookmark, index) => {
+          // 确保书签有标签
+          if (!bookmark.tags) {
+            bookmark.tags = [];
+          }
+          
+          // 构建标签编辑HTML
+          let tagsHtml = '';
+          bookmark.tags.forEach((tag, tagIndex) => {
+            tagsHtml += `
+              <div class="inline-flex items-center mr-1">
+                <input type="text" value="${tag}" class="bookmark-tag-input text-xs px-2 py-1 rounded-full bg-space-medium/30 border-none focus:ring-1 focus:ring-cosmic-blue" data-group="${groupName}" data-index="${index}" data-tag-index="${tagIndex}">
+                <button class="delete-tag ml-1 text-gray-500 hover:text-red-500" data-group="${groupName}" data-index="${index}" data-tag-index="${tagIndex}">
+                  <i class="fa fa-times-circle text-xs"></i>
+                </button>
+              </div>
+            `;
+          });
+          
+          // 添加新标签按钮
+          tagsHtml += `
+            <button class="add-tag text-xs px-2 py-1 rounded-full bg-gray-200 dark:bg-space-medium/50 text-gray-700 dark:text-gray-300" data-group="${groupName}" data-index="${index}">
+              <i class="fa fa-plus"></i> 添加标签
+            </button>
+          `;
+          
           const bookmarkItem = document.createElement('div');
           bookmarkItem.className = 'flex items-center p-2 glass-dark rounded-lg';
           bookmarkItem.innerHTML = `
             <div class="flex-1 mr-2">
               <input type="text" value="${bookmark.name}" class="bookmark-name w-full glass-dark border-none focus:ring-1 focus:ring-cosmic-blue rounded px-2 py-1" data-group="${groupName}" data-index="${index}">
               <input type="url" value="${bookmark.url}" class="bookmark-url w-full glass-dark border-none focus:ring-1 focus:ring-cosmic-blue rounded px-2 py-1 mt-1 text-sm" data-group="${groupName}" data-index="${index}">
+              <div class="mt-2">
+                ${tagsHtml}
+              </div>
             </div>
             <button class="delete-bookmark touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-gray-500" data-group="${groupName}" data-index="${index}">
               <i class="fa fa-trash-o"></i>
@@ -1180,7 +1280,8 @@
             name: '新网站',
             url: 'https://example.com',
             icon: '',
-            color: 'cosmic-blue'
+            color: 'cosmic-blue',
+            tags: []
           });
           renderEditBookmarks();
         });
@@ -1233,6 +1334,60 @@
             this.value = url;
           }
           appData.bookmarks[group][index].url = url || 'https://example.com';
+          
+          // 当URL更改时，自动更新标签
+          appData.bookmarks[group][index].tags = extractTagsFromUrl(url);
+          renderEditBookmarks();
+        });
+      });
+      
+      // 添加标签编辑事件
+      document.querySelectorAll('.bookmark-tag-input').forEach(input => {
+        input.addEventListener('change', function() {
+          const group = this.getAttribute('data-group');
+          const index = parseInt(this.getAttribute('data-index'));
+          const tagIndex = parseInt(this.getAttribute('data-tag-index'));
+          const tagValue = this.value.trim();
+          
+          if (tagValue) {
+            appData.bookmarks[group][index].tags[tagIndex] = tagValue;
+          } else {
+            appData.bookmarks[group][index].tags.splice(tagIndex, 1);
+            renderEditBookmarks();
+          }
+        });
+      });
+      
+      // 添加删除标签事件
+      document.querySelectorAll('.delete-tag').forEach(button => {
+        button.addEventListener('click', function() {
+          const group = this.getAttribute('data-group');
+          const index = parseInt(this.getAttribute('data-index'));
+          const tagIndex = parseInt(this.getAttribute('data-tag-index'));
+          
+          appData.bookmarks[group][index].tags.splice(tagIndex, 1);
+          renderEditBookmarks();
+        });
+      });
+      
+      // 添加新标签事件
+      document.querySelectorAll('.add-tag').forEach(button => {
+        button.addEventListener('click', function() {
+          const group = this.getAttribute('data-group');
+          const index = parseInt(this.getAttribute('data-index'));
+          
+          if (!appData.bookmarks[group][index].tags) {
+            appData.bookmarks[group][index].tags = [];
+          }
+          
+          appData.bookmarks[group][index].tags.push('新标签');
+          renderEditBookmarks();
+          
+          // 聚焦到新添加的标签输入框
+          setTimeout(() => {
+            const newTagInput = document.querySelector(`.bookmark-tag-input[data-group="${group}"][data-index="${index}"][data-tag-index="${appData.bookmarks[group][index].tags.length - 1}"]`);
+            if (newTagInput) newTagInput.focus();
+          }, 100);
         });
       });
     }
@@ -1248,31 +1403,6 @@
         option.textContent = groupName;
         select.appendChild(option);
       });
-    }
-    
-    // 保存数据到本地存储
-    function saveDataToLocalStorage() {
-      try {
-        localStorage.setItem('starNavigationData', JSON.stringify(appData));
-        return true;
-      } catch (e) {
-        console.error('Failed to save data to localStorage:', e);
-        return false;
-      }
-    }
-    
-    // 从本地存储加载数据
-    function loadDataFromLocalStorage() {
-      const savedData = localStorage.getItem('starNavigationData');
-      if (savedData) {
-        try {
-          appData = JSON.parse(savedData);
-          return true;
-        } catch (e) {
-          console.error('Failed to parse data from localStorage:', e);
-        }
-      }
-      return false;
     }
     
     // 初始化健康提醒
@@ -1301,16 +1431,8 @@
     
     // 初始化运行时长计时器
     function initUptime() {
-      // 检查是否有上次记录的启动时间
-      let startTime = localStorage.getItem('starNavigationStartTime');
-      
-      if (!startTime) {
-        // 如果没有，设置为当前时间
-        startTime = new Date().getTime();
-        localStorage.setItem('starNavigationStartTime', startTime);
-      } else {
-        startTime = parseInt(startTime);
-      }
+      // 使用页面加载时间作为开始时间
+      const startTime = new Date().getTime();
       
       // 更新运行时长显示
       function updateUptime() {
@@ -1337,11 +1459,12 @@
       // 主题切换按钮
       document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
       
-      // GitHub登录按钮
+      // GitHub登录按钮 - 确保生成正确的GitHub仓库URL
       document.getElementById('github-login').addEventListener('click', function() {
         if (isGithubConfigured()) {
-          // 如果已配置，打开相应的GitHub仓库页面
-          window.open(`https://github.com/${githubConfig.username}/${githubConfig.repo}`, '_blank');
+          // 构建标准GitHub仓库URL，忽略自定义域名
+          const githubUrl = `https://github.com/${githubConfig.username}/${githubConfig.repo}`;
+          window.open(githubUrl, '_blank');
         } else {
           // 如果未配置，显示配置模态框
           document.getElementById('github-config-modal').classList.remove('hidden');
@@ -1400,7 +1523,7 @@
         document.getElementById('edit-page').classList.add('hidden');
       });
       
-      // 保存编辑
+      // 保存编辑 - 只保存到GitHub
       document.getElementById('save-edit').addEventListener('click', async function() {
         // 保存广告设置
         appData.ads.ad1 = {
@@ -1427,21 +1550,17 @@
         // 更新广告显示
         updateAds();
         
-        // 保存数据到本地存储
-        saveDataToLocalStorage();
-        
-        // 尝试保存到GitHub
-        if (isGithubConfigured()) {
-          await saveDataToGithub();
+        // 保存数据到GitHub
+        const saved = await saveDataToGithub();
+        if (saved) {
+          // 更新书签显示
+          renderBookmarks();
+          
+          // 关闭编辑页面
+          document.getElementById('edit-page').classList.add('hidden');
+          
+          alert('设置已保存到GitHub');
         }
-        
-        // 更新书签显示
-        renderBookmarks();
-        
-        // 关闭编辑页面
-        document.getElementById('edit-page').classList.add('hidden');
-        
-        alert('设置已保存');
       });
       
       // 切换密码显示/隐藏
@@ -1464,8 +1583,7 @@
       document.getElementById('confirm-password').addEventListener('click', function() {
         const password = document.getElementById('admin-password').value;
         
-        // 简单密码验证 (实际应用中应该使用更安全的验证方式)
-        // 这里使用"admin"作为示例密码
+        // 简单密码验证
         if (password === 'admin') {
           document.getElementById('password-modal').classList.add('hidden');
           document.getElementById('admin-password').value = '';
@@ -1478,7 +1596,6 @@
           document.getElementById('admin-password').focus();
         }
       });
-      
       
       // 取消密码输入
       document.getElementById('cancel-password').addEventListener('click', function() {
@@ -1548,20 +1665,23 @@
           url = 'https://' + url;
         }
         
+        // 提取标签
+        const tags = extractTagsFromUrl(url);
+        
         // 添加新书签
         appData.bookmarks[group].push({
           name: name,
           url: url,
           icon: '',
-          color: `cosmic-${['blue', 'purple', 'pink', 'yellow', 'green', 'red', 'cyan'][Math.floor(Math.random() * 7)]}`
+          color: `cosmic-${['blue', 'purple', 'pink', 'yellow', 'green', 'red', 'cyan'][Math.floor(Math.random() * 7)]}`,
+          tags: tags
         });
         
-        // 保存数据
-        saveDataToLocalStorage();
-        
-        // 如果配置了GitHub，保存到GitHub
+        // 保存数据到GitHub
         if (isGithubConfigured()) {
           saveDataToGithub();
+        } else {
+          alert('请先配置GitHub信息以保存数据');
         }
         
         // 更新显示
@@ -1620,11 +1740,15 @@
               // 避免重复添加
               const isDuplicate = appData.bookmarks[importGroupName].some(b => b.url === url);
               if (!isDuplicate) {
+                // 提取标签
+                const tags = extractTagsFromUrl(url);
+                
                 appData.bookmarks[importGroupName].push({
                   name: name,
                   url: url,
                   icon: '',
-                  color: `cosmic-${['blue', 'purple', 'pink', 'yellow', 'green', 'red', 'cyan'][Math.floor(Math.random() * 7)]}`
+                  color: `cosmic-${['blue', 'purple', 'pink', 'yellow', 'green', 'red', 'cyan'][Math.floor(Math.random() * 7)]}`,
+                  tags: tags
                 });
               }
             });
@@ -1634,7 +1758,7 @@
             populateGroupSelect();
             
           } catch (error) {
-            console.error('Error importing bookmarks:', error);
+            console.error('导入书签错误:', error);
             showImportStatus('导入失败: ' + error.message, 'error');
           }
         };
@@ -1796,10 +1920,10 @@
       // 加载GitHub配置
       loadGithubConfig();
       
-      // 尝试从GitHub加载数据，如果失败则从本地存储加载
+      // 尝试从GitHub加载数据，如果失败则使用默认数据
       const loadedFromGithub = await loadDataFromGithub();
       if (!loadedFromGithub) {
-        loadDataFromLocalStorage();
+        console.log('使用默认数据，将在首次保存时上传到GitHub');
       }
       
       // 初始化日期和时间
