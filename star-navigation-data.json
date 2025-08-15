@@ -24,6 +24,12 @@
         "url": "https://www.twitter.com",
         "icon": "",
         "color": "cosmic-cyan"
+      },
+      {
+        "name": "abc",
+        "url": "https://abc.com",
+        "icon": "",
+        "color": "cosmic-blue"
       }
     ],
     "开发资源": [
