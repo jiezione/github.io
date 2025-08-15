@@ -89,7 +89,7 @@
     <div class="container mx-auto">
       <div class="flex justify-between items-center">
         <div class="flex items-center space-x-2">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cosmic-blue to-cosmic-purple flex items-center justify-center animate-pulse-slow">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cosmic-blue to-cosmic-purple flex itemsitems-center justify-center animate-pulse-slow">
             <i class="fa fa-compass text-white text-xl"></i>
           </div>
           <h1 class="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cosmic-blue to-cosmic-purple">星际导航</h1>
@@ -557,30 +557,22 @@
     let isAuthenticated = false;
     
     function safeBase64Encode(str) {
-      try {
-        return btoa(unescape(encodeURIComponent(str)));
-      } catch (e) {
-        const buffer = new TextEncoder().encode(str);
-        let binary = '';
-        const len = buffer.byteLength;
-        for (let i = 0; i < len; i++) {
-          binary += String.fromCharCode(buffer[i]);
-        }
-        return btoa(binary);
+      const buffer = new TextEncoder().encode(str);
+      let binary = '';
+      const len = buffer.byteLength;
+      for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(buffer[i]);
       }
+      return btoa(binary);
     }
     
     function safeBase64Decode(str) {
-      try {
-        return decodeURIComponent(escape(atob(str)));
-      } catch (e) {
-        const binary = atob(str);
-        const buffer = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-          buffer[i] = binary.charCodeAt(i);
-        }
-        return new TextDecoder().decode(buffer);
+      const binary = atob(str);
+      const buffer = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        buffer[i] = binary.charCodeAt(i);
       }
+      return new TextDecoder().decode(buffer);
     }
     
     async function loadFromGitHub() {
@@ -728,7 +720,7 @@
       const doc = parser.parseFromString(html, 'text/html');
       const bookmarks = {};
       
-      function processNode(node, currentGroup) {
+      function processNode(node, currentGroups = []) {
         if (node.tagName === 'DT') {
           const anchor = node.querySelector('A');
           const folder = node.querySelector('H3');
@@ -737,10 +729,13 @@
             const url = anchor.getAttribute('HREF');
             const name = anchor.textContent.trim();
             
-            if (!currentGroup) currentGroup = '未分类';
-            if (!bookmarks[currentGroup]) bookmarks[currentGroup] = [];
+            const groupPath = currentGroups.length > 0 ? currentGroups.join(' / ') : '未分类';
             
-            bookmarks[currentGroup].push({
+            if (!bookmarks[groupPath]) {
+              bookmarks[groupPath] = [];
+            }
+            
+            bookmarks[groupPath].push({
               name: name,
               url: url,
               icon: getFavicon(url),
@@ -749,21 +744,22 @@
             });
           } else if (folder) {
             const folderName = folder.textContent.trim();
+            const newGroups = [...currentGroups, folderName];
             const nextNode = node.nextElementSibling;
             if (nextNode && nextNode.tagName === 'DL') {
               Array.from(nextNode.children).forEach(child => {
-                processNode(child, folderName);
+                processNode(child, newGroups);
               });
             }
           }
         } else if (node.tagName === 'DL' || node.tagName === 'DIV') {
           Array.from(node.children).forEach(child => {
-            processNode(child, currentGroup);
+            processNode(child, currentGroups);
           });
         }
       }
       
-      processNode(doc.body, null);
+      processNode(doc.body);
       return bookmarks;
     }
     
@@ -792,9 +788,11 @@
       
       let total = 0;
       
-      for (const group in appData.bookmarks) {
+      const sortedGroups = Object.keys(appData.bookmarks).sort((a, b) => a.localeCompare(b));
+      
+      sortedGroups.forEach(group => {
         const bookmarks = appData.bookmarks[group];
-        if (!bookmarks || bookmarks.length === 0) continue;
+        if (!bookmarks || bookmarks.length === 0) return;
         
         total += bookmarks.length;
         
@@ -810,7 +808,7 @@
         bookmarksGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3';
         groupElement.appendChild(bookmarksGrid);
         
-        bookmarks.forEach((bookmark, index) => {
+        bookmarks.forEach((bookmark) => {
           const bookmarkBtn = document.createElement('a');
           bookmarkBtn.href = bookmark.url;
           bookmarkBtn.target = '_blank';
@@ -855,7 +853,7 @@
         });
         
         container.appendChild(groupElement);
-      }
+      });
       
       document.getElementById('total-bookmarks').textContent = total;
     }
@@ -916,7 +914,9 @@
       const groupSelect = document.getElementById('bookmark-group-select');
       groupSelect.innerHTML = '';
       
-      for (const group in appData.bookmarks) {
+      const sortedGroups = Object.keys(appData.bookmarks).sort((a, b) => a.localeCompare(b));
+      
+      sortedGroups.forEach(group => {
         const option = document.createElement('option');
         option.value = group;
         option.textContent = group;
@@ -1023,7 +1023,7 @@
         });
         
         container.appendChild(groupElement);
-      }
+      });
     }
     
     function renderDate() {
@@ -1263,8 +1263,15 @@
               }
               
               renderEditBookmarks();
+              renderBookmarks();
               
-              statusElement.textContent = '书签导入成功！';
+              const success = await syncData();
+              
+              if (success) {
+                statusElement.textContent = '书签导入成功并已同步到GitHub！';
+              } else {
+                statusElement.textContent = '书签导入成功，已保存到本地！';
+              }
               statusElement.className = 'mt-3 text-sm text-cosmic-green';
               
               setTimeout(() => {
@@ -1292,14 +1299,26 @@
 <DL><p>`;
         
         for (const group in appData.bookmarks) {
-          html += `<DT><H3>${group}</H3>
+          const groupParts = group.split(' / ');
+          let currentLevel = html;
+          
+          groupParts.forEach((part, index) => {
+            if (index === 0) {
+              html += `<DT><H3>${part}</H3>
 <DL><p>`;
+            } else {
+              html += `<DT><H3>${part}</H3>
+<DL><p>`;
+            }
+          });
           
           appData.bookmarks[group].forEach(bookmark => {
             html += `<DT><A HREF="${bookmark.url}">${bookmark.name}</A>`;
           });
           
-          html += `</DL><p>`;
+          for (let i = 0; i < groupParts.length; i++) {
+            html += `</DL><p>`;
+          }
         }
         
         html += `</DL><p>`;
