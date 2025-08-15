@@ -1,0 +1,76 @@
+{
+  "bookmarks": {
+    "常用网站": [
+      {
+        "name": "Google",
+        "url": "https://www.google.com",
+        "icon": "",
+        "color": "cosmic-blue"
+      },
+      {
+        "name": "GitHub",
+        "url": "https://www.github.com",
+        "icon": "",
+        "color": "cosmic-green"
+      },
+      {
+        "name": "YouTube",
+        "url": "https://www.youtube.com",
+        "icon": "",
+        "color": "cosmic-red"
+      },
+      {
+        "name": "Twitter",
+        "url": "https://www.twitter.com",
+        "icon": "",
+        "color": "cosmic-cyan"
+      }
+    ],
+    "开发资源": [
+      {
+        "name": "MDN Web Docs",
+        "url": "https://developer.mozilla.org",
+        "icon": "",
+        "color": "cosmic-blue"
+      },
+      {
+        "name": "Tailwind CSS",
+        "url": "https://tailwindcss.com",
+        "icon": "",
+        "color": "cosmic-purple"
+      }
+    ]
+  },
+  "ads": {
+    "ad1": {
+      "image": "https://picsum.photos/1200/200?random=1",
+      "link": "#",
+      "title": "探索宇宙奥秘",
+      "desc": "发现更多未知的星系与行星"
+    },
+    "ad2": {
+      "image": "https://picsum.photos/1200/200?random=2",
+      "link": "#",
+      "title": "星际旅行指南",
+      "desc": "准备好探索更远的星系了吗？"
+    },
+    "ad3": {
+      "image": "https://picsum.photos/1200/200?random=3",
+      "link": "#",
+      "title": "宇宙知识库",
+      "desc": "了解更多关于宇宙的知识"
+    }
+  },
+  "timezones": [
+    {
+      "city": "北京",
+      "offset": 8,
+      "country": "中国"
+    },
+    {
+      "city": "纽约",
+      "offset": -5,
+      "country": "美国"
+    }
+  ]
+}
