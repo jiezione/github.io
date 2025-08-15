@@ -159,7 +159,7 @@
         <!-- 功能按钮组 -->
         <div class="flex items-center space-x-3 md:space-x-6">
           <!-- GitHub 登录按钮 -->
-          <button id="github-login" class="touch-friendly w-10 h-10 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all duration-300 relative group">
+          <button id="github-login" class="touch-friendly w-10 h-10 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all duration-300 relative group hidden">
             <i class="fa fa-github text-lg"></i>
             <span class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-space-dark dark:bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
               连接GitHub
@@ -712,25 +712,6 @@
       dataFile: 'star-navigation-data.json' // 数据文件在仓库中的路径
     };
     
-    // 处理Unicode的Base64编码和解码函数
-    function utf8ToBase64(str) {
-      try {
-        return btoa(unescape(encodeURIComponent(str)));
-      } catch (e) {
-        console.error('UTF8 to Base64 encoding failed:', e);
-        throw e;
-      }
-    }
-    
-    function base64ToUtf8(str) {
-      try {
-        return decodeURIComponent(escape(atob(str)));
-      } catch (e) {
-        console.error('Base64 to UTF8 decoding failed:', e);
-        throw e;
-      }
-    }
-    
     // 从本地存储加载GitHub配置
     function loadGithubConfig() {
       const savedConfig = localStorage.getItem('githubConfig');
@@ -791,7 +772,7 @@
         }
         
         const data = await response.json();
-        const content = base64ToUtf8(data.content); // 使用改进的解码函数
+        const content = atob(data.content); // 解码base64内容
         appData = JSON.parse(content);
         
         console.log('Data loaded from GitHub successfully');
@@ -831,8 +812,8 @@
           throw new Error(`Failed to check existing file: ${getResponse.statusText}`);
         }
         
-        // 准备要保存的数据，使用改进的编码函数处理Unicode
-        const content = utf8ToBase64(JSON.stringify(appData, null, 2));
+        // 准备要保存的数据
+        const content = btoa(JSON.stringify(appData, null, 2)); // 编码为base64
         
         // 保存数据
         const putResponse = await fetch(url, {
@@ -1411,15 +1392,82 @@
       initAds();
     }
     
+    // 解析HTML书签文件内容
+    function parseBookmarkHtml(htmlContent) {
+      // 创建一个临时DOM元素来解析HTML
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlContent, 'text/html');
+      
+      // 存储解析结果的对象
+      const bookmarkData = {};
+      let currentFolder = null;
+      
+      // 递归处理书签节点
+      function processNode(node, parentFolder) {
+        // 如果是文件夹节点
+        if (node.tagName === 'H3') {
+          const folderName = node.textContent.trim();
+          // 创建新文件夹
+          bookmarkData[folderName] = bookmarkData[folderName] || [];
+          // 设置当前文件夹
+          currentFolder = folderName;
+          
+          // 查找下一个DL元素，它包含该文件夹下的书签
+          let nextNode = node.nextElementSibling;
+          while (nextNode) {
+            if (nextNode.tagName === 'DL') {
+              // 处理DL中的所有子节点
+              Array.from(nextNode.children).forEach(child => {
+                processNode(child, currentFolder);
+              });
+              break;
+            }
+            nextNode = nextNode.nextElementSibling;
+          }
+        }
+        // 如果是书签节点
+        else if (node.tagName === 'A') {
+          if (parentFolder) {
+            // 提取书签信息
+            const name = node.textContent.trim();
+            const url = node.getAttribute('href') || '';
+            
+            // 为书签随机分配一个颜色
+            const colors = ['cosmic-blue', 'cosmic-purple', 'cosmic-pink', 'cosmic-yellow', 'cosmic-green', 'cosmic-red', 'cosmic-cyan'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            // 添加到当前文件夹
+            bookmarkData[parentFolder].push({
+              name: name,
+              url: url,
+              icon: '',
+              color: color
+            });
+          }
+        }
+        // 如果是列表项，处理其子节点
+        else if (node.tagName === 'DT') {
+          Array.from(node.children).forEach(child => {
+            processNode(child, parentFolder);
+          });
+        }
+      }
+      
+      // 查找所有书签节点并处理
+      const allDlNodes = doc.querySelectorAll('dl');
+      allDlNodes.forEach(dlNode => {
+        Array.from(dlNode.children).forEach(child => {
+          processNode(child, currentFolder);
+        });
+      });
+      
+      return bookmarkData;
+    }
+    
     // 初始化事件监听器
     function initEventListeners() {
       // 主题切换按钮
       document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
-      
-      // GitHub按钮点击事件 - 修复按钮无响应问题
-      document.getElementById('github-login').addEventListener('click', () => {
-        document.getElementById('github-config-modal').classList.remove('hidden');
-      });
       
       // 设置按钮点击事件
       document.getElementById('settings-btn').addEventListener('click', () => {
@@ -1555,7 +1603,7 @@
         document.getElementById('password-modal').classList.add('hidden');
       });
       
-      // 确认密码验证
+      // 确认密码验证 - 这里简化处理，实际应用中应该与后端验证
       document.getElementById('confirm-password').addEventListener('click', () => {
         const password = document.getElementById('admin-password').value;
         // 这里只是示例，实际应用中应该有真实的密码验证逻辑
@@ -1609,30 +1657,70 @@
         document.getElementById('bookmark-import').click();
       });
       
-      // 书签文件导入
+      // 书签文件导入 - 修复的核心功能
       document.getElementById('bookmark-import').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
         
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
           try {
-            // 这里简化处理，实际应用中需要解析HTML书签文件
-            // 这里只是模拟导入成功
-            document.getElementById('import-status').textContent = '书签导入成功！';
+            // 解析HTML书签内容
+            const htmlContent = event.target.result;
+            const importedBookmarks = parseBookmarkHtml(htmlContent);
+            
+            if (Object.keys(importedBookmarks).length === 0) {
+              throw new Error('未找到有效的书签数据');
+            }
+            
+            // 将导入的书签合并到现有数据中
+            for (const [groupName, bookmarks] of Object.entries(importedBookmarks)) {
+              // 如果分组已存在，则合并书签（去重）
+              if (appData.bookmarks[groupName]) {
+                bookmarks.forEach(newBookmark => {
+                  // 检查是否已存在相同URL的书签
+                  const exists = appData.bookmarks[groupName].some(
+                    b => b.url === newBookmark.url
+                  );
+                  if (!exists) {
+                    appData.bookmarks[groupName].push(newBookmark);
+                  }
+                });
+              } else {
+                // 如果分组不存在，则创建新分组
+                appData.bookmarks[groupName] = bookmarks;
+              }
+            }
+            
+            // 更新UI显示
+            renderBookmarks();
+            renderEditBookmarks();
+            
+            // 保存到GitHub
+            const saved = await saveDataToGithub();
+            
+            // 显示成功消息
+            document.getElementById('import-status').textContent = 
+              `书签导入成功！共导入 ${Object.keys(importedBookmarks).length} 个分组`;
             document.getElementById('import-status').className = 'mt-3 text-sm text-cosmic-green';
             document.getElementById('import-status').classList.remove('hidden');
             
-            // 实际应用中应该解析HTML并添加书签
-            // 这里只是演示
+            // 3秒后隐藏状态消息并重置文件输入
             setTimeout(() => {
               document.getElementById('import-status').classList.add('hidden');
-              e.target.value = ''; // 重置文件输入
+              e.target.value = '';
             }, 3000);
+            
           } catch (error) {
             document.getElementById('import-status').textContent = `导入失败: ${error.message}`;
             document.getElementById('import-status').className = 'mt-3 text-sm text-cosmic-red';
             document.getElementById('import-status').classList.remove('hidden');
+            
+            // 5秒后隐藏错误消息
+            setTimeout(() => {
+              document.getElementById('import-status').classList.add('hidden');
+              e.target.value = '';
+            }, 5000);
           }
         };
         reader.readAsText(file);
@@ -1705,6 +1793,7 @@
       });
     }
     
+    // 初始化应用
     // 初始化应用
     async function initApp() {
       // 创建星空背景
