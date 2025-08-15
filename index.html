@@ -147,8 +147,9 @@
       .time-pill:hover::before {
         left: 100%;
       }
+      /* 书签标签样式 - 小长方形 */
       .bookmark-tag {
-        @apply text-xs px-2 py-0.5 rounded-full bg-space-medium/30 mt-1 inline-block mr-1;
+        @apply text-xs px-2 py-0.5 rounded bg-space-medium/30 inline-block mr-1 text-center whitespace-nowrap;
       }
       .group-header {
         @apply bg-gradient-to-r from-space-medium to-space-light px-4 py-2 rounded-lg inline-block text-white font-bold mb-4 shadow-md;
@@ -165,6 +166,13 @@
       }
       .widget-icon {
         @apply text-4xl;
+      }
+      /* 书签按钮样式 - 小长方形 */
+      .bookmark-btn {
+        @apply flex flex-col h-32 rounded-lg p-3 card-hover transition-all;
+      }
+      .bookmark-tags-container {
+        @apply flex flex-wrap mt-1 gap-1;
       }
     }
   </style>
@@ -259,7 +267,7 @@
     </div>
   </div>
   
-  <!-- 顶部小组件区域 - 全新独特样式 -->
+  <!-- 顶部小组件区域 -->
   <div class="pt-20 pb-6 px-4 md:px-8">
     <div class="container mx-auto">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -875,6 +883,22 @@
       }
     }
     
+    // 保存后重新加载数据并刷新界面
+    async function saveAndReloadData() {
+      const saved = await saveDataToGithub();
+      if (saved) {
+        // 保存成功后重新加载数据
+        await loadDataFromGithub();
+        // 更新所有视图
+        renderBookmarks();
+        renderEditBookmarks();
+        populateGroupSelect();
+        updateAds();
+        return true;
+      }
+      return false;
+    }
+    
     // 生成星空背景
     function createStars() {
       const starsContainer = document.getElementById('stars');
@@ -992,7 +1016,7 @@
           const index = parseInt(this.getAttribute('data-index'));
           appData.timezones.splice(index, 1);
           updateTimezones();
-          saveDataToGithub(); // 直接保存到GitHub
+          saveAndReloadData(); // 保存并重新加载
         });
       });
       
@@ -1026,7 +1050,7 @@
             
             appData.timezones.push(city);
             updateTimezones();
-            saveDataToGithub(); // 直接保存到GitHub
+            saveAndReloadData(); // 保存并重新加载
             document.getElementById('add-timezone-modal').classList.add('hidden');
           });
         }
@@ -1086,7 +1110,7 @@
       }
     }
     
-    // 渲染书签 - 长方形按钮
+    // 渲染书签 - 小长方形按钮，显示标签+标题
     function renderBookmarks() {
       const container = document.getElementById('bookmarks-container');
       container.innerHTML = '';
@@ -1132,16 +1156,16 @@
             bookmark.tags = extractTagsFromUrl(bookmark.url);
           }
           
-          // 创建书签卡片 - 长方形，尺寸适中
+          // 创建书签卡片 - 小长方形按钮设计
           const bookmarkCard = document.createElement('a');
           bookmarkCard.href = bookmark.url;
           bookmarkCard.target = '_blank';
-          bookmarkCard.className = `glass rounded-lg p-3 card-hover flex flex-col items-center justify-center text-center transition-all h-32`;
+          bookmarkCard.className = `glass bookmark-btn flex flex-col justify-between`;
           
           // 书签图标/颜色
           const colorClass = bookmark.color || 'cosmic-blue';
           
-          // 构建标签HTML
+          // 构建标签HTML - 小长方形标签
           let tagsHtml = '';
           if (bookmark.tags && bookmark.tags.length > 0) {
             bookmark.tags.forEach(tag => {
@@ -1150,12 +1174,14 @@
           }
           
           bookmarkCard.innerHTML = `
-            <div class="w-10 h-10 rounded-lg bg-${colorClass}/20 flex items-center justify-center mb-2">
+            <div class="w-10 h-10 rounded-lg bg-${colorClass}/20 flex items-center justify-center mb-2 self-start">
               <span class="font-bold text-${colorClass}">${domain}</span>
             </div>
-            <div class="font-medium text-sm text-ellipsis-1 w-full">${bookmark.name}</div>
-            <div class="flex flex-wrap justify-center">
-              ${tagsHtml}
+            <div class="flex-1 flex flex-col justify-between">
+              <div class="font-medium text-sm text-ellipsis-1 w-full">${bookmark.name}</div>
+              <div class="bookmark-tags-container">
+                ${tagsHtml}
+              </div>
             </div>
           `;
           
@@ -1235,7 +1261,7 @@
           bookmark.tags.forEach((tag, tagIndex) => {
             tagsHtml += `
               <div class="inline-flex items-center mr-1">
-                <input type="text" value="${tag}" class="bookmark-tag-input text-xs px-2 py-1 rounded-full bg-space-medium/30 border-none focus:ring-1 focus:ring-cosmic-blue" data-group="${groupName}" data-index="${index}" data-tag-index="${tagIndex}">
+                <input type="text" value="${tag}" class="bookmark-tag-input text-xs px-2 py-1 rounded bg-space-medium/30 border-none focus:ring-1 focus:ring-cosmic-blue" data-group="${groupName}" data-index="${index}" data-tag-index="${tagIndex}">
                 <button class="delete-tag ml-1 text-gray-500 hover:text-red-500" data-group="${groupName}" data-index="${index}" data-tag-index="${tagIndex}">
                   <i class="fa fa-times-circle text-xs"></i>
                 </button>
@@ -1245,7 +1271,7 @@
           
           // 添加新标签按钮
           tagsHtml += `
-            <button class="add-tag text-xs px-2 py-1 rounded-full bg-gray-200 dark:bg-space-medium/50 text-gray-700 dark:text-gray-300" data-group="${groupName}" data-index="${index}">
+            <button class="add-tag text-xs px-2 py-1 rounded bg-gray-200 dark:bg-space-medium/50 text-gray-700 dark:text-gray-300" data-group="${groupName}" data-index="${index}">
               <i class="fa fa-plus"></i> 添加标签
             </button>
           `;
@@ -1523,7 +1549,7 @@
         document.getElementById('edit-page').classList.add('hidden');
       });
       
-      // 保存编辑 - 只保存到GitHub
+      // 保存编辑 - 保存到GitHub并重新加载
       document.getElementById('save-edit').addEventListener('click', async function() {
         // 保存广告设置
         appData.ads.ad1 = {
@@ -1547,19 +1573,12 @@
           desc: document.getElementById('ad3-desc').value.trim()
         };
         
-        // 更新广告显示
-        updateAds();
-        
-        // 保存数据到GitHub
-        const saved = await saveDataToGithub();
+        // 保存数据到GitHub并重新加载
+        const saved = await saveAndReloadData();
         if (saved) {
-          // 更新书签显示
-          renderBookmarks();
-          
           // 关闭编辑页面
           document.getElementById('edit-page').classList.add('hidden');
-          
-          alert('设置已保存到GitHub');
+          alert('设置已保存到GitHub并更新');
         }
       });
       
@@ -1645,7 +1664,7 @@
       });
       
       // 确认添加书签
-      document.getElementById('confirm-add-bookmark').addEventListener('click', function() {
+      document.getElementById('confirm-add-bookmark').addEventListener('click', async function() {
         const group = document.getElementById('bookmark-group-select').value;
         const name = document.getElementById('bookmark-name').value.trim();
         let url = document.getElementById('bookmark-url').value.trim();
@@ -1677,15 +1696,12 @@
           tags: tags
         });
         
-        // 保存数据到GitHub
+        // 保存数据到GitHub并重新加载
         if (isGithubConfigured()) {
-          saveDataToGithub();
+          await saveAndReloadData();
         } else {
           alert('请先配置GitHub信息以保存数据');
         }
-        
-        // 更新显示
-        renderBookmarks();
         
         // 关闭模态框
         document.getElementById('add-bookmark-modal').classList.add('hidden');
