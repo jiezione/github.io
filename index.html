@@ -170,12 +170,42 @@
         background-color: rgba(255, 255, 255, 0.2);
         transform: translateY(-2px);
       }
+      .loading-indicator {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        background-color: rgba(10, 15, 30, 0.9);
+        padding: 20px 30px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #4A6CF7;
+        animation: spin 1s ease-in-out infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
     }
   </style>
 </head>
 
 <body class="font-space bg-gray-50 dark:bg-space-black text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-500 flex flex-col">
   <div id="stars" class="fixed inset-0 -z-10"></div>
+  
+  <!-- 加载指示器 -->
+  <div id="loading-indicator" class="loading-indicator hidden">
+    <div class="spinner"></div>
+    <div id="loading-message">加载书签数据中...</div>
+  </div>
   
   <header id="header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-dark dark:glass py-3 px-4 md:px-8">
     <div class="container mx-auto">
@@ -372,6 +402,10 @@
               <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">GitHub Personal Access Token (可选，私有仓库需要)</label>
               <input type="text" id="github-token" placeholder="ghp_..." class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">需要 repo 权限，用于私有仓库访问和修改操作</p>
+            </div>
+            <div class="md:col-span-2 p-3 bg-cosmic-blue/10 rounded-lg text-sm">
+              <i class="fa fa-info-circle text-cosmic-blue mr-1"></i>
+              未配置时将使用默认公开仓库的书签数据
             </div>
           </div>
         </div>
@@ -605,6 +639,12 @@
   </div>
   
   <script>
+    // 默认公开仓库配置 - 未配置个人GitHub时使用
+    const DEFAULT_PUBLIC_REPO = {
+      username: "example",
+      repo: "public-bookmarks"
+    };
+    
     const predefinedCities = [
       { city: "北京", offset: 8, country: "中国" },
       { city: "上海", offset: 8, country: "中国" },
@@ -671,10 +711,31 @@
       ]
     };
     
+    // 显示加载指示器
+    function showLoading(message = "加载中...") {
+      const indicator = document.getElementById('loading-indicator');
+      document.getElementById('loading-message').textContent = message;
+      indicator.classList.remove('hidden');
+    }
+    
+    // 隐藏加载指示器
+    function hideLoading() {
+      document.getElementById('loading-indicator').classList.add('hidden');
+    }
+    
     function getGitHubConfig() {
       const username = localStorage.getItem('githubUsername') || '';
       const repo = localStorage.getItem('githubRepo') || '';
       const token = localStorage.getItem('githubToken') || '';
+      
+      // 如果用户未配置，返回默认公开仓库
+      if (!username || !repo) {
+        return {
+          ...DEFAULT_PUBLIC_REPO,
+          token: '' // 默认仓库不需要token
+        };
+      }
+      
       return { username, repo, token };
     }
     
@@ -684,18 +745,49 @@
       if (config.token !== undefined) localStorage.setItem('githubToken', config.token);
     }
     
+    // 带重试机制的fetch
+    async function fetchWithRetry(url, options = {}, retries = 3, delay = 1000) {
+      try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          if (retries > 0) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return fetchWithRetry(url, options, retries - 1, delay * 2);
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response;
+      } catch (error) {
+        if (retries > 0) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return fetchWithRetry(url, options, retries - 1, delay * 2);
+        }
+        throw error;
+      }
+    }
+    
     async function loadDataFromGitHub() {
       try {
+        showLoading("正在加载书签数据...");
+        
         const { username, repo, token } = getGitHubConfig();
+        let isDefaultRepo = username === DEFAULT_PUBLIC_REPO.username && repo === DEFAULT_PUBLIC_REPO.repo;
+        
+        // 显示正在使用的仓库信息
+        if (isDefaultRepo) {
+          showLoading(`使用默认公开仓库: ${username}/${repo}`);
+        } else {
+          showLoading(`加载仓库数据: ${username}/${repo}`);
+        }
         
         let url;
-        if (token && username && repo) {
+        // 构建API URL
+        if (token) {
+          // 有token使用API接口，支持私有仓库
           url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
-        } else if (username && repo) {
-          url = `https://raw.githubusercontent.com/${username}/${repo}/main/bookmarks.json`;
         } else {
-          console.log('使用默认数据，未配置GitHub仓库信息');
-          return false;
+          // 无token使用raw.githubusercontent.com，仅支持公开仓库
+          url = `https://raw.githubusercontent.com/${username}/${repo}/main/bookmarks.json`;
         }
         
         const headers = {};
@@ -703,15 +795,12 @@
           headers['Authorization'] = `token ${token}`;
         }
         
-        const response = await fetch(url, { headers });
-        
-        if (!response.ok) {
-          console.log('GitHub数据加载失败，状态码:', response.status);
-          return false;
-        }
+        // 使用带重试机制的fetch
+        const response = await fetchWithRetry(url, { headers });
         
         let data;
         if (token) {
+          // 通过API获取的需要解码base64
           const githubData = await response.json();
           try {
             data = JSON.parse(decodeURIComponent(escape(atob(githubData.content))));
@@ -720,18 +809,52 @@
             data = JSON.parse(atob(githubData.content));
           }
         } else {
+          // 直接获取JSON
           data = await response.json();
         }
         
+        // 合并数据
         if (data.bookmarks) appData.bookmarks = mergeBookmarks(appData.bookmarks, data.bookmarks);
         if (data.ads) appData.ads = { ...appData.ads, ...data.ads };
         if (data.timezones) appData.timezones = data.timezones;
         
-        console.log('成功从GitHub加载数据');
+        showLoading("数据加载成功！");
         return true;
       } catch (error) {
         console.error('GitHub数据加载错误:', error);
+        
+        // 判断是否是默认仓库失败，如果是则使用本地默认数据
+        const { username, repo } = getGitHubConfig();
+        const isDefaultRepo = username === DEFAULT_PUBLIC_REPO.username && repo === DEFAULT_PUBLIC_REPO.repo;
+        
+        if (isDefaultRepo) {
+          showLoading("默认仓库加载失败，使用本地默认数据");
+        } else {
+          showLoading("个人仓库加载失败，尝试默认仓库...");
+          
+          // 尝试加载默认仓库
+          try {
+            const response = await fetchWithRetry(
+              `https://raw.githubusercontent.com/${DEFAULT_PUBLIC_REPO.username}/${DEFAULT_PUBLIC_REPO.repo}/main/bookmarks.json`
+            );
+            const data = await response.json();
+            
+            if (data.bookmarks) appData.bookmarks = mergeBookmarks(appData.bookmarks, data.bookmarks);
+            if (data.ads) appData.ads = { ...appData.ads, ...data.ads };
+            if (data.timezones) appData.timezones = data.timezones;
+            
+            showLoading("已加载默认仓库数据");
+            return true;
+          } catch (defaultError) {
+            console.error('默认仓库也加载失败:', defaultError);
+            showLoading("所有仓库加载失败，使用本地数据");
+          }
+        }
+        
         return false;
+      } finally {
+        // 延迟隐藏加载指示器，让用户看到状态
+        setTimeout(hideLoading, 1000);
       }
     }
     
@@ -761,6 +884,13 @@
     async function saveDataToGitHub() {
       try {
         const { username, repo, token } = getGitHubConfig();
+        
+        // 对于默认公开仓库，不允许保存（只读）
+        const isDefaultRepo = username === DEFAULT_PUBLIC_REPO.username && repo === DEFAULT_PUBLIC_REPO.repo;
+        if (isDefaultRepo && !token) {
+          console.log('默认公开仓库为只读，无法保存数据');
+          return false;
+        }
         
         if (!username || !repo || !token) {
           console.log('GitHub配置不完整，无法保存数据');
@@ -1295,7 +1425,15 @@
         if (saved) {
           alert('设置已保存并同步到GitHub');
         } else {
-          alert('设置已保存，但同步到GitHub失败。请检查GitHub配置。');
+          // 检查是否使用默认仓库
+          const { username, repo } = getGitHubConfig();
+          const isDefaultRepo = username === DEFAULT_PUBLIC_REPO.username && repo === DEFAULT_PUBLIC_REPO.repo;
+          
+          if (isDefaultRepo) {
+            alert('设置已保存到本地，但默认公开仓库为只读，无法同步。请配置个人GitHub仓库以启用同步功能。');
+          } else {
+            alert('设置已保存到本地，但同步到GitHub失败。请检查GitHub配置。');
+          }
         }
         
         document.getElementById('edit-page').classList.add('hidden');
