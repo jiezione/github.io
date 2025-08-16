@@ -35,166 +35,147 @@
         "name": "MDN Web Docs",
         "url": "https://developer.mozilla.org",
         "icon": "",
-        "color": "cosmic-red",
+        "color": "cosmic-blue",
         "favicon": "https://developer.mozilla.org/favicon.ico"
+      },
+      {
+        "name": "Tailwind CSS",
+        "url": "https://tailwindcss.com",
+        "icon": "",
+        "color": "cosmic-purple",
+        "favicon": "https://tailwindcss.com/favicon.ico"
       }
     ],
     "导入的书签": [
       {
         "name": "文件管理器",
         "url": "https://cmjwork.dpdns.org/",
-        "color": "cosmic-pink",
-        "favicon": "https://cmjwork.dpdns.org/favicon.ico"
+        "color": "cosmic-purple"
       },
       {
         "name": "渲染仪表板",
         "url": "https://dashboard.render.com/",
-        "color": "cosmic-green",
-        "favicon": "https://dashboard.render.com/favicon.ico"
+        "color": "cosmic-yellow"
       },
       {
         "name": "主页 - 在线工具",
         "url": "https://toolonline.net/",
-        "color": "cosmic-blue",
-        "favicon": "https://toolonline.net/favicon.ico"
+        "color": "cosmic-blue"
       },
       {
         "name": "互联网速度测试 | Fast.com",
         "url": "https://fast.com/zh/cn/",
-        "color": "cosmic-yellow",
-        "favicon": "https://fast.com/favicon.ico"
+        "color": "cosmic-red"
       },
       {
         "name": "Web & Mobile App Testing | Continuous Testing | Perfecto",
         "url": "https://www.perfecto.io/",
-        "color": "cosmic-green",
-        "favicon": "https://www.perfecto.io/favicon.ico"
+        "color": "cosmic-cyan"
       },
       {
         "name": "在线接收短信至虚拟号码获取一次性密码 | SMS-Activate",
         "url": "https://sms-activate.world/en",
-        "color": "cosmic-purple",
-        "favicon": "https://sms-activate.world/favicon.ico"
+        "color": "cosmic-yellow"
       },
       {
         "name": "美国地址生成器 - 美国身份生成器 - 美国信用卡生成器",
         "url": "https://www.meiguodizhi.com/",
-        "color": "cosmic-red",
-        "favicon": "https://www.meiguodizhi.com/favicon.ico"
+        "color": "cosmic-cyan"
       },
       {
         "name": "【全网首发】免费给垃圾节点提速，独家分享寻找反代IP，让你有用不完的优选IP，CN2 GIA线路免费用！拒绝优选CF自家IP垃圾路由，最佳的IP优选方法！小心你的reality节点变成别人的中转加速机 - 科学上网 技术分享",
         "url": "https://www.bulianglin.com/archives/newcdn.html",
-        "color": "cosmic-purple",
-        "favicon": "https://www.bulianglin.com/favicon.ico"
+        "color": "cosmic-pink"
       },
       {
         "name": "Twitch",
         "url": "https://m.twitch.tv/?desktop-redirect=true",
-        "color": "cosmic-blue",
-        "favicon": "https://m.twitch.tv/favicon.ico"
+        "color": "cosmic-purple"
       },
       {
         "name": "登录页 | CAC Apex",
         "url": "https://www.cacapex.com/#/login",
-        "color": "cosmic-pink",
-        "favicon": "https://www.cacapex.com/favicon.ico"
+        "color": "cosmic-purple"
       },
       {
         "name": "nhitoshi60/sms-reception: 2024年推荐的短信接码平台(收费+免费、国内+国外,建议收藏！！！)",
         "url": "https://github.com/nhitoshi60/sms-reception",
-        "color": "cosmic-purple",
-        "favicon": "https://github.com/favicon.ico"
+        "color": "cosmic-red"
       },
       {
         "name": "GPT-4 | OpenAI",
         "url": "https://openai.com/index/gpt-4/",
-        "color": "cosmic-yellow",
-        "favicon": "https://openai.com/favicon.ico"
+        "color": "cosmic-cyan"
       },
       {
         "name": "DNS查找",
         "url": "https://www.nslookup.io/",
-        "color": "cosmic-red",
-        "favicon": "https://www.nslookup.io/favicon.ico"
+        "color": "cosmic-red"
       },
       {
         "name": "US.KG 域名注册局 – NIC",
         "url": "https://nic.us.kg/",
-        "color": "cosmic-red",
-        "favicon": "https://nic.us.kg/favicon.ico"
+        "color": "cosmic-blue"
       },
       {
         "name": "Serv00.com » 首页",
         "url": "https://www.serv00.com/",
-        "color": "cosmic-cyan",
-        "favicon": "https://www.serv00.com/favicon.ico"
+        "color": "cosmic-purple"
       },
       {
         "name": "Toivomme Maailman Rauhaa",
         "url": "https://jiezi.dpdns.org/",
-        "color": "cosmic-cyan",
-        "favicon": "https://jiezi.dpdns.org/favicon.ico"
+        "color": "cosmic-yellow"
       },
       {
         "name": "爱分享导航站",
         "url": "https://afengxiang.github.io/afx/",
-        "color": "cosmic-green",
-        "favicon": "https://afengxiang.github.io/favicon.ico"
+        "color": "cosmic-pink"
       },
       {
         "name": "Free VPN Accounts • 100% Free PPTP and OpenVPN Service",
         "url": "https://www.vpnbook.com/freevpn",
-        "color": "cosmic-red",
-        "favicon": "https://www.vpnbook.com/favicon.ico"
+        "color": "cosmic-purple"
       },
       {
         "name": "GitHub · Build and ship software on a single, collaborative platform · GitHub",
         "url": "https://github.com/",
-        "color": "cosmic-blue",
-        "favicon": "https://github.com/favicon.ico"
+        "color": "cosmic-purple"
       },
       {
         "name": "【夸克网盘】夸克网盘PC网页版端入口",
         "url": "https://pan.quark.cn/",
-        "color": "cosmic-yellow",
-        "favicon": "https://pan.quark.cn/favicon.ico"
+        "color": "cosmic-red"
       },
       {
         "name": "APKMirror - Free APK Downloads - Free and safe Android APK downloads",
         "url": "https://www.apkmirror.com/",
-        "color": "cosmic-red",
-        "favicon": "https://www.apkmirror.com/favicon.ico"
+        "color": "cosmic-green"
       },
       {
         "name": "科赋锐信息科技Cloudflare | Cloudflare",
         "url": "https://www.cloudflare-cn.com/",
-        "color": "cosmic-yellow",
-        "favicon": "https://www.cloudflare-cn.com/favicon.ico"
+        "color": "cosmic-pink"
       },
       {
         "name": "FreezeHost",
         "url": "https://free.freezehost.pro/dashboard?news=true&loggedin=true",
-        "color": "cosmic-purple",
-        "favicon": "https://free.freezehost.pro/favicon.ico"
+        "color": "cosmic-cyan"
       },
       {
         "name": "腾讯云代码助手CodeBuddy：接入DeepSeek 满血版，支持全免费、不限量、免部署的 AI 编程 - A姐分享",
         "url": "https://www.ahhhhfs.com/71301/",
-        "color": "cosmic-purple",
-        "favicon": "https://www.ahhhhfs.com/favicon.ico"
+        "color": "cosmic-cyan"
       },
       {
         "name": "VirScan - 多引擎文件在线检测平台",
         "url": "https://www.virscan.org/report/db5ca872df1bb6e1f59609f53ed603c44a394fee6d94d9656f25c97ba8a0a0dc",
-        "color": "cosmic-red",
-        "favicon": "https://www.virscan.org/favicon.ico"
+        "color": "cosmic-yellow"
       },
       {
         "name": "银河录像局 次世代合租平台",
         "url": "https://nf.video/6US2b",
-        "color": "cosmic-yellow",
-        "favicon": "https://nf.video/favicon.ico"
+        "color": "cosmic-pink"
       }
     ]
   },
