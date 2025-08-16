@@ -883,7 +883,7 @@
         
         if (!username || !repo) {
           username = "defaultuser";
-          repo = "default-bookmarks";
+          repo = "star-navigation-bookmarks";
         }
         
         let url;
@@ -902,7 +902,7 @@
         const response = await fetch(url, { headers });
         
         if (!response.ok) {
-          if (response.status === 404 && (!username || !repo)) {
+          if (response.status === 404) {
             console.log('使用默认书签数据');
             return;
           }
@@ -912,7 +912,7 @@
         let data;
         if (token) {
           const githubData = await response.json();
-          const content = atob(githubData.content);
+          const content = decodeBase64(githubData.content);
           data = JSON.parse(content);
         } else {
           data = await response.json();
@@ -926,6 +926,24 @@
         console.error('从GitHub加载数据失败:', error);
         console.log('使用本地默认书签数据');
       }
+    }
+
+    function decodeBase64(base64) {
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return new TextDecoder('utf-8').decode(bytes);
+    }
+
+    function encodeBase64(str) {
+      const bytes = new TextEncoder('utf-8').encode(str);
+      let binaryString = '';
+      bytes.forEach(byte => {
+        binaryString += String.fromCharCode(byte);
+      });
+      return btoa(binaryString);
     }
 
     async function saveDataToGitHub() {
@@ -956,7 +974,7 @@
         }
         
         const content = JSON.stringify(bookmarksData, null, 2);
-        const base64Content = btoa(unescape(encodeURIComponent(content)));
+        const base64Content = encodeBase64(content);
         
         const response = await fetch(url, {
           method: 'PUT',
@@ -1159,6 +1177,9 @@
                 renderEditBookmarks();
                 confirmBtn.removeEventListener('click', handleUpdate);
                 confirmBtn.textContent = originalText;
+                
+                await saveDataToGitHub();
+                renderBookmarks();
               }
             };
             
@@ -1454,7 +1475,7 @@
         if (!file) return;
         
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
           try {
             const html = event.target.result;
             const newBookmarks = parseBookmarkHtml(html);
@@ -1469,6 +1490,9 @@
             status.textContent = `成功导入 ${newBookmarks.reduce((total, group) => total + group.bookmarks.length, 0)} 个书签`;
             status.className = 'mt-3 text-sm text-cosmic-green';
             status.classList.remove('hidden');
+            
+            
+            await saveDataToGitHub();
             
             setTimeout(() => {
               status.classList.add('hidden');
@@ -1516,7 +1540,7 @@
         URL.revokeObjectURL(url);
       });
       
-      document.getElementById('add-new-group').addEventListener('click', () => {
+      document.getElementById('add-new-group').addEventListener('click', async () => {
         const groupName = prompt('请输入新分组名称:');
         if (groupName && groupName.trim()) {
           const newGroup = {
@@ -1528,6 +1552,8 @@
           bookmarksData.groups.push(newGroup);
           renderEditBookmarks();
           populateGroupSelect();
+          
+          await saveDataToGitHub();
         }
       });
       
