@@ -132,6 +132,12 @@
       .time-pill:hover::before {
         left: 100%;
       }
+      .bookmark-tag {
+        @apply flex items-center space-x-2 bg-space-medium/50 hover:bg-space-medium/80 rounded-lg px-3 py-2 transition-all duration-300 text-sm;
+      }
+      .bookmark-favicon {
+        @apply w-6 h-6 rounded flex items-center justify-center bg-space-dark;
+      }
     }
   </style>
 </head>
@@ -243,25 +249,59 @@
   <div class="px-4 md:px-8 mb-6">
     <div class="container mx-auto">
       <div id="ad-1" class="glass rounded-xl p-4 md:p-6 shadow-lg h-24 md:h-32 flex items-center justify-center overflow-hidden relative group cursor-pointer">
-        <img src="https://picsum.photos/1200/200?random=1" alt="广告图片" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity">
+        <img src="https://picsum.photos/1200/200?random=1" alt="探索宇宙奥秘广告图" class="w-full h-full object-cover absolute inset-0 opacity-70">
         <div class="relative z-10 text-center">
-          <h3 class="text-xl md:text-2xl font-bold text-white text-shadow">宇宙知识库</h3>
-          <p class="text-sm md:text-base text-white/80 mt-1 text-ellipsis-1">了解更多关于宇宙的知识</p>
+          <h3 class="text-lg md:text-xl font-bold text-white text-shadow text-ellipsis-1">探索宇宙奥秘</h3>
+          <p class="text-sm md:text-base text-white/80 mt-1 text-ellipsis-1">发现更多未知的星系与行星</p>
         </div>
-        <div class="absolute inset-0 bg-gradient-to-r from-cosmic-green/30 to-cosmic-blue/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-cosmic-blue/30 to-cosmic-purple/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
     </div>
   </div>
   
-  <div class="px-4 md:px-8 flex-1">
+  <div class="px-4 md:px-8 mb-8">
     <div class="container mx-auto">
-      <h2 class="text-2xl font-bold mb-6 flex items-center">
-        <i class="fa fa-bookmark text-cosmic-purple mr-2"></i>
-        书签导航
+      <h2 class="text-xl md:text-2xl font-bold mb-6 flex items-center">
+        <i class="fa fa-folder-open text-cosmic-blue mr-2"></i>
+        书签收藏夹
       </h2>
       
-      <div id="bookmarks-container" class="space-y-6">
-        <!-- 书签内容将通过JS动态生成 -->
+      <div id="bookmarks-container" class="space-y-8">
+      </div>
+    </div>
+  </div>
+  
+  <div class="px-4 md:px-8 mb-6">
+    <div class="container mx-auto">
+      <div id="ad-2" class="glass rounded-xl p-4 md:p-6 shadow-lg h-24 md:h-32 flex items-center justify-center overflow-hidden relative group cursor-pointer">
+        <img src="https://picsum.photos/1200/200?random=2" alt="星际旅行指南广告图" class="w-full h-full object-cover absolute inset-0 opacity-70">
+        <div class="relative z-10 text-center">
+          <h3 class="text-lg md:text-xl font-bold text-white text-shadow text-ellipsis-1">星际旅行指南</h3>
+          <p class="text-sm md:text-base text-white/80 mt-1 text-ellipsis-1">准备好探索更远的星系了吗？</p>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-r from-cosmic-purple/30 to-cosmic-pink/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="px-4 md:px-8 mb-8">
+    <div class="container mx-auto">
+      <button id="add-bookmark-btn" class="glass w-full py-4 rounded-lg text-center font-medium hover:bg-space-medium/30 transition-all duration-300 flex items-center justify-center touch-friendly">
+        <i class="fa fa-plus-circle text-cosmic-blue mr-2"></i>
+        添加新书签
+      </button>
+    </div>
+  </div>
+  
+  <div class="px-4 md:px-8 mb-10">
+    <div class="container mx-auto">
+      <div id="ad-3" class="glass rounded-xl p-4 md:p-6 shadow-lg h-24 md:h-32 flex items-center justify-center overflow-hidden relative group cursor-pointer">
+        <img src="https://picsum.photos/1200/200?random=3" alt="宇宙知识库广告图" class="w-full h-full object-cover absolute inset-0 opacity-70">
+        <div class="relative z-10 text-center">
+          <h3 class="text-lg md:text-xl font-bold text-white text-shadow text-ellipsis-1">宇宙知识库</h3>
+          <p class="text-sm md:text-base text-white/80 mt-1 text-ellipsis-1">了解更多关于宇宙的知识</p>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-r from-cosmic-green/30 to-cosmic-blue/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
     </div>
   </div>
@@ -285,24 +325,6 @@
       </div>
       
       <div class="flex-1 overflow-y-auto p-4">
-        <div class="mb-6">
-          <h3 class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-100">GitHub 配置</h3>
-          <div class="glass rounded-lg p-4 space-y-4">
-            <div>
-              <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">个人访问令牌 (PAT)</label>
-              <input type="password" id="github-token" placeholder="ghp_..." class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
-            </div>
-            <div>
-              <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">仓库路径 (owner/repo)</label>
-              <input type="text" id="github-repo" placeholder="username/repo-name" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
-            </div>
-            <div>
-              <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">文件路径</label>
-              <input type="text" id="github-path" value="bookmarks.json" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
-            </div>
-          </div>
-        </div>
-        
         <div class="mb-8">
           <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">导入/导出书签</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -324,7 +346,7 @@
                 <i class="fa fa-download text-cosmic-blue mr-2"></i>
                 导出书签
               </h4>
-              <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">将当前书签导出为HTML文件</p>
+              <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">将当前书签导出为JSON文件</p>
               <button id="export-bookmarks" class="w-full py-3 bg-cosmic-blue/20 hover:bg-cosmic-blue/30 text-cosmic-blue rounded-lg transition-colors flex items-center justify-center touch-friendly">
                 <i class="fa fa-download mr-2"></i>
                 导出所有书签
@@ -370,11 +392,11 @@
                 </div>
                 <div>
                   <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">广告标题</label>
-                  <input type="text" id="ad1-title" value="宇宙知识库" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
+                  <input type="text" id="ad1-title" value="探索宇宙奥秘" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
                 </div>
                 <div>
                   <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">广告描述</label>
-                  <input type="text" id="ad1-desc" value="了解更多关于宇宙的知识" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
+                  <input type="text" id="ad1-desc" value="发现更多未知的星系与行星" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
                 </div>
               </div>
             </div>
@@ -399,11 +421,11 @@
                 </div>
                 <div>
                   <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">广告标题</label>
-                  <input type="text" id="ad2-title" value="星际探索" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
+                  <input type="text" id="ad2-title" value="星际旅行指南" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
                 </div>
                 <div>
                   <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">广告描述</label>
-                  <input type="text" id="ad2-desc" value="探索宇宙的奥秘" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
+                  <input type="text" id="ad2-desc" value="准备好探索更远的星系了吗？" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
                 </div>
               </div>
             </div>
@@ -453,49 +475,136 @@
   
   <div id="password-modal" class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 hidden">
     <div class="glass w-full max-w-md rounded-xl p-6">
-      <h2 class="text-xl font-bold mb-4">请输入管理员密码</h2>
+      <h3 class="text-xl font-bold mb-4 text-center">请输入密码</h3>
+      <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 text-center">进入编辑模式需要验证密码</p>
+      
       <div class="mb-4">
-        <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">密码</label>
         <div class="relative">
-          <input type="password" id="admin-password" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
-          <button id="toggle-password" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200">
+          <input type="password" id="admin-password" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white" placeholder="输入管理员密码">
+          <button id="toggle-password" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
             <i class="fa fa-eye-slash"></i>
           </button>
         </div>
       </div>
-      <button id="confirm-password" class="w-full py-3 bg-cosmic-blue text-white rounded-lg hover:bg-cosmic-blue/80 transition-colors touch-friendly">
-        确认
-      </button>
+      
+      <div class="flex space-x-3">
+        <button id="cancel-password" class="flex-1 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-space-medium/30 transition-colors touch-friendly">
+          取消
+        </button>
+        <button id="confirm-password" class="flex-1 py-3 bg-cosmic-blue text-white rounded-lg hover:bg-cosmic-blue/80 transition-colors touch-friendly">
+          确认
+        </button>
+      </div>
     </div>
   </div>
-
+  
+  <div id="add-timezone-modal" class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 hidden">
+    <div class="glass w-full max-w-md rounded-xl p-6 max-h-[80vh] overflow-hidden flex flex-col">
+      <h3 class="text-xl font-bold mb-4">选择城市</h3>
+      
+      <div class="mb-4">
+        <input type="text" id="timezone-search" placeholder="搜索城市..." class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
+      </div>
+      
+      <div class="flex-1 overflow-y-auto pr-2">
+        <div id="city-list" class="grid grid-cols-2 gap-2">
+        </div>
+      </div>
+      
+      <div class="mt-4">
+        <button id="cancel-timezone" class="w-full py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-space-medium/30 transition-colors touch-friendly">
+          取消
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="add-bookmark-modal" class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 hidden">
+    <div class="glass w-full max-w-md rounded-xl p-6">
+      <h3 class="text-xl font-bold mb-4">添加新书签</h3>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">书签分组</label>
+          <select id="bookmark-group-select" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white">
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">网站名称</label>
+          <input type="text" id="bookmark-name" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white" placeholder="输入网站名称">
+        </div>
+        
+        <div>
+          <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">网站URL</label>
+          <input type="url" id="bookmark-url" class="w-full bg-space-dark dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cosmic-blue text-gray-100 dark:text-white" placeholder="https://example.com">
+        </div>
+      </div>
+      
+      <div class="flex space-x-3 mt-6">
+        <button id="cancel-add-bookmark" class="flex-1 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-space-medium/30 transition-colors touch-friendly">
+          取消
+        </button>
+        <button id="confirm-add-bookmark" class="flex-1 py-3 bg-cosmic-blue text-white rounded-lg hover:bg-cosmic-blue/80 transition-colors touch-friendly">
+          添加
+        </button>
+      </div>
+    </div>
+  </div>
+  
   <script>
-    // 初始化应用数据
+    const predefinedCities = [
+      { city: "北京", offset: 8, country: "中国" },
+      { city: "上海", offset: 8, country: "中国" },
+      { city: "香港", offset: 8, country: "中国" },
+      { city: "台北", offset: 8, country: "中国台湾" },
+      { city: "伦敦", offset: 0, country: "英国" },
+      { city: "纽约", offset: -5, country: "美国" },
+      { city: "洛杉矶", offset: -8, country: "美国" },
+      { city: "东京", offset: 9, country: "日本" },
+      { city: "首尔", offset: 9, country: "韩国" },
+      { city: "新加坡", offset: 8, country: "新加坡" },
+      { city: "悉尼", offset: 10, country: "澳大利亚" },
+      { city: "莫斯科", offset: 3, country: "俄罗斯" },
+      { city: "巴黎", offset: 1, country: "法国" },
+      { city: "柏林", offset: 1, country: "德国" },
+      { city: "迪拜", offset: 4, country: "阿联酋" },
+      { city: "新德里", offset: 5.5, country: "印度" },
+      { city: "多伦多", offset: -5, country: "加拿大" },
+      { city: "温哥华", offset: -8, country: "加拿大" },
+      { city: "曼谷", offset: 7, country: "泰国" },
+      { city: "吉隆坡", offset: 8, country: "马来西亚" },
+      { city: "芝加哥", offset: -6, country: "美国" },
+      { city: "休斯顿", offset: -6, country: "美国" },
+      { city: "莫斯科", offset: 3, country: "俄罗斯" },
+      { city: "里约热内卢", offset: -3, country: "巴西" }
+    ];
+    
     let appData = {
       bookmarks: {
         "常用网站": [
-          { "name": "Google", "url": "https://www.google.com", "icon": "", "color": "cosmic-blue" },
-          { "name": "GitHub", "url": "https://www.github.com", "icon": "", "color": "cosmic-green" },
-          { "name": "YouTube", "url": "https://www.youtube.com", "icon": "", "color": "cosmic-red" },
-          { "name": "Twitter", "url": "https://www.twitter.com", "icon": "", "color": "cosmic-cyan" }
+          { name: "Google", url: "https://www.google.com", icon: "", color: "cosmic-blue" },
+          { name: "GitHub", url: "https://www.github.com", icon: "", color: "cosmic-green" },
+          { name: "YouTube", url: "https://www.youtube.com", icon: "", color: "cosmic-red" },
+          { name: "Twitter", url: "https://www.twitter.com", icon: "", color: "cosmic-cyan" }
         ],
         "开发资源": [
-          { "name": "MDN Web Docs", "url": "https://developer.mozilla.org", "icon": "", "color": "cosmic-blue" },
-          { "name": "Tailwind CSS", "url": "https://tailwindcss.com", "icon": "", "color": "cosmic-purple" }
+          { name: "MDN Web Docs", url: "https://developer.mozilla.org", icon: "", color: "cosmic-blue" },
+          { name: "Tailwind CSS", url: "https://tailwindcss.com", icon: "", color: "cosmic-purple" }
         ]
       },
       ads: {
         ad1: {
           image: "https://picsum.photos/1200/200?random=1",
           link: "#",
-          title: "宇宙知识库",
-          desc: "了解更多关于宇宙的知识"
+          title: "探索宇宙奥秘",
+          desc: "发现更多未知的星系与行星"
         },
         ad2: {
           image: "https://picsum.photos/1200/200?random=2",
           link: "#",
-          title: "星际探索",
-          desc: "探索宇宙的奥秘"
+          title: "星际旅行指南",
+          desc: "准备好探索更远的星系了吗？"
         },
         ad3: {
           image: "https://picsum.photos/1200/200?random=3",
@@ -503,141 +612,226 @@
           title: "宇宙知识库",
           desc: "了解更多关于宇宙的知识"
         }
-      }
+      },
+      timezones: [
+        { city: "北京", offset: 8, country: "中国" },
+        { city: "纽约", offset: -5, country: "美国" }
+      ]
     };
 
-    // 从GitHub加载数据（核心修复部分）
     async function loadDataFromGitHub() {
-      const token = localStorage.getItem('githubToken');
-      const repo = localStorage.getItem('githubRepo') || 'jiezione/jznav'; // 默认仓库
-      const path = localStorage.getItem('githubPath') || 'bookmarks.json';
+      const config = {
+        username: 'default-user',
+        repo: 'bookmarks',
+        path: 'bookmarks.json',
+        token: localStorage.getItem('github-token') || ''
+      };
       
       try {
-        const [owner, repoName] = repo.split('/');
-        if (!owner || !repoName) return false;
-        
         let url;
-        // 有token用API接口（支持私有仓库/修改），无token用公开raw地址
-        if (token) {
-          url = `https://api.github.com/repos/${owner}/${repoName}/contents/${path}`;
+        if (config.token) {
+          url = `https://api.github.com/repos/${config.username}/${config.repo}/contents/${config.path}`;
         } else {
-          url = `https://raw.githubusercontent.com/${owner}/${repoName}/main/${path}`;
+          url = `https://raw.githubusercontent.com/${config.username}/${config.repo}/main/${config.path}`;
         }
         
         const headers = {};
-        if (token) {
-          headers['Authorization'] = `token ${token}`;
-          headers['Accept'] = 'application/vnd.github.v3+json';
+        if (config.token) {
+          headers.Authorization = `token ${config.token}`;
         }
         
         const response = await fetch(url, { headers });
+        
         if (!response.ok) {
-          if (response.status === 404) return false;
-          throw new Error(`加载失败: ${response.status}`);
+          console.log('使用默认数据，无法加载GitHub数据');
+          return;
         }
         
-        let content;
-        if (token) {
-          // API返回的是base64编码内容
-          const data = await response.json();
-          content = JSON.parse(atob(data.content.replace(/\n/g, '')));
+        let data;
+        if (config.token) {
+          const githubData = await response.json();
+          const content = atob(githubData.content);
+          data = JSON.parse(content);
         } else {
-          // 公开raw地址直接返回文本
-          const text = await response.text();
-          content = JSON.parse(text);
+          data = await response.json();
         }
         
-        // 合并数据（保留本地可能新增的配置）
-        appData = { ...appData, ...content };
-        return true;
-      } catch (e) {
-        console.error('从GitHub加载数据失败:', e);
-        return false;
+        if (data && typeof data === 'object') {
+          appData = { ...appData, ...data };
+          console.log('成功从GitHub加载数据');
+        }
+      } catch (error) {
+        console.error('加载GitHub数据失败:', error);
       }
     }
 
-    // 保存GitHub配置
-    function saveGitHubConfig() {
-      const token = document.getElementById('github-token').value;
-      const repo = document.getElementById('github-repo').value;
-      const path = document.getElementById('github-path').value;
-      
-      if (token) localStorage.setItem('githubToken', token);
-      if (repo) localStorage.setItem('githubRepo', repo);
-      if (path) localStorage.setItem('githubPath', path);
-      
-      return { token, repo, path };
-    }
-
-    // 保存数据到GitHub
     async function saveDataToGitHub() {
+      const config = {
+        username: 'default-user',
+        repo: 'bookmarks',
+        path: 'bookmarks.json',
+        token: localStorage.getItem('github-token') || ''
+      };
+      
+      if (!config.token) {
+        console.log('没有GitHub token，无法保存数据到GitHub');
+        return false;
+      }
+      
       try {
-        const { token, repo, path } = saveGitHubConfig();
-        if (!token || !repo) {
-          alert('请填写GitHub配置信息');
-          return false;
-        }
-        
-        const [owner, repoName] = repo.split('/');
-        if (!owner || !repoName) {
-          alert('仓库路径格式错误 (应为 owner/repo)');
-          return false;
-        }
-        
-        const filePath = path || 'bookmarks.json';
-        const apiUrl = `https://api.github.com/repos/${owner}/${repoName}/contents/${filePath}`;
+        const contentUrl = `https://api.github.com/repos/${config.username}/${config.repo}/contents/${config.path}`;
+        const headers = {
+          'Authorization': `token ${config.token}`,
+          'Content-Type': 'application/json'
+        };
         
         let sha;
         try {
-          const response = await fetch(apiUrl, {
-            headers: {
-              'Authorization': `token ${token}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          });
-          
+          const response = await fetch(contentUrl, { headers });
           if (response.ok) {
             const data = await response.json();
             sha = data.sha;
           }
-        } catch (e) {
-          console.log('文件可能不存在，将创建新文件:', e);
+        } catch (error) {
+          console.log('文件可能不存在，将创建新文件');
         }
         
         const content = JSON.stringify(appData, null, 2);
         const base64Content = btoa(unescape(encodeURIComponent(content)));
         
         const payload = {
-          message: `更新书签数据: ${new Date().toISOString()}`,
-          content: base64Content,
-          ...(sha && { sha })
+          message: `Update bookmarks - ${new Date().toISOString()}`,
+          content: base64Content
         };
         
-        const response = await fetch(apiUrl, {
-          method: sha ? 'PUT' : 'POST',
-          headers: {
-            'Authorization': `token ${token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/vnd.github.v3+json'
-          },
+        if (sha) {
+          payload.sha = sha;
+        }
+        
+        const response = await fetch(contentUrl, {
+          method: 'PUT',
+          headers: headers,
           body: JSON.stringify(payload)
         });
         
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || `HTTP错误: ${response.status}`);
+        if (response.ok) {
+          console.log('数据已成功保存到GitHub');
+          return true;
+        } else {
+          console.error('保存数据到GitHub失败:', await response.text());
+          return false;
         }
-        
-        console.log('数据已成功保存到GitHub');
-        return true;
-      } catch (e) {
-        console.error('保存数据到GitHub失败:', e);
-        alert(`保存失败: ${e.message}`);
+      } catch (error) {
+        console.error('保存数据到GitHub时发生错误:', error);
         return false;
       }
     }
 
-    // 创建星空背景
+    function downloadBookmarksJson() {
+      const dataStr = JSON.stringify(appData.bookmarks, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = 'bookmarks.json';
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    }
+
+    function parseBookmarkHtml(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const bookmarks = {};
+      
+      function processNode(node, currentGroup) {
+        if (!currentGroup) currentGroup = '未分类';
+        
+        if (!bookmarks[currentGroup]) {
+          bookmarks[currentGroup] = [];
+        }
+        
+        const children = Array.from(node.children);
+        for (const child of children) {
+          if (child.tagName === 'DT') {
+            const aTag = child.querySelector('A');
+            if (aTag) {
+              const url = aTag.getAttribute('HREF');
+              const name = aTag.textContent.trim();
+              
+              if (url && name && !bookmarks[currentGroup].some(b => b.url === url)) {
+                const domain = new URL(url).hostname.replace('www.', '');
+                const icon = `https://${new URL(url).hostname}/favicon.ico`;
+                
+                bookmarks[currentGroup].push({
+                  name,
+                  url,
+                  icon,
+                  color: `cosmic-${['blue', 'purple', 'pink', 'yellow', 'green', 'red', 'cyan'][Math.floor(Math.random() * 7)]}`
+                });
+              }
+            }
+            
+            const folder = child.querySelector('DL');
+            if (folder) {
+              const folderName = child.querySelector('H3')?.textContent.trim() || '未命名文件夹';
+              processNode(folder, folderName);
+            }
+          } else if (child.tagName === 'DL') {
+            processNode(child, currentGroup);
+          }
+        }
+      }
+      
+      const bookmarkNodes = doc.querySelectorAll('DL');
+      if (bookmarkNodes.length > 0) {
+        processNode(bookmarkNodes[0]);
+      }
+      
+      return bookmarks;
+    }
+
+    function mergeBookmarks(existing, newBookmarks) {
+      const merged = { ...existing };
+      
+      for (const group in newBookmarks) {
+        if (!merged[group]) {
+          merged[group] = [];
+        }
+        
+        for (const bookmark of newBookmarks[group]) {
+          const exists = merged[group].some(b => b.url === bookmark.url);
+          if (!exists) {
+            merged[group].push(bookmark);
+          }
+        }
+      }
+      
+      return merged;
+    }
+
+    function getFavicon(url) {
+      try {
+        const parsedUrl = new URL(url);
+        return `${parsedUrl.protocol}//${parsedUrl.hostname}/favicon.ico`;
+      } catch (e) {
+        return '';
+      }
+    }
+
+    async function fetchWebsiteTitle(url) {
+      try {
+        const response = await fetch(url, { mode: 'cors' });
+        if (!response.ok) return '';
+        
+        const html = await response.text();
+        const match = html.match(/<title>([^<]+)<\/title>/i);
+        return match ? match[1].trim() : '';
+      } catch (e) {
+        return '';
+      }
+    }
+
     function createStars() {
       const starsContainer = document.getElementById('stars');
       const starCount = 150;
@@ -652,44 +846,39 @@
         
         star.style.left = `${Math.random() * 100}%`;
         star.style.top = `${Math.random() * 100}%`;
+        
         star.style.animationDelay = `${Math.random() * 3}s`;
+        
         star.style.opacity = Math.random() * 0.8 + 0.2;
         
         starsContainer.appendChild(star);
       }
     }
-
-    // 初始化主题
+    
     function initTheme() {
-      if (localStorage.getItem('darkMode') === 'true' || 
-          (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      if (localStorage.getItem('theme') === 'dark' || 
+          (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
       }
-      
-      document.getElementById('theme-toggle').addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
-      });
+    }
+    
+    function toggleTheme() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
     }
 
-    // 更新日期时间
-    function updateDateTime() {
-      const now = new Date();
-      document.getElementById('current-date').textContent = `${now.getFullYear()}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getDate().toString().padStart(2, '0')}`;
+    function updateUptime() {
+      const startTime = new Date(localStorage.getItem('startTime') || new Date().toISOString());
+      localStorage.setItem('startTime', startTime.toISOString());
       
-      const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-      document.getElementById('current-weekday').textContent = weekdays[now.getDay()];
-      
-      document.getElementById('current-year').textContent = now.getFullYear();
-    }
-
-    // 初始化运行时长
-    function initUptime() {
-      const startTime = new Date();
-      
-      function updateUptime() {
+      setInterval(() => {
         const now = new Date();
         const diff = now - startTime;
         
@@ -698,148 +887,317 @@
         const seconds = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
         
         document.getElementById('uptime').textContent = `${hours}:${minutes}:${seconds}`;
-      }
-      
-      updateUptime();
-      setInterval(updateUptime, 1000);
+      }, 1000);
     }
 
-    // 更新健康提醒
     function updateHealthReminder() {
-      const now = new Date();
-      const hour = now.getHours();
+      const reminders = [
+        "该休息一下了",
+        "记得多喝水",
+        "远眺放松眼睛",
+        "站起来活动一下",
+        "深呼吸，保持专注"
+      ];
       
-      let reminder;
+      const reminderEl = document.getElementById('health-reminder');
+      reminderEl.textContent = reminders[Math.floor(Math.random() * reminders.length)];
       
-      if (hour >= 5 && hour < 7) {
-        reminder = "早上好，该起床了";
-      } else if (hour >= 7 && hour < 9) {
-        reminder = "该吃早餐了，开启新的一天";
-      } else if (hour >= 9 && hour < 11) {
-        reminder = "上午工作效率高，加油";
-      } else if (hour >= 11 && hour < 13) {
-        reminder = "午餐时间到了，注意休息";
-      } else if (hour >= 13 && hour < 14) {
-        reminder = "午休一会儿，下午更有精神";
-      } else if (hour >= 14 && hour < 17) {
-        reminder = "下午工作时间，保持专注";
-      } else if (hour >= 17 && hour < 19) {
-        reminder = "晚餐时间到了，补充能量";
-      } else if (hour >= 19 && hour < 21) {
-        reminder = "晚上放松一下吧";
-      } else if (hour >= 21 && hour < 23) {
-        reminder = "准备休息了，早点睡哦";
-      } else {
-        reminder = "夜深了，该睡觉了";
-      }
-      
-      document.getElementById('health-reminder').textContent = reminder;
+      setInterval(() => {
+        reminderEl.textContent = reminders[Math.floor(Math.random() * reminders.length)];
+      }, 300000);
     }
 
-    // 渲染书签
+    function updateDate() {
+      const now = new Date();
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+      const dateStr = now.toLocaleDateString('zh-CN', options).replace(/\//g, '/');
+      
+      const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+      const weekdayStr = weekdays[now.getDay()];
+      
+      document.getElementById('current-date').textContent = dateStr;
+      document.getElementById('current-weekday').textContent = weekdayStr;
+      
+      document.getElementById('current-year').textContent = now.getFullYear();
+    }
+
+    function updateTimezones() {
+      const container = document.getElementById('timezones-container');
+      container.innerHTML = '';
+      
+      appData.timezones.forEach(tz => {
+        const now = new Date();
+        const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+        const tzTime = new Date(utcTime + tz.offset * 3600000);
+        
+        const timeStr = tzTime.toLocaleTimeString('zh-CN', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        
+        const timePill = document.createElement('div');
+        timePill.className = 'time-pill glass rounded-lg p-2 flex justify-between items-center';
+        timePill.innerHTML = `
+          <div>
+            <div class="text-sm font-medium">${tz.city}, ${tz.country}</div>
+            <div class="text-xs text-gray-400 dark:text-gray-500">GMT${tz.offset >= 0 ? '+' : ''}${tz.offset}</div>
+          </div>
+          <div class="font-mono font-bold">${timeStr}</div>
+          <button class="remove-timezone touch-friendly w-6 h-6 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-gray-400">
+            <i class="fa fa-times text-xs"></i>
+          </button>
+        `;
+        
+        timePill.querySelector('.remove-timezone').addEventListener('click', (e) => {
+          e.stopPropagation();
+          appData.timezones = appData.timezones.filter(t => !(t.city === tz.city && t.offset === tz.offset));
+          updateTimezones();
+          saveDataToGitHub();
+        });
+        
+        container.appendChild(timePill);
+      });
+      
+      document.getElementById('timezone-limit-message').classList.toggle('hidden', appData.timezones.length < 2);
+    }
+
+    function renderCities() {
+      const cityList = document.getElementById('city-list');
+      const searchInput = document.getElementById('timezone-search');
+      
+      function filterCities() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const filteredCities = predefinedCities.filter(city => 
+          city.city.toLowerCase().includes(searchTerm) || 
+          city.country.toLowerCase().includes(searchTerm)
+        );
+        
+        cityList.innerHTML = '';
+        filteredCities.forEach(city => {
+          const cityEl = document.createElement('div');
+          cityEl.className = 'glass rounded-lg p-3 cursor-pointer hover:bg-space-medium/30 transition-colors';
+          cityEl.innerHTML = `
+            <div class="font-medium">${city.city}</div>
+            <div class="text-xs text-gray-400 dark:text-gray-500">${city.country} (GMT${city.offset >= 0 ? '+' : ''}${city.offset})</div>
+          `;
+          
+          cityEl.addEventListener('click', () => {
+            const exists = appData.timezones.some(tz => tz.city === city.city && tz.offset === city.offset);
+            if (!exists) {
+              if (appData.timezones.length >= 2) {
+                appData.timezones.shift();
+              }
+              appData.timezones.push(city);
+              updateTimezones();
+              document.getElementById('add-timezone-modal').classList.add('hidden');
+              saveDataToGitHub();
+            }
+          });
+          
+          cityList.appendChild(cityEl);
+        });
+      }
+      
+      searchInput.addEventListener('input', filterCities);
+      filterCities();
+    }
+
     function renderBookmarks() {
       const container = document.getElementById('bookmarks-container');
       container.innerHTML = '';
       
-      let total = 0;
+      let totalCount = 0;
       
-      Object.keys(appData.bookmarks).forEach(groupName => {
-        const bookmarks = appData.bookmarks[groupName];
-        total += bookmarks.length;
+      for (const group in appData.bookmarks) {
+        if (appData.bookmarks[group].length === 0) continue;
         
-        const groupElement = document.createElement('div');
-        groupElement.className = 'glass rounded-xl p-4 shadow-lg';
+        totalCount += appData.bookmarks[group].length;
         
-        groupElement.innerHTML = `
-          <h3 class="text-lg font-bold mb-4 flex items-center">
+        const groupEl = document.createElement('div');
+        groupEl.className = 'bookmark-group';
+        
+        const groupHeader = document.createElement('div');
+        groupHeader.className = 'mb-4 flex justify-between items-center';
+        groupHeader.innerHTML = `
+          <h3 class="text-lg font-semibold flex items-center">
             <i class="fa fa-folder text-cosmic-purple mr-2"></i>
-            ${groupName}
-            <span class="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">(${bookmarks.length})</span>
+            ${group}
           </h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            ${bookmarks.map(bookmark => `
-              <a href="${bookmark.url}" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-lg bg-space-medium/10 hover:bg-space-medium/30 transition-all card-hover">
-                <div class="w-10 h-10 rounded-full bg-${bookmark.color}/20 flex items-center justify-center mb-2">
-                  <i class="fa fa-globe text-${bookmark.color}"></i>
-                </div>
-                <span class="text-sm text-center text-ellipsis-1">${bookmark.name}</span>
-              </a>
-            `).join('')}
+          <span class="text-sm text-gray-500 dark:text-gray-400">${appData.bookmarks[group].length} 个网站</span>
+        `;
+        
+        const bookmarksGrid = document.createElement('div');
+        bookmarksGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3';
+        
+        appData.bookmarks[group].forEach(bookmark => {
+          const favicon = bookmark.icon || getFavicon(bookmark.url);
+          
+          const bookmarkEl = document.createElement('a');
+          bookmarkEl.href = bookmark.url;
+          bookmarkEl.target = '_blank';
+          bookmarkEl.className = 'bookmark-tag';
+          bookmarkEl.innerHTML = `
+            <div class="bookmark-favicon">
+              <img src="${favicon}" alt="${bookmark.name}图标" class="w-4 h-4 object-contain" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzE2NUZGZiIgZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMC00LjQ4LTEwLTEwLTEwUzE3LjUyIDIgMTIgMnptMCAxOGMtNC40MSAwLTgtMy41OS04LThzMy41OS04IDgtOCA4IDMuNTkgOCA4LTMuNTkgOC04IDh6bTAgLTIwYzUuNTIgMCAxMCA0LjQ4IDEwIDEwcy00LjQ4IDEwLTEwIDEwLTEwLTQuNDgtMTAtMTAgNC40OC0xMCAxMC0xMHoiLz48L3N2Zz4='">
+            </div>
+            <span class="text-ellipsis-1">${bookmark.name}</span>
+          `;
+          
+          bookmarksGrid.appendChild(bookmarkEl);
+        });
+        
+        groupEl.appendChild(groupHeader);
+        groupEl.appendChild(bookmarksGrid);
+        container.appendChild(groupEl);
+      }
+      
+      document.getElementById('total-bookmarks').textContent = totalCount;
+    }
+
+    function renderEditBookmarks() {
+      const container = document.getElementById('edit-bookmarks-container');
+      container.innerHTML = '';
+      
+      for (const group in appData.bookmarks) {
+        const groupEl = document.createElement('div');
+        groupEl.className = 'glass rounded-xl p-4';
+        
+        const groupHeader = document.createElement('div');
+        groupHeader.className = 'flex justify-between items-center mb-4 pb-2 border-b border-gray-200/10';
+        groupHeader.innerHTML = `
+          <div class="flex items-center">
+            <i class="fa fa-folder text-cosmic-purple mr-2"></i>
+            <input type="text" value="${group}" class="bg-transparent border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-cosmic-blue focus:outline-none font-semibold group-name-input">
+          </div>
+          <div class="flex space-x-2">
+            <button class="add-bookmark-to-group touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all" data-group="${group}">
+              <i class="fa fa-plus text-sm"></i>
+            </button>
+            <button class="delete-group touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-gray-500" data-group="${group}">
+              <i class="fa fa-trash text-sm"></i>
+            </button>
           </div>
         `;
         
-        container.appendChild(groupElement);
+        const bookmarksList = document.createElement('div');
+        bookmarksList.className = 'space-y-3';
+        
+        if (appData.bookmarks[group].length === 0) {
+          bookmarksList.innerHTML = `
+            <div class="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+              该分组暂无书签
+            </div>
+          `;
+        } else {
+          appData.bookmarks[group].forEach((bookmark, index) => {
+            const bookmarkEl = document.createElement('div');
+            bookmarkEl.className = 'flex items-center p-2 hover:bg-space-medium/20 rounded-lg transition-colors';
+            bookmarkEl.innerHTML = `
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center mb-1">
+                  <input type="text" value="${bookmark.name}" class="bg-transparent border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-cosmic-blue focus:outline-none text-sm bookmark-name-input" data-group="${group}" data-index="${index}">
+                </div>
+                <input type="text" value="${bookmark.url}" class="bg-transparent border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-cosmic-blue focus:outline-none text-xs text-gray-500 dark:text-gray-400 w-full bookmark-url-input" data-group="${group}" data-index="${index}">
+              </div>
+              <button class="delete-bookmark touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-gray-500" data-group="${group}" data-index="${index}">
+                <i class="fa fa-trash text-sm"></i>
+              </button>
+            `;
+            
+            bookmarksList.appendChild(bookmarkEl);
+          });
+        }
+        
+        groupEl.appendChild(groupHeader);
+        groupEl.appendChild(bookmarksList);
+        container.appendChild(groupEl);
+        
+        groupHeader.querySelector('.group-name-input').addEventListener('change', function() {
+          const newName = this.value.trim();
+          if (newName && newName !== group) {
+            appData.bookmarks[newName] = appData.bookmarks[group];
+            delete appData.bookmarks[group];
+            renderEditBookmarks();
+          }
+        });
+        
+        groupHeader.querySelector('.delete-group').addEventListener('click', function() {
+          if (confirm(`确定要删除分组"${group}"吗？`)) {
+            delete appData.bookmarks[group];
+            renderEditBookmarks();
+          }
+        });
+        
+        groupHeader.querySelector('.add-bookmark-to-group').addEventListener('click', function() {
+          const groupName = this.getAttribute('data-group');
+          document.getElementById('bookmark-group-select').value = groupName;
+          document.getElementById('add-bookmark-modal').classList.remove('hidden');
+        });
+      }
+      
+      document.querySelectorAll('.bookmark-name-input').forEach(input => {
+        input.addEventListener('change', function() {
+          const group = this.getAttribute('data-group');
+          const index = parseInt(this.getAttribute('data-index'));
+          appData.bookmarks[group][index].name = this.value.trim();
+        });
       });
       
-      document.getElementById('total-bookmarks').textContent = total;
+      document.querySelectorAll('.bookmark-url-input').forEach(input => {
+        input.addEventListener('change', async function() {
+          const group = this.getAttribute('data-group');
+          const index = parseInt(this.getAttribute('data-index'));
+          const newUrl = this.value.trim();
+          
+          appData.bookmarks[group][index].url = newUrl;
+          appData.bookmarks[group][index].icon = getFavicon(newUrl);
+          
+          const title = await fetchWebsiteTitle(newUrl);
+          if (title) {
+            document.querySelector(`.bookmark-name-input[data-group="${group}"][data-index="${index}"]`).value = title;
+            appData.bookmarks[group][index].name = title;
+          }
+        });
+      });
+      
+      document.querySelectorAll('.delete-bookmark').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const group = this.getAttribute('data-group');
+          const index = parseInt(this.getAttribute('data-index'));
+          appData.bookmarks[group].splice(index, 1);
+          renderEditBookmarks();
+        });
+      });
     }
 
-    // 初始化事件监听器
-    function initEventListeners() {
-      // 设置按钮点击事件
+    function populateBookmarkGroupSelect() {
+      const select = document.getElementById('bookmark-group-select');
+      select.innerHTML = '';
+      
+      for (const group in appData.bookmarks) {
+        const option = document.createElement('option');
+        option.value = group;
+        option.textContent = group;
+        select.appendChild(option);
+      }
+    }
+
+    function setupEventListeners() {
+      document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+      
       document.getElementById('settings-btn').addEventListener('click', () => {
         document.getElementById('password-modal').classList.remove('hidden');
-        document.getElementById('admin-password').value = '';
       });
       
-      // 关闭编辑页面
       document.getElementById('close-edit-page').addEventListener('click', () => {
         document.getElementById('edit-page').classList.add('hidden');
       });
       
-      // 取消编辑
       document.getElementById('cancel-edit').addEventListener('click', () => {
         document.getElementById('edit-page').classList.add('hidden');
       });
       
-      // 密码确认
-      document.getElementById('confirm-password').addEventListener('click', () => {
-        const password = document.getElementById('admin-password').value;
-        if (password === 'admin') {
-          document.getElementById('password-modal').classList.add('hidden');
-          document.getElementById('edit-page').classList.remove('hidden');
-          renderEditBookmarks();
-          
-          document.getElementById('github-token').value = localStorage.getItem('githubToken') || '';
-          document.getElementById('github-repo').value = localStorage.getItem('githubRepo') || '';
-          document.getElementById('github-path').value = localStorage.getItem('githubPath') || 'bookmarks.json';
-          
-          document.getElementById('ad1-image').value = appData.ads.ad1.image;
-          document.getElementById('ad1-link').value = appData.ads.ad1.link;
-          document.getElementById('ad1-title').value = appData.ads.ad1.title;
-          document.getElementById('ad1-desc').value = appData.ads.ad1.desc;
-          
-          document.getElementById('ad2-image').value = appData.ads.ad2.image;
-          document.getElementById('ad2-link').value = appData.ads.ad2.link;
-          document.getElementById('ad2-title').value = appData.ads.ad2.title;
-          document.getElementById('ad2-desc').value = appData.ads.ad2.desc;
-          
-          document.getElementById('ad3-image').value = appData.ads.ad3.image;
-          document.getElementById('ad3-link').value = appData.ads.ad3.link;
-          document.getElementById('ad3-title').value = appData.ads.ad3.title;
-          document.getElementById('ad3-desc').value = appData.ads.ad3.desc;
-        } else {
-          alert('密码错误');
-        }
-      });
-      
-      // 切换密码显示
-      document.getElementById('toggle-password').addEventListener('click', () => {
-        const input = document.getElementById('admin-password');
-        const icon = document.querySelector('#toggle-password i');
-        
-        if (input.type === 'password') {
-          input.type = 'text';
-          icon.classList.remove('fa-eye-slash');
-          icon.classList.add('fa-eye');
-        } else {
-          input.type = 'password';
-          icon.classList.remove('fa-eye');
-          icon.classList.add('fa-eye-slash');
-        }
-      });
-      
-      // 保存编辑
       document.getElementById('save-edit').addEventListener('click', async () => {
         appData.ads.ad1 = {
           image: document.getElementById('ad1-image').value,
@@ -862,257 +1220,223 @@
           desc: document.getElementById('ad3-desc').value
         };
         
-        const success = await saveDataToGitHub();
-        if (success) {
-          renderBookmarks();
-          updateAds();
-          document.getElementById('edit-page').classList.add('hidden');
+        document.getElementById('ad-1').innerHTML = `
+          <img src="${appData.ads.ad1.image}" alt="${appData.ads.ad1.title}" class="w-full h-full object-cover absolute inset-0 opacity-70">
+          <div class="relative z-10 text-center">
+            <h3 class="text-lg md:text-xl font-bold text-white text-shadow text-ellipsis-1">${appData.ads.ad1.title}</h3>
+            <p class="text-sm md:text-base text-white/80 mt-1 text-ellipsis-1">${appData.ads.ad1.desc}</p>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-r from-cosmic-blue/30 to-cosmic-purple/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        `;
+        
+        document.getElementById('ad-2').innerHTML = `
+          <img src="${appData.ads.ad2.image}" alt="${appData.ads.ad2.title}" class="w-full h-full object-cover absolute inset-0 opacity-70">
+          <div class="relative z-10 text-center">
+            <h3 class="text-lg md:text-xl font-bold text-white text-shadow text-ellipsis-1">${appData.ads.ad2.title}</h3>
+            <p class="text-sm md:text-base text-white/80 mt-1 text-ellipsis-1">${appData.ads.ad2.desc}</p>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-r from-cosmic-purple/30 to-cosmic-pink/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        `;
+        
+        document.getElementById('ad-3').innerHTML = `
+          <img src="${appData.ads.ad3.image}" alt="${appData.ads.ad3.title}" class="w-full h-full object-cover absolute inset-0 opacity-70">
+          <div class="relative z-10 text-center">
+            <h3 class="text-lg md:text-xl font-bold text-white text-shadow text-ellipsis-1">${appData.ads.ad3.title}</h3>
+            <p class="text-sm md:text-base text-white/80 mt-1 text-ellipsis-1">${appData.ads.ad3.desc}</p>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-r from-cosmic-green/30 to-cosmic-blue/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        `;
+        
+        renderBookmarks();
+        await saveDataToGitHub();
+        document.getElementById('edit-page').classList.add('hidden');
+      });
+      
+      document.getElementById('toggle-password').addEventListener('click', function() {
+        const passwordInput = document.getElementById('admin-password');
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="fa fa-eye-slash"></i>' : '<i class="fa fa-eye"></i>';
+      });
+      
+      document.getElementById('cancel-password').addEventListener('click', () => {
+        document.getElementById('password-modal').classList.add('hidden');
+        document.getElementById('admin-password').value = '';
+      });
+      
+      document.getElementById('confirm-password').addEventListener('click', () => {
+        const password = document.getElementById('admin-password').value;
+        if (password === 'admin' || !password) {
+          document.getElementById('password-modal').classList.add('hidden');
+          document.getElementById('edit-page').classList.remove('hidden');
+          renderEditBookmarks();
+        } else {
+          alert('密码错误');
+        }
+        document.getElementById('admin-password').value = '';
+      });
+      
+      document.getElementById('add-timezone').addEventListener('click', () => {
+        document.getElementById('add-timezone-modal').classList.remove('hidden');
+        renderCities();
+      });
+      
+      document.getElementById('cancel-timezone').addEventListener('click', () => {
+        document.getElementById('add-timezone-modal').classList.add('hidden');
+        document.getElementById('timezone-search').value = '';
+      });
+      
+      document.getElementById('add-bookmark-btn').addEventListener('click', () => {
+        populateBookmarkGroupSelect();
+        document.getElementById('bookmark-name').value = '';
+        document.getElementById('bookmark-url').value = '';
+        document.getElementById('add-bookmark-modal').classList.remove('hidden');
+      });
+      
+      document.getElementById('cancel-add-bookmark').addEventListener('click', () => {
+        document.getElementById('add-bookmark-modal').classList.add('hidden');
+      });
+      
+      document.getElementById('confirm-add-bookmark').addEventListener('click', async () => {
+        const group = document.getElementById('bookmark-group-select').value;
+        const name = document.getElementById('bookmark-name').value.trim();
+        let url = document.getElementById('bookmark-url').value.trim();
+        
+        if (!group || !name || !url) {
+          alert('请填写完整信息');
+          return;
+        }
+        
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = 'https://' + url;
+        }
+        
+        if (!appData.bookmarks[group]) {
+          appData.bookmarks[group] = [];
+        }
+        
+        const exists = appData.bookmarks[group].some(b => b.url === url);
+        if (exists) {
+          alert('该书签已存在');
+          return;
+        }
+        
+        const icon = getFavicon(url);
+        
+        appData.bookmarks[group].push({
+          name,
+          url,
+          icon,
+          color: `cosmic-${['blue', 'purple', 'pink', 'yellow', 'green', 'red', 'cyan'][Math.floor(Math.random() * 7)]}`
+        });
+        
+        renderBookmarks();
+        renderEditBookmarks();
+        await saveDataToGitHub();
+        
+        document.getElementById('add-bookmark-modal').classList.add('hidden');
+      });
+      
+      document.getElementById('add-new-group').addEventListener('click', () => {
+        const newGroupName = prompt('请输入新分组名称:');
+        if (newGroupName && newGroupName.trim() && !appData.bookmarks[newGroupName.trim()]) {
+          appData.bookmarks[newGroupName.trim()] = [];
+          renderEditBookmarks();
         }
       });
       
-      // 新建分组
-      document.getElementById('add-new-group').addEventListener('click', () => {
-        const newGroupName = `新分组 ${Object.keys(appData.bookmarks).length + 1}`;
-        appData.bookmarks[newGroupName] = [];
-        renderEditBookmarks();
-      });
-      
-      // 触发导入
       document.getElementById('trigger-import').addEventListener('click', () => {
         document.getElementById('bookmark-import').click();
       });
       
-      // 导入书签
-      document.getElementById('bookmark-import').addEventListener('change', (e) => {
+      document.getElementById('bookmark-import').addEventListener('change', async function(e) {
         const file = e.target.files[0];
         if (!file) return;
         
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          try {
-            const content = event.target.result;
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(content, 'text/html');
-            const links = doc.querySelectorAll('a');
-            
-            const importedBookmarks = {};
-            
-            links.forEach(link => {
-              const href = link.getAttribute('href');
-              if (!href || href.startsWith('javascript:')) return;
-              
-              const name = link.textContent.trim() || '未命名网站';
-              const parentGroup = link.closest('dl')?.previousElementSibling?.textContent || '导入的书签';
-              
-              if (!importedBookmarks[parentGroup]) {
-                importedBookmarks[parentGroup] = [];
-              }
-              
-              importedBookmarks[parentGroup].push({
-                name,
-                url: href,
-                icon: '',
-                color: `cosmic-${['blue', 'purple', 'pink', 'yellow', 'green', 'cyan'][Math.floor(Math.random() * 6)]}`
-              });
-            });
-            
-            Object.assign(appData.bookmarks, importedBookmarks);
-            renderEditBookmarks();
-            
-            document.getElementById('import-status').textContent = `成功导入 ${Object.values(importedBookmarks).flat().length} 个书签`;
-            document.getElementById('import-status').className = 'mt-3 text-sm text-cosmic-green';
-            document.getElementById('import-status').classList.remove('hidden');
-          } catch (error) {
-            document.getElementById('import-status').textContent = `导入失败: ${error.message}`;
-            document.getElementById('import-status').className = 'mt-3 text-sm text-cosmic-red';
-            document.getElementById('import-status').classList.remove('hidden');
-          }
-        };
-        reader.readAsText(file);
-      });
-      
-      // 导出书签
-      document.getElementById('export-bookmarks').addEventListener('click', () => {
-        let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-<TITLE>书签</TITLE>
-<H1>书签</H1>
-<DL><p>`;
+        const statusEl = document.getElementById('import-status');
+        statusEl.textContent = '正在导入...';
+        statusEl.className = 'mt-3 text-sm text-cosmic-yellow';
+        statusEl.classList.remove('hidden');
         
-        Object.keys(appData.bookmarks).forEach(groupName => {
-          html += `<DT><H3>${groupName}</H3>
-<DL><p>`;
-          
-          appData.bookmarks[groupName].forEach(bookmark => {
-            html += `<DT><A HREF="${bookmark.url}">${bookmark.name}</A>`;
-          });
-          
-          html += `</DL><p>`;
-        });
-        
-        html += `</DL><p>`;
-        
-        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'bookmarks.html';
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-      
-      // 广告图片上传
-      ['ad1', 'ad2', 'ad3'].forEach(adId => {
-        document.getElementById(`${adId}-upload`).addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          
+        try {
           const reader = new FileReader();
-          reader.onload = (event) => {
-            document.getElementById(`${adId}-image`).value = event.target.result;
+          reader.onload = async function(event) {
+            try {
+              const html = event.target.result;
+              const newBookmarks = parseBookmarkHtml(html);
+              appData.bookmarks = mergeBookmarks(appData.bookmarks, newBookmarks);
+              
+              renderBookmarks();
+              renderEditBookmarks();
+              await saveDataToGitHub();
+              
+              statusEl.textContent = '导入成功！';
+              statusEl.className = 'mt-3 text-sm text-cosmic-green';
+            } catch (error) {
+              console.error('解析书签失败:', error);
+              statusEl.textContent = '导入失败: 无效的书签文件';
+              statusEl.className = 'mt-3 text-sm text-cosmic-red';
+            }
+          };
+          reader.readAsText(file);
+        } catch (error) {
+          console.error('导入书签失败:', error);
+          statusEl.textContent = '导入失败，请重试';
+          statusEl.className = 'mt-3 text-sm text-cosmic-red';
+        }
+      });
+      
+      document.getElementById('export-bookmarks').addEventListener('click', downloadBookmarksJson);
+      
+      document.getElementById('ad1-upload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            document.getElementById('ad1-image').value = event.target.result;
           };
           reader.readAsDataURL(file);
-        });
-        
-        document.querySelector(`label[for="${adId}-upload"]`).addEventListener('click', (e) => {
-          e.preventDefault();
-          document.getElementById(`${adId}-upload`).click();
-        });
+        }
       });
       
-      // 滚动事件
-      window.addEventListener('scroll', () => {
-        const header = document.getElementById('header');
-        if (window.scrollY > 10) {
-          header.classList.add('py-2');
-          header.classList.remove('py-3');
-        } else {
-          header.classList.add('py-3');
-          header.classList.remove('py-2');
+      document.getElementById('ad2-upload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            document.getElementById('ad2-image').value = event.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      
+      document.getElementById('ad3-upload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            document.getElementById('ad3-image').value = event.target.result;
+          };
+          reader.readAsDataURL(file);
         }
       });
     }
 
-    // 渲染编辑书签界面
-    function renderEditBookmarks() {
-      const container = document.getElementById('edit-bookmarks-container');
-      container.innerHTML = '';
-      
-      Object.keys(appData.bookmarks).forEach(groupName => {
-        const groupElement = document.createElement('div');
-        groupElement.className = 'glass rounded-lg p-4';
-        
-        groupElement.innerHTML = `
-          <div class="flex justify-between items-center mb-4">
-            <h4 class="font-medium text-gray-800 dark:text-gray-100 flex items-center">
-              <i class="fa fa-folder text-cosmic-purple mr-2"></i>
-              ${groupName}
-            </h4>
-            <button class="delete-group touch-friendly w-6 h-6 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-gray-500" data-group="${groupName}">
-              <i class="fa fa-trash-o"></i>
-            </button>
-          </div>
-          
-          <div class="space-y-3 mb-4" id="${groupName}-bookmarks">
-            ${appData.bookmarks[groupName].map((bookmark, index) => `
-              <div class="flex items-center space-x-2 bg-space-dark/30 p-2 rounded-lg">
-                <input type="text" value="${bookmark.name}" class="flex-1 bg-transparent border border-gray-500 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-cosmic-blue text-sm" data-group="${groupName}" data-index="${index}" data-field="name">
-                <input type="text" value="${bookmark.url}" class="flex-2 bg-transparent border border-gray-500 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-cosmic-blue text-sm" data-group="${groupName}" data-index="${index}" data-field="url">
-                <button class="delete-bookmark touch-friendly w-6 h-6 rounded flex items-center justify-center hover:bg-space-medium/50 transition-all text-gray-500" data-group="${groupName}" data-index="${index}">
-                  <i class="fa fa-times"></i>
-                </button>
-              </div>
-            `).join('')}
-          </div>
-          
-          <button class="add-bookmark w-full py-2 border border-dashed border-gray-400 rounded-lg text-sm hover:bg-space-medium/20 transition-colors flex items-center justify-center" data-group="${groupName}">
-            <i class="fa fa-plus mr-1 text-cosmic-green"></i> 添加书签
-          </button>
-        `;
-        
-        container.appendChild(groupElement);
-      });
-      
-      // 添加书签事件
-      document.querySelectorAll('.add-bookmark').forEach(button => {
-        button.addEventListener('click', (e) => {
-          const groupName = e.currentTarget.dataset.group;
-          appData.bookmarks[groupName].push({
-            name: '新书签',
-            url: 'https://',
-            icon: '',
-            color: `cosmic-${['blue', 'purple', 'pink', 'yellow', 'green', 'cyan'][Math.floor(Math.random() * 6)]}`
-          });
-          renderEditBookmarks();
-        });
-      });
-      
-      // 删除书签事件
-      document.querySelectorAll('.delete-bookmark').forEach(button => {
-        button.addEventListener('click', (e) => {
-          const groupName = e.currentTarget.dataset.group;
-          const index = parseInt(e.currentTarget.dataset.index);
-          appData.bookmarks[groupName].splice(index, 1);
-          renderEditBookmarks();
-        });
-      });
-      
-      // 删除分组事件
-      document.querySelectorAll('.delete-group').forEach(button => {
-        button.addEventListener('click', (e) => {
-          const groupName = e.currentTarget.dataset.group;
-          if (confirm(`确定要删除分组"${groupName}"吗？`)) {
-            delete appData.bookmarks[groupName];
-            renderEditBookmarks();
-          }
-        });
-      });
-      
-      // 编辑书签内容
-      document.querySelectorAll('#edit-bookmarks-container input').forEach(input => {
-        input.addEventListener('change', (e) => {
-          const groupName = e.currentTarget.dataset.group;
-          const index = parseInt(e.currentTarget.dataset.index);
-          const field = e.currentTarget.dataset.field;
-          appData.bookmarks[groupName][index][field] = e.currentTarget.value;
-        });
-      });
-    }
-
-    // 更新广告内容
-    function updateAds() {
-      Object.keys(appData.ads).forEach(adId => {
-        const ad = appData.ads[adId];
-        const adElement = document.getElementById(adId);
-        
-        const img = adElement.querySelector('img');
-        const title = adElement.querySelector('h3');
-        const desc = adElement.querySelector('p');
-        
-        img.src = ad.image;
-        img.alt = ad.title;
-        title.textContent = ad.title;
-        desc.textContent = ad.desc;
-      });
-    }
-
-    // 初始化应用
     async function init() {
       createStars();
       initTheme();
-      await loadDataFromGitHub(); // 优先从GitHub加载数据
-      updateDateTime();
-      setInterval(updateDateTime, 60000);
-      initUptime();
+      await loadDataFromGitHub();
+      updateUptime();
       updateHealthReminder();
-      setInterval(updateHealthReminder, 3600000);
-      renderBookmarks(); // 加载完成后渲染书签
-      initEventListeners();
-      updateAds();
+      updateDate();
+      updateTimezones();
+      renderBookmarks();
+      setupEventListeners();
+      
+      setInterval(updateTimezones, 1000);
     }
-
-    // 启动应用
-    init();
+    
+    window.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
