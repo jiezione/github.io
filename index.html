@@ -44,22 +44,10 @@
             'pulse-soft': 'pulse-soft 2s infinite'
           },
           keyframes: {
-            float: {
-              '0%, 100%': { transform: 'translateY(0)' },
-              '50%': { transform: 'translateY(-10px)' }
-            },
-            twinkle: {
-              '0%, 100%': { opacity: 1 },
-              '50%': { opacity: 0.5 }
-            },
-            orbit: {
-              '0%': { transform: 'rotate(0deg) translateX(50px) rotate(0deg)' },
-              '100%': { transform: 'rotate(360deg) translateX(50px) rotate(-360deg)' }
-            },
-            'pulse-soft': {
-              '0%, 100%': { opacity: 1 },
-              '50%': { opacity: 0.7 }
-            }
+            float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+            twinkle: { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.5 } },
+            orbit: { '0%': { transform: 'rotate(0deg) translateX(50px) rotate(0deg)' }, '100%': { transform: 'rotate(360deg) translateX(50px) rotate(-360deg)' } },
+            'pulse-soft': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.7 } }
           }
         }
       }
@@ -164,9 +152,7 @@
           <div class="flex justify-between items-start">
             <div>
               <div class="flex items-center justify-between">
-                <h3 class="text-sm text-gray-400 dark:text-gray-500 flex items-center">
-                  世界时间
-                </h3>
+                <h3 class="text-sm text-gray-400 dark:text-gray-500 flex items-center">世界时间</h3>
                 <button id="add-timezone" class="touch-friendly w-6 h-6 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all">
                   <i class="fa fa-plus text-xs"></i>
                 </button>
@@ -223,8 +209,7 @@
         <h2 class="text-xl font-bold">书签编辑中心</h2>
         <div class="flex space-x-2">
           <button id="save-all-changes" class="touch-friendly px-4 py-2 bg-cosmic-green/20 hover:bg-cosmic-green/30 text-cosmic-green rounded-lg transition-colors flex items-center">
-            <i class="fa fa-save mr-1"></i>
-            保存更改
+            <i class="fa fa-save mr-1"></i>保存更改
           </button>
           <button id="close-edit-page" class="touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all">
             <i class="fa fa-times"></i>
@@ -256,8 +241,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="glass rounded-lg p-4">
               <h4 class="font-medium mb-3 flex items-center text-gray-800 dark:text-gray-100">
-                <i class="fa fa-upload text-cosmic-green mr-2"></i>
-                导入书签
+                <i class="fa fa-upload text-cosmic-green mr-2"></i>导入书签
               </h4>
               <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">支持从浏览器导出的HTML书签文件导入</p>
               <button id="trigger-import" class="w-full p-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-gray-50 dark:bg-space-dark hover:bg-gray-100 dark:hover:bg-space-medium/30 transition-colors text-sm touch-friendly">
@@ -269,13 +253,11 @@
             
             <div class="glass rounded-lg p-4">
               <h4 class="font-medium mb-3 flex items-center text-gray-800 dark:text-gray-100">
-                <i class="fa fa-download text-cosmic-blue mr-2"></i>
-                导出书签
+                <i class="fa fa-download text-cosmic-blue mr-2"></i>导出书签
               </h4>
               <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">将当前书签导出为HTML文件</p>
               <button id="export-bookmarks" class="w-full py-3 bg-cosmic-blue/20 hover:bg-cosmic-blue/30 text-cosmic-blue rounded-lg transition-colors flex items-center justify-center touch-friendly">
-                <i class="fa fa-download mr-2"></i>
-                导出所有书签
+                <i class="fa fa-download mr-2"></i>导出所有书签
               </button>
             </div>
           </div>
@@ -285,8 +267,7 @@
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">书签管理</h3>
             <button id="add-new-group" class="py-2 px-4 text-sm bg-cosmic-purple/20 hover:bg-cosmic-purple/30 text-cosmic-purple rounded-lg transition-colors flex items-center touch-friendly">
-              <i class="fa fa-plus mr-1"></i>
-              新建分组
+              <i class="fa fa-plus mr-1"></i>新建分组
             </button>
           </div>
           
@@ -767,20 +748,13 @@
       if (!city) return;
       
       const timezoneMap = {
-        '北京': 'Asia/Shanghai',
-        '上海': 'Asia/Shanghai',
-        '香港': 'Asia/Hong_Kong',
-        '东京': 'Asia/Tokyo',
-        '首尔': 'Asia/Seoul',
-        '伦敦': 'Europe/London',
-        '巴黎': 'Europe/Paris',
-        '纽约': 'America/New_York',
-        '洛杉矶': 'America/Los_Angeles',
+        '北京': 'Asia/Shanghai', '上海': 'Asia/Shanghai', '香港': 'Asia/Hong_Kong',
+        '东京': 'Asia/Tokyo', '首尔': 'Asia/Seoul', '伦敦': 'Europe/London',
+        '巴黎': 'Europe/Paris', '纽约': 'America/New_York', '洛杉矶': 'America/Los_Angeles',
         '莫斯科': 'Europe/Moscow'
       };
       
       const timezone = timezoneMap[city] || 'UTC';
-      
       appData.timezones.push({ city, timezone });
       updateTimezones();
     });
@@ -802,21 +776,13 @@
       const hour = now.getHours();
       let reminder = '';
       
-      if (hour >= 6 && hour < 9) {
-        reminder = '早上好，开始新的一天吧';
-      } else if (hour >= 9 && hour < 12) {
-        reminder = '上午工作效率高，加油！';
-      } else if (hour >= 12 && hour < 14) {
-        reminder = '午休时间，适当放松一下';
-      } else if (hour >= 14 && hour < 17) {
-        reminder = '下午容易犯困，记得多喝水';
-      } else if (hour >= 17 && hour < 19) {
-        reminder = '傍晚时分，适当运动有益健康';
-      } else if (hour >= 19 && hour < 22) {
-        reminder = '晚上注意休息，不要熬夜';
-      } else {
-        reminder = '夜深了，早点休息吧';
-      }
+      if (hour >= 6 && hour < 9) reminder = '早上好，开始新的一天吧';
+      else if (hour >= 9 && hour < 12) reminder = '上午工作效率高，加油！';
+      else if (hour >= 12 && hour < 14) reminder = '午休时间，适当放松一下';
+      else if (hour >= 14 && hour < 17) reminder = '下午容易犯困，记得多喝水';
+      else if (hour >= 17 && hour < 19) reminder = '傍晚时分，适当运动有益健康';
+      else if (hour >= 19 && hour < 22) reminder = '晚上注意休息，不要熬夜';
+      else reminder = '夜深了，早点休息吧';
       
       document.getElementById('health-reminder').textContent = reminder;
     }
@@ -836,9 +802,7 @@
           if (desc) desc.textContent = ad.desc;
           
           adElement.onclick = () => {
-            if (ad.link && ad.link !== '#') {
-              window.open(ad.link, '_blank');
-            }
+            if (ad.link && ad.link !== '#') window.open(ad.link, '_blank');
           };
         }
       });
@@ -856,15 +820,10 @@
         Object.keys(appData.ads).forEach(adId => {
           const ad = appData.ads[adId];
           if (ad) {
-            const imgInput = document.getElementById(`${adId}-image`);
-            const linkInput = document.getElementById(`${adId}-link`);
-            const titleInput = document.getElementById(`${adId}-title`);
-            const descInput = document.getElementById(`${adId}-desc`);
-            
-            if (imgInput) imgInput.value = ad.image || '';
-            if (linkInput) linkInput.value = ad.link || '';
-            if (titleInput) titleInput.value = ad.title || '';
-            if (descInput) descInput.value = ad.desc || '';
+            document.getElementById(`${adId}-image`).value = ad.image || '';
+            document.getElementById(`${adId}-link`).value = ad.link || '';
+            document.getElementById(`${adId}-title`).value = ad.title || '';
+            document.getElementById(`${adId}-desc`).value = ad.desc || '';
           }
         });
       });
@@ -876,16 +835,10 @@
       document.getElementById('save-all-changes').addEventListener('click', async () => {
         Object.keys(appData.ads).forEach(adId => {
           if (!appData.ads[adId]) appData.ads[adId] = {};
-          
-          const imgInput = document.getElementById(`${adId}-image`);
-          const linkInput = document.getElementById(`${adId}-link`);
-          const titleInput = document.getElementById(`${adId}-title`);
-          const descInput = document.getElementById(`${adId}-desc`);
-          
-          if (imgInput) appData.ads[adId].image = imgInput.value;
-          if (linkInput) appData.ads[adId].link = linkInput.value;
-          if (titleInput) appData.ads[adId].title = titleInput.value;
-          if (descInput) appData.ads[adId].desc = descInput.value;
+          appData.ads[adId].image = document.getElementById(`${adId}-image`).value;
+          appData.ads[adId].link = document.getElementById(`${adId}-link`).value;
+          appData.ads[adId].title = document.getElementById(`${adId}-title`).value;
+          appData.ads[adId].desc = document.getElementById(`${adId}-desc`).value;
         });
         
         const success = await saveDataToGitHub();
@@ -917,7 +870,6 @@
         reader.onload = async (event) => {
           try {
             const content = event.target.result;
-            
             const parser = new DOMParser();
             const doc = parser.parseFromString(content, 'text/html');
             const bookmarkGroups = doc.querySelectorAll('h3');
@@ -926,9 +878,7 @@
               const groupName = group.textContent.trim();
               if (!groupName) return;
               
-              if (!appData.bookmarks[groupName]) {
-                appData.bookmarks[groupName] = [];
-              }
+              if (!appData.bookmarks[groupName]) appData.bookmarks[groupName] = [];
               
               const links = group.nextElementSibling?.querySelectorAll('a');
               if (links) {
@@ -1026,7 +976,6 @@
     }
     
     window.removeTimezone = removeTimezone;
-    
     init();
   </script>
 </body>
