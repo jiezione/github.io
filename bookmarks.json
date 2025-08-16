@@ -45,25 +45,25 @@
         "name": "文件管理器",
         "url": "https://cmjwork.dpdns.org/",
         "icon": "",
-        "color": "cosmic-purple"
-      },
-      {
-        "name": "Fmie导航网站",
-        "url": "https://cmjlss.dpdns.org/#/",
-        "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "文件管理器",
-        "url": "https://cmjwork.dpdns.org/",
-        "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-yellow"
       },
       {
         "name": "Fmie导航网站",
         "url": "https://cmjlss.dpdns.org/#/",
         "icon": "",
         "color": "cosmic-pink"
+      },
+      {
+        "name": "文件管理器",
+        "url": "https://cmjwork.dpdns.org/",
+        "icon": "",
+        "color": "cosmic-purple"
+      },
+      {
+        "name": "Fmie导航网站",
+        "url": "https://cmjlss.dpdns.org/#/",
+        "icon": "",
+        "color": "cosmic-purple"
       }
     ],
     "tutorial": [
@@ -71,13 +71,13 @@
         "name": "Terser 深度混淆教程 | 结合其他技术的实现方案",
         "url": "https://tutorial.cmjwork.dpdns.org/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-yellow"
       },
       {
         "name": "Terser 深度混淆教程 | 结合其他技术的实现方案",
         "url": "https://tutorial.cmjwork.dpdns.org/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-blue"
       }
     ],
     "Time tunnel": [
@@ -85,67 +85,67 @@
         "name": "幻彩星渊-pg_tj",
         "url": "https://h.jiezione.dpdns.org/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-yellow"
       },
       {
         "name": "幻彩星渊-wk_tj",
         "url": "https://tj.fmienbone.dpdns.org/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-cyan"
       },
       {
         "name": "宇宙炫酷页面-pg_vl",
         "url": "https://fmls.pages.dev/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-pink"
       },
       {
         "name": "宇宙炫酷页面-wk_vl",
         "url": "https://fmienbone.dpdns.org/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-green"
       },
       {
         "name": "Cosmic Proxy-wk_vln",
         "url": "https://vln.fmienbone.dpdns.org/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-cyan"
       },
       {
         "name": "Time Travel-pg_tjn",
         "url": "https://tjn.fmienbone.dpdns.org/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-green"
       },
       {
         "name": "幻彩星渊-pg_tj",
         "url": "https://h.jiezione.dpdns.org/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-pink"
       },
       {
         "name": "幻彩星渊-wk_tj",
         "url": "https://tj.fmienbone.dpdns.org/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-pink"
       },
       {
         "name": "宇宙炫酷页面-pg_vl",
         "url": "https://fmls.pages.dev/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-pink"
       },
       {
         "name": "宇宙炫酷页面-wk_vl",
         "url": "https://fmienbone.dpdns.org/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-pink"
       },
       {
         "name": "Cosmic Proxy-wk_vln",
         "url": "https://vln.fmienbone.dpdns.org/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-pink"
       },
       {
         "name": "Time Travel-pg_tjn",
@@ -159,25 +159,25 @@
         "name": "渲染仪表板",
         "url": "https://dashboard.render.com/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-purple"
       },
       {
         "name": "sshweb - Overview – Vercel",
         "url": "https://vercel.com/fmies-projects/sshweb/settings/domains",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-blue"
       },
       {
         "name": "渲染仪表板",
         "url": "https://dashboard.render.com/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-yellow"
       },
       {
         "name": "sshweb - Overview – Vercel",
         "url": "https://vercel.com/fmies-projects/sshweb/settings/domains",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-cyan"
       }
     ],
     "在线转换工具": [
@@ -185,13 +185,13 @@
         "name": "主页 - 在线工具",
         "url": "https://toolonline.net/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-green"
       },
       {
         "name": "主页 - 在线工具",
         "url": "https://toolonline.net/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-cyan"
       }
     ],
     "Internet speed": [
@@ -199,61 +199,61 @@
         "name": "互联网速度测试 | Fast.com",
         "url": "https://fast.com/zh/cn/",
         "icon": "",
+        "color": "cosmic-pink"
+      },
+      {
+        "name": "中国科学技术大学测速网站",
+        "url": "https://test.ustc.edu.cn/",
+        "icon": "",
+        "color": "cosmic-purple"
+      },
+      {
+        "name": "免费在线网速测试 - 网速测试, 宽带提速, 游戏测速, 直播测速, 5G测速, Wi-Fi 7,Wi-Fi 6, 全屋Wi-Fi - browserscan.net | BrowserScan",
+        "url": "https://www.browserscan.net/zh/speed-test",
+        "icon": "",
+        "color": "cosmic-blue"
+      },
+      {
+        "name": "speedtest.net/zh-Hans",
+        "url": "https://www.speedtest.net/zh-Hans",
+        "icon": "",
+        "color": "cosmic-cyan"
+      },
+      {
+        "name": "Speedtest by Ookla - The Global Broadband Speed Test",
+        "url": "https://www.speedtest.net/",
+        "icon": "",
+        "color": "cosmic-yellow"
+      },
+      {
+        "name": "互联网速度测试 | Fast.com",
+        "url": "https://fast.com/zh/cn/",
+        "icon": "",
         "color": "cosmic-blue"
       },
       {
         "name": "中国科学技术大学测速网站",
         "url": "https://test.ustc.edu.cn/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-blue"
       },
       {
         "name": "免费在线网速测试 - 网速测试, 宽带提速, 游戏测速, 直播测速, 5G测速, Wi-Fi 7,Wi-Fi 6, 全屋Wi-Fi - browserscan.net | BrowserScan",
         "url": "https://www.browserscan.net/zh/speed-test",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-blue"
       },
       {
         "name": "speedtest.net/zh-Hans",
         "url": "https://www.speedtest.net/zh-Hans",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-yellow"
       },
       {
         "name": "Speedtest by Ookla - The Global Broadband Speed Test",
         "url": "https://www.speedtest.net/",
         "icon": "",
-        "color": "cosmic-purple"
-      },
-      {
-        "name": "互联网速度测试 | Fast.com",
-        "url": "https://fast.com/zh/cn/",
-        "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "中国科学技术大学测速网站",
-        "url": "https://test.ustc.edu.cn/",
-        "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "免费在线网速测试 - 网速测试, 宽带提速, 游戏测速, 直播测速, 5G测速, Wi-Fi 7,Wi-Fi 6, 全屋Wi-Fi - browserscan.net | BrowserScan",
-        "url": "https://www.browserscan.net/zh/speed-test",
-        "icon": "",
-        "color": "cosmic-purple"
-      },
-      {
-        "name": "speedtest.net/zh-Hans",
-        "url": "https://www.speedtest.net/zh-Hans",
-        "icon": "",
-        "color": "cosmic-pink"
-      },
-      {
-        "name": "Speedtest by Ookla - The Global Broadband Speed Test",
-        "url": "https://www.speedtest.net/",
-        "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-blue"
       }
     ],
     "IOS Phone": [
@@ -261,13 +261,13 @@
         "name": "Web & Mobile App Testing | Continuous Testing | Perfecto",
         "url": "https://www.perfecto.io/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-yellow"
       },
       {
         "name": "Web & Mobile App Testing | Continuous Testing | Perfecto",
         "url": "https://www.perfecto.io/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-green"
       }
     ],
     "接码平台": [
@@ -275,19 +275,19 @@
         "name": "在线接收短信至虚拟号码获取一次性密码 | SMS-Activate",
         "url": "https://sms-activate.world/en",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-blue"
       },
       {
         "name": "临时邮箱、十分钟邮箱（10分钟)、临时邮、临时Email、快速注册Email、24Mail--查错网",
         "url": "http://24mail.chacuo.net/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-purple"
       },
       {
         "name": "免费台湾手机号码:在线接收短信(+886 Taiwan) - SMSOnline",
         "url": "https://www.smsonline.cloud/zh/country/Taiwan#:~:text=%E5%9C%A8%E5%8F%B0%E6%B9%BE%EF%BC%8C%E4%BD%BF%E7%94%A8sms%E9%AA%8C",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-cyan"
       },
       {
         "name": "在线接收短信至虚拟号码获取一次性密码 | SMS-Activate",
@@ -313,13 +313,13 @@
         "name": "美国地址生成器 - 美国身份生成器 - 美国信用卡生成器",
         "url": "https://www.meiguodizhi.com/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-green"
       },
       {
         "name": "美国地址生成器 - 美国身份生成器 - 美国信用卡生成器",
         "url": "https://www.meiguodizhi.com/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-pink"
       }
     ],
     "优选IP和反代IP": [
@@ -327,85 +327,85 @@
         "name": "【全网首发】免费给垃圾节点提速，独家分享寻找反代IP，让你有用不完的优选IP，CN2 GIA线路免费用！拒绝优选CF自家IP垃圾路由，最佳的IP优选方法！小心你的reality节点变成别人的中转加速机 - 科学上网 技术分享",
         "url": "https://www.bulianglin.com/archives/newcdn.html",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-cyan"
       },
       {
         "name": "FOFA网络空间测绘，网络空间安全搜索引擎，网络空间搜索引擎，安全态势感知 - FOFA网络空间测绘系统",
         "url": "https://fofa.info/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-purple"
       },
       {
         "name": "CF PROXYIP REMOTE Check(CloudFlare 反代IP检测) - EDtunnel App",
         "url": "https://proxyip.edtunnel.best/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-purple"
       },
       {
         "name": "CloudFront 优选地址V4 - 微测网",
         "url": "https://www.wetest.vip/page/cloudfront/address_v4.html",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-green"
       },
       {
         "name": "GitHub - XIU2/CloudflareSpeedTest: 🌩「自选优选 IP」测试 Cloudflare CDN 延迟和速度，获取最快 IP ！当然也支持其他 CDN / 网站 IP ~",
         "url": "https://github.com/xiu2/cloudflareSpeedTest",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-pink"
       },
       {
         "name": "Simple Copy and Paste | Bulk IP Geolocation Lookup Tool Online",
         "url": "https://reallyfreegeoip.org/bulk",
         "icon": "",
+        "color": "cosmic-pink"
+      },
+      {
+        "name": "CDN节点优选IP工具",
+        "url": "https://cdn.jc.ddns-ip.net/",
+        "icon": "",
+        "color": "cosmic-green"
+      },
+      {
+        "name": "【全网首发】免费给垃圾节点提速，独家分享寻找反代IP，让你有用不完的优选IP，CN2 GIA线路免费用！拒绝优选CF自家IP垃圾路由，最佳的IP优选方法！小心你的reality节点变成别人的中转加速机 - 科学上网 技术分享",
+        "url": "https://www.bulianglin.com/archives/newcdn.html",
+        "icon": "",
         "color": "cosmic-purple"
+      },
+      {
+        "name": "FOFA网络空间测绘，网络空间安全搜索引擎，网络空间搜索引擎，安全态势感知 - FOFA网络空间测绘系统",
+        "url": "https://fofa.info/",
+        "icon": "",
+        "color": "cosmic-yellow"
+      },
+      {
+        "name": "CF PROXYIP REMOTE Check(CloudFlare 反代IP检测) - EDtunnel App",
+        "url": "https://proxyip.edtunnel.best/",
+        "icon": "",
+        "color": "cosmic-purple"
+      },
+      {
+        "name": "CloudFront 优选地址V4 - 微测网",
+        "url": "https://www.wetest.vip/page/cloudfront/address_v4.html",
+        "icon": "",
+        "color": "cosmic-purple"
+      },
+      {
+        "name": "GitHub - XIU2/CloudflareSpeedTest: 🌩「自选优选 IP」测试 Cloudflare CDN 延迟和速度，获取最快 IP ！当然也支持其他 CDN / 网站 IP ~",
+        "url": "https://github.com/xiu2/cloudflareSpeedTest",
+        "icon": "",
+        "color": "cosmic-purple"
+      },
+      {
+        "name": "Simple Copy and Paste | Bulk IP Geolocation Lookup Tool Online",
+        "url": "https://reallyfreegeoip.org/bulk",
+        "icon": "",
+        "color": "cosmic-green"
       },
       {
         "name": "CDN节点优选IP工具",
         "url": "https://cdn.jc.ddns-ip.net/",
         "icon": "",
         "color": "cosmic-yellow"
-      },
-      {
-        "name": "【全网首发】免费给垃圾节点提速，独家分享寻找反代IP，让你有用不完的优选IP，CN2 GIA线路免费用！拒绝优选CF自家IP垃圾路由，最佳的IP优选方法！小心你的reality节点变成别人的中转加速机 - 科学上网 技术分享",
-        "url": "https://www.bulianglin.com/archives/newcdn.html",
-        "icon": "",
-        "color": "cosmic-green"
-      },
-      {
-        "name": "FOFA网络空间测绘，网络空间安全搜索引擎，网络空间搜索引擎，安全态势感知 - FOFA网络空间测绘系统",
-        "url": "https://fofa.info/",
-        "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "CF PROXYIP REMOTE Check(CloudFlare 反代IP检测) - EDtunnel App",
-        "url": "https://proxyip.edtunnel.best/",
-        "icon": "",
-        "color": "cosmic-blue"
-      },
-      {
-        "name": "CloudFront 优选地址V4 - 微测网",
-        "url": "https://www.wetest.vip/page/cloudfront/address_v4.html",
-        "icon": "",
-        "color": "cosmic-green"
-      },
-      {
-        "name": "GitHub - XIU2/CloudflareSpeedTest: 🌩「自选优选 IP」测试 Cloudflare CDN 延迟和速度，获取最快 IP ！当然也支持其他 CDN / 网站 IP ~",
-        "url": "https://github.com/xiu2/cloudflareSpeedTest",
-        "icon": "",
-        "color": "cosmic-green"
-      },
-      {
-        "name": "Simple Copy and Paste | Bulk IP Geolocation Lookup Tool Online",
-        "url": "https://reallyfreegeoip.org/bulk",
-        "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "CDN节点优选IP工具",
-        "url": "https://cdn.jc.ddns-ip.net/",
-        "icon": "",
-        "color": "cosmic-pink"
       }
     ],
     "在线优选IP，优选域名网站  ": [
@@ -413,37 +413,37 @@
         "name": "微测网-云服务监测平台",
         "url": "https://www.wetest.vip/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-blue"
       },
       {
         "name": "Cloudflare IP Batch Test Tool",
         "url": "http://ip.flares.cloud/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-blue"
       },
       {
         "name": "全球主机监控 - 国内外VPS、云服务器的库存监控和优惠信息",
         "url": "https://stock.hostmonit.com/CloudFlareYes",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-yellow"
       },
       {
         "name": "微测网-云服务监测平台",
         "url": "https://www.wetest.vip/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-cyan"
       },
       {
         "name": "Cloudflare IP Batch Test Tool",
         "url": "http://ip.flares.cloud/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-yellow"
       },
       {
         "name": "全球主机监控 - 国内外VPS、云服务器的库存监控和优惠信息",
         "url": "https://stock.hostmonit.com/CloudFlareYes",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-cyan"
       }
     ],
     "Live streaming": [
@@ -451,13 +451,13 @@
         "name": "Twitch",
         "url": "https://m.twitch.tv/?desktop-redirect=true",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-blue"
       },
       {
         "name": "Twitch",
         "url": "https://m.twitch.tv/?desktop-redirect=true",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-purple"
       }
     ],
     "Airport": [
@@ -465,24 +465,6 @@
         "name": "登录页 | CAC Apex",
         "url": "https://www.cacapex.com/#/login",
         "icon": "",
-        "color": "cosmic-yellow"
-      },
-      {
-        "name": "使用文档 | 漏网之鱼",
-        "url": "https://ch.cukug.website/#/knowledge",
-        "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "登录页 | CAC Apex",
-        "url": "https://www.cacapex.com/#/login",
-        "icon": "",
-        "color": "cosmic-yellow"
-      },
-      {
-        "name": "登录页 | CAC Apex",
-        "url": "https://www.cacapex.com/#/login",
-        "icon": "",
         "color": "cosmic-cyan"
       },
       {
@@ -495,7 +477,25 @@
         "name": "登录页 | CAC Apex",
         "url": "https://www.cacapex.com/#/login",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-purple"
+      },
+      {
+        "name": "登录页 | CAC Apex",
+        "url": "https://www.cacapex.com/#/login",
+        "icon": "",
+        "color": "cosmic-blue"
+      },
+      {
+        "name": "使用文档 | 漏网之鱼",
+        "url": "https://ch.cukug.website/#/knowledge",
+        "icon": "",
+        "color": "cosmic-purple"
+      },
+      {
+        "name": "登录页 | CAC Apex",
+        "url": "https://www.cacapex.com/#/login",
+        "icon": "",
+        "color": "cosmic-yellow"
       }
     ],
     "SMSvrelated": [
@@ -503,25 +503,7 @@
         "name": "nhitoshi60/sms-reception: 2024年推荐的短信接码平台(收费+免费、国内+国外,建议收藏！！！)",
         "url": "https://github.com/nhitoshi60/sms-reception",
         "icon": "",
-        "color": "cosmic-blue"
-      },
-      {
-        "name": "在线接收短信 - 虚拟手机 - 临时电话 - SMSCodeOnline",
-        "url": "https://smscodeonline.com/virtual-phone/fi",
-        "icon": "",
-        "color": "cosmic-pink"
-      },
-      {
-        "name": "短信在线SMSOnline - 完全免费的虚拟电话号码平台",
-        "url": "https://www.smsonline.cloud/zh",
-        "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "nhitoshi60/sms-reception: 2024年推荐的短信接码平台(收费+免费、国内+国外,建议收藏！！！)",
-        "url": "https://github.com/nhitoshi60/sms-reception",
-        "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-purple"
       },
       {
         "name": "在线接收短信 - 虚拟手机 - 临时电话 - SMSCodeOnline",
@@ -534,6 +516,24 @@
         "url": "https://www.smsonline.cloud/zh",
         "icon": "",
         "color": "cosmic-green"
+      },
+      {
+        "name": "nhitoshi60/sms-reception: 2024年推荐的短信接码平台(收费+免费、国内+国外,建议收藏！！！)",
+        "url": "https://github.com/nhitoshi60/sms-reception",
+        "icon": "",
+        "color": "cosmic-green"
+      },
+      {
+        "name": "在线接收短信 - 虚拟手机 - 临时电话 - SMSCodeOnline",
+        "url": "https://smscodeonline.com/virtual-phone/fi",
+        "icon": "",
+        "color": "cosmic-green"
+      },
+      {
+        "name": "短信在线SMSOnline - 完全免费的虚拟电话号码平台",
+        "url": "https://www.smsonline.cloud/zh",
+        "icon": "",
+        "color": "cosmic-yellow"
       }
     ],
     "AI": [
@@ -541,7 +541,67 @@
         "name": "GPT-4 | OpenAI",
         "url": "https://openai.com/index/gpt-4/",
         "icon": "",
+        "color": "cosmic-cyan"
+      },
+      {
+        "name": "Grok",
+        "url": "https://grok.com/",
+        "icon": "",
         "color": "cosmic-purple"
+      },
+      {
+        "name": "DeepSeek | 深度求索",
+        "url": "https://www.deepseek.com/",
+        "icon": "",
+        "color": "cosmic-blue"
+      },
+      {
+        "name": "Claude",
+        "url": "https://claude.ai/new",
+        "icon": "",
+        "color": "cosmic-purple"
+      },
+      {
+        "name": "Llama",
+        "url": "https://www.llama.com/",
+        "icon": "",
+        "color": "cosmic-yellow"
+      },
+      {
+        "name": "Le Chat - Mistral AI",
+        "url": "https://chat.mistral.ai/chat",
+        "icon": "",
+        "color": "cosmic-purple"
+      },
+      {
+        "name": "文心一言",
+        "url": "https://yiyan.baidu.com/",
+        "icon": "",
+        "color": "cosmic-blue"
+      },
+      {
+        "name": "智谱清言",
+        "url": "https://chatglm.cn/main/alltoolsdetail?lang=zh",
+        "icon": "",
+        "color": "cosmic-green"
+      },
+      {
+        "name": "讯飞星火-懂我的AI助手",
+        "url": "https://xinghuo.xfyun.cn/",
+        "icon": "",
+        "color": "cosmic-yellow"
+      },
+      {
+        "name": "通义 - 你的实用AI助手",
+        "url": "https://www.tongyi.com/",
+        "icon": "",
+        "color": "cosmic-blue"
+      },
+      {
+        "name": "GPT-4 | OpenAI",
+        "url": "https://openai.com/index/gpt-4/",
+        "icon": "",
+        "color": "cosmic-green"
       },
       {
         "name": "Grok",
@@ -559,85 +619,25 @@
         "name": "Claude",
         "url": "https://claude.ai/new",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-yellow"
       },
       {
         "name": "Llama",
         "url": "https://www.llama.com/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-yellow"
       },
       {
         "name": "Le Chat - Mistral AI",
         "url": "https://chat.mistral.ai/chat",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-yellow"
       },
       {
         "name": "文心一言",
         "url": "https://yiyan.baidu.com/",
         "icon": "",
-        "color": "cosmic-purple"
-      },
-      {
-        "name": "智谱清言",
-        "url": "https://chatglm.cn/main/alltoolsdetail?lang=zh",
-        "icon": "",
-        "color": "cosmic-pink"
-      },
-      {
-        "name": "讯飞星火-懂我的AI助手",
-        "url": "https://xinghuo.xfyun.cn/",
-        "icon": "",
         "color": "cosmic-cyan"
-      },
-      {
-        "name": "通义 - 你的实用AI助手",
-        "url": "https://www.tongyi.com/",
-        "icon": "",
-        "color": "cosmic-purple"
-      },
-      {
-        "name": "GPT-4 | OpenAI",
-        "url": "https://openai.com/index/gpt-4/",
-        "icon": "",
-        "color": "cosmic-pink"
-      },
-      {
-        "name": "Grok",
-        "url": "https://grok.com/",
-        "icon": "",
-        "color": "cosmic-pink"
-      },
-      {
-        "name": "DeepSeek | 深度求索",
-        "url": "https://www.deepseek.com/",
-        "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "Claude",
-        "url": "https://claude.ai/new",
-        "icon": "",
-        "color": "cosmic-green"
-      },
-      {
-        "name": "Llama",
-        "url": "https://www.llama.com/",
-        "icon": "",
-        "color": "cosmic-purple"
-      },
-      {
-        "name": "Le Chat - Mistral AI",
-        "url": "https://chat.mistral.ai/chat",
-        "icon": "",
-        "color": "cosmic-green"
-      },
-      {
-        "name": "文心一言",
-        "url": "https://yiyan.baidu.com/",
-        "icon": "",
-        "color": "cosmic-purple"
       },
       {
         "name": "智谱清言",
@@ -649,13 +649,13 @@
         "name": "讯飞星火-懂我的AI助手",
         "url": "https://xinghuo.xfyun.cn/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-green"
       },
       {
         "name": "通义 - 你的实用AI助手",
         "url": "https://www.tongyi.com/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-green"
       }
     ],
     "图像生成AI": [
@@ -663,7 +663,7 @@
         "name": "DALL·E 3 | OpenAI",
         "url": "https://openai.com/index/dall-e-3/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-yellow"
       },
       {
         "name": "Midjourney",
@@ -675,55 +675,55 @@
         "name": "Stability AI",
         "url": "https://stability.ai/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-green"
       },
       {
         "name": "Adobe Firefly - Free Generative AI for creatives",
         "url": "https://www.adobe.com/products/firefly.html",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-purple"
+      },
+      {
+        "name": "Imagen: Text-to-Image Diffusion Models",
+        "url": "https://imagen.research.google/",
+        "icon": "",
+        "color": "cosmic-yellow"
+      },
+      {
+        "name": "免费 AI 图像生成器 - 必应图像创建器",
+        "url": "https://www.bing.com/images/create",
+        "icon": "",
+        "color": "cosmic-pink"
+      },
+      {
+        "name": "DALL·E 3 | OpenAI",
+        "url": "https://openai.com/index/dall-e-3/",
+        "icon": "",
+        "color": "cosmic-cyan"
+      },
+      {
+        "name": "Midjourney",
+        "url": "https://www.midjourney.com/home",
+        "icon": "",
+        "color": "cosmic-yellow"
+      },
+      {
+        "name": "Stability AI",
+        "url": "https://stability.ai/",
+        "icon": "",
+        "color": "cosmic-pink"
+      },
+      {
+        "name": "Adobe Firefly - Free Generative AI for creatives",
+        "url": "https://www.adobe.com/products/firefly.html",
+        "icon": "",
+        "color": "cosmic-cyan"
       },
       {
         "name": "Imagen: Text-to-Image Diffusion Models",
         "url": "https://imagen.research.google/",
         "icon": "",
         "color": "cosmic-blue"
-      },
-      {
-        "name": "免费 AI 图像生成器 - 必应图像创建器",
-        "url": "https://www.bing.com/images/create",
-        "icon": "",
-        "color": "cosmic-purple"
-      },
-      {
-        "name": "DALL·E 3 | OpenAI",
-        "url": "https://openai.com/index/dall-e-3/",
-        "icon": "",
-        "color": "cosmic-purple"
-      },
-      {
-        "name": "Midjourney",
-        "url": "https://www.midjourney.com/home",
-        "icon": "",
-        "color": "cosmic-green"
-      },
-      {
-        "name": "Stability AI",
-        "url": "https://stability.ai/",
-        "icon": "",
-        "color": "cosmic-yellow"
-      },
-      {
-        "name": "Adobe Firefly - Free Generative AI for creatives",
-        "url": "https://www.adobe.com/products/firefly.html",
-        "icon": "",
-        "color": "cosmic-yellow"
-      },
-      {
-        "name": "Imagen: Text-to-Image Diffusion Models",
-        "url": "https://imagen.research.google/",
-        "icon": "",
-        "color": "cosmic-purple"
       },
       {
         "name": "免费 AI 图像生成器 - 必应图像创建器",
@@ -737,67 +737,67 @@
         "name": "Sora | OpenAI",
         "url": "https://openai.com/sora/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-green"
       },
       {
         "name": "Runway | Tools for human imagination.",
         "url": "https://runwayml.com/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-yellow"
       },
       {
         "name": "Pika",
         "url": "https://pika.art/login",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-pink"
       },
       {
         "name": "Runway Research | Gen-2: Generate novel videos with text, images or video clips",
         "url": "https://runwayml.com/research/gen-2",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-green"
       },
       {
         "name": "Lumiere",
         "url": "https://lumiere-video.github.io/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-yellow"
       },
       {
         "name": "Make-A-Video",
         "url": "https://makeavideo.studio/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-green"
       },
       {
         "name": "Sora | OpenAI",
         "url": "https://openai.com/sora/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-blue"
       },
       {
         "name": "Runway | Tools for human imagination.",
         "url": "https://runwayml.com/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-blue"
       },
       {
         "name": "Pika",
         "url": "https://pika.art/login",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-blue"
       },
       {
         "name": "Runway Research | Gen-2: Generate novel videos with text, images or video clips",
         "url": "https://runwayml.com/research/gen-2",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-purple"
       },
       {
         "name": "Lumiere",
         "url": "https://lumiere-video.github.io/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-blue"
       },
       {
         "name": "Make-A-Video",
@@ -811,25 +811,25 @@
         "name": "GitHub Copilot（由OpenAI与GitHub合作开发）- 基于Codex模型，集成于多种IDE，提供实时代码补全和建议 https://github.com/features/copilot",
         "url": "https://github.com/features/copilot",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-purple"
       },
       {
         "name": "Claude 3系列（特别是Opus和Sonnet版本）- 在复杂代码理解、生成和调试方面表现卓越 https://www.anthropic.com/claude",
         "url": "https://www.anthropic.com/claude",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-purple"
       },
       {
         "name": "Codium - 专注于代码生成和自动测试生成的工具 https://www.codium.ai/",
         "url": "https://www.qodo.ai/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-pink"
       },
       {
         "name": "适用于软件开发的生成式人工智能助手– Amazon Q 开发者版– AWS",
         "url": "https://aws.amazon.com/cn/q/developer/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-blue"
       },
       {
         "name": "Replit Ghostwriter - 集成于Replit平台的代码生成助手 https://replit.com/ghostwriter",
@@ -841,61 +841,61 @@
         "name": "Devin（由Cognition Labs开发）- 被称为\"第一个完全自主的AI软件工程师\" https://www.cognition.ai/",
         "url": "https://cognition.ai/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-cyan"
       },
       {
         "name": "Bard/Gemini（Google）- Google的大规模语言模型，具有强大的编程能力 https://gemini.google.com/",
         "url": "https://gemini.google.com/app",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-yellow"
       },
       {
         "name": "Code Llama（Meta）- 专门针对代码优化的开源大语言模型 https://github.com/facebookresearch/codellama",
         "url": "https://github.com/meta-llama/codellama",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-purple"
       },
       {
         "name": "GitHub Copilot（由OpenAI与GitHub合作开发）- 基于Codex模型，集成于多种IDE，提供实时代码补全和建议 https://github.com/features/copilot",
         "url": "https://github.com/features/copilot",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-green"
       },
       {
         "name": "Claude 3系列（特别是Opus和Sonnet版本）- 在复杂代码理解、生成和调试方面表现卓越 https://www.anthropic.com/claude",
         "url": "https://www.anthropic.com/claude",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-purple"
       },
       {
         "name": "Codium - 专注于代码生成和自动测试生成的工具 https://www.codium.ai/",
         "url": "https://www.qodo.ai/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-yellow"
       },
       {
         "name": "适用于软件开发的生成式人工智能助手– Amazon Q 开发者版– AWS",
         "url": "https://aws.amazon.com/cn/q/developer/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-pink"
       },
       {
         "name": "Replit Ghostwriter - 集成于Replit平台的代码生成助手 https://replit.com/ghostwriter",
         "url": "https://replit.com/ai",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-cyan"
       },
       {
         "name": "Devin（由Cognition Labs开发）- 被称为\"第一个完全自主的AI软件工程师\" https://www.cognition.ai/",
         "url": "https://cognition.ai/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-cyan"
       },
       {
         "name": "Bard/Gemini（Google）- Google的大规模语言模型，具有强大的编程能力 https://gemini.google.com/",
         "url": "https://gemini.google.com/app",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-blue"
       },
       {
         "name": "Code Llama（Meta）- 专门针对代码优化的开源大语言模型 https://github.com/facebookresearch/codellama",
@@ -909,13 +909,13 @@
         "name": "CodeGeeX",
         "url": "https://codegeex.cn/downloadGuide#vscode",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-pink"
       },
       {
         "name": "登录 - 腾讯云",
         "url": "https://cloud.tencent.com/login?s_url=https%3A%2F%2Fconsole.cloud.tencent.com%2F",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-pink"
       },
       {
         "name": "CodeGeeX",
@@ -927,7 +927,7 @@
         "name": "登录 - 腾讯云",
         "url": "https://cloud.tencent.com/login?s_url=https%3A%2F%2Fconsole.cloud.tencent.com%2F",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-purple"
       }
     ],
     "IP查询网站": [
@@ -935,25 +935,25 @@
         "name": "DNS查找",
         "url": "https://www.nslookup.io/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-pink"
       },
       {
         "name": "DNS Checker - DNS Check Propagation Tool",
         "url": "https://dnschecker.org/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-blue"
       },
       {
         "name": "DNS Lookup Tool | Check DNS Records for Any Domain - WhatIsMyIP.com®",
         "url": "https://www.whatismyip.com/dns-lookup/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-pink"
       },
       {
         "name": "DNS查找",
         "url": "https://www.nslookup.io/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-pink"
       },
       {
         "name": "DNS Checker - DNS Check Propagation Tool",
@@ -965,7 +965,7 @@
         "name": "DNS Lookup Tool | Check DNS Records for Any Domain - WhatIsMyIP.com®",
         "url": "https://www.whatismyip.com/dns-lookup/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-pink"
       }
     ],
     "IP related": [
@@ -973,61 +973,61 @@
         "name": "FOFA网络空间测绘，网络空间安全搜索引擎，网络空间搜索引擎，安全态势感知 - FOFA网络空间测绘系统",
         "url": "https://fofa.info/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-green"
       },
       {
         "name": "IP Address Lookup / IPv4 / IPv6 - IP.SB",
         "url": "https://ip.sb/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-blue"
       },
       {
         "name": "IP地址查询-DNS泄漏、IP伪装度查询、IP匿名度评估 - WHOER",
         "url": "https://whoer.com/zh/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-purple"
       },
       {
         "name": "我的 IP 地址 | IPAddress.my",
         "url": "https://ipaddress.my/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-green"
       },
       {
         "name": "Scamalytics",
         "url": "https://scamalytics.com/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-yellow"
       },
       {
         "name": "What Is My IP Address - See Your Public Address - IPv4 & IPv6",
         "url": "https://whatismyipaddress.com/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-yellow"
       },
       {
         "name": "IP/DNS Detect - What is your IP, what is your DNS, what informations you send to websites.",
         "url": "https://ipleak.net/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-cyan"
       },
       {
         "name": "IP泄漏检测-高精度IP地址归属地查询-全球小鸡监控平台",
         "url": "https://ping0.cc/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-green"
       },
       {
         "name": "FOFA网络空间测绘，网络空间安全搜索引擎，网络空间搜索引擎，安全态势感知 - FOFA网络空间测绘系统",
         "url": "https://fofa.info/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-cyan"
       },
       {
         "name": "IP Address Lookup / IPv4 / IPv6 - IP.SB",
         "url": "https://ip.sb/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-yellow"
       },
       {
         "name": "IP地址查询-DNS泄漏、IP伪装度查询、IP匿名度评估 - WHOER",
@@ -1039,25 +1039,25 @@
         "name": "我的 IP 地址 | IPAddress.my",
         "url": "https://ipaddress.my/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-cyan"
       },
       {
         "name": "Scamalytics",
         "url": "https://scamalytics.com/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-green"
       },
       {
         "name": "What Is My IP Address - See Your Public Address - IPv4 & IPv6",
         "url": "https://whatismyipaddress.com/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-yellow"
       },
       {
         "name": "IP/DNS Detect - What is your IP, what is your DNS, what informations you send to websites.",
         "url": "https://ipleak.net/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-cyan"
       },
       {
         "name": "IP泄漏检测-高精度IP地址归属地查询-全球小鸡监控平台",
@@ -1071,49 +1071,49 @@
         "name": "US.KG 域名注册局 – NIC",
         "url": "https://nic.us.kg/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-pink"
       },
       {
         "name": "随时随地连接、保护和构建 | Cloudflare",
         "url": "https://www.cloudflare.com/zh-cn/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-pink"
       },
       {
         "name": "Free DNS hosting, Cloud DNS hosting and Domain names | ClouDNS",
         "url": "https://www.cloudns.net/",
         "icon": "",
-        "color": "cosmic-yellow"
-      },
-      {
-        "name": "科赋锐信息科技Cloudflare | Cloudflare",
-        "url": "https://www.cloudflare-cn.com/",
-        "icon": "",
         "color": "cosmic-green"
-      },
-      {
-        "name": "US.KG 域名注册局 – NIC",
-        "url": "https://nic.us.kg/",
-        "icon": "",
-        "color": "cosmic-yellow"
-      },
-      {
-        "name": "随时随地连接、保护和构建 | Cloudflare",
-        "url": "https://www.cloudflare.com/zh-cn/",
-        "icon": "",
-        "color": "cosmic-green"
-      },
-      {
-        "name": "Free DNS hosting, Cloud DNS hosting and Domain names | ClouDNS",
-        "url": "https://www.cloudns.net/",
-        "icon": "",
-        "color": "cosmic-blue"
       },
       {
         "name": "科赋锐信息科技Cloudflare | Cloudflare",
         "url": "https://www.cloudflare-cn.com/",
         "icon": "",
         "color": "cosmic-cyan"
+      },
+      {
+        "name": "US.KG 域名注册局 – NIC",
+        "url": "https://nic.us.kg/",
+        "icon": "",
+        "color": "cosmic-purple"
+      },
+      {
+        "name": "随时随地连接、保护和构建 | Cloudflare",
+        "url": "https://www.cloudflare.com/zh-cn/",
+        "icon": "",
+        "color": "cosmic-pink"
+      },
+      {
+        "name": "Free DNS hosting, Cloud DNS hosting and Domain names | ClouDNS",
+        "url": "https://www.cloudns.net/",
+        "icon": "",
+        "color": "cosmic-cyan"
+      },
+      {
+        "name": "科赋锐信息科技Cloudflare | Cloudflare",
+        "url": "https://www.cloudflare-cn.com/",
+        "icon": "",
+        "color": "cosmic-yellow"
       }
     ],
     "VPS": [
@@ -1121,31 +1121,31 @@
         "name": "Serv00.com » 首页",
         "url": "https://www.serv00.com/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-purple"
       },
       {
         "name": "登录",
         "url": "https://panel12.serv00.com/login/?next=/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-blue"
       },
       {
         "name": "Zaloguj się",
         "url": "https://panel16.serv00.com/login/?next=/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-yellow"
       },
       {
         "name": "Log In To Client Area - Web Host Most",
         "url": "https://client.webhostmost.com/login",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-green"
       },
       {
         "name": "Zaloguj się",
         "url": "https://panel12.serv00.com/login/?next=/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-green"
       },
       {
         "name": "客户专区 - 虚拟主机 大多数",
@@ -1157,13 +1157,13 @@
         "name": "Byethost Free Webhosting | Facebook",
         "url": "https://www.facebook.com/free.byethost",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-blue"
       },
       {
         "name": "server3.webhostmost.com | Dashboard",
         "url": "https://server3.webhostmost.com:2222/evo/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-cyan"
       },
       {
         "name": "云计算服务 | Google Cloud",
@@ -1175,13 +1175,13 @@
         "name": "VP Login",
         "url": "https://cpanel.byethost.com/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-green"
       },
       {
         "name": "The Ultimate Web Hosting For People - Web Host Most",
         "url": "https://webhostmost.com/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-pink"
       },
       {
         "name": "server3.webhostmost.com | Login",
@@ -1193,7 +1193,7 @@
         "name": "server4.webhostmost.com | Dashboard",
         "url": "https://server4.webhostmost.com:2222/evo/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-green"
       },
       {
         "name": "server5.webhostmost.com | Dashboard",
@@ -1205,43 +1205,43 @@
         "name": "server6.webhostmost.com | Login",
         "url": "https://server6.webhostmost.com:2222/evo/login",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-pink"
       },
       {
         "name": "server7.webhostmost.com | 错误404: 未找到文件",
         "url": "https://server7.webhostmost.com:2222/evo/login",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-pink"
       },
       {
         "name": "server8.webhostmost.com | Login",
         "url": "https://server8.webhostmost.com:2222/evo/login",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-yellow"
       },
       {
         "name": "cpanel.byethost.com/panel/indexpl.php?id=cab6482d1091645837f9a22fe0e5f6cd930861b7",
         "url": "https://cpanel.byethost.com/panel/indexpl.php?id=cab6482d1091645837f9a22fe0e5f6cd930861b7",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-green"
       },
       {
         "name": "HN 用戶服務綜合系統 | HNICS",
         "url": "https://client.hnhost.net/login.php",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-blue"
       },
       {
         "name": "Serv00.com » 首页",
         "url": "https://www.serv00.com/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-cyan"
       },
       {
         "name": "登录",
         "url": "https://panel12.serv00.com/login/?next=/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-purple"
       },
       {
         "name": "Zaloguj się",
@@ -1253,73 +1253,73 @@
         "name": "Log In To Client Area - Web Host Most",
         "url": "https://client.webhostmost.com/login",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-green"
       },
       {
         "name": "Zaloguj się",
         "url": "https://panel12.serv00.com/login/?next=/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-purple"
       },
       {
         "name": "客户专区 - 虚拟主机 大多数",
         "url": "https://webhostmost.com/clientarea.php",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-pink"
       },
       {
         "name": "Byethost Free Webhosting | Facebook",
         "url": "https://www.facebook.com/free.byethost",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-green"
       },
       {
         "name": "server3.webhostmost.com | Dashboard",
         "url": "https://server3.webhostmost.com:2222/evo/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-green"
       },
       {
         "name": "云计算服务 | Google Cloud",
         "url": "https://cloud.google.com/?hl=zh-cn",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-blue"
       },
       {
         "name": "VP Login",
         "url": "https://cpanel.byethost.com/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-pink"
       },
       {
         "name": "The Ultimate Web Hosting For People - Web Host Most",
         "url": "https://webhostmost.com/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-green"
       },
       {
         "name": "server3.webhostmost.com | Login",
         "url": "https://server3.webhostmost.com:2222/evo/login",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-purple"
       },
       {
         "name": "server4.webhostmost.com | Dashboard",
         "url": "https://server4.webhostmost.com:2222/evo/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-purple"
       },
       {
         "name": "server5.webhostmost.com | Dashboard",
         "url": "https://server5.webhostmost.com:2222/evo/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-yellow"
       },
       {
         "name": "server6.webhostmost.com | Login",
         "url": "https://server6.webhostmost.com:2222/evo/login",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-blue"
       },
       {
         "name": "server7.webhostmost.com | 错误404: 未找到文件",
@@ -1337,13 +1337,13 @@
         "name": "cpanel.byethost.com/panel/indexpl.php?id=cab6482d1091645837f9a22fe0e5f6cd930861b7",
         "url": "https://cpanel.byethost.com/panel/indexpl.php?id=cab6482d1091645837f9a22fe0e5f6cd930861b7",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-cyan"
       },
       {
         "name": "HN 用戶服務綜合系統 | HNICS",
         "url": "https://client.hnhost.net/login.php",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-blue"
       }
     ],
     "myhost": [
@@ -1351,7 +1351,7 @@
         "name": "Toivomme Maailman Rauhaa",
         "url": "https://jiezi.dpdns.org/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-blue"
       },
       {
         "name": "Proteggiamo i Piccoli Animali",
@@ -1363,97 +1363,97 @@
         "name": "jz.ip-ddns.com",
         "url": "http://jz.ip-ddns.com/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-cyan"
       },
       {
         "name": "Notre mission climatique",
         "url": "https://jiezione.serv00.net/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-cyan"
       },
       {
         "name": "努力总会有成就",
         "url": "https://jc.ddns-ip.net/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-yellow"
       },
       {
         "name": "Effort Leads to Success",
         "url": "http://fmie.dpdns.org/index.html",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-blue"
       },
       {
         "name": "Kochaj i ceni dobre chwile.",
         "url": "https://jiezi.serv00.net/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-purple"
       },
       {
         "name": "String Symphony | Custom Guitars",
         "url": "https://ad.jiezione.dpdns.org/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-cyan"
       },
       {
         "name": "Élan Beauty | Premium Kosmetik & Wellness",
         "url": "https://jiezione.dpdns.org/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-green"
       },
       {
         "name": "Toivomme Maailman Rauhaa",
         "url": "https://jiezi.dpdns.org/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-cyan"
       },
       {
         "name": "Proteggiamo i Piccoli Animali",
         "url": "http://a.fmie.ip-ddns.com/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-pink"
       },
       {
         "name": "jz.ip-ddns.com",
         "url": "http://jz.ip-ddns.com/",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-cyan"
       },
       {
         "name": "Notre mission climatique",
         "url": "https://jiezione.serv00.net/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-yellow"
       },
       {
         "name": "努力总会有成就",
         "url": "https://jc.ddns-ip.net/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-pink"
       },
       {
         "name": "Effort Leads to Success",
         "url": "http://fmie.dpdns.org/index.html",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-blue"
       },
       {
         "name": "Kochaj i ceni dobre chwile.",
         "url": "https://jiezi.serv00.net/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-purple"
       },
       {
         "name": "String Symphony | Custom Guitars",
         "url": "https://ad.jiezione.dpdns.org/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-blue"
       },
       {
         "name": "Élan Beauty | Premium Kosmetik & Wellness",
         "url": "https://jiezione.dpdns.org/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-cyan"
       }
     ],
     "Navigation Station": [
@@ -1461,13 +1461,13 @@
         "name": "爱分享导航站",
         "url": "https://afengxiang.github.io/afx/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-cyan"
       },
       {
         "name": "爱分享导航站",
         "url": "https://afengxiang.github.io/afx/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-pink"
       }
     ],
     "Bypassing": [
@@ -1475,42 +1475,6 @@
         "name": "Free VPN Accounts • 100% Free PPTP and OpenVPN Service",
         "url": "https://www.vpnbook.com/freevpn",
         "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "用于安全网络的商业VPN |开放VPN",
-        "url": "https://openvpn.net/",
-        "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "批量获取免费的VPN节点，用不完真用不完….. BPB-Worker-Panel 面板BUG利用！！-零度博客",
-        "url": "https://www.freedidi.com/17131.html",
-        "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "85LA - 免费高速节点、科学上网资源与技术交流 | 节点列表与软件推荐",
-        "url": "https://www.85la.com/",
-        "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "Open Proxy List - Free VPN & Proxy",
-        "url": "https://openproxylist.com/",
-        "icon": "",
-        "color": "cosmic-green"
-      },
-      {
-        "name": "Borderfree – The world's first Web3.0 AI browser",
-        "url": "https://borderfree.app/",
-        "icon": "",
-        "color": "cosmic-pink"
-      },
-      {
-        "name": "Free VPN Accounts • 100% Free PPTP and OpenVPN Service",
-        "url": "https://www.vpnbook.com/freevpn",
-        "icon": "",
         "color": "cosmic-pink"
       },
       {
@@ -1523,19 +1487,55 @@
         "name": "批量获取免费的VPN节点，用不完真用不完….. BPB-Worker-Panel 面板BUG利用！！-零度博客",
         "url": "https://www.freedidi.com/17131.html",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-yellow"
       },
       {
         "name": "85LA - 免费高速节点、科学上网资源与技术交流 | 节点列表与软件推荐",
         "url": "https://www.85la.com/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-pink"
       },
       {
         "name": "Open Proxy List - Free VPN & Proxy",
         "url": "https://openproxylist.com/",
         "icon": "",
         "color": "cosmic-yellow"
+      },
+      {
+        "name": "Borderfree – The world's first Web3.0 AI browser",
+        "url": "https://borderfree.app/",
+        "icon": "",
+        "color": "cosmic-blue"
+      },
+      {
+        "name": "Free VPN Accounts • 100% Free PPTP and OpenVPN Service",
+        "url": "https://www.vpnbook.com/freevpn",
+        "icon": "",
+        "color": "cosmic-cyan"
+      },
+      {
+        "name": "用于安全网络的商业VPN |开放VPN",
+        "url": "https://openvpn.net/",
+        "icon": "",
+        "color": "cosmic-blue"
+      },
+      {
+        "name": "批量获取免费的VPN节点，用不完真用不完….. BPB-Worker-Panel 面板BUG利用！！-零度博客",
+        "url": "https://www.freedidi.com/17131.html",
+        "icon": "",
+        "color": "cosmic-yellow"
+      },
+      {
+        "name": "85LA - 免费高速节点、科学上网资源与技术交流 | 节点列表与软件推荐",
+        "url": "https://www.85la.com/",
+        "icon": "",
+        "color": "cosmic-cyan"
+      },
+      {
+        "name": "Open Proxy List - Free VPN & Proxy",
+        "url": "https://openproxylist.com/",
+        "icon": "",
+        "color": "cosmic-green"
       },
       {
         "name": "Borderfree – The world's first Web3.0 AI browser",
@@ -1549,31 +1549,31 @@
         "name": "GitHub · Build and ship software on a single, collaborative platform · GitHub",
         "url": "https://github.com/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-yellow"
       },
       {
         "name": "项目 V",
         "url": "https://github.com/v2ray",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-green"
       },
       {
         "name": "louwangzhiyu001",
         "url": "https://github.com/louwangzhiyu001/",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-green"
       },
       {
         "name": "GitHub · Build and ship software on a single, collaborative platform · GitHub",
         "url": "https://github.com/",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-purple"
       },
       {
         "name": "项目 V",
         "url": "https://github.com/v2ray",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-yellow"
       },
       {
         "name": "louwangzhiyu001",
@@ -1587,13 +1587,13 @@
         "name": "【夸克网盘】夸克网盘PC网页版端入口",
         "url": "https://pan.quark.cn/",
         "icon": "",
-        "color": "cosmic-blue"
+        "color": "cosmic-green"
       },
       {
         "name": "【夸克网盘】夸克网盘PC网页版端入口",
         "url": "https://pan.quark.cn/",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-blue"
       }
     ],
     "my sunpanel": [
@@ -1601,16 +1601,28 @@
         "name": "YouTube",
         "url": "https://www.youtube.com/channel/UCYfdidRxbB8Qhf0Nx7ioOYw",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-yellow"
       },
       {
         "name": "YouTube",
         "url": "https://www.youtube.com/channel/UCYfdidRxbB8Qhf0Nx7ioOYw",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-yellow"
       }
     ],
     "APK related": [
+      {
+        "name": "APKMirror - Free APK Downloads - Free and safe Android APK downloads",
+        "url": "https://www.apkmirror.com/",
+        "icon": "",
+        "color": "cosmic-green"
+      },
+      {
+        "name": "在APKPure使用免费在线APK下载器下载APK到安卓",
+        "url": "https://apkpure.com/cn/",
+        "icon": "",
+        "color": "cosmic-yellow"
+      },
       {
         "name": "APKMirror - Free APK Downloads - Free and safe Android APK downloads",
         "url": "https://www.apkmirror.com/",
@@ -1621,19 +1633,7 @@
         "name": "在APKPure使用免费在线APK下载器下载APK到安卓",
         "url": "https://apkpure.com/cn/",
         "icon": "",
-        "color": "cosmic-cyan"
-      },
-      {
-        "name": "APKMirror - Free APK Downloads - Free and safe Android APK downloads",
-        "url": "https://www.apkmirror.com/",
-        "icon": "",
-        "color": "cosmic-pink"
-      },
-      {
-        "name": "在APKPure使用免费在线APK下载器下载APK到安卓",
-        "url": "https://apkpure.com/cn/",
-        "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-blue"
       }
     ],
     "容器": [
@@ -1641,25 +1641,25 @@
         "name": "FreezeHost",
         "url": "https://free.freezehost.pro/dashboard?news=true&loggedin=true",
         "icon": "",
-        "color": "cosmic-green"
+        "color": "cosmic-purple"
       },
       {
         "name": "Client Area - Pine Hosting",
         "url": "https://pinehosting.com/clientarea/clientarea.php",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-yellow"
       },
       {
         "name": "FreezeHost",
         "url": "https://free.freezehost.pro/dashboard?news=true&loggedin=true",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-blue"
       },
       {
         "name": "Client Area - Pine Hosting",
         "url": "https://pinehosting.com/clientarea/clientarea.php",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-purple"
       }
     ],
     "书签栏": [
@@ -1667,7 +1667,7 @@
         "name": "腾讯云代码助手CodeBuddy：接入DeepSeek 满血版，支持全免费、不限量、免部署的 AI 编程 - A姐分享",
         "url": "https://www.ahhhhfs.com/71301/",
         "icon": "",
-        "color": "cosmic-pink"
+        "color": "cosmic-green"
       },
       {
         "name": "VirScan - 多引擎文件在线检测平台",
@@ -1679,7 +1679,7 @@
         "name": "银河录像局 次世代合租平台",
         "url": "https://nf.video/6US2b",
         "icon": "",
-        "color": "cosmic-purple"
+        "color": "cosmic-green"
       }
     ],
     "Bookmarks": [
@@ -1693,13 +1693,13 @@
         "name": "VirScan - 多引擎文件在线检测平台",
         "url": "https://www.virscan.org/report/db5ca872df1bb6e1f59609f53ed603c44a394fee6d94d9656f25c97ba8a0a0dc",
         "icon": "",
-        "color": "cosmic-yellow"
+        "color": "cosmic-cyan"
       },
       {
         "name": "银河录像局 次世代合租平台",
         "url": "https://nf.video/6US2b",
         "icon": "",
-        "color": "cosmic-cyan"
+        "color": "cosmic-yellow"
       }
     ]
   },
