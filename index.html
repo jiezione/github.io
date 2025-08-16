@@ -636,72 +636,58 @@
       groups: [
         {
           id: 1,
-          name: "开发工具",
+          name: "常用工具",
           bookmarks: [
-            { id: 1, name: "GitHub", url: "https://github.com", tags: ["代码", "协作"] },
-            { id: 2, name: "Stack Overflow", url: "https://stackoverflow.com", tags: ["问答", "开发"] }
+            { id: 1, name: "Google", url: "https://google.com", tags: ["搜索", "工具"] },
+            { id: 2, name: "GitHub", url: "https://github.com", tags: ["代码", "开发"] },
           ]
         },
         {
           id: 2,
           name: "学习资源",
           bookmarks: [
-            { id: 3, name: "MDN Web Docs", url: "https://developer.mozilla.org", tags: ["文档", "前端"] },
-            { id: 4, name: "掘金", url: "https://juejin.cn", tags: ["技术", "社区"] }
+            { id: 3, name: "MDN Web Docs", url: "https://developer.mozilla.org", tags: ["编程", "文档"] },
           ]
         }
       ]
     };
 
-    let userData = {
-      timezones: [],
-      githubConfig: {
+    let userConfig = {
+      github: {
         username: "",
         repo: "",
         token: ""
       },
-      password: "admin",
-      ads: {
-        ad1: {
-          image: "https://picsum.photos/1200/200?random=1",
-          link: "#",
-          title: "探索宇宙奥秘",
-          desc: "发现更多未知的星系与行星"
-        },
-        ad2: {
-          image: "https://picsum.photos/1200/200?random=2",
-          link: "#",
-          title: "星际旅行指南",
-          desc: "准备好探索更远的星系了吗？"
-        },
-        ad3: {
-          image: "https://picsum.photos/1200/200?random=3",
-          link: "#",
-          title: "宇宙知识库",
-          desc: "了解更多关于宇宙的知识"
-        }
-      }
+      timezones: [],
+      theme: "dark",
+      password: "admin"
     };
 
+    const MAX_TIMEZONES = 2;
     let startTime = new Date();
     let uptimeInterval;
-    let healthReminderInterval;
+    let isAuthenticated = false;
 
     async function init() {
       createStars();
-      setupEventListeners();
+      loadUserConfig();
+      setupTheme();
       updateDateTime();
       startUptimeCounter();
-      setupHealthReminder();
       renderTimezones();
       renderCities();
+      updateHealthReminder();
+      setInterval(updateDateTime, 1000);
+      setInterval(updateHealthReminder, 30 * 60 * 1000);
+      
       document.getElementById('current-year').textContent = new Date().getFullYear();
       
-      loadUserData();
       await loadDataFromGitHub();
       renderBookmarks();
-      updateTotalBookmarks();
-      updateTheme();
+      renderEditBookmarks();
+      populateGroupSelect();
+      
+      setupEventListeners();
     }
 
     function createStars() {
@@ -726,600 +712,238 @@
       }
     }
 
-    function setupEventListeners() {
-      document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
-      document.getElementById('settings-btn').addEventListener('click', openPasswordModal);
-      document.getElementById('close-edit-page').addEventListener('click', closeEditPage);
-      document.getElementById('cancel-edit').addEventListener('click', closeEditPage);
-      document.getElementById('save-edit').addEventListener('click', saveEditChanges);
-      document.getElementById('confirm-password').addEventListener('click', checkPassword);
-      document.getElementById('cancel-password').addEventListener('click', closePasswordModal);
-      document.getElementById('toggle-password').addEventListener('click', togglePasswordVisibility);
-      document.getElementById('toggle-github-token').addEventListener('click', toggleGithubTokenVisibility);
-      document.getElementById('github-login').addEventListener('click', openGithubConfigModal);
-      document.getElementById('cancel-github-config').addEventListener('click', closeGithubConfigModal);
-      document.getElementById('save-github-config').addEventListener('click', saveGithubConfig);
-      document.getElementById('add-timezone').addEventListener('click', openAddTimezoneModal);
-      document.getElementById('cancel-timezone').addEventListener('click', closeAddTimezoneModal);
-      document.getElementById('timezone-search').addEventListener('input', filterCities);
-      document.getElementById('add-bookmark-btn').addEventListener('click', openAddBookmarkModal);
-      document.getElementById('cancel-add-bookmark').addEventListener('click', closeAddBookmarkModal);
-      document.getElementById('confirm-add-bookmark').addEventListener('click', addNewBookmark);
-      document.getElementById('add-new-group').addEventListener('click', addNewGroup);
-      document.getElementById('trigger-import').addEventListener('click', triggerImport);
-      document.getElementById('bookmark-import').addEventListener('change', handleBookmarkImport);
-      document.getElementById('export-bookmarks').addEventListener('click', exportBookmarks);
-      
-      ['ad1-upload', 'ad2-upload', 'ad3-upload'].forEach(id => {
-        document.getElementById(id).addEventListener('change', handleAdImageUpload);
-      });
-    }
-
-    function updateDateTime() {
-      const now = new Date();
-      
-      const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
-      document.getElementById('current-date').textContent = now.toLocaleDateString('zh-CN', dateOptions).replace(/\//g, '/');
-      
-      const weekdayOptions = { weekday: 'long' };
-      document.getElementById('current-weekday').textContent = now.toLocaleDateString('zh-CN', weekdayOptions);
-      
-      setTimeout(updateDateTime, 60000);
-    }
-
-    function startUptimeCounter() {
-      updateUptime();
-      uptimeInterval = setInterval(updateUptime, 1000);
-    }
-
-    function updateUptime() {
-      const now = new Date();
-      const diff = now - startTime;
-      
-      const hours = Math.floor(diff / 3600000).toString().padStart(2, '0');
-      const minutes = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-      const seconds = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-      
-      document.getElementById('uptime').textContent = `${hours}:${minutes}:${seconds}`;
-    }
-
-    function setupHealthReminder() {
-      updateHealthReminder();
-      healthReminderInterval = setInterval(updateHealthReminder, 1800000);
-    }
-
-    function updateHealthReminder() {
-      const now = new Date();
-      const hour = now.getHours();
-      
-      let reminder;
-      
-      if (hour >= 6 && hour < 9) {
-        reminder = "早上好，开始新的一天吧！";
-      } else if (hour >= 9 && hour < 12) {
-        reminder = "上午工作效率高，加油！";
-      } else if (hour >= 12 && hour < 14) {
-        reminder = "午餐时间，注意休息哦！";
-      } else if (hour >= 14 && hour < 17) {
-        reminder = "下午容易犯困，适当活动一下";
-      } else if (hour >= 17 && hour < 19) {
-        reminder = "傍晚了，总结一下今天的工作吧";
-      } else if (hour >= 19 && hour < 22) {
-        reminder = "晚上注意放松，不要熬夜";
-      } else {
-        reminder = "夜深了，早点休息吧";
-      }
-      
-      document.getElementById('health-reminder').textContent = reminder;
-    }
-
-    function renderTimezones() {
-      const container = document.getElementById('timezones-container');
-      container.innerHTML = '';
-      
-      userData.timezones.forEach((timezone, index) => {
-        const timeElement = document.createElement('div');
-        timeElement.className = 'time-pill glass p-2 rounded-lg flex justify-between items-center';
-        
-        const now = new Date();
-        const timezoneOffset = now.getTimezoneOffset() / 60;
-        const localTime = new Date(now.getTime() + (timezone.offset + timezoneOffset) * 3600000);
-        const timeString = localTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-        
-        timeElement.innerHTML = `
-          <div>
-            <div class="font-medium">${timezone.city}, ${timezone.country}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">UTC${timezone.offset >= 0 ? '+' : ''}${timezone.offset}</div>
-          </div>
-          <div class="text-lg font-bold">${timeString}</div>
-          <button class="delete-timezone touch-friendly w-6 h-6 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all" data-index="${index}">
-            <i class="fa fa-times text-xs"></i>
-          </button>
-        `;
-        
-        container.appendChild(timeElement);
-      });
-      
-      document.querySelectorAll('.delete-timezone').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const index = parseInt(e.currentTarget.dataset.index);
-          userData.timezones.splice(index, 1);
-          saveUserData();
-          renderTimezones();
-        });
-      });
-      
-      const limitMessage = document.getElementById('timezone-limit-message');
-      if (userData.timezones.length >= 2) {
-        document.getElementById('add-timezone').disabled = true;
-        limitMessage.classList.remove('hidden');
-      } else {
-        document.getElementById('add-timezone').disabled = false;
-        limitMessage.classList.add('hidden');
+    function loadUserConfig() {
+      const savedConfig = localStorage.getItem('starNavConfig');
+      if (savedConfig) {
+        userConfig = JSON.parse(savedConfig);
+        document.getElementById('github-username').value = userConfig.github.username || '';
+        document.getElementById('github-repo').value = userConfig.github.repo || '';
+        document.getElementById('github-token').value = userConfig.github.token || '';
       }
     }
 
-    function renderCities(filter = '') {
-      const cityList = document.getElementById('city-list');
-      cityList.innerHTML = '';
-      
-      const filteredCities = predefinedCities.filter(city => 
-        city.city.toLowerCase().includes(filter.toLowerCase()) || 
-        city.country.toLowerCase().includes(filter.toLowerCase())
-      );
-      
-      filteredCities.forEach(city => {
-        const cityElement = document.createElement('div');
-        cityElement.className = 'glass p-3 rounded-lg cursor-pointer hover:bg-space-medium/30 transition-all';
-        cityElement.innerHTML = `
-          <div class="font-medium">${city.city}</div>
-          <div class="text-xs text-gray-500 dark:text-gray-400">${city.country} (UTC${city.offset >= 0 ? '+' : ''}${city.offset})</div>
-        `;
-        
-        cityElement.addEventListener('click', () => {
-          if (userData.timezones.length < 2) {
-            userData.timezones.push(city);
-            saveUserData();
-            renderTimezones();
-            closeAddTimezoneModal();
-          }
-        });
-        
-        cityList.appendChild(cityElement);
-      });
+    function saveUserConfig() {
+      localStorage.setItem('starNavConfig', JSON.stringify(userConfig));
     }
 
-    function filterCities(e) {
-      renderCities(e.target.value);
-    }
-
-    function openAddTimezoneModal() {
-      document.getElementById('add-timezone-modal').classList.remove('hidden');
-      document.getElementById('timezone-search').focus();
-    }
-
-    function closeAddTimezoneModal() {
-      document.getElementById('add-timezone-modal').classList.add('hidden');
-      document.getElementById('timezone-search').value = '';
-      renderCities();
-    }
-
-    function toggleTheme() {
-      document.documentElement.classList.toggle('dark');
-      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-    }
-
-    function updateTheme() {
-      if (localStorage.getItem('theme') === 'dark' || 
-          (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    function setupTheme() {
+      if (userConfig.theme === 'dark' || 
+          (!userConfig.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
       }
     }
 
-    function openPasswordModal() {
-      document.getElementById('password-modal').classList.remove('hidden');
-      document.getElementById('admin-password').value = '';
-      document.getElementById('admin-password').focus();
-    }
-
-    function closePasswordModal() {
-      document.getElementById('password-modal').classList.add('hidden');
-    }
-
-    function checkPassword() {
-      const password = document.getElementById('admin-password').value;
-      if (password === userData.password) {
-        closePasswordModal();
-        openEditPage();
-      } else {
-        alert('密码错误，请重试');
-      }
-    }
-
-    function togglePasswordVisibility() {
-      const passwordInput = document.getElementById('admin-password');
-      const icon = document.querySelector('#toggle-password i');
+    function updateDateTime() {
+      const now = new Date();
       
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-      } else {
-        passwordInput.type = 'password';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-      }
-    }
-
-    function toggleGithubTokenVisibility() {
-      const tokenInput = document.getElementById('github-token');
-      const icon = document.querySelector('#toggle-github-token i');
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+      document.getElementById('current-date').textContent = now.toLocaleDateString('zh-CN', options).replace(/\//g, '/');
       
-      if (tokenInput.type === 'password') {
-        tokenInput.type = 'text';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-      } else {
-        tokenInput.type = 'password';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-      }
+      const weekday = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+      document.getElementById('current-weekday').textContent = weekday[now.getDay()];
+      
+      updateTimezones();
     }
 
-    function openEditPage() {
-      document.getElementById('edit-page').classList.remove('hidden');
-      renderEditBookmarks();
-      populateBookmarkGroupSelect();
-      loadAdSettings();
+    function startUptimeCounter() {
+      uptimeInterval = setInterval(() => {
+        const now = new Date();
+        const diff = now - startTime;
+        
+        const hours = Math.floor(diff / 3600000).toString().padStart(2, '0');
+        const minutes = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+        const seconds = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+        
+        document.getElementById('uptime').textContent = `${hours}:${minutes}:${seconds}`;
+      }, 1000);
     }
 
-    function closeEditPage() {
-      document.getElementById('edit-page').classList.add('hidden');
+    function updateHealthReminder() {
+      const reminders = [
+        "该休息一下了",
+        "站起来活动活动吧",
+        "记得多喝水哦",
+        "远眺一下，保护眼睛",
+        "深呼吸，放松一下"
+      ];
+      const randomIndex = Math.floor(Math.random() * reminders.length);
+      document.getElementById('health-reminder').textContent = reminders[randomIndex];
     }
 
-    function renderBookmarks() {
-      const container = document.getElementById('bookmarks-container');
+    function renderTimezones() {
+      const container = document.getElementById('timezones-container');
       container.innerHTML = '';
       
-      if (bookmarksData.groups.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-10">
-            <i class="fa fa-folder-open text-4xl text-gray-400 mb-3"></i>
-            <p class="text-gray-500">还没有书签分组，添加你的第一个分组吧！</p>
-          </div>
-        `;
-        return;
+      if (userConfig.timezones.length === 0) {
+        const defaultTimezone = { city: "北京", offset: 8, country: "中国" };
+        userConfig.timezones.push(defaultTimezone);
+        saveUserConfig();
       }
       
-      bookmarksData.groups.forEach(group => {
-        const groupElement = document.createElement('div');
-        groupElement.className = 'bookmark-group';
+      userConfig.timezones.forEach((timezone, index) => {
+        const timePill = document.createElement('div');
+        timePill.className = 'time-pill glass p-2 rounded-lg flex justify-between items-center';
         
-        let bookmarksHtml = '';
-        group.bookmarks.forEach(bookmark => {
-          const url = new URL(bookmark.url);
-          const domain = url.hostname.replace('www.', '');
-          const faviconUrl = `https://picsum.photos/32/32?random=${bookmark.id}`;
-          
-          let tagsHtml = '';
-          if (bookmark.tags && bookmark.tags.length > 0) {
-            tagsHtml = `<div class="bookmark-tags-container">${bookmark.tags.map(tag => `<span class="bookmark-tag">${tag}</span>`).join('')}</div>`;
-          }
-          
-          bookmarksHtml += `
-            <a href="${bookmark.url}" target="_blank" class="bookmark-btn glass bg-gradient-to-br from-space-dark/80 to-space-medium/80">
-              <div class="flex items-center mb-2">
-                <img src="${faviconUrl}" alt="${bookmark.name} 图标" class="w-6 h-6 rounded mr-2">
-                <span class="font-medium text-ellipsis-1">${bookmark.name}</span>
-              </div>
-              <div class="text-xs text-gray-400 mb-1">${domain}</div>
-              ${tagsHtml}
-            </a>
-          `;
-        });
+        const now = new Date();
+        const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+        const cityTime = new Date(utcTime + timezone.offset * 3600000);
         
-        groupElement.innerHTML = `
-          <h3 class="group-header">${group.name}</h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            ${bookmarksHtml}
+        timePill.innerHTML = `
+          <div>
+            <div class="font-medium">${timezone.city}, ${timezone.country}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">GMT${timezone.offset >= 0 ? '+' : ''}${timezone.offset}</div>
           </div>
-        `;
-        
-        container.appendChild(groupElement);
-      });
-    }
-
-    function renderEditBookmarks() {
-      const container = document.getElementById('edit-bookmarks-container');
-      container.innerHTML = '';
-      
-      if (bookmarksData.groups.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-10 glass rounded-lg">
-            <p class="text-gray-500">还没有书签分组，点击"新建分组"按钮添加</p>
+          <div class="text-right">
+            <div class="font-bold">${cityTime.getHours().toString().padStart(2, '0')}:${cityTime.getMinutes().toString().padStart(2, '0')}</div>
           </div>
-        `;
-        return;
-      }
-      
-      bookmarksData.groups.forEach(group => {
-        const groupElement = document.createElement('div');
-        groupElement.className = 'glass rounded-lg p-4';
-        
-        let bookmarksHtml = '';
-        group.bookmarks.forEach(bookmark => {
-          bookmarksHtml += `
-            <div class="flex items-center p-2 border-b border-gray-200/10 last:border-0">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center">
-                  <img src="https://picsum.photos/32/32?random=${bookmark.id}" alt="${bookmark.name} 图标" class="w-5 h-5 rounded mr-2">
-                  <span class="font-medium truncate">${bookmark.name}</span>
-                </div>
-                <div class="text-xs text-gray-500 truncate">${bookmark.url}</div>
-              </div>
-              <div class="flex space-x-2">
-                <button class="edit-bookmark touch-friendly w-7 h-7 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all" data-group-id="${group.id}" data-bookmark-id="${bookmark.id}">
-                  <i class="fa fa-pencil text-sm"></i>
-                </button>
-                <button class="delete-bookmark touch-friendly w-7 h-7 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-cosmic-red" data-group-id="${group.id}" data-bookmark-id="${bookmark.id}">
-                  <i class="fa fa-trash text-sm"></i>
-                </button>
-              </div>
-            </div>
-          `;
-        });
-        
-        groupElement.innerHTML = `
-          <div class="flex justify-between items-center mb-3">
-            <h4 class="font-medium">${group.name}</h4>
-            <div class="flex space-x-2">
-              <button class="rename-group touch-friendly w-7 h-7 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all" data-group-id="${group.id}">
-                <i class="fa fa-pencil text-sm"></i>
-              </button>
-              <button class="delete-group touch-friendly w-7 h-7 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-cosmic-red" data-group-id="${group.id}">
-                <i class="fa fa-trash text-sm"></i>
-              </button>
-            </div>
-          </div>
-          ${bookmarksHtml || '<div class="text-center py-3 text-sm text-gray-500">该分组暂无书签</div>'}
-          <button class="add-bookmark-to-group w-full mt-3 py-2 text-sm border border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:bg-space-medium/30 transition-all" data-group-id="${group.id}">
-            <i class="fa fa-plus mr-1"></i> 添加书签到该分组
+          <button class="delete-timezone ml-2 touch-friendly w-6 h-6 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all" data-index="${index}">
+            <i class="fa fa-times text-xs"></i>
           </button>
         `;
         
-        container.appendChild(groupElement);
+        container.appendChild(timePill);
       });
       
-      document.querySelectorAll('.delete-bookmark').forEach(btn => {
+      document.querySelectorAll('.delete-timezone').forEach(btn => {
         btn.addEventListener('click', (e) => {
-          const groupId = parseInt(e.currentTarget.dataset.group-id);
-          const bookmarkId = parseInt(e.currentTarget.dataset.bookmark-id);
-          deleteBookmark(groupId, bookmarkId);
+          const index = parseInt(e.currentTarget.dataset.index);
+          userConfig.timezones.splice(index, 1);
+          saveUserConfig();
+          renderTimezones();
         });
       });
       
-      document.querySelectorAll('.delete-group').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const groupId = parseInt(e.currentTarget.dataset.group-id);
-          deleteGroup(groupId);
-        });
-      });
-      
-      document.querySelectorAll('.add-bookmark-to-group').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const groupId = parseInt(e.currentTarget.dataset.group-id);
-          openAddBookmarkModal(groupId);
-        });
-      });
+      updateTimezoneLimitMessage();
     }
 
-    function populateBookmarkGroupSelect(selectedGroupId = null) {
-      const select = document.getElementById('bookmark-group-select');
-      select.innerHTML = '';
-      
-      bookmarksData.groups.forEach(group => {
-        const option = document.createElement('option');
-        option.value = group.id;
-        option.textContent = group.name;
-        if (selectedGroupId === group.id) {
-          option.selected = true;
+    function updateTimezones() {
+      document.querySelectorAll('.time-pill').forEach((pill, index) => {
+        if (index >= userConfig.timezones.length) return;
+        
+        const timezone = userConfig.timezones[index];
+        const now = new Date();
+        const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+        const cityTime = new Date(utcTime + timezone.offset * 3600000);
+        
+        const timeElement = pill.querySelector('.font-bold');
+        if (timeElement) {
+          timeElement.textContent = `${cityTime.getHours().toString().padStart(2, '0')}:${cityTime.getMinutes().toString().padStart(2, '0')}`;
         }
-        select.appendChild(option);
       });
     }
 
-    function openAddBookmarkModal(groupId = null) {
-      document.getElementById('add-bookmark-modal').classList.remove('hidden');
-      populateBookmarkGroupSelect(groupId);
-      document.getElementById('bookmark-name').value = '';
-      document.getElementById('bookmark-url').value = '';
-      document.getElementById('bookmark-name').focus();
-    }
-
-    function closeAddBookmarkModal() {
-      document.getElementById('add-bookmark-modal').classList.add('hidden');
-    }
-
-    function addNewBookmark() {
-      const groupId = parseInt(document.getElementById('bookmark-group-select').value);
-      const name = document.getElementById('bookmark-name').value.trim();
-      const url = document.getElementById('bookmark-url').value.trim();
+    function updateTimezoneLimitMessage() {
+      const message = document.getElementById('timezone-limit-message');
+      const addButton = document.getElementById('add-timezone');
       
-      if (!groupId || !name || !url) {
-        alert('请填写所有必填字段');
-        return;
+      if (userConfig.timezones.length >= MAX_TIMEZONES) {
+        message.classList.remove('hidden');
+        addButton.disabled = true;
+        addButton.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        message.classList.add('hidden');
+        addButton.disabled = false;
+        addButton.classList.remove('opacity-50', 'cursor-not-allowed');
       }
+    }
+
+    function renderCities() {
+      const cityList = document.getElementById('city-list');
+      cityList.innerHTML = '';
       
-      try {
-        new URL(url);
-      } catch (e) {
-        alert('请输入有效的URL');
-        return;
-      }
-      
-      const group = bookmarksData.groups.find(g => g.id === groupId);
-      if (!group) return;
-      
-      const newId = group.bookmarks.length > 0 
-        ? Math.max(...group.bookmarks.map(b => b.id)) + 1 
-        : 1;
-      
-      group.bookmarks.push({
-        id: newId,
-        name: name,
-        url: url,
-        tags: []
+      predefinedCities.forEach(city => {
+        const cityEl = document.createElement('div');
+        cityEl.className = 'glass p-3 rounded-lg cursor-pointer hover:bg-space-medium/30 transition-colors';
+        cityEl.innerHTML = `
+          <div class="font-medium">${city.city}</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400">${city.country} (GMT${city.offset >= 0 ? '+' : ''}${city.offset})</div>
+        `;
+        
+        cityEl.addEventListener('click', () => {
+          if (userConfig.timezones.length < MAX_TIMEZONES && 
+              !userConfig.timezones.some(tz => tz.city === city.city && tz.country === city.country)) {
+            userConfig.timezones.push(city);
+            saveUserConfig();
+            renderTimezones();
+            document.getElementById('add-timezone-modal').classList.add('hidden');
+          }
+        });
+        
+        cityList.appendChild(cityEl);
       });
-      
-      saveDataToGitHub();
-      renderBookmarks();
-      renderEditBookmarks();
-      updateTotalBookmarks();
-      closeAddBookmarkModal();
-    }
-
-    function addNewGroup() {
-      const groupName = prompt('请输入新分组名称:');
-      if (!groupName || groupName.trim() === '') return;
-      
-      const newId = bookmarksData.groups.length > 0 
-        ? Math.max(...bookmarksData.groups.map(g => g.id)) + 1 
-        : 1;
-      
-      bookmarksData.groups.push({
-        id: newId,
-        name: groupName.trim(),
-        bookmarks: []
-      });
-      
-      saveDataToGitHub();
-      renderBookmarks();
-      renderEditBookmarks();
-    }
-
-    function deleteBookmark(groupId, bookmarkId) {
-      if (!confirm('确定要删除这个书签吗？')) return;
-      
-      const group = bookmarksData.groups.find(g => g.id === groupId);
-      if (!group) return;
-      
-      group.bookmarks = group.bookmarks.filter(b => b.id !== bookmarkId);
-      
-      saveDataToGitHub();
-      renderBookmarks();
-      renderEditBookmarks();
-      updateTotalBookmarks();
-    }
-
-    function deleteGroup(groupId) {
-      const group = bookmarksData.groups.find(g => g.id === groupId);
-      if (!group) return;
-      
-      if (!confirm(`确定要删除"${group.name}"分组及其所有书签吗？`)) return;
-      
-      bookmarksData.groups = bookmarksData.groups.filter(g => g.id !== groupId);
-      
-      saveDataToGitHub();
-      renderBookmarks();
-      renderEditBookmarks();
-      updateTotalBookmarks();
-    }
-
-    function updateTotalBookmarks() {
-      let total = 0;
-      bookmarksData.groups.forEach(group => {
-        total += group.bookmarks.length;
-      });
-      document.getElementById('total-bookmarks').textContent = total;
-    }
-
-    function openGithubConfigModal() {
-      document.getElementById('github-username').value = userData.githubConfig.username || '';
-      document.getElementById('github-repo').value = userData.githubConfig.repo || '';
-      document.getElementById('github-token').value = userData.githubConfig.token || '';
-      document.getElementById('github-config-modal').classList.remove('hidden');
-    }
-
-    function closeGithubConfigModal() {
-      document.getElementById('github-config-modal').classList.add('hidden');
-    }
-
-    function saveGithubConfig() {
-      userData.githubConfig = {
-        username: document.getElementById('github-username').value.trim(),
-        repo: document.getElementById('github-repo').value.trim(),
-        token: document.getElementById('github-token').value.trim()
-      };
-      
-      saveUserData();
-      closeGithubConfigModal();
-      alert('GitHub配置已保存');
     }
 
     async function loadDataFromGitHub() {
-      const { username, repo, token } = userData.githubConfig;
-      const defaultUsername = "default-user";
-      const defaultRepo = "bookmarks";
-      
-      let apiUrl;
-      let headers = {};
-      
-      if (token && username && repo) {
-        apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
-        headers = {
-          Authorization: `token ${token}`,
-          Accept: 'application/vnd.github.v3+json'
-        };
-      } else {
-        const user = username || defaultUsername;
-        const repository = repo || defaultRepo;
-        apiUrl = `https://raw.githubusercontent.com/${user}/${repository}/main/bookmarks.json`;
-      }
-      
       try {
-        const response = await fetch(apiUrl, { headers });
+        let username = userConfig.github.username;
+        let repo = userConfig.github.repo;
+        const token = userConfig.github.token;
         
-        if (response.ok) {
-          let data;
-          if (token && username && repo) {
-            const githubData = await response.json();
-            const content = atob(githubData.content);
-            data = JSON.parse(content);
-          } else {
-            data = await response.json();
+        if (!username || !repo) {
+          username = "defaultuser";
+          repo = "default-bookmarks";
+        }
+        
+        let url;
+        let headers = {};
+        
+        if (token) {
+          url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
+          headers = {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          };
+        } else {
+          url = `https://raw.githubusercontent.com/${username}/${repo}/main/bookmarks.json`;
+        }
+        
+        const response = await fetch(url, { headers });
+        
+        if (!response.ok) {
+          if (response.status === 404 && (!username || !repo)) {
+            console.log('使用默认书签数据');
+            return;
           }
-          
-          if (data && data.groups) {
-            bookmarksData = data;
-          }
-        } else if (response.status !== 404) {
-          console.error('GitHub数据加载失败:', response.statusText);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        let data;
+        if (token) {
+          const githubData = await response.json();
+          const content = atob(githubData.content);
+          data = JSON.parse(content);
+        } else {
+          data = await response.json();
+        }
+        
+        if (data && data.groups) {
+          bookmarksData = data;
+          console.log('成功从GitHub加载书签数据');
         }
       } catch (error) {
-        console.error('GitHub数据加载错误:', error);
+        console.error('从GitHub加载数据失败:', error);
+        console.log('使用本地默认书签数据');
       }
     }
 
     async function saveDataToGitHub() {
-      const { username, repo, token } = userData.githubConfig;
-      
-      if (!token || !username || !repo) {
-        console.log('未配置GitHub，无法保存数据');
-        return;
-      }
-      
       try {
-        const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
-        const content = JSON.stringify(bookmarksData, null, 2);
+        const { username, repo, token } = userConfig.github;
+        
+        if (!username || !repo || !token) {
+          throw new Error('GitHub配置不完整');
+        }
+        
+        const url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
         
         let sha;
         try {
-          const response = await fetch(apiUrl, {
+          const response = await fetch(url, {
             headers: {
-              Authorization: `token ${token}`,
-              Accept: 'application/vnd.github.v3+json'
+              'Authorization': `token ${token}`,
+              'Accept': 'application/vnd.github.v3+json'
             }
           });
           
@@ -1328,290 +952,631 @@
             sha = data.sha;
           }
         } catch (error) {
-          console.log('文件不存在，将创建新文件');
+          console.log('文件可能不存在，将创建新文件');
         }
         
+        const content = JSON.stringify(bookmarksData, null, 2);
         const base64Content = btoa(unescape(encodeURIComponent(content)));
         
-        const response = await fetch(apiUrl, {
+        const response = await fetch(url, {
           method: 'PUT',
           headers: {
-            Authorization: `token ${token}`,
-            Accept: 'application/vnd.github.v3+json',
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json',
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            message: `Update bookmarks at ${new Date().toISOString()}`,
+            message: '更新书签数据',
             content: base64Content,
-            ...(sha && { sha })
+            sha: sha
           })
         });
         
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`保存失败: ${response.statusText}`);
         }
         
-        console.log('数据已成功保存到GitHub');
+        console.log('成功保存数据到GitHub');
         return true;
       } catch (error) {
         console.error('保存数据到GitHub失败:', error);
-        alert('保存数据到GitHub失败，请检查配置');
         return false;
       }
     }
 
-    function saveUserData() {
-      localStorage.setItem('userData', JSON.stringify(userData));
+    function renderBookmarks() {
+      const container = document.getElementById('bookmarks-container');
+      container.innerHTML = '';
+      
+      let total = 0;
+      
+      bookmarksData.groups.forEach(group => {
+        total += group.bookmarks.length;
+        
+        const groupEl = document.createElement('div');
+        groupEl.className = 'bookmark-group';
+        
+        const groupHeader = document.createElement('h3');
+        groupHeader.className = 'group-header';
+        groupHeader.textContent = group.name;
+        groupEl.appendChild(groupHeader);
+        
+        const bookmarksGrid = document.createElement('div');
+        bookmarksGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4';
+        groupEl.appendChild(bookmarksGrid);
+        
+        group.bookmarks.forEach(bookmark => {
+          const faviconUrl = getFaviconUrl(bookmark.url);
+          
+          const bookmarkEl = document.createElement('a');
+          bookmarkEl.href = bookmark.url;
+          bookmarkEl.target = '_blank';
+          bookmarkEl.className = 'bookmark-btn glass';
+          bookmarkEl.innerHTML = `
+            <div class="flex items-center mb-2">
+              <img src="${faviconUrl}" alt="${bookmark.name}图标" class="w-5 h-5 mr-2 rounded">
+              <span class="font-medium text-ellipsis-1">${bookmark.name}</span>
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">${new URL(bookmark.url).hostname}</div>
+            <div class="bookmark-tags-container">
+              ${bookmark.tags ? bookmark.tags.map(tag => `<span class="bookmark-tag">${tag}</span>`).join('') : ''}
+            </div>
+          `;
+          
+          bookmarksGrid.appendChild(bookmarkEl);
+        });
+        
+        container.appendChild(groupEl);
+      });
+      
+      document.getElementById('total-bookmarks').textContent = total;
     }
 
-    function loadUserData() {
-      const saved = localStorage.getItem('userData');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          userData = { ...userData, ...parsed };
-          
-          if (parsed.githubConfig) {
-            userData.githubConfig = { ...userData.githubConfig, ...parsed.githubConfig };
-          }
-          
-          if (parsed.ads) {
-            userData.ads = { ...userData.ads, ...parsed.ads };
-            updateAds();
-          }
-        } catch (e) {
-          console.error('加载用户数据失败:', e);
-        }
+    function getFaviconUrl(url) {
+      try {
+        const parsedUrl = new URL(url);
+        return `https://${parsedUrl.hostname}/favicon.ico`;
+      } catch (error) {
+        return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMjAgNGMtOC44IDAtMTYgNy4yLTE2IDE2czcuMiAxNiAxNiAxNiAxNiAxNi03LjIgMTYtMTYtNy4yLTE2LTE2LTE2em0tMyAxOGMtLjYsMC0xLS40LTEtMXMtLjQtMS0xLTFoLTZjLS42IDAtMS4uNC0xIDEtMXMtLjQgMS0xIDFoLTZjLjYgMCAxIC40IDEgMXMuNCAxIDEgMWg2Yy42IDAgMS0uNCAxLTFzLS40LTEtMS0xaC02em0xNi0xN2MwIC42LS40IDEtMSAxcy0xLS40LTEtMUg5Yy0uNiAwLTEtLjQtMS0xcy40LTEgMS0xaDE2YzEuMSAwIDIgLjkgMiAydjJ6Ii8+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMTUiIGZpbGw9IiM0QTYzRjciLz48L3N2Zz4=';
       }
     }
 
-    function loadAdSettings() {
-      document.getElementById('ad1-image').value = userData.ads.ad1.image;
-      document.getElementById('ad1-link').value = userData.ads.ad1.link;
-      document.getElementById('ad1-title').value = userData.ads.ad1.title;
-      document.getElementById('ad1-desc').value = userData.ads.ad1.desc;
+    function renderEditBookmarks() {
+      const container = document.getElementById('edit-bookmarks-container');
+      container.innerHTML = '';
       
-      document.getElementById('ad2-image').value = userData.ads.ad2.image;
-      document.getElementById('ad2-link').value = userData.ads.ad2.link;
-      document.getElementById('ad2-title').value = userData.ads.ad2.title;
-      document.getElementById('ad2-desc').value = userData.ads.ad2.desc;
+      bookmarksData.groups.forEach(group => {
+        const groupEl = document.createElement('div');
+        groupEl.className = 'glass rounded-xl p-4';
+        
+        const groupHeader = document.createElement('div');
+        groupHeader.className = 'flex justify-between items-center mb-4';
+        groupHeader.innerHTML = `
+          <h4 class="font-bold text-lg">${group.name}</h4>
+          <div class="flex space-x-2">
+            <button class="edit-group touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all" data-id="${group.id}">
+              <i class="fa fa-pencil text-sm"></i>
+            </button>
+            <button class="delete-group touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-cosmic-red" data-id="${group.id}">
+              <i class="fa fa-trash text-sm"></i>
+            </button>
+          </div>
+        `;
+        groupEl.appendChild(groupHeader);
+        
+        const bookmarksList = document.createElement('div');
+        bookmarksList.className = 'space-y-3';
+        groupEl.appendChild(bookmarksList);
+        
+        group.bookmarks.forEach(bookmark => {
+          const bookmarkEl = document.createElement('div');
+          bookmarkEl.className = 'flex items-center justify-between p-2 border border-gray-200/10 rounded-lg';
+          bookmarkEl.innerHTML = `
+            <div class="flex-1 min-w-0">
+              <div class="font-medium truncate">${bookmark.name}</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 truncate">${bookmark.url}</div>
+            </div>
+            <div class="flex space-x-2 ml-4">
+              <button class="edit-bookmark touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all" data-group-id="${group.id}" data-id="${bookmark.id}">
+                <i class="fa fa-pencil text-sm"></i>
+              </button>
+              <button class="delete-bookmark touch-friendly w-8 h-8 rounded-full flex items-center justify-center hover:bg-space-medium/50 transition-all text-cosmic-red" data-group-id="${group.id}" data-id="${bookmark.id}">
+                <i class="fa fa-trash text-sm"></i>
+              </button>
+            </div>
+          `;
+          
+          bookmarksList.appendChild(bookmarkEl);
+        });
+        
+        container.appendChild(groupEl);
+      });
       
-      document.getElementById('ad3-image').value = userData.ads.ad3.image;
-      document.getElementById('ad3-link').value = userData.ads.ad3.link;
-      document.getElementById('ad3-title').value = userData.ads.ad3.title;
-      document.getElementById('ad3-desc').value = userData.ads.ad3.desc;
-    }
-
-    function updateAds() {
-      const ad1 = document.getElementById('ad-1');
-      ad1.querySelector('img').src = userData.ads.ad1.image;
-      ad1.querySelector('h3').textContent = userData.ads.ad1.title;
-      ad1.querySelector('p').textContent = userData.ads.ad1.desc;
-      ad1.onclick = () => window.open(userData.ads.ad1.link, '_blank');
+      document.querySelectorAll('.delete-bookmark').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const groupId = parseInt(e.currentTarget.dataset.groupId);
+          const bookmarkId = parseInt(e.currentTarget.dataset.id);
+          
+          if (confirm('确定要删除这个书签吗？')) {
+            const group = bookmarksData.groups.find(g => g.id === groupId);
+            if (group) {
+              group.bookmarks = group.bookmarks.filter(b => b.id !== bookmarkId);
+              renderEditBookmarks();
+            }
+          }
+        });
+      });
       
-      const ad2 = document.getElementById('ad-2');
-      ad2.querySelector('img').src = userData.ads.ad2.image;
-      ad2.querySelector('h3').textContent = userData.ads.ad2.title;
-      ad2.querySelector('p').textContent = userData.ads.ad2.desc;
-      ad2.onclick = () => window.open(userData.ads.ad2.link, '_blank');
+      document.querySelectorAll('.delete-group').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const groupId = parseInt(e.currentTarget.dataset.id);
+          
+          if (confirm('确定要删除这个分组吗？分组内的所有书签也会被删除。')) {
+            bookmarksData.groups = bookmarksData.groups.filter(g => g.id !== groupId);
+            renderEditBookmarks();
+            populateGroupSelect();
+          }
+        });
+      });
       
-      const ad3 = document.getElementById('ad-3');
-      ad3.querySelector('img').src = userData.ads.ad3.image;
-      ad3.querySelector('h3').textContent = userData.ads.ad3.title;
-      ad3.querySelector('p').textContent = userData.ads.ad3.desc;
-      ad3.onclick = () => window.open(userData.ads.ad3.link, '_blank');
-    }
-
-    function handleAdImageUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      const adId = e.target.id.split('-')[0];
-      const reader = new FileReader();
-      
-      reader.onload = function(event) {
-        document.getElementById(`${adId}-image`).value = event.target.result;
-      };
-      
-      reader.readAsDataURL(file);
-    }
-
-    function saveEditChanges() {
-      userData.ads = {
-        ad1: {
-          image: document.getElementById('ad1-image').value,
-          link: document.getElementById('ad1-link').value,
-          title: document.getElementById('ad1-title').value,
-          desc: document.getElementById('ad1-desc').value
-        },
-        ad2: {
-          image: document.getElementById('ad2-image').value,
-          link: document.getElementById('ad2-link').value,
-          title: document.getElementById('ad2-title').value,
-          desc: document.getElementById('ad2-desc').value
-        },
-        ad3: {
-          image: document.getElementById('ad3-image').value,
-          link: document.getElementById('ad3-link').value,
-          title: document.getElementById('ad3-title').value,
-          desc: document.getElementById('ad3-desc').value
-        }
-      };
-      
-      saveUserData();
-      updateAds();
-      saveDataToGitHub().then(success => {
-        if (success) {
-          closeEditPage();
-          alert('更改已保存');
-        }
+      document.querySelectorAll('.edit-bookmark').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const groupId = parseInt(e.currentTarget.dataset.groupId);
+          const bookmarkId = parseInt(e.currentTarget.dataset.id);
+          
+          const group = bookmarksData.groups.find(g => g.id === groupId);
+          const bookmark = group ? group.bookmarks.find(b => b.id === bookmarkId) : null;
+          
+          if (bookmark) {
+            document.getElementById('bookmark-group-select').value = groupId;
+            document.getElementById('bookmark-name').value = bookmark.name;
+            document.getElementById('bookmark-url').value = bookmark.url;
+            
+            document.getElementById('add-bookmark-modal').classList.remove('hidden');
+            
+            const confirmBtn = document.getElementById('confirm-add-bookmark');
+            const originalText = confirmBtn.textContent;
+            confirmBtn.textContent = '更新';
+            
+            const handleUpdate = async () => {
+              const newGroupId = parseInt(document.getElementById('bookmark-group-select').value);
+              const newName = document.getElementById('bookmark-name').value;
+              const newUrl = document.getElementById('bookmark-url').value;
+              
+              if (newName && newUrl) {
+                if (newGroupId !== groupId) {
+                  group.bookmarks = group.bookmarks.filter(b => b.id !== bookmarkId);
+                  const newGroup = bookmarksData.groups.find(g => g.id === newGroupId);
+                  if (newGroup) {
+                    newGroup.bookmarks.push({ ...bookmark, name: newName, url: newUrl });
+                  }
+                } else {
+                  bookmark.name = newName;
+                  bookmark.url = newUrl;
+                }
+                
+                document.getElementById('add-bookmark-modal').classList.add('hidden');
+                renderEditBookmarks();
+                confirmBtn.removeEventListener('click', handleUpdate);
+                confirmBtn.textContent = originalText;
+              }
+            };
+            
+            confirmBtn.addEventListener('click', handleUpdate, { once: true });
+          }
+        });
       });
     }
 
-    function triggerImport() {
-      document.getElementById('bookmark-import').click();
-    }
-
-    function handleBookmarkImport(e) {
-      const file = e.target.files[0];
-      if (!file) return;
+    function populateGroupSelect() {
+      const select = document.getElementById('bookmark-group-select');
+      select.innerHTML = '';
       
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const content = event.target.result;
-        parseBookmarkHtml(content);
-      };
-      reader.readAsText(file);
+      bookmarksData.groups.forEach(group => {
+        const option = document.createElement('option');
+        option.value = group.id;
+        option.textContent = group.name;
+        select.appendChild(option);
+      });
     }
 
     function parseBookmarkHtml(html) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
-      const bookmarks = doc.querySelectorAll('a');
+      const bookmarks = [];
       
-      if (bookmarks.length === 0) {
-        showImportStatus('未找到书签数据', 'error');
-        return;
+      function processNode(node, currentGroup) {
+        if (node.tagName === 'DT') {
+          const aTag = node.querySelector('A');
+          if (aTag) {
+            const url = aTag.getAttribute('HREF');
+            const name = aTag.textContent;
+            
+            if (url && name) {
+              currentGroup.bookmarks.push({
+                id: Date.now() + Math.floor(Math.random() * 1000),
+                name: name,
+                url: url,
+                tags: []
+              });
+            }
+          }
+          
+          const folder = node.querySelector('H3');
+          if (folder) {
+            const newGroup = {
+              id: Date.now() + Math.floor(Math.random() * 10000),
+              name: folder.textContent,
+              bookmarks: []
+            };
+            bookmarks.push(newGroup);
+            
+            const nextNode = node.nextElementSibling;
+            if (nextNode && nextNode.tagName === 'DL') {
+              Array.from(nextNode.children).forEach(child => {
+                processNode(child, newGroup);
+              });
+            }
+          }
+        }
       }
       
-      const tempGroups = {};
-      
-      bookmarks.forEach(bookmark => {
-        const href = bookmark.getAttribute('href');
-        if (!href || href.startsWith('javascript:')) return;
+      const dl = doc.querySelector('DL');
+      if (dl) {
+        const rootGroup = {
+          id: Date.now(),
+          name: '导入的书签',
+          bookmarks: []
+        };
+        bookmarks.push(rootGroup);
         
-        const name = bookmark.textContent.trim() || '未命名书签';
-        const parentNode = bookmark.closest('dl');
-        let groupName = '未分类';
-        
-        if (parentNode && parentNode.previousElementSibling && parentNode.previousElementSibling.tagName === 'DT') {
-          const parentTitle = parentNode.previousElementSibling.querySelector('h3');
-          if (parentTitle) {
-            groupName = parentTitle.textContent.trim();
-          }
-        }
-        
-        if (!tempGroups[groupName]) {
-          tempGroups[groupName] = [];
-        }
-        
-        tempGroups[groupName].push({
-          name,
-          url: href,
-          tags: []
+        Array.from(dl.children).forEach(child => {
+          processNode(child, rootGroup);
         });
-      });
+      }
       
-      mergeImportedBookmarks(tempGroups);
-      showImportStatus(`成功导入 ${Object.keys(tempGroups).length} 个分组，共 ${bookmarks.length} 个书签`, 'success');
-      
-      saveDataToGitHub();
-      renderBookmarks();
-      renderEditBookmarks();
-      updateTotalBookmarks();
+      return bookmarks;
     }
 
-    function mergeImportedBookmarks(importedGroups) {
-      Object.keys(importedGroups).forEach(groupName => {
-        let group = bookmarksData.groups.find(g => g.name === groupName);
+    function mergeBookmarks(existing, newBookmarks) {
+      newBookmarks.forEach(newGroup => {
+        let existingGroup = existing.find(g => g.name.toLowerCase() === newGroup.name.toLowerCase());
         
-        if (!group) {
-          const newId = bookmarksData.groups.length > 0 
-            ? Math.max(...bookmarksData.groups.map(g => g.id)) + 1 
-            : 1;
-          
-          group = {
-            id: newId,
-            name: groupName,
-            bookmarks: []
-          };
-          
-          bookmarksData.groups.push(group);
-        }
-        
-        importedGroups[groupName].forEach(importedBookmark => {
-          const isDuplicate = group.bookmarks.some(b => 
-            b.url.toLowerCase() === importedBookmark.url.toLowerCase()
-          );
-          
-          if (!isDuplicate) {
-            const newId = group.bookmarks.length > 0 
-              ? Math.max(...group.bookmarks.map(b => b.id)) + 1 
-              : 1;
+        if (!existingGroup) {
+          existing.push(newGroup);
+        } else {
+          newGroup.bookmarks.forEach(newBookmark => {
+            const urlExists = existingGroup.bookmarks.some(b => 
+              normalizeUrl(b.url) === normalizeUrl(newBookmark.url)
+            );
             
-            group.bookmarks.push({
-              id: newId,
-              ...importedBookmark
-            });
+            if (!urlExists) {
+              existingGroup.bookmarks.push(newBookmark);
+            }
+          });
+        }
+      });
+      
+      return existing;
+    }
+
+    function normalizeUrl(url) {
+      try {
+        const parsed = new URL(url);
+        return parsed.origin + parsed.pathname;
+      } catch (e) {
+        return url.toLowerCase();
+      }
+    }
+
+    function setupEventListeners() {
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        userConfig.theme = isDark ? 'dark' : 'light';
+        saveUserConfig();
+      });
+      
+      document.getElementById('github-login').addEventListener('click', () => {
+        document.getElementById('github-config-modal').classList.remove('hidden');
+      });
+      
+      document.getElementById('cancel-github-config').addEventListener('click', () => {
+        document.getElementById('github-config-modal').classList.add('hidden');
+      });
+      
+      document.getElementById('save-github-config').addEventListener('click', () => {
+        userConfig.github.username = document.getElementById('github-username').value;
+        userConfig.github.repo = document.getElementById('github-repo').value;
+        userConfig.github.token = document.getElementById('github-token').value;
+        saveUserConfig();
+        
+        document.getElementById('github-config-modal').classList.add('hidden');
+      });
+      
+      document.getElementById('toggle-github-token').addEventListener('click', (e) => {
+        const input = document.getElementById('github-token');
+        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+        input.setAttribute('type', type);
+        e.currentTarget.innerHTML = type === 'password' ? '<i class="fa fa-eye-slash"></i>' : '<i class="fa fa-eye"></i>';
+      });
+      
+      document.getElementById('settings-btn').addEventListener('click', () => {
+        document.getElementById('password-modal').classList.remove('hidden');
+        document.getElementById('admin-password').value = '';
+      });
+      
+      document.getElementById('toggle-password').addEventListener('click', (e) => {
+        const input = document.getElementById('admin-password');
+        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+        input.setAttribute('type', type);
+        e.currentTarget.innerHTML = type === 'password' ? '<i class="fa fa-eye-slash"></i>' : '<i class="fa fa-eye"></i>';
+      });
+      
+      document.getElementById('confirm-password').addEventListener('click', () => {
+        const password = document.getElementById('admin-password').value;
+        if (password === userConfig.password) {
+          isAuthenticated = true;
+          document.getElementById('password-modal').classList.add('hidden');
+          document.getElementById('edit-page').classList.remove('hidden');
+        } else {
+          alert('密码错误，请重试');
+        }
+      });
+      
+      document.getElementById('cancel-password').addEventListener('click', () => {
+        document.getElementById('password-modal').classList.add('hidden');
+      });
+      
+      document.getElementById('close-edit-page').addEventListener('click', () => {
+        document.getElementById('edit-page').classList.add('hidden');
+      });
+      
+      document.getElementById('cancel-edit').addEventListener('click', () => {
+        document.getElementById('edit-page').classList.add('hidden');
+      });
+      
+      document.getElementById('save-edit').addEventListener('click', async () => {
+        if (!isAuthenticated) {
+          document.getElementById('edit-page').classList.add('hidden');
+          document.getElementById('password-modal').classList.remove('hidden');
+          return;
+        }
+        
+        const ad1Image = document.getElementById('ad1-image').value;
+        const ad1Link = document.getElementById('ad1-link').value;
+        const ad1Title = document.getElementById('ad1-title').value;
+        const ad1Desc = document.getElementById('ad1-desc').value;
+        
+        const ad1 = document.getElementById('ad-1');
+        ad1.querySelector('img').src = ad1Image;
+        ad1.querySelector('a')?.setAttribute('href', ad1Link);
+        ad1.querySelector('h3').textContent = ad1Title;
+        ad1.querySelector('p').textContent = ad1Desc;
+        
+        const ad2Image = document.getElementById('ad2-image').value;
+        const ad2Link = document.getElementById('ad2-link').value;
+        const ad2Title = document.getElementById('ad2-title').value;
+        const ad2Desc = document.getElementById('ad2-desc').value;
+        
+        const ad2 = document.getElementById('ad-2');
+        ad2.querySelector('img').src = ad2Image;
+        ad2.querySelector('a')?.setAttribute('href', ad2Link);
+        ad2.querySelector('h3').textContent = ad2Title;
+        ad2.querySelector('p').textContent = ad2Desc;
+        
+        const ad3Image = document.getElementById('ad3-image').value;
+        const ad3Link = document.getElementById('ad3-link').value;
+        const ad3Title = document.getElementById('ad3-title').value;
+        const ad3Desc = document.getElementById('ad3-desc').value;
+        
+        const ad3 = document.getElementById('ad-3');
+        ad3.querySelector('img').src = ad3Image;
+        ad3.querySelector('a')?.setAttribute('href', ad3Link);
+        ad3.querySelector('h3').textContent = ad3Title;
+        ad3.querySelector('p').textContent = ad3Desc;
+        
+        const success = await saveDataToGitHub();
+        if (success) {
+          renderBookmarks();
+          document.getElementById('edit-page').classList.add('hidden');
+          alert('保存成功！');
+        } else {
+          alert('保存失败，请检查GitHub配置');
+        }
+      });
+      
+      document.getElementById('add-timezone').addEventListener('click', () => {
+        document.getElementById('add-timezone-modal').classList.remove('hidden');
+      });
+      
+      document.getElementById('cancel-timezone').addEventListener('click', () => {
+        document.getElementById('add-timezone-modal').classList.add('hidden');
+      });
+      
+      document.getElementById('timezone-search').addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const cities = document.querySelectorAll('#city-list > div');
+        
+        cities.forEach(city => {
+          const text = city.textContent.toLowerCase();
+          if (text.includes(searchTerm)) {
+            city.classList.remove('hidden');
+          } else {
+            city.classList.add('hidden');
           }
         });
       });
-    }
-
-    function showImportStatus(message, type) {
-      const statusElement = document.getElementById('import-status');
-      statusElement.textContent = message;
-      statusElement.className = `mt-3 text-sm ${type === 'error' ? 'text-cosmic-red' : 'text-cosmic-green'}`;
-      statusElement.classList.remove('hidden');
       
-      setTimeout(() => {
-        statusElement.classList.add('hidden');
-      }, 5000);
-    }
-
-    function exportBookmarks() {
-      let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+      document.getElementById('add-bookmark-btn').addEventListener('click', () => {
+        document.getElementById('bookmark-name').value = '';
+        document.getElementById('bookmark-url').value = '';
+        document.getElementById('add-bookmark-modal').classList.remove('hidden');
+      });
+      
+      document.getElementById('cancel-add-bookmark').addEventListener('click', () => {
+        document.getElementById('add-bookmark-modal').classList.add('hidden');
+      });
+      
+      document.getElementById('confirm-add-bookmark').addEventListener('click', async () => {
+        const groupId = parseInt(document.getElementById('bookmark-group-select').value);
+        const name = document.getElementById('bookmark-name').value;
+        const url = document.getElementById('bookmark-url').value;
+        
+        if (name && url) {
+          const group = bookmarksData.groups.find(g => g.id === groupId);
+          if (group) {
+            const newBookmark = {
+              id: Date.now(),
+              name: name,
+              url: url,
+              tags: []
+            };
+            
+            group.bookmarks.push(newBookmark);
+            
+            document.getElementById('add-bookmark-modal').classList.add('hidden');
+            renderBookmarks();
+            renderEditBookmarks();
+            
+            await saveDataToGitHub();
+          }
+        } else {
+          alert('请填写书签名称和URL');
+        }
+      });
+      
+      document.getElementById('trigger-import').addEventListener('click', () => {
+        document.getElementById('bookmark-import').click();
+      });
+      
+      document.getElementById('bookmark-import').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const html = event.target.result;
+            const newBookmarks = parseBookmarkHtml(html);
+            
+            bookmarksData.groups = mergeBookmarks(bookmarksData.groups, newBookmarks);
+            
+            renderBookmarks();
+            renderEditBookmarks();
+            populateGroupSelect();
+            
+            const status = document.getElementById('import-status');
+            status.textContent = `成功导入 ${newBookmarks.reduce((total, group) => total + group.bookmarks.length, 0)} 个书签`;
+            status.className = 'mt-3 text-sm text-cosmic-green';
+            status.classList.remove('hidden');
+            
+            setTimeout(() => {
+              status.classList.add('hidden');
+            }, 3000);
+          } catch (error) {
+            console.error('导入书签失败:', error);
+            const status = document.getElementById('import-status');
+            status.textContent = '导入失败，请检查文件格式';
+            status.className = 'mt-3 text-sm text-cosmic-red';
+            status.classList.remove('hidden');
+          }
+        };
+        reader.readAsText(file);
+      });
+      
+      document.getElementById('export-bookmarks').addEventListener('click', () => {
+        let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
 <TITLE>书签导出</TITLE>
 <H1>书签</H1>
 <DL><p>`;
-      
-      bookmarksData.groups.forEach(group => {
-        html += `<DT><H3>${group.name}</H3>
-<DL><p>`;
         
-        group.bookmarks.forEach(bookmark => {
-          html += `<DT><A HREF="${bookmark.url}">${bookmark.name}</A>`;
-          if (bookmark.tags && bookmark.tags.length > 0) {
-            html += `<DD>${bookmark.tags.join(', ')}</DD>`;
-          }
-          html += '\n';
+        bookmarksData.groups.forEach(group => {
+          html += `<DT><H3>${group.name}</H3>
+<DL><p>`;
+          
+          group.bookmarks.forEach(bookmark => {
+            html += `<DT><A HREF="${bookmark.url}">${bookmark.name}</A>`;
+          });
+          
+          html += `</DL><p>`;
         });
         
         html += `</DL><p>`;
+        
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bookmarks.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       });
       
-      html += `</DL><p>`;
+      document.getElementById('add-new-group').addEventListener('click', () => {
+        const groupName = prompt('请输入新分组名称:');
+        if (groupName && groupName.trim()) {
+          const newGroup = {
+            id: Date.now(),
+            name: groupName.trim(),
+            bookmarks: []
+          };
+          
+          bookmarksData.groups.push(newGroup);
+          renderEditBookmarks();
+          populateGroupSelect();
+        }
+      });
       
-      const blob = new Blob([html], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `bookmarks_${new Date().toISOString().split('T')[0]}.html`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      document.querySelectorAll('[id$="-upload"]').forEach(input => {
+        input.addEventListener('change', function() {
+          const file = this.files[0];
+          if (file) {
+            const id = this.id.replace('-upload', '-image');
+            const imageInput = document.getElementById(id);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              imageInput.value = e.target.result;
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      });
+      
+      document.querySelectorAll('[id$="-upload"]').forEach(input => {
+        const label = input.previousElementSibling;
+        if (label) {
+          label.addEventListener('click', (e) => {
+            e.preventDefault();
+            input.click();
+          });
+        }
+      });
+      
+      document.getElementById('ad-1').addEventListener('click', () => {
+        const link = document.getElementById('ad1-link').value;
+        if (link && link !== '#') {
+          window.open(link, '_blank');
+        }
+      });
+      
+      document.getElementById('ad-2').addEventListener('click', () => {
+        const link = document.getElementById('ad2-link').value;
+        if (link && link !== '#') {
+          window.open(link, '_blank');
+        }
+      });
+      
+      document.getElementById('ad-3').addEventListener('click', () => {
+        const link = document.getElementById('ad3-link').value;
+        if (link && link !== '#') {
+          window.open(link, '_blank');
+        }
+      });
     }
 
     window.addEventListener('DOMContentLoaded', init);
