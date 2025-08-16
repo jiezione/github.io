@@ -68,90 +68,21 @@
   
   <style type="text/tailwindcss">
     @layer utilities {
-      .content-auto {
-        content-visibility: auto;
-      }
-      .star {
-        position: absolute;
-        background-color: white;
-        border-radius: 50%;
-        animation: twinkle 2s infinite ease-in-out;
-      }
-      .glass {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-      }
-      .glass-dark {
-        background: rgba(10, 15, 30, 0.7);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-      .card-hover {
-        transition: all 0.3s ease;
-      }
-      .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px -5px rgba(74, 108, 247, 0.3);
-      }
-      .text-shadow {
-        text-shadow: 0 0 10px rgba(123, 147, 255, 0.7);
-      }
-      .text-ellipsis-1 {
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      .touch-friendly {
-        min-height: 44px;
-        min-width: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        position: relative;
-        z-index: 10;
-      }
-      .time-pill {
-        position: relative;
-        overflow: hidden;
-      }
-      .time-pill::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-        transition: 0.5s;
-      }
-      .time-pill:hover::before {
-        left: 100%;
-      }
-      .bookmark-tag {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 8px;
-        margin: 0 4px 4px 0;
-        border-radius: 4px;
-        background-color: rgba(255, 255, 255, 0.1);
-        font-size: 12px;
-        transition: all 0.2s ease;
-      }
-      .bookmark-tag:hover {
-        background-color: rgba(255, 255, 255, 0.2);
-        transform: translateY(-2px);
-      }
-      .bookmark-favicon {
-        width: 16px;
-        height: 16px;
-        margin-right: 4px;
-        border-radius: 2px;
-      }
+      .content-auto { content-visibility: auto; }
+      .star { position: absolute; background-color: white; border-radius: 50%; animation: twinkle 2s infinite ease-in-out; }
+      .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.18); }
+      .glass-dark { background: rgba(10, 15, 30, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); }
+      .card-hover { transition: all 0.3s ease; }
+      .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(74, 108, 247, 0.3); }
+      .text-shadow { text-shadow: 0 0 10px rgba(123, 147, 255, 0.7); }
+      .text-ellipsis-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+      .touch-friendly { min-height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; z-index: 10; }
+      .time-pill { position: relative; overflow: hidden; }
+      .time-pill::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transition: 0.5s; }
+      .time-pill:hover::before { left: 100%; }
+      .bookmark-tag { display: inline-flex; align-items: center; padding: 4px 8px; margin: 0 4px 4px 0; border-radius: 4px; background-color: rgba(255, 255, 255, 0.1); font-size: 12px; transition: all 0.2s ease; }
+      .bookmark-tag:hover { background-color: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+      .bookmark-favicon { width: 16px; height: 16px; margin-right: 4px; border-radius: 2px; }
     }
   </style>
 </head>
@@ -1055,7 +986,7 @@
             delete appData.bookmarks[oldName];
             renderEditBookmarks();
             updateBookmarkGroupSelect();
-          } else {
+          } else if (appData.bookmarks[newName]) {
             e.target.value = oldName;
           }
         });
@@ -1635,3 +1566,4 @@
   </script>
 </body>
 </html>
+    
