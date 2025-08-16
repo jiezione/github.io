@@ -654,23 +654,28 @@
     };
     
     function getGitHubConfig() {
-      const username = localStorage.getItem('githubUsername') || 'username';
-      const repo = localStorage.getItem('githubRepo') || 'repo-name';
+      const username = localStorage.getItem('githubUsername') || '';
+      const repo = localStorage.getItem('githubRepo') || '';
       const token = localStorage.getItem('githubToken') || '';
       return { username, repo, token };
     }
     
     function saveGitHubConfig(config) {
-      if (config.username) localStorage.setItem('githubUsername', config.username);
-      if (config.repo) localStorage.setItem('githubRepo', config.repo);
+      if (config.username !== undefined) localStorage.setItem('githubUsername', config.username);
+      if (config.repo !== undefined) localStorage.setItem('githubRepo', config.repo);
       if (config.token !== undefined) localStorage.setItem('githubToken', config.token);
     }
     
     async function loadDataFromGitHub() {
       try {
         const { username, repo, token } = getGitHubConfig();
-        let url;
         
+        if (!username || !repo) {
+          console.log('GitHub配置不完整，使用默认数据');
+          return false;
+        }
+        
+        let url;
         if (token) {
           url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
         } else {
@@ -711,6 +716,11 @@
     async function saveDataToGitHub() {
       try {
         const { username, repo, token } = getGitHubConfig();
+        
+        if (!username || !repo) {
+          console.log('GitHub配置不完整，无法保存数据');
+          return false;
+        }
         
         if (!token) {
           console.log('没有提供GitHub Token，无法保存数据');
@@ -1141,7 +1151,7 @@
       const doc = parser.parseFromString(html, 'text/html');
       const bookmarks = {};
       
-      function processNode(node, currentGroup) {
+      function processNode(node, currentGroup, parentGroups = []) {
         if (node.tagName === 'DT') {
           const link = node.querySelector('A');
           if (link) {
@@ -1149,16 +1159,20 @@
             const name = link.textContent.trim();
             
             if (url && name && currentGroup) {
-              if (!bookmarks[currentGroup]) {
-                bookmarks[currentGroup] = [];
+              const fullGroupName = [...parentGroups, currentGroup].join(' / ');
+              if (!bookmarks[fullGroupName]) {
+                bookmarks[fullGroupName] = [];
               }
               
-              bookmarks[currentGroup].push({
-                name,
-                url,
-                icon: extractFavicon(url),
-                color: `cosmic-${['blue', 'purple', 'pink', 'yellow', 'green', 'red', 'cyan'][Math.floor(Math.random() * 7)]}`
-              });
+              const isDuplicate = bookmarks[fullGroupName].some(b => b.url === url);
+              if (!isDuplicate) {
+                bookmarks[fullGroupName].push({
+                  name,
+                  url,
+                  icon: extractFavicon(url),
+                  color: `cosmic-${['blue', 'purple', 'pink', 'yellow', 'green', 'red', 'cyan'][Math.floor(Math.random() * 7)]}`
+                });
+              }
             }
           }
           
@@ -1168,14 +1182,17 @@
             const nextNode = node.nextElementSibling;
             
             if (nextNode && nextNode.tagName === 'DL') {
+              const newParentGroups = folderName ? [...parentGroups, currentGroup] : parentGroups;
+              const newCurrentGroup = folderName || currentGroup;
+              
               Array.from(nextNode.children).forEach(child => {
-                processNode(child, folderName || currentGroup);
+                processNode(child, newCurrentGroup, newParentGroups);
               });
             }
           }
         } else if (node.tagName === 'DL' || node.tagName === 'DIV') {
           Array.from(node.children).forEach(child => {
-            processNode(child, currentGroup);
+            processNode(child, currentGroup, parentGroups);
           });
         }
       }
@@ -1520,15 +1537,20 @@
           appData.bookmarks[group] = [];
         }
         
-        appData.bookmarks[group].push({ name, url, icon, color });
-        
-        await saveDataToGitHub();
-        renderBookmarks();
-        renderEditBookmarks();
-        
-        document.getElementById('bookmark-name').value = '';
-        document.getElementById('bookmark-url').value = '';
-        document.getElementById('add-bookmark-modal').classList.add('hidden');
+        const isDuplicate = appData.bookmarks[group].some(b => b.url === url);
+        if (!isDuplicate) {
+          appData.bookmarks[group].push({ name, url, icon, color });
+          
+          await saveDataToGitHub();
+          renderBookmarks();
+          renderEditBookmarks();
+          
+          document.getElementById('bookmark-name').value = '';
+          document.getElementById('bookmark-url').value = '';
+          document.getElementById('add-bookmark-modal').classList.add('hidden');
+        } else {
+          alert('该书签已存在');
+        }
       });
       
       document.getElementById('toggle-password').addEventListener('click', () => {
