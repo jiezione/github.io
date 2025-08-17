@@ -3,448 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Bookmarks</title>
+    <title>Bookmark Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#165DFF',
-                        secondary: '#36CFC9',
-                        neutral: '#86909C',
-                        light: '#F2F3F5',
-                        dark: '#1D2129'
-                    },
-                    fontFamily: {
-                        inter: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
-            .card-hover {
-                @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
-            }
-            .btn-primary {
-                @apply bg-primary text-white px-4 py-2 rounded-md transition-all hover:bg-primary/90 focus:ring-2 focus:ring-primary/50;
-            }
-            .input-field {
-                @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary;
-            }
-        }
-    </style>
 </head>
-<body class="font-inter bg-gray-50 text-dark min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-10">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i class="fa fa-bookmark text-primary text-2xl"></i>
-                <h1 class="text-xl md:text-2xl font-bold text-primary">GitHub Bookmarks</h1>
-            </div>
-            <button id="configBtn" class="flex items-center space-x-1 text-neutral hover:text-primary transition-colors">
-                <i class="fa fa-cog"></i>
-                <span class="hidden md:inline">Settings</span>
-            </button>
+<body class="bg-gray-50">
+    <div class="container mx-auto p-4 max-w-4xl">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">Bookmark Manager</h1>
+        <div id="bookmarks-container" class="space-y-4"></div>
+        <div id="loading" class="py-8 text-center text-gray-500">
+            <i class="fa fa-spinner fa-spin mr-2"></i> Loading bookmarks...
         </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
-        <!-- Configuration Modal -->
-        <div id="configModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold">Configuration</h2>
-                    <button id="closeModal" class="text-neutral hover:text-dark">
-                        <i class="fa fa-times text-xl"></i>
-                    </button>
-                </div>
-                <p class="text-sm text-neutral mb-4">
-                    Configure your GitHub repository to load bookmarks. 
-                    Leave empty to use the automatically detected repository.
-                </p>
-                <form id="configForm" class="space-y-4">
-                    <div>
-                        <label for="githubToken" class="block text-sm font-medium mb-1">GitHub Token (optional)</label>
-                        <input type="text" id="githubToken" class="input-field" placeholder="ghp_..." 
-                               title="Only needed for private repositories">
-                    </div>
-                    <div>
-                        <label for="githubRepo" class="block text-sm font-medium mb-1">Repository (owner/repo)</label>
-                        <input type="text" id="githubRepo" class="input-field" placeholder="username/repository">
-                        <p id="autoDetectedRepo" class="text-xs text-green-600 mt-1 hidden">
-                            <i class="fa fa-info-circle"></i> Automatically detected: <span></span>
-                        </p>
-                    </div>
-                    <div>
-                        <label for="bookmarkPath" class="block text-sm font-medium mb-1">File Path</label>
-                        <input type="text" id="bookmarkPath" class="input-field" placeholder="bookmarks.json" value="bookmarks.json">
-                    </div>
-                    <div class="pt-2">
-                        <button type="submit" class="btn-primary w-full">Save Configuration</button>
-                    </div>
-                </form>
-                <div class="mt-4 text-xs text-neutral text-center">
-                    Fallback: <code>github/bookmarks-example</code> / <code>bookmarks.json</code>
-                </div>
-            </div>
-        </div>
-
-        <!-- Loading Indicator -->
-        <div id="loading" class="flex justify-center items-center py-16">
-            <div class="flex flex-col items-center">
-                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-                <p class="mt-4 text-neutral">Loading bookmarks...</p>
-            </div>
-        </div>
-
-        <!-- Error Message -->
-        <div id="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6 hidden">
-            <div class="flex">
-                <i class="fa fa-exclamation-circle mt-1 mr-3"></i>
-                <div>
-                    <h3 class="font-medium">Error loading bookmarks</h3>
-                    <p id="errorMessage" class="text-sm mt-1">Please check your configuration and try again.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bookmarks Grid -->
-        <div id="bookmarksContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
-            <!-- Bookmarks will be inserted here dynamically -->
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="text-center py-16 hidden">
-            <i class="fa fa-folder-open-o text-5xl text-neutral mb-4"></i>
-            <h3 class="text-xl font-medium mb-2">No bookmarks found</h3>
-            <p class="text-neutral max-w-md mx-auto">
-                It looks like there are no bookmarks in the current repository. 
-                Check your configuration or add some bookmarks to your repository.
-            </p>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-white border-t mt-12 py-6">
-        <div class="container mx-auto px-4 text-center text-neutral text-sm">
-            <p>Deployed on GitHub Pages • <a href="#" id="repoLink" class="text-primary hover:underline">View Repository</a></p>
-        </div>
-    </footer>
+        <div id="error" class="py-8 text-center text-red-500 hidden"></div>
+    </div>
 
     <script>
-        // DOM Elements
-        const configBtn = document.getElementById('configBtn');
-        const configModal = document.getElementById('configModal');
-        const closeModal = document.getElementById('closeModal');
-        const configForm = document.getElementById('configForm');
-        const loading = document.getElementById('loading');
-        const error = document.getElementById('error');
-        const errorMessage = document.getElementById('errorMessage');
-        const bookmarksContainer = document.getElementById('bookmarksContainer');
-        const emptyState = document.getElementById('emptyState');
-        const repoLink = document.getElementById('repoLink');
-        const autoDetectedRepo = document.getElementById('autoDetectedRepo');
-        const autoDetectedRepoSpan = autoDetectedRepo.querySelector('span');
+        // 配置区域 - 用户可自定义的仓库信息（可留空）
+        const USER_CONFIG = {
+            githubToken: '', // 用户的GitHub token（可选）
+            githubRepo: '',  // 格式："用户名/仓库名"（可选）
+            filePath: 'bookmarks.json' // 书签文件路径（默认即可）
+        };
 
-        // Fallback repository if automatic detection fails
-        const FALLBACK_REPO = 'github/bookmarks-example'; // 备用公开仓库
-        const DEFAULT_PATH = 'bookmarks.json';
+        // 默认公开仓库配置（当用户未配置时使用）
+        const DEFAULT_REPO = {
+            githubRepo: 'jiezione/jznav', // 替换为你的公开仓库
+            filePath: 'bookmarks.json'
+        };
 
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', () => {
-            // Load saved configuration or use auto-detected
-            const config = loadConfig();
-            updateRepoLink(config.repo);
-            
-            // Load bookmarks
-            loadBookmarks(config);
-            
-            // Event listeners
-            configBtn.addEventListener('click', () => {
-                populateConfigForm();
-                configModal.classList.remove('hidden');
-            });
-            
-            closeModal.addEventListener('click', () => {
-                configModal.classList.add('hidden');
-            });
-            
-            configForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                saveConfig();
-                configModal.classList.add('hidden');
-                
-                // Reload bookmarks with new config
-                const newConfig = loadConfig();
-                updateRepoLink(newConfig.repo);
-                loadBookmarks(newConfig);
-            });
-            
-            // Close modal when clicking outside
-            configModal.addEventListener('click', (e) => {
-                if (e.target === configModal) {
-                    configModal.classList.add('hidden');
-                }
-            });
+        // 确定最终使用的仓库信息
+        const finalConfig = {
+            githubRepo: USER_CONFIG.githubRepo || DEFAULT_REPO.githubRepo,
+            filePath: USER_CONFIG.filePath || DEFAULT_REPO.filePath,
+            githubToken: USER_CONFIG.githubToken // token可选，公开仓库无需token
+        };
 
-            // Show auto-detected repo when input is empty
-            document.getElementById('githubRepo').addEventListener('input', (e) => {
-                if (!e.target.value.trim()) {
-                    const detected = detectGitHubRepo();
-                    autoDetectedRepoSpan.textContent = detected;
-                    autoDetectedRepo.classList.remove('hidden');
-                } else {
-                    autoDetectedRepo.classList.add('hidden');
-                }
-            });
-        });
-
-        // Automatically detect GitHub repository from current URL
-        function detectGitHubRepo() {
+        // 加载GitHub仓库中的书签数据
+        async function loadBookmarks() {
             try {
-                const url = new URL(window.location.href);
-                const hostname = url.hostname;
-                
-                // Check if it's a GitHub Pages domain
-                if (hostname.endsWith('.github.io')) {
-                    // Case 1: username.github.io/repository (project site)
-                    if (hostname.includes('.github.io') && url.pathname && url.pathname !== '/') {
-                        const username = hostname.split('.')[0];
-                        const repoName = url.pathname.split('/')[1];
-                        if (username && repoName) {
-                            return `${username}/${repoName}`;
-                        }
-                    }
-                    
-                    // Case 2: username.github.io (user site)
-                    const username = hostname.split('.')[0];
-                    if (username) {
-                        return `${username}/${username}.github.io`;
-                    }
-                }
-                
-                // If we can't detect, return fallback
-                return FALLBACK_REPO;
-            } catch (err) {
-                console.error('Error detecting repository:', err);
-                return FALLBACK_REPO;
-            }
-        }
-
-        // Load configuration from localStorage or use auto-detected
-        function loadConfig() {
-            try {
-                const saved = localStorage.getItem('githubBookmarkConfig');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    // Return saved config if repo is specified, otherwise auto-detect
-                    return {
-                        token: parsed.token || '',
-                        repo: parsed.repo || detectGitHubRepo(),
-                        path: parsed.path || DEFAULT_PATH
-                    };
-                }
-            } catch (err) {
-                console.error('Error loading config:', err);
-            }
-            
-            // Default to auto-detected repo
-            return {
-                token: '',
-                repo: detectGitHubRepo(),
-                path: DEFAULT_PATH
-            };
-        }
-
-        // Save configuration to localStorage
-        function saveConfig() {
-            const repoInput = document.getElementById('githubRepo').value.trim();
-            
-            const config = {
-                token: document.getElementById('githubToken').value.trim(),
-                // Use auto-detected if input is empty
-                repo: repoInput || detectGitHubRepo(),
-                path: document.getElementById('bookmarkPath').value.trim() || DEFAULT_PATH
-            };
-            
-            localStorage.setItem('githubBookmarkConfig', JSON.stringify(config));
-            
-            // Show feedback
-            const submitBtn = configForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Saved!';
-            submitBtn.classList.add('bg-green-600');
-            
-            setTimeout(() => {
-                submitBtn.textContent = originalText;
-                submitBtn.classList.remove('bg-green-600');
-            }, 1500);
-        }
-
-        // Populate config form with saved values
-        function populateConfigForm() {
-            const config = loadConfig();
-            const detectedRepo = detectGitHubRepo();
-            
-            document.getElementById('githubToken').value = config.token || '';
-            document.getElementById('githubRepo').value = config.repo || '';
-            document.getElementById('bookmarkPath').value = config.path || DEFAULT_PATH;
-            
-            // Show auto-detected repo info if input is empty
-            if (!document.getElementById('githubRepo').value.trim()) {
-                autoDetectedRepoSpan.textContent = detectedRepo;
-                autoDetectedRepo.classList.remove('hidden');
-            } else {
-                autoDetectedRepo.classList.add('hidden');
-            }
-        }
-
-        // Update repository link in footer
-        function updateRepoLink(repo) {
-            repoLink.href = `https://github.com/${repo}`;
-            repoLink.textContent = repo;
-        }
-
-        // Load bookmarks from GitHub
-        async function loadBookmarks(config) {
-            // Show loading state
-            showLoading();
-            
-            try {
-                // Parse repo owner and name
-                const [owner, repo] = config.repo.split('/');
+                const [owner, repo] = finalConfig.githubRepo.split('/');
                 if (!owner || !repo) {
-                    throw new Error('Invalid repository format. Use "owner/repo"');
+                    throw new Error('Invalid repository format (expected "owner/repo")');
                 }
+
+                // 构建GitHub API请求URL
+                const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${finalConfig.filePath}`;
                 
-                // GitHub API endpoint
-                const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${config.path}`;
-                
-                // Set up headers
+                // 配置请求头（有token则添加，无则不添加）
                 const headers = {
-                    'Accept': 'application/vnd.github.v3+json'
+                    'Accept': 'application/vnd.github.v3.raw'
                 };
-                
-                // Add token if provided
-                if (config.token) {
-                    headers['Authorization'] = `token ${config.token}`;
+                if (finalConfig.githubToken) {
+                    headers['Authorization'] = `token ${finalConfig.githubToken}`;
                 }
-                
-                // Fetch data from GitHub API
+
+                // 发起请求
                 const response = await fetch(apiUrl, { headers });
                 
                 if (!response.ok) {
-                    // Handle different error statuses
-                    if (response.status === 404) {
-                        // If default repo not found, try fallback
-                        if (config.repo === detectGitHubRepo() && config.repo !== FALLBACK_REPO) {
-                            console.log('Trying fallback repository...');
-                            return loadBookmarks({...config, repo: FALLBACK_REPO});
-                        }
-                        throw new Error('Bookmark file not found in repository');
-                    } else if (response.status === 403) {
-                        throw new Error('Access denied. Check your token permissions');
-                    } else {
-                        throw new Error(`Failed to load data (${response.status})`);
-                    }
+                    throw new Error(`Failed to load: ${response.statusText}`);
                 }
-                
-                const data = await response.json();
-                
-                // GitHub returns content as base64 encoded string
-                if (data.content) {
-                    const decodedContent = atob(data.content);
-                    const bookmarks = JSON.parse(decodedContent);
-                    
-                    if (bookmarks && bookmarks.length > 0) {
-                        displayBookmarks(bookmarks);
-                    } else {
-                        showEmptyState();
-                    }
-                } else {
-                    showEmptyState();
-                }
-                
+
+                const bookmarks = await response.json();
+                renderBookmarks(bookmarks);
             } catch (err) {
-                console.error('Error loading bookmarks:', err);
-                showError(err.message);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error').textContent = `Error: ${err.message}`;
+                document.getElementById('error').classList.remove('hidden');
             }
         }
 
-        // Display bookmarks in the grid
-        function displayBookmarks(bookmarks) {
-            // Clear previous content
-            bookmarksContainer.innerHTML = '';
-            
-            // Add each bookmark
-            bookmarks.forEach(bookmark => {
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-lg shadow-sm overflow-hidden card-hover';
-                
-                // Add favicon if available, otherwise use default icon
-                const faviconUrl = bookmark.url 
-                    ? `https://${new URL(bookmark.url).hostname}/favicon.ico`
-                    : 'https://via.placeholder.com/16';
-                
-                card.innerHTML = `
-                    <div class="p-5">
-                        <div class="flex items-start mb-3">
-                            <img src="${faviconUrl}" alt="Favicon" class="w-6 h-6 mr-3 rounded" onerror="this.src='https://via.placeholder.com/16'">
-                            <div>
-                                <h3 class="font-semibold text-lg mb-1">${bookmark.title || 'No title'}</h3>
-                                <p class="text-sm text-neutral truncate max-w-[250px]">${bookmark.url || ''}</p>
-                            </div>
-                        </div>
-                        ${bookmark.description ? `<p class="text-sm text-gray-600 mb-4">${bookmark.description}</p>` : ''}
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            ${bookmark.tags ? bookmark.tags.map(tag => 
-                                `<span class="bg-light text-neutral text-xs px-2 py-1 rounded-full">${tag}</span>`
-                            ).join('') : ''}
-                        </div>
-                        <a href="${bookmark.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-primary hover:text-primary/80 text-sm font-medium">
-                            Visit site
-                            <i class="fa fa-external-link ml-1 text-xs"></i>
+        // 渲染书签列表
+        function renderBookmarks(bookmarks) {
+            const container = document.getElementById('bookmarks-container');
+            container.innerHTML = bookmarks.map(bookmark => `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <h3 class="font-semibold text-lg">
+                        <a href="${bookmark.url}" target="_blank" class="text-blue-600 hover:underline">
+                            ${bookmark.title}
                         </a>
-                    </div>
-                `;
-                
-                bookmarksContainer.appendChild(card);
-            });
+                    </h3>
+                    <p class="text-gray-500 text-sm mt-1">${bookmark.description || ''}</p>
+                </div>
+            `).join('');
             
-            // Show bookmarks container
-            showBookmarks();
+            document.getElementById('loading').classList.add('hidden');
         }
 
-        // UI State Helpers
-        function showLoading() {
-            [loading, error, bookmarksContainer, emptyState].forEach(el => el.classList.add('hidden'));
-            loading.classList.remove('hidden');
-        }
-
-        function showError(message) {
-            [loading, error, bookmarksContainer, emptyState].forEach(el => el.classList.add('hidden'));
-            errorMessage.textContent = message;
-            error.classList.remove('hidden');
-        }
-
-        function showBookmarks() {
-            [loading, error, bookmarksContainer, emptyState].forEach(el => el.classList.add('hidden'));
-            bookmarksContainer.classList.remove('hidden');
-        }
-
-        function showEmptyState() {
-            [loading, error, bookmarksContainer, emptyState].forEach(el => el.classList.add('hidden'));
-            emptyState.classList.remove('hidden');
-        }
+        // 页面加载时启动
+        window.addEventListener('DOMContentLoaded', loadBookmarks);
     </script>
 </body>
 </html>
