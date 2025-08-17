@@ -935,12 +935,6 @@
           "title": "VirScan - 多引擎文件在线检测平台",
           "url": "https://www.virscan.org/report/db5ca872df1bb6e1f59609f53ed603c44a394fee6d94d9656f25c97ba8a0a0dc",
           "favicon": "https://www.virscan.org/favicon.ico"
-        },
-        {
-          "id": 1755426794942,
-          "title": "银河录像局 次世代合租平台",
-          "url": "https://nf.video/6US2b",
-          "favicon": "https://nf.video/favicon.ico"
         }
       ]
     }
@@ -969,11 +963,6 @@
       "city": "纽约",
       "utcOffset": -4,
       "elementId": "newyork"
-    },
-    {
-      "city": "伦敦",
-      "utcOffset": 1,
-      "elementId": "london"
     }
   ]
 }
