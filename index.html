@@ -233,7 +233,7 @@
 
             <!-- GitHub配置 -->
             <div class="bg-day-card dark:bg-space-light rounded-xl p-5 shadow-lg border border-gray-100 dark:border-space-accent/20">
-                <h3 class="text-xl font-semibold mb-4">GitHub 配置</h3>
+                <h3 class="text-xl font-semibold mb-4">GitHub 配置 (可选)</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">用户名</label>
@@ -245,14 +245,14 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">个人访问令牌 (可选)</label>
-                        <input type="password" id="github-token" placeholder="用于私有仓库" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent">
+                        <input type="password" id="github-token" placeholder="用于私有仓库和修改" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent">
                     </div>
                 </div>
                 <div class="mt-4">
                     <button id="save-github-config" class="px-4 py-2 bg-space-accent hover:bg-space-accent/80 text-white rounded-lg transition-colors">
                         <i class="fa fa-save mr-1"></i> 保存配置
                     </button>
-                    <span id="github-config-status" class="ml-3 text-sm"></span>
+                    <span id="github-config-status" class="ml-3 text-sm">未配置时使用默认公共仓库</span>
                 </div>
             </div>
 
@@ -301,7 +301,7 @@
                     </button>
                     <input type="file" id="backup-file" accept=".json" class="hidden">
                     <button id="save-changes" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors ml-auto">
-                        <i class="fa fa-save mr-1"></i> 保存更改到GitHub
+                        <i class="fa fa-save mr-1"></i> 保存更改
                     </button>
                 </div>
                 <div id="backup-status" class="mt-3 text-sm"></div>
@@ -446,7 +446,8 @@
                 repo: '',
                 token: ''
             },
-            onlineTimeData: [0, 1.5, 2, 0.5, 3, 4, 2.5]
+            onlineTimeData: [0, 1.5, 2, 0.5, 3, 4, 2.5],
+            defaultRepoUrl: 'https://example.com/bookmarks.json'
         };
 
         // DOM 元素
@@ -1236,18 +1237,16 @@
             reader.readAsDataURL(file);
         }
 
-        // 从GitHub加载数据
-        async function loadDataFromGitHub() {
+        // 从GitHub或默认仓库加载数据
+        async function loadDataFromRepository() {
             const { username, repo, token } = appData.githubConfig;
+            let url = appData.defaultRepoUrl;
+            let headers = {};
+            let isGitHub = false;
             
-            if (!username || !repo) {
-                return false;
-            }
-            
-            try {
-                let url;
-                let headers = {};
-                
+            // 如果配置了GitHub信息，使用GitHub
+            if (username && repo) {
+                isGitHub = true;
                 if (token) {
                     url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
                     headers = {
@@ -1257,19 +1256,21 @@
                 } else {
                     url = `https://raw.githubusercontent.com/${username}/${repo}/main/bookmarks.json`;
                 }
-                
+            }
+            
+            try {
                 const response = await fetch(url, { headers });
                 
                 if (!response.ok) {
                     if (response.status === 404) {
-                        showToast('未找到书签数据，将使用默认数据', 'warning');
+                        showToast(isGitHub ? '未找到GitHub书签数据，使用默认数据' : '未找到默认仓库数据，使用本地数据', 'warning');
                         return false;
                     }
                     throw new Error(`HTTP错误: ${response.status}`);
                 }
                 
                 let data;
-                if (token) {
+                if (isGitHub && token) {
                     const githubData = await response.json();
                     data = JSON.parse(atob(githubData.content));
                 } else {
@@ -1281,21 +1282,27 @@
                 if (data.timezones) appData.timezones = data.timezones;
                 if (data.ads) appData.ads = data.ads;
                 
-                showToast('已从GitHub加载数据', 'success');
+                showToast(isGitHub ? '已从GitHub加载数据' : '已从默认仓库加载数据', 'success');
                 return true;
             } catch (e) {
-                console.error('从GitHub加载数据失败:', e);
-                showToast(`从GitHub加载数据失败: ${e.message}`, 'error');
+                console.error('从仓库加载数据失败:', e);
+                showToast(`从${isGitHub ? 'GitHub' : '默认仓库'}加载数据失败: ${e.message}，使用本地数据`, 'warning');
                 return false;
             }
         }
 
-        // 保存数据到GitHub
-        async function saveDataToGitHub() {
+        // 保存数据到配置的仓库
+        async function saveDataToRepository() {
             const { username, repo, token } = appData.githubConfig;
             
+            // 如果没有配置GitHub信息，提示用户
             if (!username || !repo || !token) {
-                showToast('请先配置完整的GitHub信息', 'error');
+                showModal(
+                    '无法保存',
+                    '未配置完整的GitHub信息，无法保存更改到远程仓库。您可以：<br><br>1. 配置GitHub信息以启用远程保存<br>2. 使用"创建JSON备份"功能保存到本地',
+                    () => {},
+                    () => {}
+                );
                 return false;
             }
             
@@ -1371,11 +1378,12 @@
             elements.githubConfigStatus.className = 'ml-3 text-sm text-green-500';
             
             setTimeout(() => {
-                elements.githubConfigStatus.textContent = '';
+                elements.githubConfigStatus.textContent = '未配置时使用默认公共仓库';
+                elements.githubConfigStatus.className = 'ml-3 text-sm';
             }, 3000);
             
             // 尝试加载数据
-            loadDataFromGitHub().then(success => {
+            loadDataFromRepository().then(success => {
                 if (success) {
                     renderEditBookmarks();
                     renderTimezones();
@@ -1522,8 +1530,8 @@
                 reader.readAsText(file);
             });
             
-            // 保存到GitHub
-            elements.saveChangesBtn.addEventListener('click', saveDataToGitHub);
+            // 保存到仓库
+            elements.saveChangesBtn.addEventListener('click', saveDataToRepository);
             
             // GitHub配置
             elements.saveGithubConfigBtn.addEventListener('click', saveGitHubConfig);
@@ -1583,7 +1591,7 @@
             createStars();
             initTheme();
             loadGitHubConfig();
-            await loadDataFromGitHub();
+            await loadDataFromRepository();
             renderBookmarks();
             renderTimezones();
             updateAds();
