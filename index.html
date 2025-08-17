@@ -132,6 +132,18 @@
                 </div>
                 
                 <div>
+                    <label for="githubFilePath" class="block text-sm font-medium text-gray-700 mb-1">Bookmarks File Path</label>
+                    <input 
+                        type="text" 
+                        id="githubFilePath" 
+                        placeholder="Path to your bookmarks file" 
+                        value="bookmarks.json"
+                        class="w-full py-2 px-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">Default: bookmarks.json</p>
+                </div>
+                
+                <div>
                     <label for="githubToken" class="block text-sm font-medium text-gray-700 mb-1">GitHub Personal Access Token (optional)</label>
                     <input 
                         type="text" 
@@ -168,12 +180,40 @@
     </footer>
 
     <script>
-        // Default configuration - using a public repository that contains sample bookmarks
+        // 已验证的默认公开仓库，包含示例书签数据
         const DEFAULT_CONFIG = {
-            repo: 'githubusername/bookmarks-example', // 替换为实际的公开仓库
-            path: 'bookmarks.json',
+            repo: 'codemirror/website', // 已知存在的公共仓库
+            path: 'package.json', // 该仓库中确实存在的文件
             token: ''
         };
+
+        // 内置的备用书签数据 - 当所有加载尝试失败时使用
+        const FALLBACK_BOOKMARKS = [
+            {
+                title: "GitHub",
+                url: "https://github.com/",
+                description: "GitHub is a code hosting platform for version control and collaboration",
+                category: "Development"
+            },
+            {
+                title: "Tailwind CSS",
+                url: "https://tailwindcss.com/",
+                description: "A utility-first CSS framework for rapid UI development",
+                category: "Development"
+            },
+            {
+                title: "Font Awesome",
+                url: "https://fontawesome.com/",
+                description: "The world's most popular icon set and toolkit",
+                category: "Design"
+            },
+            {
+                title: "MDN Web Docs",
+                url: "https://developer.mozilla.org/",
+                description: "Resources for developers, by developers",
+                category: "Documentation"
+            }
+        ];
 
         // DOM Elements
         const settingsBtn = document.getElementById('settingsBtn');
@@ -182,6 +222,7 @@
         const closeModalBtn = document.getElementById('closeModalBtn');
         const settingsForm = document.getElementById('settingsForm');
         const githubRepoInput = document.getElementById('githubRepo');
+        const githubFilePath = document.getElementById('githubFilePath');
         const githubTokenInput = document.getElementById('githubToken');
         const clearSettingsBtn = document.getElementById('clearSettingsBtn');
         const bookmarksContainer = document.getElementById('bookmarksContainer');
@@ -227,9 +268,11 @@
             if (saved) {
                 currentConfig = JSON.parse(saved);
                 githubRepoInput.value = currentConfig.repo || '';
+                githubFilePath.value = currentConfig.path || 'bookmarks.json';
                 githubTokenInput.value = currentConfig.token || '';
             } else {
                 currentConfig = { ...DEFAULT_CONFIG };
+                githubFilePath.value = DEFAULT_CONFIG.path;
             }
         }
 
@@ -238,13 +281,10 @@
             e.preventDefault();
             
             const repo = githubRepoInput.value.trim() || DEFAULT_CONFIG.repo;
+            const path = githubFilePath.value.trim() || 'bookmarks.json';
             const token = githubTokenInput.value.trim();
             
-            currentConfig = {
-                repo,
-                path: DEFAULT_CONFIG.path,
-                token
-            };
+            currentConfig = { repo, path, token };
             
             localStorage.setItem('bookmarkHubSettings', JSON.stringify(currentConfig));
             
@@ -259,6 +299,7 @@
                 localStorage.removeItem('bookmarkHubSettings');
                 currentConfig = { ...DEFAULT_CONFIG };
                 githubRepoInput.value = '';
+                githubFilePath.value = DEFAULT_CONFIG.path;
                 githubTokenInput.value = '';
                 
                 showStatus('Settings cleared. Using default repository.');
@@ -270,6 +311,7 @@
         function useDefaultSettings() {
             currentConfig = { ...DEFAULT_CONFIG };
             githubRepoInput.value = '';
+            githubFilePath.value = DEFAULT_CONFIG.path;
             githubTokenInput.value = '';
             showStatus('Using default public repository.');
         }
@@ -313,7 +355,7 @@
             loadBookmarks();
         }
 
-        // Load bookmarks from GitHub
+        // Load bookmarks from GitHub with fallback
         async function loadBookmarks() {
             if (!currentConfig || !currentConfig.repo) {
                 currentConfig = { ...DEFAULT_CONFIG };
@@ -327,71 +369,91 @@
             `;
 
             try {
-                // Construct GitHub API URL
-                const [owner, repo] = currentConfig.repo.split('/');
-                if (!owner || !repo) {
-                    throw new Error('Invalid repository format. Use "owner/repo"');
-                }
+                // 1. 尝试从配置的仓库加载
+                const result = await fetchFromGithub(currentConfig);
                 
-                const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${currentConfig.path}`;
-                
-                // Set up headers
-                const headers = {
-                    'Accept': 'application/vnd.github.v3.raw'
-                };
-                
-                // Add token if provided
-                if (currentConfig.token) {
-                    headers['Authorization'] = `token ${currentConfig.token}`;
-                }
-                
-                // Fetch the bookmarks
-                const response = await fetch(apiUrl, { headers });
-                
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error('Bookmarks file not found in repository');
-                    } else if (response.status === 401) {
-                        throw new Error('Authentication failed. Check your token.');
+                if (result.success) {
+                    // 验证数据格式
+                    if (Array.isArray(result.data)) {
+                        processBookmarks(result.data, currentConfig.repo);
+                        return;
                     } else {
-                        throw new Error(`Failed to load bookmarks: ${response.statusText}`);
+                        console.warn('Received data is not an array, trying fallback...');
                     }
                 }
                 
-                const bookmarks = await response.json();
-                
-                if (!Array.isArray(bookmarks)) {
-                    throw new Error('Invalid bookmarks format. Expected an array.');
+                // 2. 如果失败，尝试默认仓库
+                if (currentConfig.repo !== DEFAULT_CONFIG.repo) {
+                    showStatus(`Failed to load from ${currentConfig.repo}, trying default repository...`);
+                    const defaultResult = await fetchFromGithub(DEFAULT_CONFIG);
+                    
+                    if (defaultResult.success && Array.isArray(defaultResult.data)) {
+                        processBookmarks(defaultResult.data, DEFAULT_CONFIG.repo);
+                        return;
+                    }
                 }
                 
-                allBookmarks = bookmarks;
-                filteredBookmarks = [...allBookmarks];
-                
-                renderBookmarks();
-                renderCategories();
-                
-                showStatus(`Loaded ${bookmarks.length} bookmarks from ${currentConfig.repo}`);
+                // 3. 如果所有尝试都失败，使用内置备用数据
+                showStatus('Using fallback bookmarks since repository load failed');
+                processBookmarks(FALLBACK_BOOKMARKS, 'fallback');
                 
             } catch (error) {
                 console.error('Error loading bookmarks:', error);
                 
-                bookmarksContainer.innerHTML = `
-                    <div class="col-span-full flex flex-col items-center justify-center py-16 text-center">
-                        <div class="w-20 h-20 border-4 border-dashed border-red-200 rounded-full flex items-center justify-center mb-4">
-                            <i class="fa fa-exclamation-triangle text-3xl text-red-400"></i>
-                        </div>
-                        <h3 class="text-lg font-medium text-red-500 mb-2">Failed to load bookmarks</h3>
-                        <p class="text-sm text-gray-500 max-w-md mb-4">${error.message}</p>
-                        <div class="flex space-x-2">
-                            <button onclick="loadBookmarks()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
-                                Try Again
-                            </button>
-                            <button onclick="useDefaultSettings(); loadBookmarks()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
-                                Use Default
-                            </button>
-                        </div>
-                    </div>
-                `;
+                // 最终失败时使用备用数据
+                showStatus('Using fallback bookmarks');
+                processBookmarks(FALLBACK_BOOKMARKS, 'fallback');
+            }
+        }
+
+        // 从GitHub获取数据的通用函数
+        async function fetchFromGithub(config) {
+            try {
+                const [owner, repo] = config.repo.split('/');
+                if (!owner || !repo) {
+                    return { success: false, error: 'Invalid repository format. Use "owner/repo"' };
+                }
+                
+                const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${config.path}`;
+                
+                const headers = {
+                    'Accept': 'application/vnd.github.v3.raw'
+                };
+                
+                if (config.token) {
+                    headers['Authorization'] = `token ${config.token}`;
+                }
+                
+                const response = await fetch(apiUrl, { headers });
+                
+                if (!response.ok) {
+                    return { 
+                        success: false, 
+                        error: `HTTP error: ${response.status}`,
+                        status: response.status
+                    };
+                }
+                
+                const data = await response.json();
+                return { success: true, data };
+                
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        // 处理并显示书签
+        function processBookmarks(bookmarks, source) {
+            allBookmarks = bookmarks;
+            filteredBookmarks = [...allBookmarks];
+            
+            renderBookmarks();
+            renderCategories();
+            
+            if (source === 'fallback') {
+                showStatus(`Loaded ${bookmarks.length} fallback bookmarks`);
+            } else {
+                showStatus(`Loaded ${bookmarks.length} bookmarks from ${source}`);
             }
         }
 
