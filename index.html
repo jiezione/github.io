@@ -104,7 +104,7 @@
                     </p>
                 </div>
                 <button id="saveGitHubConfig" class="w-full bg-space-accent hover:bg-space-glow text-white px-4 py-2 rounded-md transition-colors">
-                    确认配置
+                    确认配置并进入编辑
                 </button>
             </div>
         </div>
@@ -461,7 +461,7 @@
                 { city: "纽约", offset: -4 }
             ],
             github: {
-                repo: "default-user/space-bookmarks",
+                repo: "",
                 token: ""
             },
             stats: {
@@ -476,6 +476,7 @@
         let currentDeleteType = null;
         let currentDeleteGroup = null;
         let scrollTimer = null;
+        const DEFAULT_REPO = "default-user/space-bookmarks";
 
         document.addEventListener('DOMContentLoaded', async () => {
             initStars();
@@ -547,6 +548,7 @@
 
         async function init() {
             loadLocalConfig();
+            autoDetectGitHubRepo();
             await loadDataFromGitHub();
             renderBookmarks();
             renderTimezones();
@@ -554,8 +556,26 @@
             renderStats();
             updateAdPreviews();
             
-            document.getElementById('githubRepo').value = appData.github.repo;
-            document.getElementById('githubToken').value = appData.github.token;
+            document.getElementById('githubRepo').value = appData.github.repo || DEFAULT_REPO;
+            document.getElementById('githubToken').value = appData.github.token || '';
+        }
+
+        function autoDetectGitHubRepo() {
+            if (!appData.github.repo) {
+                try {
+                    const currentUrl = window.location.href;
+                    if (currentUrl.includes('github.io')) {
+                        const match = currentUrl.match(/https?:\/\/([^.]+)\.github\.io\/([^\/]+)/);
+                        if (match && match[1] && match[2]) {
+                            appData.github.repo = `${match[1]}/${match[2]}`;
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.log('无法自动检测GitHub仓库:', e);
+                }
+                appData.github.repo = DEFAULT_REPO;
+            }
         }
 
         function loadLocalConfig() {
@@ -565,12 +585,15 @@
                     appData.github = JSON.parse(savedGithub);
                 } catch (e) {
                     console.error('加载GitHub配置失败', e);
+                    appData.github = { repo: DEFAULT_REPO, token: '' };
                 }
+            } else {
+                appData.github = { repo: DEFAULT_REPO, token: '' };
             }
         }
 
         async function loadDataFromGitHub() {
-            let repo = appData.github.repo || 'default-user/space-bookmarks';
+            let repo = appData.github.repo || DEFAULT_REPO;
             let token = appData.github.token;
             
             try {
@@ -615,13 +638,8 @@
         }
 
         async function saveDataToGitHub() {
-            const repo = appData.github.repo;
+            const repo = appData.github.repo || DEFAULT_REPO;
             const token = appData.github.token;
-            
-            if (!repo) {
-                showNotification('请设置GitHub仓库', 'error');
-                return false;
-            }
             
             try {
                 const dataToSave = {
@@ -639,6 +657,11 @@
                 } catch (e) {
                     console.error('编码错误', e);
                     showNotification('数据编码错误', 'error');
+                    return false;
+                }
+                
+                if (!token) {
+                    showNotification('需要令牌才能保存更改', 'warning');
                     return false;
                 }
                 
@@ -1042,7 +1065,7 @@
             });
             
             document.getElementById('saveGitHubConfig').addEventListener('click', () => {
-                const repo = document.getElementById('githubRepo').value.trim();
+                const repo = document.getElementById('githubRepo').value.trim() || DEFAULT_REPO;
                 const token = document.getElementById('githubToken').value.trim();
                 
                 appData.github = { repo, token };
@@ -1051,7 +1074,7 @@
                 document.getElementById('githubConfigModal').classList.add('hidden');
                 document.getElementById('editPage').classList.remove('translate-x-full');
                 
-                showNotification('GitHub配置已保存');
+                showNotification('配置已保存，进入编辑模式');
             });
             
             document.getElementById('importBookmarks').addEventListener('click', () => {
