@@ -69,7 +69,7 @@
                 </div>
                 <p class="text-sm text-neutral mb-4">
                     Configure your GitHub repository to load bookmarks. 
-                    Leave empty to use the default public repository.
+                    Leave empty to use the automatically detected repository.
                 </p>
                 <form id="configForm" class="space-y-4">
                     <div>
@@ -80,6 +80,9 @@
                     <div>
                         <label for="githubRepo" class="block text-sm font-medium mb-1">Repository (owner/repo)</label>
                         <input type="text" id="githubRepo" class="input-field" placeholder="username/repository">
+                        <p id="autoDetectedRepo" class="text-xs text-green-600 mt-1 hidden">
+                            <i class="fa fa-info-circle"></i> Automatically detected: <span></span>
+                        </p>
                     </div>
                     <div>
                         <label for="bookmarkPath" class="block text-sm font-medium mb-1">File Path</label>
@@ -90,7 +93,7 @@
                     </div>
                 </form>
                 <div class="mt-4 text-xs text-neutral text-center">
-                    Default: <code>example/bookmarks</code> / <code>bookmarks.json</code>
+                    Fallback: <code>github/bookmarks-example</code> / <code>bookmarks.json</code>
                 </div>
             </div>
         </div>
@@ -149,17 +152,16 @@
         const bookmarksContainer = document.getElementById('bookmarksContainer');
         const emptyState = document.getElementById('emptyState');
         const repoLink = document.getElementById('repoLink');
+        const autoDetectedRepo = document.getElementById('autoDetectedRepo');
+        const autoDetectedRepoSpan = autoDetectedRepo.querySelector('span');
 
-        // Default configuration - replace with your actual default public repository
-        const DEFAULT_CONFIG = {
-            repo: 'example/bookmarks', // This should be a public repository you control
-            path: 'bookmarks.json',
-            token: ''
-        };
+        // Fallback repository if automatic detection fails
+        const FALLBACK_REPO = 'github/bookmarks-example'; // 备用公开仓库
+        const DEFAULT_PATH = 'bookmarks.json';
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', () => {
-            // Load saved configuration or use defaults
+            // Load saved configuration or use auto-detected
             const config = loadConfig();
             updateRepoLink(config.repo);
             
@@ -193,32 +195,85 @@
                     configModal.classList.add('hidden');
                 }
             });
+
+            // Show auto-detected repo when input is empty
+            document.getElementById('githubRepo').addEventListener('input', (e) => {
+                if (!e.target.value.trim()) {
+                    const detected = detectGitHubRepo();
+                    autoDetectedRepoSpan.textContent = detected;
+                    autoDetectedRepo.classList.remove('hidden');
+                } else {
+                    autoDetectedRepo.classList.add('hidden');
+                }
+            });
         });
 
-        // Load configuration from localStorage or return defaults
+        // Automatically detect GitHub repository from current URL
+        function detectGitHubRepo() {
+            try {
+                const url = new URL(window.location.href);
+                const hostname = url.hostname;
+                
+                // Check if it's a GitHub Pages domain
+                if (hostname.endsWith('.github.io')) {
+                    // Case 1: username.github.io/repository (project site)
+                    if (hostname.includes('.github.io') && url.pathname && url.pathname !== '/') {
+                        const username = hostname.split('.')[0];
+                        const repoName = url.pathname.split('/')[1];
+                        if (username && repoName) {
+                            return `${username}/${repoName}`;
+                        }
+                    }
+                    
+                    // Case 2: username.github.io (user site)
+                    const username = hostname.split('.')[0];
+                    if (username) {
+                        return `${username}/${username}.github.io`;
+                    }
+                }
+                
+                // If we can't detect, return fallback
+                return FALLBACK_REPO;
+            } catch (err) {
+                console.error('Error detecting repository:', err);
+                return FALLBACK_REPO;
+            }
+        }
+
+        // Load configuration from localStorage or use auto-detected
         function loadConfig() {
             try {
                 const saved = localStorage.getItem('githubBookmarkConfig');
                 if (saved) {
                     const parsed = JSON.parse(saved);
-                    // Merge with defaults to ensure all properties exist
+                    // Return saved config if repo is specified, otherwise auto-detect
                     return {
-                        ...DEFAULT_CONFIG,
-                        ...parsed
+                        token: parsed.token || '',
+                        repo: parsed.repo || detectGitHubRepo(),
+                        path: parsed.path || DEFAULT_PATH
                     };
                 }
             } catch (err) {
                 console.error('Error loading config:', err);
             }
-            return { ...DEFAULT_CONFIG };
+            
+            // Default to auto-detected repo
+            return {
+                token: '',
+                repo: detectGitHubRepo(),
+                path: DEFAULT_PATH
+            };
         }
 
         // Save configuration to localStorage
         function saveConfig() {
+            const repoInput = document.getElementById('githubRepo').value.trim();
+            
             const config = {
                 token: document.getElementById('githubToken').value.trim(),
-                repo: document.getElementById('githubRepo').value.trim() || DEFAULT_CONFIG.repo,
-                path: document.getElementById('bookmarkPath').value.trim() || DEFAULT_CONFIG.path
+                // Use auto-detected if input is empty
+                repo: repoInput || detectGitHubRepo(),
+                path: document.getElementById('bookmarkPath').value.trim() || DEFAULT_PATH
             };
             
             localStorage.setItem('githubBookmarkConfig', JSON.stringify(config));
@@ -238,9 +293,19 @@
         // Populate config form with saved values
         function populateConfigForm() {
             const config = loadConfig();
+            const detectedRepo = detectGitHubRepo();
+            
             document.getElementById('githubToken').value = config.token || '';
             document.getElementById('githubRepo').value = config.repo || '';
-            document.getElementById('bookmarkPath').value = config.path || DEFAULT_CONFIG.path;
+            document.getElementById('bookmarkPath').value = config.path || DEFAULT_PATH;
+            
+            // Show auto-detected repo info if input is empty
+            if (!document.getElementById('githubRepo').value.trim()) {
+                autoDetectedRepoSpan.textContent = detectedRepo;
+                autoDetectedRepo.classList.remove('hidden');
+            } else {
+                autoDetectedRepo.classList.add('hidden');
+            }
         }
 
         // Update repository link in footer
@@ -280,6 +345,11 @@
                 if (!response.ok) {
                     // Handle different error statuses
                     if (response.status === 404) {
+                        // If default repo not found, try fallback
+                        if (config.repo === detectGitHubRepo() && config.repo !== FALLBACK_REPO) {
+                            console.log('Trying fallback repository...');
+                            return loadBookmarks({...config, repo: FALLBACK_REPO});
+                        }
                         throw new Error('Bookmark file not found in repository');
                     } else if (response.status === 403) {
                         throw new Error('Access denied. Check your token permissions');
