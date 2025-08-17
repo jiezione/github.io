@@ -231,16 +231,23 @@
                 </button>
             </div>
 
-            <!-- GitHub配置 -->
+            <!-- 仓库配置 -->
             <div class="bg-day-card dark:bg-space-light rounded-xl p-5 shadow-lg border border-gray-100 dark:border-space-accent/20">
-                <h3 class="text-xl font-semibold mb-4">GitHub 配置 (可选)</h3>
+                <h3 class="text-xl font-semibold mb-4">仓库配置</h3>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">默认仓库地址</label>
+                    <input type="url" id="default-repo-url" placeholder="默认书签仓库URL" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">此地址将在未配置GitHub仓库时使用</p>
+                </div>
+                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-sm font-medium mb-1">用户名</label>
+                        <label class="block text-sm font-medium mb-1">GitHub 用户名</label>
                         <input type="text" id="github-username" placeholder="GitHub 用户名" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">仓库名</label>
+                        <label class="block text-sm font-medium mb-1">GitHub 仓库名</label>
                         <input type="text" id="github-repo" placeholder="仓库名称" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent">
                     </div>
                     <div>
@@ -248,11 +255,20 @@
                         <input type="password" id="github-token" placeholder="用于私有仓库和修改" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent">
                     </div>
                 </div>
-                <div class="mt-4">
-                    <button id="save-github-config" class="px-4 py-2 bg-space-accent hover:bg-space-accent/80 text-white rounded-lg transition-colors">
+                
+                <div class="mt-4 flex flex-wrap gap-3">
+                    <button id="fetch-repo-info" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
+                        <i class="fa fa-refresh mr-1"></i> 获取仓库信息
+                    </button>
+                    <button id="save-repo-config" class="px-4 py-2 bg-space-accent hover:bg-space-accent/80 text-white rounded-lg transition-colors">
                         <i class="fa fa-save mr-1"></i> 保存配置
                     </button>
-                    <span id="github-config-status" class="ml-3 text-sm">未配置时使用默认公共仓库: https://example.com/repo-name/bookmarks.json</span>
+                    <span id="repo-config-status" class="mt-2 text-sm"></span>
+                </div>
+                
+                <div id="repo-info" class="mt-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hidden">
+                    <h4 class="font-medium mb-2">仓库信息</h4>
+                    <pre id="repo-info-content" class="text-sm overflow-x-auto"></pre>
                 </div>
             </div>
 
@@ -441,13 +457,15 @@
                 { id: 2, url: '#', img: 'https://picsum.photos/1200/300?random=2', text: '发现新的星系' },
                 { id: 3, url: '#', img: 'https://picsum.photos/1200/300?random=3', text: '星际旅行指南' }
             ],
-            githubConfig: {
-                username: '',
-                repo: '',
-                token: ''
+            repoConfig: {
+                defaultRepoUrl: '',
+                githubUsername: '',
+                githubRepo: '',
+                githubToken: ''
             },
             onlineTimeData: [0, 1.5, 2, 0.5, 3, 4, 2.5],
-            defaultRepoUrl: 'https://example.com/repo-name/bookmarks.json' // 更新为指定的默认仓库地址
+            // 内置的最终fallback默认仓库
+            builtInDefaultRepo: 'https://example.com/repo-name/bookmarks.json'
         };
 
         // DOM 元素
@@ -473,11 +491,17 @@
             backupFileInput: document.getElementById('backup-file'),
             saveChangesBtn: document.getElementById('save-changes'),
             backupStatus: document.getElementById('backup-status'),
+            // 仓库配置元素
+            defaultRepoUrl: document.getElementById('default-repo-url'),
             githubUsername: document.getElementById('github-username'),
             githubRepo: document.getElementById('github-repo'),
             githubToken: document.getElementById('github-token'),
-            saveGithubConfigBtn: document.getElementById('save-github-config'),
-            githubConfigStatus: document.getElementById('github-config-status'),
+            saveRepoConfigBtn: document.getElementById('save-repo-config'),
+            fetchRepoInfoBtn: document.getElementById('fetch-repo-info'),
+            repoConfigStatus: document.getElementById('repo-config-status'),
+            repoInfo: document.getElementById('repo-info'),
+            repoInfoContent: document.getElementById('repo-info-content'),
+            // 其他元素
             addCategoryBtn: document.getElementById('add-category'),
             modal: document.getElementById('modal'),
             modalTitle: document.getElementById('modal-title'),
@@ -1142,6 +1166,11 @@
                 categories: appData.categories,
                 timezones: appData.timezones,
                 ads: appData.ads,
+                repoConfig: {
+                    ...appData.repoConfig,
+                    // 不备份敏感信息
+                    githubToken: ''
+                },
                 timestamp: new Date().toISOString()
             };
             
@@ -1167,6 +1196,15 @@
                 if (data.categories) appData.categories = data.categories;
                 if (data.timezones) appData.timezones = data.timezones;
                 if (data.ads) appData.ads = data.ads;
+                if (data.repoConfig) {
+                    appData.repoConfig = {
+                        ...appData.repoConfig,
+                        ...data.repoConfig,
+                        // 保留现有token，不从备份恢复
+                        githubToken: appData.repoConfig.githubToken
+                    };
+                    saveRepoConfig();
+                }
                 
                 renderEditBookmarks();
                 renderTimezones();
@@ -1210,6 +1248,7 @@
             ad.text = titleInput.value.trim() || `广告 ${adId}`;
             
             updateAds();
+            saveDataToLocalStorage();
             showToast(`广告 ${adId} 已保存`, 'success');
         }
 
@@ -1231,6 +1270,7 @@
                 if (ad) {
                     ad.img = e.target.result;
                     updateAds();
+                    saveDataToLocalStorage();
                     showToast(`广告 ${adId} 图片已更新`, 'success');
                 }
             };
@@ -1275,25 +1315,38 @@
             }
         }
 
-        // 从GitHub或默认仓库加载数据
-        async function loadDataFromRepository() {
-            const { username, repo, token } = appData.githubConfig;
-            let url = appData.defaultRepoUrl; // 默认使用指定的仓库地址
-            let headers = {};
-            let isGitHub = false;
+        // 获取当前使用的仓库地址
+        function getCurrentRepoUrl() {
+            const { defaultRepoUrl, githubUsername, githubRepo } = appData.repoConfig;
             
-            // 如果配置了GitHub信息，使用GitHub
-            if (username && repo) {
-                isGitHub = true;
-                if (token) {
-                    url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
-                    headers = {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    };
-                } else {
-                    url = `https://raw.githubusercontent.com/${username}/${repo}/main/bookmarks.json`;
-                }
+            // 优先使用GitHub仓库
+            if (githubUsername && githubRepo) {
+                return appData.repoConfig.githubToken 
+                    ? `https://api.github.com/repos/${githubUsername}/${githubRepo}/contents/bookmarks.json`
+                    : `https://raw.githubusercontent.com/${githubUsername}/${githubRepo}/main/bookmarks.json`;
+            }
+            
+            // 其次使用用户配置的默认仓库
+            if (defaultRepoUrl) {
+                return defaultRepoUrl;
+            }
+            
+            // 最后使用内置的默认仓库
+            return appData.builtInDefaultRepo;
+        }
+
+        // 从仓库加载数据
+        async function loadDataFromRepository() {
+            const url = getCurrentRepoUrl();
+            const { githubToken } = appData.repoConfig;
+            const isGitHubApi = url.startsWith('https://api.github.com/repos/');
+            
+            let headers = {};
+            if (isGitHubApi && githubToken) {
+                headers = {
+                    'Authorization': `token ${githubToken}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                };
             }
             
             try {
@@ -1309,11 +1362,7 @@
                 clearTimeout(timeoutId);
                 
                 if (!response.ok) {
-                    if (response.status === 404) {
-                        showToast(isGitHub ? '未找到GitHub书签数据' : '未找到默认仓库数据', 'warning');
-                    } else {
-                        showToast(`${isGitHub ? 'GitHub' : '默认仓库'}请求失败: HTTP ${response.status}`, 'warning');
-                    }
+                    showToast(`仓库请求失败: HTTP ${response.status} (${url})`, 'warning');
                     
                     // 尝试从本地存储加载
                     const localLoaded = loadDataFromLocalStorage();
@@ -1321,7 +1370,7 @@
                 }
                 
                 let data;
-                if (isGitHub && token) {
+                if (isGitHubApi) {
                     const githubData = await response.json();
                     data = JSON.parse(atob(githubData.content));
                 } else {
@@ -1336,17 +1385,17 @@
                 // 同时保存到本地存储作为备份
                 saveDataToLocalStorage();
                 
-                showToast(isGitHub ? '已从GitHub加载数据' : '已从默认仓库加载数据', 'success');
+                showToast(`已从仓库加载数据: ${url}`, 'success');
                 return true;
             } catch (e) {
-                console.error(`从${isGitHub ? 'GitHub' : '默认仓库'}加载数据失败:`, e);
+                console.error(`从仓库加载数据失败:`, e);
                 
                 // 处理不同类型的错误
                 let errorMsg;
                 if (e.name === 'AbortError') {
-                    errorMsg = `${isGitHub ? 'GitHub' : '默认仓库'}请求超时`;
+                    errorMsg = `仓库请求超时 (${url})`;
                 } else if (e.message.includes('Failed to fetch')) {
-                    errorMsg = `无法连接到${isGitHub ? 'GitHub' : '默认仓库'}`;
+                    errorMsg = `无法连接到仓库 (${url})`;
                 } else {
                     errorMsg = e.message;
                 }
@@ -1359,6 +1408,56 @@
             }
         }
 
+        // 获取仓库信息
+        async function fetchRepoInfo() {
+            const url = getCurrentRepoUrl();
+            const { githubToken } = appData.repoConfig;
+            const isGitHubApi = url.startsWith('https://api.github.com/repos/');
+            
+            elements.repoConfigStatus.textContent = '正在获取仓库信息...';
+            elements.repoConfigStatus.className = 'mt-2 text-sm text-blue-500';
+            elements.repoInfo.classList.add('hidden');
+            
+            let headers = {};
+            if (isGitHubApi && githubToken) {
+                headers = {
+                    'Authorization': `token ${githubToken}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                };
+            }
+            
+            try {
+                const response = await fetch(url, { headers });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                let data = await response.json();
+                
+                // 如果是GitHub API响应，解码内容
+                if (isGitHubApi) {
+                    try {
+                        data.decodedContent = JSON.parse(atob(data.content));
+                    } catch (e) {
+                        data.decodedContent = "无法解析内容: 不是有效的JSON";
+                    }
+                }
+                
+                elements.repoInfoContent.textContent = JSON.stringify(data, null, 2);
+                elements.repoInfo.classList.remove('hidden');
+                elements.repoConfigStatus.textContent = '仓库信息获取成功';
+                elements.repoConfigStatus.className = 'mt-2 text-sm text-green-500';
+                
+                return true;
+            } catch (e) {
+                console.error(`获取仓库信息失败:`, e);
+                elements.repoConfigStatus.textContent = `获取失败: ${e.message}`;
+                elements.repoConfigStatus.className = 'mt-2 text-sm text-red-500';
+                return false;
+            }
+        }
+
         // 保存数据到配置的仓库
         async function saveDataToRepository() {
             // 总是先保存到本地存储
@@ -1368,16 +1467,16 @@
                 return false;
             }
             
-            const { username, repo, token } = appData.githubConfig;
+            const { githubUsername, githubRepo, githubToken } = appData.repoConfig;
             
             // 如果没有配置完整的GitHub信息，只保存到本地
-            if (!username || !repo) {
+            if (!githubUsername || !githubRepo) {
                 showToast('已保存到本地，若要同步到云端请配置完整的GitHub信息', 'info');
                 return true;
             }
             
             // 如果没有提供token，无法保存到GitHub
-            if (!token) {
+            if (!githubToken) {
                 showToast('已保存到本地，同步到GitHub需要提供访问令牌', 'info');
                 return true;
             }
@@ -1392,12 +1491,12 @@
                 };
                 
                 const content = JSON.stringify(data, null, 2);
+                const url = `https://api.github.com/repos/${githubUsername}/${githubRepo}/contents/bookmarks.json`;
                 
                 // 检查文件是否已存在
-                const url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
                 const response = await fetch(url, {
                     headers: {
-                        'Authorization': `token ${token}`,
+                        'Authorization': `token ${githubToken}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
@@ -1416,7 +1515,7 @@
                 const saveResponse = await fetch(url, {
                     method,
                     headers: {
-                        'Authorization': `token ${token}`,
+                        'Authorization': `token ${githubToken}`,
                         'Content-Type': 'application/json',
                         'Accept': 'application/vnd.github.v3+json'
                     },
@@ -1441,44 +1540,47 @@
             }
         }
 
-        // 保存GitHub配置
-        function saveGitHubConfig() {
-            const username = elements.githubUsername.value.trim();
-            const repo = elements.githubRepo.value.trim();
-            const token = elements.githubToken.value.trim();
+        // 保存仓库配置
+        function saveRepoConfig() {
+            appData.repoConfig = {
+                defaultRepoUrl: elements.defaultRepoUrl.value.trim(),
+                githubUsername: elements.githubUsername.value.trim(),
+                githubRepo: elements.githubRepo.value.trim(),
+                githubToken: elements.githubToken.value.trim()
+            };
             
-            appData.githubConfig = { username, repo, token };
-            localStorage.setItem('githubConfig', JSON.stringify(appData.githubConfig));
+            localStorage.setItem('repoConfig', JSON.stringify({
+                ...appData.repoConfig,
+                // 可选：仅在需要时保存token，这里选择保存
+            }));
             
-            elements.githubConfigStatus.textContent = '配置已保存';
-            elements.githubConfigStatus.className = 'ml-3 text-sm text-green-500';
+            elements.repoConfigStatus.textContent = '仓库配置已保存';
+            elements.repoConfigStatus.className = 'mt-2 text-sm text-green-500';
             
             setTimeout(() => {
-                elements.githubConfigStatus.textContent = '未配置时使用默认公共仓库: https://example.com/repo-name/bookmarks.json';
-                elements.githubConfigStatus.className = 'ml-3 text-sm';
+                elements.repoConfigStatus.textContent = '';
             }, 3000);
             
-            // 尝试加载数据
-            loadDataFromRepository().then(success => {
-                if (success) {
-                    renderEditBookmarks();
-                    renderTimezones();
-                    updateAds();
-                }
-            });
+            return true;
         }
 
-        // 加载GitHub配置
-        function loadGitHubConfig() {
-            const savedConfig = localStorage.getItem('githubConfig');
+        // 加载仓库配置
+        function loadRepoConfig() {
+            const savedConfig = localStorage.getItem('repoConfig');
             if (savedConfig) {
                 try {
-                    appData.githubConfig = JSON.parse(savedConfig);
-                    elements.githubUsername.value = appData.githubConfig.username || '';
-                    elements.githubRepo.value = appData.githubConfig.repo || '';
-                    elements.githubToken.value = appData.githubConfig.token || '';
+                    const config = JSON.parse(savedConfig);
+                    appData.repoConfig = {
+                        ...appData.repoConfig,
+                        ...config
+                    };
+                    
+                    elements.defaultRepoUrl.value = appData.repoConfig.defaultRepoUrl || '';
+                    elements.githubUsername.value = appData.repoConfig.githubUsername || '';
+                    elements.githubRepo.value = appData.repoConfig.githubRepo || '';
+                    elements.githubToken.value = appData.repoConfig.githubToken || '';
                 } catch (e) {
-                    console.error('加载GitHub配置失败:', e);
+                    console.error('加载仓库配置失败:', e);
                 }
             }
         }
@@ -1487,7 +1589,6 @@
         function initTimeChart() {
             const ctx = document.getElementById('timeChart').getContext('2d');
             const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-            const today = new Date().getDay();
             
             // 计算本周总时长
             const totalHours = appData.onlineTimeData.reduce((sum, hours) => sum + hours, 0);
@@ -1609,8 +1710,9 @@
             // 保存到仓库
             elements.saveChangesBtn.addEventListener('click', saveDataToRepository);
             
-            // GitHub配置
-            elements.saveGithubConfigBtn.addEventListener('click', saveGitHubConfig);
+            // 仓库配置
+            elements.saveRepoConfigBtn.addEventListener('click', saveRepoConfig);
+            elements.fetchRepoInfoBtn.addEventListener('click', fetchRepoInfo);
             
             // 时区管理
             elements.addTimezoneBtn.addEventListener('click', showAddTimezoneForm);
@@ -1666,7 +1768,7 @@
         async function init() {
             createStars();
             initTheme();
-            loadGitHubConfig();
+            loadRepoConfig();
             
             // 先尝试从仓库加载，如果失败则从本地存储加载
             const repoLoaded = await loadDataFromRepository();
