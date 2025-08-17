@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>星际导航 | 探索网络宇宙</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%231a202c'/><circle cx='50' cy='50' r='20' fill='%2338bdf8'/><circle cx='30' cy='30' r='5' fill='%23e2e8f0'/><circle cx='70' cy='40' r='3' fill='%23e2e8f0'/><circle cx='40' cy='70' r='4' fill='%23e2e8f0'/></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%230f172a'/><circle cx='50' cy='50' r='20' fill='%2338bdf8'/><circle cx='30' cy='30' r='5' fill='%23e2e8f0'/><circle cx='70' cy='40' r='3' fill='%23e2e8f0'/><circle cx='40' cy='70' r='4' fill='%23e2e8f0'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
@@ -57,43 +57,20 @@
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
-            .star {
-                position: absolute;
-                background-color: white;
-                border-radius: 50%;
-                animation: twinkle 2s infinite-out infinite;
-            }
-            .glow {
-                box-shadow: 0 0 15px theme('colors.space.glow');
-            }
-            .text-shadow {
-                text-shadow: 0 0 10px theme('colors.space.glow');
-            }
-            .bg-grid {
-                background-size: 40px 40px;
-                background-image: 
-                    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            }
-            .scrollbar-hide::-webkit-scrollbar {
-                display: none;
-            }
-            .scrollbar-hide {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-            }
+            .content-auto { content-visibility: auto; }
+            .star { position: absolute; background-color: white; border-radius: 50%; animation: twinkle 2s infinite; }
+            .glow { box-shadow: 0 0 15px theme('colors.space.glow'); }
+            .text-shadow { text-shadow: 0 0 10px theme('colors.space.glow'); }
+            .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px); }
+            .scrollbar-hide::-webkit-scrollbar { display: none; }
+            .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="bg-gray-50 dark:bg-space-black text-gray-800 dark:text-gray-100 transition-colors duration-300 min-h-screen font-sans">
-    <!-- 星空背景 -->
     <div id="stars" class="fixed inset-0 z-0 pointer-events-none"></div>
     
-    <!-- 顶部导航栏 -->
     <header id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 dark:bg-space-dark/80 backdrop-blur-md">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2">
@@ -104,13 +81,10 @@
             </div>
             
             <div class="flex items-center space-x-4">
-                <!-- 模式切换按钮 -->
                 <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-space-blue/30 transition-colors">
                     <i class="fa fa-moon-o dark:hidden text-xl"></i>
                     <i class="fa fa-sun-o hidden dark:block text-xl text-star-yellow"></i>
                 </button>
-                
-                <!-- 编辑按钮 -->
                 <button id="edit-btn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-space-blue/30 transition-colors">
                     <i class="fa fa-cog text-xl"></i>
                 </button>
@@ -118,11 +92,8 @@
         </div>
     </header>
 
-    <!-- 主内容区 -->
     <main class="container mx-auto px-4 pt-24 pb-20 relative z-10">
-        <!-- 顶部小组件 -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <!-- 在线时长统计 -->
             <div class="bg-white dark:bg-space-dark rounded-xl p-5 shadow-lg dark:shadow-space-blue/20 border border-gray-200 dark:border-space-blue/30 transform hover:-translate-y-1 transition-all">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-semibold text-lg font-space">在线时长</h3>
@@ -136,7 +107,6 @@
                 </div>
             </div>
             
-            <!-- 健康提醒 -->
             <div class="bg-white dark:bg-space-dark rounded-xl p-5 shadow-lg dark:shadow-space-blue/20 border border-gray-200 dark:border-space-blue/30 transform hover:-translate-y-1 transition-all">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-semibold text-lg font-space">健康提醒</h3>
@@ -158,7 +128,6 @@
                 </div>
             </div>
             
-            <!-- 世界时间 -->
             <div class="bg-white dark:bg-space-dark rounded-xl p-5 shadow-lg dark:shadow-space-blue/20 border border-gray-200 dark:border-space-blue/30 transform hover:-translate-y-1 transition-all">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-semibold text-lg font-space">世界时间</h3>
@@ -169,31 +138,25 @@
                     </div>
                 </div>
                 <div id="timezones" class="space-y-3 max-h-40 overflow-y-auto scrollbar-hide">
-                    <!-- 时区将通过JS动态添加 -->
                 </div>
             </div>
         </div>
         
-        <!-- 广告位1 -->
-        <div id="ad-1" class="mb-10 rounded-xl overflow-hidden shadow-lg relative group">
+        <div id="ad-1" class="mb-10 rounded-xl-xl overflow-hidden shadow-lg relative group">
             <div class="absolute inset-0 bg-gradient-to-tr from-space-blue/20 to-transparent z-10"></div>
             <img src="https://picsum.photos/1200/200?random=1" alt="广告图片1" class="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105">
             <a href="#" class="absolute inset-0 z-20"></a>
         </div>
         
-        <!-- 书签分组 -->
         <div id="bookmark-groups" class="space-y-10">
-            <!-- 书签将通过JS动态添加 -->
         </div>
         
-        <!-- 广告位2 -->
         <div id="ad-2" class="my-10 rounded-xl overflow-hidden shadow-lg relative group">
             <div class="absolute inset-0 bg-gradient-to-tr from-space-purple/20 to-transparent z-10"></div>
             <img src="https://picsum.photos/1200/200?random=2" alt="广告图片2" class="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105">
             <a href="#" class="absolute inset-0 z-20"></a>
         </div>
         
-        <!-- 广告位3 -->
         <div id="ad-3" class="my-10 rounded-xl overflow-hidden shadow-lg relative group">
             <div class="absolute inset-0 bg-gradient-to-tr from-space-pink/20 to-transparent z-10"></div>
             <img src="https://picsum.photos/1200/200?random=3" alt="广告图片3" class="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105">
@@ -201,7 +164,6 @@
         </div>
     </main>
     
-    <!-- 页脚 -->
     <footer class="bg-white dark:bg-space-dark py-6 border-t border-gray-200 dark:border-space-blue/30 relative z-10">
         <div class="container mx-auto px-4">
             <div class="dark-white flex flex-col md:flex-row justify-between items-center">
@@ -213,7 +175,6 @@
         </div>
     </footer>
     
-    <!-- GitHub设置对话框 -->
     <div id="github-settings-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
         <div class="bg-white dark:bg-space-dark rounded-xl p-6 w-full max-w-md shadow-2xl transform transition-all">
             <div class="flex justify-between items-center mb-4">
@@ -237,10 +198,8 @@
         </div>
     </div>
     
-    <!-- 编辑页面 -->
     <div id="edit-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden overflow-hidden">
         <div class="flex h-full">
-            <!-- 编辑侧边栏 -->
             <div class="w-64 bg-white dark:bg-space-dark border-r border-gray-200 dark:border-space-blue/30 overflow-y-auto">
                 <div class="p-4 border-b border-gray-200 dark:border-space-blue/30">
                     <h3 class="font-bold text-lg font-space">编辑中心</h3>
@@ -270,12 +229,10 @@
                 </div>
             </div>
             
-            <!-- 编辑内容区 -->
             <div class="flex-1 overflow-y-auto p-6">
                 <div class="max-w-4xl mx-auto">
                     <h2 class="text-2xl font-bold mb-6 font-space">书签管理</h2>
                     
-                    <!-- 添加新书签 -->
                     <div class="bg-white dark:bg-space-dark rounded-xl p-5 shadow-md dark:shadow-space-blue/20 border border-gray-200 dark:border-space-blue/30 mb-8">
                         <h3 class="font-semibold text-lg mb-4">添加新书签</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -299,21 +256,17 @@
                         </div>
                     </div>
                     
-                    <!-- 书签列表 -->
                     <div id="edit-bookmarks-container">
-                        <!-- 编辑模式下的书签将通过JS动态添加 -->
                     </div>
                 </div>
             </div>
             
-            <!-- 关闭按钮 -->
             <button id="close-edit" class="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors">
                 <i class="fa fa-times text-xl"></i>
             </button>
         </div>
     </div>
     
-    <!-- 管理广告对话框 -->
     <div id="ads-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
         <div class="bg-white dark:bg-space-dark rounded-xl p-6 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
@@ -324,7 +277,6 @@
             </div>
             
             <div class="space-y-6">
-                <!-- 广告1 -->
                 <div class="border border-gray-200 dark:border-space-blue/30 rounded-lg p-4">
                     <h4 class="font-medium mb-3">广告位 1</h4>
                     <div class="space-y-3">
@@ -346,7 +298,6 @@
                     </div>
                 </div>
                 
-                <!-- 广告2 -->
                 <div class="border border-gray-200 dark:border-space-blue/30 rounded-lg p-4">
                     <h4 class="font-medium mb-3">广告位 2</h4>
                     <div class="space-y-3">
@@ -368,7 +319,6 @@
                     </div>
                 </div>
                 
-                <!-- 广告3 -->
                 <div class="border border-gray-200 dark:border-space-blue/30 rounded-lg p-4">
                     <h4 class="font-medium mb-3">广告位 3</h4>
                     <div class="space-y-3">
@@ -397,7 +347,6 @@
         </div>
     </div>
     
-    <!-- 管理时区对话框 -->
     <div id="timezones-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
         <div class="bg-white dark:bg-space-dark rounded-xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
@@ -418,7 +367,6 @@
             </div>
             
             <div id="timezones-list" class="space-y-2">
-                <!-- 时区列表将通过JS动态添加 -->
             </div>
             
             <button class="save-timezones-btn w-full bg-space-blue hover:bg-space-blue/80 text-white py-2 rounded-lg transition-colors font-medium mt-4">
@@ -427,7 +375,6 @@
         </div>
     </div>
     
-    <!-- 通知提示 -->
     <div id="notification" class="fixed bottom-4 right-4 bg-white dark:bg-space-dark rounded-lg shadow-lg p-4 transform translate-y-20 opacity-0 transition-all duration-300 max-w-sm z-50 border border-gray-200 dark:border-space-blue/30">
         <div class="flex items-start">
             <div id="notification-icon" class="mr-3 text-xl"></div>
@@ -439,7 +386,6 @@
     </div>
     
     <script>
-        // 全局数据
         const appData = {
             bookmarks: {},
             ads: {
@@ -457,15 +403,13 @@
                 data: [2.5, 3.2, 1.8, 4.0, 2.1, 5.5, 3.8]
             },
             github: {
-                repo: 'username/navigation',
+                repo: '',
                 token: ''
             }
         };
         
-        // 默认仓库
-        const DEFAULT_GITHUB_REPO = 'yourusername/space-navigation';
+        const DEFAULT_GITHUB_REPO = 'username/space-navigation';
         
-        // DOM 元素
         const elements = {
             themeToggle: document.getElementById('theme-toggle'),
             editBtn: document.getElementById('edit-btn'),
@@ -510,7 +454,6 @@
             notificationMessage: document.getElementById('notification-message')
         };
         
-        // 初始化
         async function init() {
             createStars();
             initTheme();
@@ -525,7 +468,6 @@
             updateTotalOnlineTime();
         }
         
-        // 创建星空背景
         function createStars() {
             const count = 150;
             for (let i = 0; i < count; i++) {
@@ -542,7 +484,6 @@
             }
         }
         
-        // 初始化主题
         function initTheme() {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
@@ -551,23 +492,16 @@
             }
         }
         
-        // 初始化导航栏行为
         function initNavbarBehavior() {
             let lastScrollTop = 0;
             let hideTimeout;
             
             window.addEventListener('scroll', () => {
                 const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                
-                // 清除之前的定时器
                 clearTimeout(hideTimeout);
-                
-                // 显示导航栏
                 elements.navbar.classList.remove('translate-y-[-100%]');
                 
-                // 设置定时器，3秒后隐藏导航栏
                 hideTimeout = setTimeout(() => {
-                    // 只有在滚动到一定距离后才隐藏
                     if (scrollTop > 100) {
                         elements.navbar.classList.add('translate-y-[-100%]');
                     }
@@ -577,32 +511,27 @@
             });
         }
         
-        // 从GitHub加载数据
         async function loadDataFromGitHub() {
             try {
-                // 从本地存储获取GitHub配置
                 const savedGithubRepo = localStorage.getItem('githubRepo');
                 const savedGithubToken = localStorage.getItem('githubToken');
                 
-                // 设置默认仓库
-                elements.githubRepo.value = savedGithubRepo || DEFAULT_GITHUB_REPO;
-                elements.githubToken.value = savedGithubToken || '';
-                
                 appData.github.repo = savedGithubRepo || DEFAULT_GITHUB_REPO;
                 appData.github.token = savedGithubToken || '';
+                
+                elements.githubRepo.value = appData.github.repo;
+                elements.githubToken.value = appData.github.token;
                 
                 let url;
                 let headers = {};
                 
                 if (appData.github.token) {
-                    // 有token时使用GitHub API
                     url = `https://api.github.com/repos/${appData.github.repo}/contents/bookmarks.json`;
                     headers = {
                         'Authorization': `token ${appData.github.token}`,
                         'Accept': 'application/vnd.github.v3+json'
                     };
                 } else {
-                    // 无token时使用raw.githubusercontent.com
                     url = `https://raw.githubusercontent.com/${appData.github.repo}/main/bookmarks.json`;
                 }
                 
@@ -614,15 +543,12 @@
                 
                 let data;
                 if (appData.github.token) {
-                    // 处理GitHub API响应
                     const apiData = await response.json();
                     data = JSON.parse(atob(apiData.content));
                 } else {
-                    // 处理raw响应
                     data = await response.json();
                 }
                 
-                // 合并数据，新数据覆盖默认数据
                 if (data.bookmarks) appData.bookmarks = data.bookmarks;
                 if (data.ads) appData.ads = data.ads;
                 if (data.timezones) appData.timezones = data.timezones;
@@ -633,7 +559,6 @@
                 console.error('Failed to load data from GitHub:', error);
                 showNotification('error', '数据加载失败', '使用本地默认数据');
                 
-                // 尝试从localStorage加载
                 const localData = localStorage.getItem('backupData');
                 if (localData) {
                     try {
@@ -650,7 +575,6 @@
             }
         }
         
-        // 保存数据到GitHub
         async function saveDataToGitHub() {
             try {
                 const dataToSave = {
@@ -660,14 +584,14 @@
                     onlineTime: appData.onlineTime
                 };
                 
-                // 确保所有字符串都在Latin1范围内
                 const jsonString = JSON.stringify(dataToSave);
+                const encoder = new TextEncoder();
+                const dataBytes = encoder.encode(jsonString);
+                const base64Content = btoa(String.fromCharCode(...new Uint8Array(dataBytes)));
                 
                 let url = `https://api.github.com/repos/${appData.github.repo}/contents/bookmarks.json`;
-                let method = 'PUT';
                 let sha;
                 
-                // 先检查文件是否存在
                 try {
                     const checkResponse = await fetch(url, {
                         headers: {
@@ -684,13 +608,8 @@
                     console.log('File does not exist, creating new one');
                 }
                 
-                // 准备内容，使用UTF-8编码转换为base64
-                const encoder = new TextEncoder();
-                const dataBytes = encoder.encode(jsonString);
-                const base64Content = btoa(String.fromCharCode(...new Uint8Array(dataBytes)));
-                
                 const response = await fetch(url, {
-                    method: method,
+                    method: 'PUT',
                     headers: {
                         'Authorization': `token ${appData.github.token}`,
                         'Accept': 'application/vnd.github.v3+json',
@@ -699,7 +618,7 @@
                     body: JSON.stringify({
                         message: 'Update bookmarks via space navigation app',
                         content: base64Content,
-                        sha: sha // 只有更新现有文件时需要
+                        sha: sha
                     })
                 });
                 
@@ -707,9 +626,7 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                // 同时保存到localStorage作为备份
                 localStorage.setItem('backupData', jsonString);
-                
                 return true;
             } catch (error) {
                 console.error('Failed to save data to GitHub:', error);
@@ -717,7 +634,6 @@
             }
         }
         
-        // 渲染在线时长图表
         function renderOnlineChart() {
             const ctx = document.getElementById('onlineChart').getContext('2d');
             
@@ -780,17 +696,15 @@
             });
         }
         
-        // 更新总在线时长
         function updateTotalOnlineTime() {
             const total = appData.onlineTime.data.reduce((sum, hours) => sum + hours, 0).toFixed(1);
             elements.totalOnline.textContent = `${total}小时`;
         }
         
-        // 渲染时区
         function renderTimezones() {
             elements.timezonesContainer.innerHTML = '';
             
-            appData.timezones.forEach((timezone, index) => {
+            appData.timezones.forEach((timezone) => {
                 const timezoneEl = document.createElement('div');
                 timezoneEl.className = 'flex justify-between items-center p-2 bg-gray-50 dark:bg-space-blue/10 rounded-lg';
                 
@@ -811,11 +725,9 @@
                 elements.timezonesContainer.appendChild(timezoneEl);
             });
             
-            // 更新时区列表（编辑模式）
             renderTimezonesList();
         }
         
-        // 渲染时区列表（编辑模式）
         function renderTimezonesList() {
             elements.timezonesList.innerHTML = '';
             
@@ -836,7 +748,6 @@
                 elements.timezonesList.appendChild(timezoneEl);
             });
             
-            // 添加删除时区事件监听
             document.querySelectorAll('.delete-timezone-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const index = parseInt(e.currentTarget.dataset.index);
@@ -846,36 +757,30 @@
             });
         }
         
-        // 渲染书签
         function renderBookmarks() {
             elements.bookmarkGroups.innerHTML = '';
             
-            // 按分组渲染书签
             Object.keys(appData.bookmarks).forEach(groupName => {
                 const bookmarks = appData.bookmarks[groupName];
                 
                 const groupEl = document.createElement('div');
                 groupEl.className = 'bookmark-group';
                 
-                // 创建分组标题
                 const groupTitle = document.createElement('h2');
                 groupTitle.className = 'text-xl font-bold mb-4 font-space flex items-center';
                 groupTitle.innerHTML = `<i class="fa fa-folder-open-o mr-2 text-space-glow"></i>${groupName}`;
                 groupEl.appendChild(groupTitle);
                 
-                // 创建书签网格
                 const bookmarksGrid = document.createElement('div');
                 bookmarksGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4';
                 groupEl.appendChild(bookmarksGrid);
                 
-                // 添加书签
-                bookmarks.forEach((bookmark, index) => {
+                bookmarks.forEach((bookmark) => {
                     const bookmarkEl = document.createElement('a');
                     bookmarkEl.href = bookmark.url;
                     bookmarkEl.target = '_blank';
                     bookmarkEl.className = 'bg-white dark:bg-space-dark rounded-lg p-3 shadow-md dark:shadow-space-blue/20 border border-gray-200 dark:border-space-blue/30 hover:shadow-lg dark:hover:shadow-space-blue/30 hover:-translate-y-1 transition-all flex flex-col items-center text-center group';
                     
-                    // 获取favicon或首字母
                     let faviconHtml = '';
                     if (bookmark.favicon) {
                         faviconHtml = `<img src="${bookmark.favicon}" alt="${bookmark.title} 图标" class="w-8 h-8 mb-2 rounded opacity-80 group-hover:opacity-100 transition-opacity">`;
@@ -897,23 +802,19 @@
                 elements.bookmarkGroups.appendChild(groupEl);
             });
             
-            // 同时渲染编辑模式下的书签
             renderEditBookmarks();
             updateTotalBookmarks();
         }
         
-        // 渲染编辑模式下的书签
         function renderEditBookmarks() {
             elements.editBookmarksContainer.innerHTML = '';
             
-            // 按分组渲染可编辑的书签
             Object.keys(appData.bookmarks).forEach(groupName => {
                 const bookmarks = appData.bookmarks[groupName];
                 
                 const groupEl = document.createElement('div');
                 groupEl.className = 'mb-8';
                 
-                // 创建分组标题
                 const groupHeader = document.createElement('div');
                 groupHeader.className = 'flex justify-between items-center mb-4';
                 groupHeader.innerHTML = `
@@ -924,15 +825,13 @@
                 `;
                 groupEl.appendChild(groupHeader);
                 
-                // 创建书签列表
                 const bookmarksList = document.createElement('div');
                 bookmarksList.className = 'grid grid-cols-1 md:grid-cols-2 gap-3';
                 groupEl.appendChild(bookmarksList);
                 
-                // 添加可编辑的书签
                 bookmarks.forEach((bookmark, index) => {
                     const bookmarkEl = document.createElement('div');
-                    bookmarkEl.className = 'bg-white dark:bg-space-dark rounded-lg p-4 shadow-md dark:shadow-space-blue/20 border border-gray-200 dark:border-space-blue/30';
+                    bookmarkEl.className = 'bg-white dark:bg-space-dark rounded-lg p-4 shadow-md-md dark:shadow-space-blue/20 border border-gray-200 dark:border-space-blue/30';
                     
                     bookmarkEl.innerHTML = `
                         <div class="flex justify-between items-start mb-3">
@@ -955,10 +854,10 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <input type="text" value="${bookmark.title || ''}" placeholder="标题" class="bookmark-title px-3 py-2 rounded-lg border border-gray-300 dark:border-space-blue/50 bg-gray-100 dark:bg-space-black focus:outline-none focus:ring-2 focus:ring-space-glow dark:bg-opacity-50 text-sm">
-                                <input type="text" value="${groupName}" placeholder="分组" class="bookmark-group px-3 py-2 rounded-lg border border-gray-300 dark:border-space-blue/50 bg-gray-100 dark:bg-space-black focus:outline-none focus:ring-2 focus:ring-space-glow dark:bg-opacity-50 text-sm">
+                                <input type="text" value="${groupName}" placeholder="分组" class="bookmark-group px-3 py-2 rounded-lg border border border-gray-300 dark:border-space-blue/50 bg-gray-100 dark:bg-space-black focus:outline-none focus:ring-2 focus:ring-space-glow dark:bg-opacity-50 text-sm">
                             </div>
                             <div class="flex justify-end space-x-2">
-                                <button class="cancel-edit-btn px-3 py-1 bg-gray-200 dark:bg-space-dark border border-gray-300 dark:border-space-blue/50 rounded text-sm">取消</button>
+                                <button class="cancel-edit-btn px-3 py-1 bg-gray-200 dark:bg-space-dark dark:border-space-blue/50 rounded text-sm">取消</button>
                                 <button data-original-group="${groupName}" data-index="${index}" class="save-edit-btn px-3 py-1 bg-space-blue hover:bg-space-blue/80 text-white rounded text-sm">保存</button>
                             </div>
                         </div>
@@ -970,39 +869,24 @@
                 elements.editBookmarksContainer.appendChild(groupEl);
             });
             
-            // 添加事件监听
             setupEditBookmarkListeners();
         }
         
-        // 设置编辑书签的事件监听
         function setupEditBookmarkListeners() {
-            // 编辑书签
             document.querySelectorAll('.edit-bookmark-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const group = e.currentTarget.dataset.group;
-                    const index = e.currentTarget.dataset.index;
-                    const bookmarkEl = e.currentTarget.closest('.bg-white, .bg-space-dark');
-                    const form = bookmarkEl.querySelector('.edit-bookmark-form');
-                    
-                    // 隐藏其他所有编辑表单
-                    document.querySelectorAll('.edit-bookmark-form').forEach(f => {
-                        f.classList.add('hidden');
-                    });
-                    
-                    // 显示当前编辑表单
+                    document.querySelectorAll('.edit-bookmark-form').forEach(f => f.classList.add('hidden'));
+                    const form = e.currentTarget.closest('.bg-white, .bg-space-dark').querySelector('.edit-bookmark-form');
                     form.classList.remove('hidden');
                 });
             });
             
-            // 取消编辑
             document.querySelectorAll('.cancel-edit-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const form = e.currentTarget.closest('.edit-bookmark-form');
-                    form.classList.add('hidden');
+                    e.currentTarget.closest('.edit-bookmark-form').classList.add('hidden');
                 });
             });
             
-            // 保存编辑
             document.querySelectorAll('.save-edit-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const originalGroup = e.currentTarget.dataset.originalGroup;
@@ -1012,7 +896,6 @@
                     const title = bookmarkEl.querySelector('.bookmark-title').value;
                     const newGroup = bookmarkEl.querySelector('.bookmark-group').value;
                     
-                    // 验证URL
                     try {
                         new URL(url);
                     } catch (error) {
@@ -1020,37 +903,30 @@
                         return;
                     }
                     
-                    // 获取favicon
                     getFavicon(url).then(favicon => {
-                        // 从原分组中移除
                         const bookmark = appData.bookmarks[originalGroup][index];
                         appData.bookmarks[originalGroup].splice(index, 1);
                         
-                        // 如果原分组为空，删除分组
                         if (appData.bookmarks[originalGroup].length === 0) {
                             delete appData.bookmarks[originalGroup];
                         }
                         
-                        // 添加到新分组
                         if (!appData.bookmarks[newGroup]) {
                             appData.bookmarks[newGroup] = [];
                         }
                         
-                        // 更新书签信息
                         appData.bookmarks[newGroup].push({
                             url: url,
                             title: title || bookmark.title,
                             favicon: favicon || bookmark.favicon
                         });
                         
-                        // 重新渲染
                         renderBookmarks();
                         showNotification('success', '书签已更新', '书签信息已成功更新');
                     });
                 });
             });
             
-            // 删除书签
             document.querySelectorAll('.delete-bookmark-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const group = e.currentTarget.dataset.group;
@@ -1061,7 +937,6 @@
                     if (confirm(`确定要删除书签 "${bookmarkName}" 吗？`)) {
                         appData.bookmarks[group].splice(index, 1);
                         
-                        // 如果分组为空，删除分组
                         if (appData.bookmarks[group].length === 0) {
                             delete appData.bookmarks[group];
                         }
@@ -1072,7 +947,6 @@
                 });
             });
             
-            // 删除分组
             document.querySelectorAll('.delete-group-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const group = e.currentTarget.dataset.group;
@@ -1087,7 +961,6 @@
             });
         }
         
-        // 渲染广告
         function renderAds() {
             for (let i = 1; i <= 3; i++) {
                 const ad = appData.ads[i];
@@ -1100,14 +973,12 @@
                     imgEl.alt = `广告图片 ${i}`;
                     linkEl.href = ad.linkUrl;
                     
-                    // 更新编辑框中的值
                     document.getElementById(`ad${i}-url`).value = ad.imageUrl || '';
                     document.getElementById(`ad${i}-link`).value = ad.linkUrl || '';
                 }
             }
         }
         
-        // 更新书签总数
         function updateTotalBookmarks() {
             let total = 0;
             Object.values(appData.bookmarks).forEach(bookmarks => {
@@ -1116,17 +987,14 @@
             elements.totalBookmarks.textContent = total;
         }
         
-        // 获取网站favicon
         function getFavicon(url) {
             try {
                 const parsedUrl = new URL(url);
                 return new Promise(resolve => {
-                    // 尝试直接获取favicon
                     const testImg = new Image();
                     testImg.src = `${parsedUrl.protocol}//${parsedUrl.hostname}/favicon.ico`;
                     testImg.onload = () => resolve(testImg.src);
                     testImg.onerror = () => {
-                        // 如果直接获取失败，尝试使用第三方服务
                         resolve(`https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(parsedUrl.href)}&size=32`);
                     };
                 });
@@ -1136,7 +1004,6 @@
             }
         }
         
-        // 导入书签
         function importBookmarks(file) {
             const reader = new FileReader();
             
@@ -1149,7 +1016,6 @@
                     let importedCount = 0;
                     let duplicateCount = 0;
                     
-                    // 收集现有URL用于去重
                     const existingUrls = new Set();
                     Object.values(appData.bookmarks).forEach(group => {
                         group.forEach(bookmark => {
@@ -1157,18 +1023,15 @@
                         });
                     });
                     
-                    // 处理导入的书签
                     bookmarks.forEach(bookmark => {
                         const url = bookmark.href;
                         const title = bookmark.textContent.trim();
                         
-                        // 跳过无效URL和重复项
                         if (!url || url === 'about:blank' || existingUrls.has(url)) {
                             duplicateCount++;
                             return;
                         }
                         
-                        // 尝试获取分组信息
                         let groupName = '默认';
                         let parent = bookmark.parentNode;
                         while (parent && parent.tagName !== 'DL') {
@@ -1179,7 +1042,6 @@
                             parent = parent.parentNode;
                         }
                         
-                        // 获取favicon并添加书签
                         getFavicon(url).then(favicon => {
                             if (!appData.bookmarks[groupName]) {
                                 appData.bookmarks[groupName] = [];
@@ -1193,8 +1055,6 @@
                             
                             existingUrls.add(url);
                             importedCount++;
-                            
-                            // 重新渲染
                             renderBookmarks();
                         });
                     });
@@ -1209,16 +1069,13 @@
             reader.readAsText(file);
         }
         
-        // 导出书签
         function exportBookmarks() {
-            // 创建HTML书签文件内容
             let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
 <TITLE>书签导出</TITLE>
 <H1>书签</H1>
 <DL><p>`;
             
-            // 添加分组和书签
             Object.keys(appData.bookmarks).forEach(groupName => {
                 html += `<DT><H3>${groupName}</H3>
 <DL><p>`;
@@ -1232,7 +1089,6 @@
             
             html += `</DL><p>`;
             
-            // 创建并下载文件
             const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1246,7 +1102,6 @@
             showNotification('success', '书签导出成功', '书签已导出为HTML文件');
         }
         
-        // 备份数据
         function backupData() {
             const dataToBackup = {
                 bookmarks: appData.bookmarks,
@@ -1269,7 +1124,6 @@
             showNotification('success', '数据备份成功', '所有数据已导出为JSON文件');
         }
         
-        // 恢复数据
         function restoreData(file) {
             const reader = new FileReader();
             
@@ -1282,7 +1136,6 @@
                     if (restoredData.timezones) appData.timezones = restoredData.timezones;
                     if (restoredData.onlineTime) appData.onlineTime = restoredData.onlineTime;
                     
-                    // 重新渲染
                     renderBookmarks();
                     renderAds();
                     renderTimezones();
@@ -1299,7 +1152,6 @@
             reader.readAsText(file);
         }
         
-        // 显示通知
         function showNotification(type, title, message) {
             const iconMap = {
                 success: '<i class="fa fa-check-circle text-green-500"></i>',
@@ -1311,20 +1163,16 @@
             elements.notificationTitle.textContent = title;
             elements.notificationMessage.textContent = message;
             
-            // 显示通知
             elements.notification.classList.remove('translate-y-20', 'opacity-0');
             elements.notification.classList.add('translate-y-0', 'opacity-100');
             
-            // 3秒后隐藏
             setTimeout(() => {
                 elements.notification.classList.remove('translate-y-0', 'opacity-100');
                 elements.notification.classList.add('translate-y-20', 'opacity-0');
             }, 3000);
         }
         
-        // 设置事件监听
         function setupEventListeners() {
-            // 主题切换
             elements.themeToggle.addEventListener('click', () => {
                 if (document.documentElement.classList.contains('dark')) {
                     document.documentElement.classList.remove('dark');
@@ -1333,39 +1181,31 @@
                     document.documentElement.classList.add('dark');
                     localStorage.theme = 'dark';
                 }
-                renderOnlineChart(); // 图表颜色需要重新渲染
+                renderOnlineChart();
             });
             
-            // 打开编辑页面
             elements.editBtn.addEventListener('click', () => {
-                // 检查是否已配置GitHub
                 const savedGithubRepo = localStorage.getItem('githubRepo');
-                const savedGithubToken = localStorage.getItem('githubToken');
                 
                 if (!savedGithubRepo) {
-                    // 显示GitHub设置对话框
                     elements.githubSettingsModal.classList.remove('hidden');
                     elements.githubSettingsModal.classList.add('flex');
                 } else {
-                    // 直接显示编辑页面
                     elements.editModal.classList.remove('hidden');
                     elements.editModal.classList.add('flex');
                 }
             });
             
-            // 关闭编辑页面
             elements.closeEdit.addEventListener('click', () => {
                 elements.editModal.classList.remove('flex');
                 elements.editModal.classList.add('hidden');
             });
             
-            // 关闭GitHub设置对话框
             elements.closeSettings.addEventListener('click', () => {
                 elements.githubSettingsModal.classList.remove('flex');
                 elements.githubSettingsModal.classList.add('hidden');
             });
             
-            // 保存GitHub设置
             elements.saveGithubSettings.addEventListener('click', () => {
                 const repo = elements.githubRepo.value.trim();
                 const token = elements.githubToken.value.trim();
@@ -1375,15 +1215,12 @@
                     return;
                 }
                 
-                // 保存到localStorage
                 localStorage.setItem('githubRepo', repo);
                 localStorage.setItem('githubToken', token);
                 
-                // 更新应用数据
                 appData.github.repo = repo;
                 appData.github.token = token;
                 
-                // 关闭设置对话框，打开编辑页面
                 elements.githubSettingsModal.classList.remove('flex');
                 elements.githubSettingsModal.classList.add('hidden');
                 elements.editModal.classList.remove('hidden');
@@ -1392,7 +1229,6 @@
                 showNotification('success', '配置已保存', 'GitHub设置已更新');
             });
             
-            // 导入书签
             elements.importBookmarks.addEventListener('click', () => {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -1408,13 +1244,10 @@
                 input.click();
             });
             
-            // 导出书签
             elements.exportBookmarks.addEventListener('click', exportBookmarks);
             
-            // 备份数据
             elements.backupData.addEventListener('click', backupData);
             
-            // 恢复数据
             elements.restoreData.addEventListener('click', () => {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -1430,13 +1263,11 @@
                 input.click();
             });
             
-            // 打开广告管理
             elements.manageAds.addEventListener('click', () => {
                 elements.adsModal.classList.remove('hidden');
                 elements.adsModal.classList.add('flex');
             });
             
-            // 关闭广告管理
             elements.closeAdsModal.forEach(btn => {
                 btn.addEventListener('click', () => {
                     elements.adsModal.classList.remove('flex');
@@ -1444,7 +1275,6 @@
                 });
             });
             
-            // 删除广告
             elements.deleteAdBtn.forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const adId = e.currentTarget.dataset.ad;
@@ -1457,7 +1287,6 @@
                 });
             });
             
-            // 保存广告设置
             elements.saveAdsBtn.addEventListener('click', () => {
                 for (let i = 1; i <= 3; i++) {
                     const imageUrl = document.getElementById(`ad${i}-url`).value.trim();
@@ -1475,18 +1304,15 @@
                 showNotification('success', '广告设置已保存', '广告配置已更新');
             });
             
-            // 广告图片上传
             for (let i = 1; i <= 3; i++) {
                 document.getElementById(`ad${i}-upload`).addEventListener('change', function(e) {
                     const file = e.target.files[0];
                     if (file) {
-                        // 检查文件大小
                         if (file.size > 3 * 1024 * 1024) {
                             showNotification('error', '文件过大', '图片大小不能超过3M');
                             return;
                         }
                         
-                        // 读取图片并显示预览
                         const reader = new FileReader();
                         reader.onload = function(event) {
                             document.getElementById(`ad${i}-url`).value = event.target.result;
@@ -1496,13 +1322,11 @@
                 });
             }
             
-            // 打开时区管理
             elements.manageTimezones.addEventListener('click', () => {
                 elements.timezonesModal.classList.remove('hidden');
                 elements.timezonesModal.classList.add('flex');
             });
             
-            // 关闭时区管理
             elements.closeTimezonesModal.forEach(btn => {
                 btn.addEventListener('click', () => {
                     elements.timezonesModal.classList.remove('flex');
@@ -1510,7 +1334,6 @@
                 });
             });
             
-            // 添加时区
             elements.addTimezoneBtn.addEventListener('click', () => {
                 const name = document.getElementById('new-timezone-name').value.trim();
                 const offset = document.getElementById('new-timezone-offset').value.trim();
@@ -1520,7 +1343,6 @@
                     return;
                 }
                 
-                // 验证偏移格式
                 if (!/^[+-]\d{1,2}$/.test(offset)) {
                     showNotification('error', '格式错误', 'UTC偏移格式应为 +8 或 -5 这样的形式');
                     return;
@@ -1529,18 +1351,15 @@
                 appData.timezones.push({ name, offset });
                 renderTimezonesList();
                 
-                // 清空输入
                 document.getElementById('new-timezone-name').value = '';
                 document.getElementById('new-timezone-offset').value = '';
             });
             
-            // 快速添加时区
             elements.addTimezone.addEventListener('click', () => {
                 elements.timezonesModal.classList.remove('hidden');
                 elements.timezonesModal.classList.add('flex');
             });
             
-            // 保存时区设置
             elements.saveTimezonesBtn.addEventListener('click', () => {
                 renderTimezones();
                 elements.timezonesModal.classList.remove('flex');
@@ -1548,13 +1367,11 @@
                 showNotification('success', '时区设置已保存', '时区配置已更新');
             });
             
-            // 添加新书签
             elements.addBookmarkBtn.addEventListener('click', () => {
                 const url = elements.newBookmarkUrl.value.trim();
                 const title = elements.newBookmarkTitle.value.trim();
                 const group = elements.newBookmarkGroup.value.trim() || '默认';
                 
-                // 验证URL
                 try {
                     new URL(url);
                 } catch (error) {
@@ -1562,7 +1379,6 @@
                     return;
                 }
                 
-                // 检查是否已存在
                 let isDuplicate = false;
                 Object.values(appData.bookmarks).forEach(bookmarks => {
                     bookmarks.forEach(bookmark => {
@@ -1577,7 +1393,6 @@
                     return;
                 }
                 
-                // 获取favicon并添加书签
                 getFavicon(url).then(favicon => {
                     if (!appData.bookmarks[group]) {
                         appData.bookmarks[group] = [];
@@ -1589,31 +1404,25 @@
                         favicon: favicon
                     });
                     
-                    // 清空输入
                     elements.newBookmarkUrl.value = '';
                     elements.newBookmarkTitle.value = '';
                     
-                    // 重新渲染
                     renderBookmarks();
                     showNotification('success', '书签已添加', '成功添加新书签');
                 });
             });
             
-            // 保存更改到GitHub
             elements.saveChanges.addEventListener('click', async () => {
-                // 显示加载状态
                 elements.saveChanges.disabled = true;
                 elements.saveChanges.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>保存中...';
                 
                 const success = await saveDataToGitHub();
                 
-                // 恢复按钮状态
                 elements.saveChanges.disabled = false;
                 elements.saveChanges.innerHTML = '<i class="fa fa-github mr-2"></i>保存更改';
                 
                 if (success) {
                     showNotification('success', '保存成功', '所有更改已同步到GitHub');
-                    // 关闭编辑页面
                     elements.editModal.classList.remove('flex');
                     elements.editModal.classList.add('hidden');
                 } else {
@@ -1621,7 +1430,6 @@
                 }
             });
             
-            // 点击编辑模态框外部关闭
             elements.editModal.addEventListener('click', (e) => {
                 if (e.target === elements.editModal) {
                     elements.editModal.classList.remove('flex');
@@ -1629,7 +1437,6 @@
                 }
             });
             
-            // 点击广告模态框外部关闭
             elements.adsModal.addEventListener('click', (e) => {
                 if (e.target === elements.adsModal) {
                     elements.adsModal.classList.remove('flex');
@@ -1637,7 +1444,6 @@
                 }
             });
             
-            // 点击时区模态框外部关闭
             elements.timezonesModal.addEventListener('click', (e) => {
                 if (e.target === elements.timezonesModal) {
                     elements.timezonesModal.classList.remove('flex');
@@ -1645,7 +1451,6 @@
                 }
             });
             
-            // 点击GitHub设置模态框外部关闭
             elements.githubSettingsModal.addEventListener('click', (e) => {
                 if (e.target === elements.githubSettingsModal) {
                     elements.githubSettingsModal.classList.remove('flex');
@@ -1653,12 +1458,11 @@
                 }
             });
             
-            // 每秒钟更新一次时间
             setInterval(renderTimezones, 1000);
         }
         
-        // 启动应用
         window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
+    
