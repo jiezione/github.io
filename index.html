@@ -9,15 +9,15 @@
 </head>
 <body class="bg-gray-50">
     <div class="container mx-auto p-4 max-w-4xl">
-        <div class="flex justify-content-between items-center mb-6">
+        <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800">Bookmark Manager</h1>
-            <button id="config-btn" class="bg-blue-500 text-white px-4 py-2 rounded rounded hover:bg-blue-600">
+            <button id="config-btn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                 <i class="fa fa-cog mr-1"></i> Settings
             </button>
         </div>
 
         <!-- 配置面板 -->
-        <div id="config-panel" class="hidden bg-white p-6 rounded-lg shadow-md mb-6 hidden">
+        <div id="config-panel" class="bg-white p-6 rounded-lg shadow-md mb-6 hidden">
             <h2 class="text-xl font-semibold mb-4">Repository Settings</h2>
             <div class="space-y-4">
                 <div>
@@ -25,6 +25,7 @@
                     <input type="text" id="default-repo-input" 
                            class="w-full p-2 border border-gray-300 rounded"
                            placeholder="your-username/your-repo">
+                    <p class="text-xs text-gray-500 mt-1">Automatically detected from current GitHub Pages URL</p>
                 </div>
                 <div>
                     <label class="block text-gray-700 mb-1">File Path</label>
@@ -52,6 +53,34 @@
     </div>
 
     <script>
+        // 从URL自动检测GitHub仓库信息 (owner/repo)
+        function detectGitHubRepoFromUrl() {
+            try {
+                const currentUrl = window.location.href;
+                const url = new URL(currentUrl);
+                
+                // GitHub Pages的URL格式通常是:
+                // 1. https://<username>.github.io/<repo>/
+                // 2. https://<org>.github.io/<repo>/
+                if (url.hostname.endsWith('.github.io')) {
+                    const parts = url.hostname.split('.');
+                    const owner = parts[0]; // 提取用户名/组织名
+                    
+                    // 提取仓库名（从路径中）
+                    const pathParts = url.pathname.split('/').filter(part => part.trim() !== '');
+                    const repo = pathParts.length > 0 ? pathParts[0] : '';
+                    
+                    if (owner && repo) {
+                        return `${owner}/${repo}`;
+                    }
+                }
+                return ''; // 不是GitHub Pages或无法解析
+            } catch (e) {
+                console.error('Failed to detect GitHub repo from URL:', e);
+                return '';
+            }
+        }
+
         // 从本地存储加载配置，没有则使用初始默认值
         function loadConfig() {
             const savedConfig = localStorage.getItem('bookmarkConfig');
@@ -59,9 +88,9 @@
                 return JSON.parse(savedConfig);
             }
             
-            // 初始默认配置 - 可根据需要修改
+            // 初始默认配置 - 自动检测当前仓库
             return {
-                githubRepo: '',
+                githubRepo: detectGitHubRepoFromUrl(),
                 filePath: 'bookmarks.json',
                 githubToken: ''
             };
@@ -72,16 +101,21 @@
             localStorage.setItem('bookmarkConfig', JSON.stringify(config));
         }
 
-        // 应用级默认仓库 - 当用户未配置任何仓库时使用
+        // 应用级默认仓库 - 当所有检测都失败时使用
         const FALLBACK_REPO = {
-            githubRepo: 'example/public-bookmarks', // 这里可以使用一个公开的示例仓库
+            githubRepo: 'example/public-bookmarks', // 备用公开仓库
             filePath: 'bookmarks.json'
         };
 
         // 加载并显示配置
         function initConfigPanel() {
             const config = loadConfig();
-            document.getElementById('default-repo-input').value = config.githubRepo || '';
+            const detectedRepo = detectGitHubRepoFromUrl();
+            
+            // 显示自动检测到的仓库，除非用户已保存了自己的配置
+            const repoToShow = config.githubRepo || detectedRepo;
+            
+            document.getElementById('default-repo-input').value = repoToShow || '';
             document.getElementById('file-path-input').value = config.filePath || 'bookmarks.json';
             document.getElementById('github-token-input').value = config.githubToken || '';
         }
@@ -89,10 +123,11 @@
         // 确定最终使用的仓库信息
         function getFinalConfig() {
             const userConfig = loadConfig();
+            const detectedRepo = detectGitHubRepoFromUrl();
             
-            // 优先使用用户配置，用户未配置则使用 fallback
+            // 优先级: 用户保存的配置 > 自动检测的仓库 > 备用仓库
             return {
-                githubRepo: userConfig.githubRepo || FALLBACK_REPO.githubRepo,
+                githubRepo: userConfig.githubRepo || detectedRepo || FALLBACK_REPO.githubRepo,
                 filePath: userConfig.filePath || FALLBACK_REPO.filePath,
                 githubToken: userConfig.githubToken || ''
             };
