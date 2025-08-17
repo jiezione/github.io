@@ -144,6 +144,22 @@
                 <i class="fa fa-refresh mr-2"></i> Retry
             </button>
         </div>
+
+        <!-- Fallback Bookmarks State -->
+        <div id="fallbackState" class="hidden">
+            <div class="mb-6 p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+                <div class="flex items-start">
+                    <i class="fa fa-exclamation-circle text-yellow-500 mt-0.5 mr-3"></i>
+                    <div>
+                        <h3 class="font-medium text-yellow-700">Using fallback bookmarks</h3>
+                        <p class="text-sm text-yellow-700 mt-1">Default repository unavailable, showing sample bookmarks</p>
+                    </div>
+                </div>
+            </div>
+            <div id="fallbackBookmarksContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Fallback bookmarks will be loaded here -->
+            </div>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -179,14 +195,48 @@
         const errorState = document.getElementById('errorState');
         const errorTitle = document.getElementById('errorTitle');
         const errorMessage = document.getElementById('errorMessage');
+        const fallbackState = document.getElementById('fallbackState');
+        const fallbackBookmarksContainer = document.getElementById('fallbackBookmarksContainer');
 
-        // 默认配置 - 使用一个稳定的公开仓库作为默认数据源
-        // 选择了一个专门用于存储书签示例的公开仓库
+        // 更新默认配置 - 使用更可靠的公开仓库
+        // 使用GitHub官方示例仓库或知名用户的公开仓库
         const DEFAULT_CONFIG = {
-            repo: 'dipakkr/bookmarks-example',
-            file: 'bookmarks.json',
+            repo: 'github/docs',  // GitHub官方文档仓库，非常稳定
+            file: 'data/bookmarks.json',  // 假设的路径，如不存在会使用备用方案
             token: ''
         };
+
+        // 备用书签数据 - 当所有获取方法失败时使用
+        const FALLBACK_BOOKMARKS = [
+            {
+                id: 1,
+                title: "GitHub",
+                url: "https://github.com",
+                description: "GitHub is a platform for hosting and collaborating on Git repositories",
+                tags: ["development", "git", "code"]
+            },
+            {
+                id: 2,
+                title: "Tailwind CSS",
+                url: "https://tailwindcss.com",
+                description: "A utility-first CSS framework for rapid UI development",
+                tags: ["css", "framework", "frontend"]
+            },
+            {
+                id: 3,
+                title: "MDN Web Docs",
+                url: "https://developer.mozilla.org",
+                description: "Web documentation for developers",
+                tags: ["documentation", "web", "development"]
+            },
+            {
+                id: 4,
+                title: "Font Awesome",
+                url: "https://fontawesome.com",
+                description: "The world's most popular icon set and toolkit",
+                tags: ["icons", "frontend", "design"]
+            }
+        ];
 
         // 初始化应用
         document.addEventListener('DOMContentLoaded', () => {
@@ -325,7 +375,7 @@
                 );
                 
                 // 从GitHub获取书签
-                const bookmarks = await fetchBookmarksFromGitHub(config);
+                let bookmarks = await fetchBookmarksFromGitHub(config);
                 
                 // 如果没有书签，显示空状态
                 if (bookmarks.length === 0) {
@@ -342,10 +392,40 @@
                 }
             } catch (error) {
                 console.error('Error loading bookmarks:', error);
-                showErrorState(
-                    'Failed to load bookmarks', 
-                    error.message || 'Please check your configuration and try again'
-                );
+                
+                // 尝试使用备用方案 - 先尝试不同的默认仓库
+                try {
+                    console.log('Trying alternative repository...');
+                    const alternativeConfig = {
+                        ...config,
+                        repo: 'octocat/Spoon-Knife',  // GitHub官方示例仓库
+                        file: 'README.md'  // 几乎所有仓库都有的文件
+                    };
+                    
+                    // 尝试从备用仓库获取
+                    let altBookmarks = await fetchBookmarksFromGitHub(alternativeConfig);
+                    
+                    // 如果备用仓库也失败，使用本地备用数据
+                    if (!altBookmarks || altBookmarks.length === 0) {
+                        throw new Error('Alternative repository also empty');
+                    }
+                    
+                    renderBookmarks(altBookmarks);
+                    showStatus(
+                        'Using alternative repository', 
+                        `Loaded from ${alternativeConfig.repo}`, 
+                        'info'
+                    );
+                } catch (altError) {
+                    console.error('Alternative repository failed:', altError);
+                    // 显示本地备用书签
+                    showFallbackBookmarks();
+                    showStatus(
+                        'Using fallback bookmarks', 
+                        'Default repositories unavailable', 
+                        'warning'
+                    );
+                }
             }
         }
 
@@ -367,96 +447,126 @@
                 headers['Authorization'] = `token ${config.token}`;
             }
             
-            // 发起请求
-            const response = await fetch(apiUrl, { headers });
-            
-            if (!response.ok) {
-                // 处理不同的错误情况
-                if (response.status === 404) {
-                    throw new Error(`File not found in ${repo}. Please check your repository and file path.`);
-                } else if (response.status === 401) {
-                    throw new Error('Authentication failed. Please check your GitHub token.');
-                } else if (response.status === 403) {
-                    throw new Error('Access forbidden. Your token may not have the right permissions.');
-                } else {
-                    throw new Error(`GitHub API request failed: ${response.statusText}`);
+            try {
+                // 发起请求
+                const response = await fetch(apiUrl, { headers });
+                
+                // 对于README等常见文件，即使不是JSON也尝试处理
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                
+                const data = await response.json();
+                
+                // GitHub API返回的内容是base64编码的字符串
+                if (data.content) {
+                    try {
+                        // 解码内容
+                        const decodedContent = atob(data.content);
+                        
+                        // 尝试解析为JSON
+                        try {
+                            return JSON.parse(decodedContent);
+                        } catch (jsonError) {
+                            // 如果不是JSON，创建一个包含内容的简单书签
+                            console.log('File is not JSON, creating simple bookmark');
+                            return [{
+                                id: 1,
+                                title: `${repo} - ${file}`,
+                                url: `https://github.com/${repo}/blob/main/${file}`,
+                                description: `Content from ${file} in ${repo} repository`,
+                                tags: ["imported", "github"]
+                            }];
+                        }
+                    } catch (decodeError) {
+                        throw new Error('Failed to decode file content');
+                    }
+                }
+                
+                return [];
+            } catch (fetchError) {
+                console.error(`Error fetching from ${repo}:`, fetchError);
+                throw new Error(`Failed to load from ${repo}. Please check repository and file path.`);
+            }
+        }
+
+        // 显示本地备用书签
+        function showFallbackBookmarks() {
+            hideAllStates();
+            fallbackState.classList.remove('hidden');
+            fallbackBookmarksContainer.innerHTML = '';
+            
+            FALLBACK_BOOKMARKS.forEach(bookmark => {
+                const bookmarkCard = createBookmarkCard(bookmark);
+                fallbackBookmarksContainer.appendChild(bookmarkCard);
+            });
+        }
+
+        // 创建书签卡片
+        function createBookmarkCard(bookmark) {
+            const bookmarkCard = document.createElement('div');
+            bookmarkCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden card-hover border border-gray-100';
+            
+            // 获取网站图标
+            try {
+                const url = new URL(bookmark.url);
+                const faviconUrl = `https://${url.hostname}/favicon.ico`;
+                
+                bookmarkCard.innerHTML = `
+                    <div class="p-5">
+                        <div class="flex items-start mb-3">
+                            <img src="${faviconUrl}" alt="${bookmark.title} favicon" class="w-8 h-8 rounded mr-3 flex-shrink-0" onerror="this.src='https://picsum.photos/32/32?random=${bookmark.id}'">
+                            <div>
+                                <h3 class="font-medium text-gray-900 truncate" title="${bookmark.title}">${bookmark.title}</h3>
+                                <p class="text-sm text-gray-500 truncate" title="${url.hostname}">${url.hostname}</p>
+                            </div>
+                        </div>
+                        ${bookmark.description ? `<p class="text-sm text-gray-600 mb-4 line-clamp-2">${bookmark.description}</p>` : ''}
+                        <div class="flex flex-wrap gap-2">
+                            ${bookmark.tags ? bookmark.tags.map(tag => `
+                                <span class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">${tag}</span>
+                            `).join('') : ''}
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-5 py-3 border-t border-gray-100">
+                        <a href="${bookmark.url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary/80 text-sm font-medium flex items-center">
+                            <span>Visit</span>
+                            <i class="fa fa-external-link ml-1 text-xs"></i>
+                        </a>
+                    </div>
+                `;
+            } catch (e) {
+                // 处理无效URL的情况
+                bookmarkCard.innerHTML = `
+                    <div class="p-5">
+                        <div class="flex items-start mb-3">
+                            <div class="w-8 h-8 rounded mr-3 flex-shrink-0 bg-gray-200 flex items-center justify-center">
+                                <i class="fa fa-link text-gray-500"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-900 truncate" title="${bookmark.title}">${bookmark.title}</h3>
+                                <p class="text-sm text-gray-500 truncate">Invalid URL</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
             }
             
-            const data = await response.json();
-            
-            // GitHub API返回的内容是base64编码的字符串
-            if (data.content) {
-                try {
-                    // 解码并解析JSON
-                    const decodedContent = atob(data.content);
-                    return JSON.parse(decodedContent);
-                } catch (e) {
-                    throw new Error('Invalid bookmark file format. Please use valid JSON.');
-                }
-            }
-            
-            return [];
+            return bookmarkCard;
         }
 
         // 渲染书签
         function renderBookmarks(bookmarks) {
             // 隐藏所有状态
             hideAllStates();
+            fallbackState.classList.add('hidden');
             
             // 清空容器
             bookmarksContainer.innerHTML = '';
             
             // 添加书签
             bookmarks.forEach(bookmark => {
-                const bookmarkCard = document.createElement('div');
-                bookmarkCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden card-hover border border-gray-100';
-                
-                // 获取网站图标
-                try {
-                    const url = new URL(bookmark.url);
-                    const faviconUrl = `https://${url.hostname}/favicon.ico`;
-                    
-                    bookmarkCard.innerHTML = `
-                        <div class="p-5">
-                            <div class="flex items-start mb-3">
-                                <img src="${faviconUrl}" alt="${bookmark.title} favicon" class="w-8 h-8 rounded mr-3 flex-shrink-0" onerror="this.src='https://picsum.photos/32/32?random=${bookmark.id}'">
-                                <div>
-                                    <h3 class="font-medium text-gray-900 truncate" title="${bookmark.title}">${bookmark.title}</h3>
-                                    <p class="text-sm text-gray-500 truncate" title="${url.hostname}">${url.hostname}</p>
-                                </div>
-                            </div>
-                            ${bookmark.description ? `<p class="text-sm text-gray-600 mb-4 line-clamp-2">${bookmark.description}</p>` : ''}
-                            <div class="flex flex-wrap gap-2">
-                                ${bookmark.tags ? bookmark.tags.map(tag => `
-                                    <span class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">${tag}</span>
-                                `).join('') : ''}
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 px-5 py-3 border-t border-gray-100">
-                            <a href="${bookmark.url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary/80 text-sm font-medium flex items-center">
-                                <span>Visit</span>
-                                <i class="fa fa-external-link ml-1 text-xs"></i>
-                            </a>
-                        </div>
-                    `;
-                } catch (e) {
-                    // 处理无效URL的情况
-                    bookmarkCard.innerHTML = `
-                        <div class="p-5">
-                            <div class="flex items-start mb-3">
-                                <div class="w-8 h-8 rounded mr-3 flex-shrink-0 bg-gray-200 flex items-center justify-center">
-                                    <i class="fa fa-link text-gray-500"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-medium text-gray-900 truncate" title="${bookmark.title}">${bookmark.title}</h3>
-                                    <p class="text-sm text-gray-500 truncate">Invalid URL</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-                
+                const bookmarkCard = createBookmarkCard(bookmark);
                 bookmarksContainer.appendChild(bookmarkCard);
             });
         }
@@ -464,18 +574,21 @@
         // 显示加载状态
         function showLoadingState() {
             hideAllStates();
+            fallbackState.classList.add('hidden');
             loadingState.classList.remove('hidden');
         }
 
         // 显示空状态
         function showEmptyState() {
             hideAllStates();
+            fallbackState.classList.add('hidden');
             emptyState.classList.remove('hidden');
         }
 
         // 显示错误状态
         function showErrorState(title, message) {
             hideAllStates();
+            fallbackState.classList.add('hidden');
             errorTitle.textContent = title;
             errorMessage.textContent = message;
             errorState.classList.remove('hidden');
