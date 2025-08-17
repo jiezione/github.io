@@ -6,6 +6,8 @@
     <title>星际导航 | 探索网络宇宙</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%232563EB'/%3E%3Ccircle cx='50' cy='50' r='25' fill='%233B82F6'/%3E%3Ccircle cx='50' cy='35' r='5' fill='white'/%3E%3Cpath d='M50 60 Q65 65 70 80 M50 60 Q35 65 30 80 M50 60 Q50 75 50 80' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E" type="image/svg+xml">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -13,35 +15,34 @@
                 extend: {
                     colors: {
                         space: {
-                            black: '#0A0E17',
-                            dark: '#12192C',
-                            blue: '#1E3A8A',
-                            purple: '#4C1D95',
-                            pink: '#EC4899',
-                            glow: '#3B82F6'
+                            dark: '#0B0E2D',
+                            light: '#1A204B',
+                            accent: '#6366F1',
+                            glow: '#8B5CF6',
+                            star: '#E0E7FF'
                         },
                         day: {
-                            bg: '#F8FAFC',
+                            bg: '#F3F4F6',
                             card: '#FFFFFF',
-                            text: '#1E293B'
+                            text: '#1F2937'
                         }
                     },
                     fontFamily: {
-                        space: ['Orbitron', 'sans-serif']
+                        space: ['Inter', 'system-ui', 'sans-serif'],
                     },
                     animation: {
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'float': 'float 6s ease-in-out infinite',
-                        'twinkle': 'twinkle 3s ease-in-out infinite'
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'twinkle': 'twinkle 2s ease-in-out infinite',
                     },
                     keyframes: {
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' }
+                            '50%': { transform: 'translateY(-10px)' },
                         },
                         twinkle: {
-                            '0%, 100%': { opacity: 0.6 },
-                            '50%': { opacity: 1 }
+                            '0%, 100%': { opacity: 1 },
+                            '50%': { opacity: 0.5 },
                         }
                     }
                 }
@@ -50,1101 +51,1072 @@
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
-            .content-auto { content-visibility: auto; }
-            .star { position: absolute; background-color: white; border-radius: 50%; }
-            .glow { box-shadow: 0 0 15px theme('colors.space.glow'); }
-            .text-shadow { text-shadow: 0 0 8px theme('colors.space.glow'); }
-            .card-hover { transition: all 0.3s ease; }
-            .card-hover:hover { transform: translateY(-5px); }
-            .gradient-mask { mask-image: linear-gradient(to bottom, black 85%, transparent 100%); }
+            .content-auto {
+                content-visibility: auto;
+            }
+            .star {
+                position: absolute;
+                background-color: white;
+                border-radius: 50%;
+                animation: twinkle var(--twinkle-duration, 2s) ease-in-out infinite;
+            }
+            .gradient-mask-b {
+                mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+                -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.1), 0 10px 10px -5px rgba(139, 92, 246, 0.04);
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%231E3A8A'/%3E%3Ccircle cx='50' cy='50' r='25' fill='%233B82F6'/%3E%3Ccircle cx='50' cy='35' r='5' fill='white'/%3E%3C/svg%3E" type="image/svg+xml">
 </head>
-<body class="font-sans transition-colors duration-500 bg-space-black text-white" id="app-body">
-    <div id="stars" class="fixed inset-0 -z-10"></div>
+<body class="font-space transition-colors duration-500 dark:bg-space-dark bg-day-bg text-day-text dark:text-white min-h-screen overflow-x-hidden">
+    <!-- 星空背景 -->
+    <div id="stars" class="fixed inset-0 -z-10 pointer-events-none opacity-70 dark:opacity-100"></div>
     
-    <div class="fixed top-4 right-4 z-50 flex gap-2">
-        <button id="theme-toggle" class="p-2 rounded-full bg-space-dark/70 backdrop-blur-sm transition-all duration-300 opacity-0 group" aria-label="切换模式">
-            <i class="fa fa-moon-o text-xl group-hover:text-space-glow"></i>
-            <span class="absolute right-full mr-2 whitespace-nowrap bg-space-dark px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">切换白天/黑夜模式</span>
-        </button>
-        <button id="edit-page-btn" class="p-2 rounded-full bg-space-dark/70 backdrop-blur-sm transition-all duration-300 opacity-0 group" aria-label="编辑页面">
-            <i class="fa fa-cog text-xl group-hover:text-space-glow"></i>
-            <span class="absolute right-full mr-2 whitespace-nowrap bg-space-dark px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">编辑书签和设置</span>
-        </button>
-    </div>
+    <!-- 行星装饰 -->
+    <div class="fixed -z-10 top-1/4 -left-20 w-64 h-64 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur-3xl animate-float hidden md:block"></div>
+    <div class="fixed -z-10 bottom-1/3 -right-32 w-96 h-96 rounded-full bg-gradient-to-r from-blue-600 to-teal-500 opacity-20 blur-3xl animate-float animation-delay-2000 hidden md:block"></div>
 
-    <div id="home-page" class="min-h-screen">
-        <div id="widgets-container" class="container mx-auto px-4 py-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-space-dark/50 backdrop-blur-sm rounded-xl p-4 border border-space-blue/30 hover:border-space-glow/50 transition-all duration-300">
-                    <h3 class="text-space-glow font-space mb-2 flex items-center">
-                        <i class="fa fa-clock-o mr-2"></i>在线时长统计
-                    </h3>
-                    <div class="grid grid-cols-7 gap-1 text-center text-sm">
-                        <div class="flex flex-col items-center">
-                            <span>一</span>
-                            <div class="w-full bg-space-blue/30 rounded-full h-2 mt-1 overflow-hidden">
-                                <div class="bg-space-glow h-full rounded-full" style="width: 65%"></div>
-                            </div>
-                            <span>2.5h</span>
-                        </div>
-                        <div class="flex flex-col items-center">
-                            <span>二</span>
-                            <div class="w-full bg-space-blue/30 rounded-full h-2 mt-1 overflow-hidden">
-                                <div class="bg-space-glow h-full rounded-full" style="width: 40%"></div>
-                            </div>
-                            <span>1.8h</span>
-                        </div>
-                        <div class="flex flex-col items-center">
-                            <span>三</span>
-                            <div class="w-full bg-space-blue/30 rounded-full h-2 mt-1 overflow-hidden">
-                                <div class="bg-space-glow h-full rounded-full" style="width: 80%"></div>
-                            </div>
-                            <span>3.2h</span>
-                        </div>
-                        <div class="flex flex-col items-center">
-                            <span>四</span>
-                            <div class="w-full bg-space-blue/30 rounded-full h-2 mt-1 overflow-hidden">
-                                <div class="bg-space-glow h-full rounded-full" style="width: 50%"></div>
-                            </div>
-                            <span>2.1h</span>
-                        </div>
-                        <div class="flex flex-col items-center">
-                            <span>五</span>
-                            <div class="w-full bg-space-blue/30 rounded-full h-2 mt-1 overflow-hidden">
-                                <div class="bg-space-glow h-full rounded-full" style="width: 75%"></div>
-                            </div>
-                            <span>3.0h</span>
-                        </div>
-                        <div class="flex flex-col items-center">
-                            <span>六</span>
-                            <div class="w-full bg-space-blue/30 rounded-full h-2 mt-1 overflow-hidden">
-                                <div class="bg-space-glow h-full rounded-full" style="width: 90%"></div>
-                            </div>
-                            <span>4.5h</span>
-                        </div>
-                        <div class="flex flex-col items-center">
-                            <span>日</span>
-                            <div class="w-full bg-space-blue/30 rounded-full h-2 mt-1 overflow-hidden">
-                                <div class="bg-space-glow h-full rounded-full" style="width: 30%"></div>
-                            </div>
-                            <span>1.2h</span>
-                        </div>
-                    </div>
+    <!-- 顶部导航栏 -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-day-bg/80 dark:bg-space-dark/80 border-b border-gray-200 dark:border-space-light/50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-r from-space-accent to-space-glow flex items-center justify-center">
+                    <i class="fa fa-compass text-white text-xl"></i>
                 </div>
-
-                <div class="bg-space-dark/50 backdrop-blur-sm rounded-xl p-4 border border-space-purple/30 hover:border-space-pink/50 transition-all duration-300">
-                    <h3 class="text-space-pink font-space mb-2 flex items-center">
-                        <i class="fa fa-heartbeat mr-2"></i>健康提醒
-                    </h3>
-                    <div class="space-y-2">
-                        <div class="flex items-center p-2 bg-space-purple/20 rounded-lg">
-                            <i class="fa fa-coffee text-space-pink mr-3"></i>
-                            <div>
-                                <div class="font-medium">休息时间</div>
-                                <div class="text-sm text-gray-300">15:30 - 建议起身活动</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center p-2 bg-space-purple/20 rounded-lg">
-                            <i class="fa fa-eye text-space-pink mr-3"></i>
-                            <div>
-                                <div class="font-medium">护眼提醒</div>
-                                <div class="text-sm text-gray-300">17:00 - 远眺放松眼睛</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center p-2 bg-space-purple/20 rounded-lg">
-                            <i class="fa fa-bed text-space-pink mr-3"></i>
-                            <div>
-                                <div class="font-medium">休息提醒</div>
-                                <div class="text-sm text-gray-300">23:00 - 准备入睡</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-space-dark/50 backdrop-blur-sm rounded-xl p-4 border border-space-blue/30 hover:border-space-glow/50 transition-all duration-300">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-space-glow font-space flex items-center">
-                            <i class="fa fa-globe mr-2"></i>世界时间
-                        </h3>
-                        <button id="add-timezone" class="text-xs bg-space-blue/50 hover:bg-space-blue/80 p-1 rounded transition-colors">
-                            <i class="fa fa-plus"></i>
-                        </button>
-                    </div>
-                    <div id="timezones-container" class="space-y-2 max-h-40 overflow-y-auto gradient-mask">
-                        <div class="flex justify-between items-center p-2 bg-space-blue/10 rounded-lg group">
-                            <div>
-                                <div class="font-medium">北京</div>
-                                <div class="text-sm text-gray-300">UTC+8</div>
-                            </div>
-                            <div class="text-right">
-                                <div id="time-beijing" class="font-mono"></div>
-                                <div id="date-beijing" class="text-sm text-gray-300"></div>
-                            </div>
-                            <button class="delete-timezone opacity-0 group-hover:opacity-100 text-red-400 p-1" data-city="北京">
-                                <i class="fa fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="flex justify-between items-center p-2 bg-space-blue/10 rounded-lg group">
-                            <div>
-                                <div class="font-medium">纽约</div>
-                                <div class="text-sm text-gray-300">UTC-4</div>
-                            </div>
-                            <div class="text-right">
-                                <div id="time-newyork" class="font-mono"></div>
-                                <div id="date-newyork" class="text-sm text-gray-300"></div>
-                            </div>
-                            <button class="delete-timezone opacity-0 group-hover:opacity-100 text-red-400 p-1" data-city="纽约">
-                                <i class="fa fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="flex justify-between items-center p-2 bg-space-blue/10 rounded-lg group">
-                            <div>
-                                <div class="font-medium">伦敦</div>
-                                <div class="text-sm text-gray-300">UTC+1</div>
-                            </div>
-                            <div class="text-right">
-                                <div id="time-london" class="font-mono"></div>
-                                <div id="date-london" class="text-sm text-gray-300"></div>
-                            </div>
-                            <button class="delete-timezone opacity-0 group-hover:opacity-100 text-red-400 p-1" data-city="伦敦">
-                                <i class="fa fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-space-accent to-space-glow">星际导航</h1>
             </div>
-        </div>
-
-        <div class="container mx-auto px-4 my-6">
-            <div class="ad-container bg-space-dark/30 rounded-xl overflow-hidden border border-space-blue/20 h-32 md:h-40 flex items-center justify-center">
-                <div class="text-center p-4">
-                    <div class="text-gray-400 text-sm">广告位</div>
-                    <div class="text-white">探索宇宙的奥秘</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="container mx-auto px-4 my-8">
-            <h2 class="text-2xl font-space mb-6 text-center text-shadow">
-                <i class="fa fa-bookmark text-space-glow mr-2"></i>星际书签
-            </h2>
             
-            <div id="bookmarks-container" class="space-y-6">
+            <div class="flex items-center space-x-1 md:space-x-4">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-space-light transition-colors relative group">
+                    <i class="fa fa-moon-o dark:hidden text-gray-700"></i>
+                    <i class="fa fa-sun-o hidden dark:inline text-yellow-300"></i>
+                    <span class="absolute right-full mr-2 mt-1 w-max bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                        切换至<span class="dark:hidden">黑夜</span><span class="hidden dark:inline">白天</span>模式
+                    </span>
+                </button>
+                
+                <button id="edit-btn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-space-light transition-colors relative group">
+                    <i class="fa fa-cog"></i>
+                    <span class="absolute right-full mr-2 mt-1 w-max bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                        编辑书签和设置
+                    </span>
+                </button>
             </div>
         </div>
+    </header>
 
-        <div class="container mx-auto px-4 my-6">
-            <div class="ad-container bg-space-dark/30 rounded-xl overflow-hidden border border-space-purple/20 h-32 md:h-40 flex items-center justify-center">
-                <div class="text-center p-4">
-                    <div class="text-gray-400 text-sm">广告位</div>
-                    <div class="text-white">发现新的星系</div>
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- 主页视图 -->
+        <section id="home-view" class="space-y-8">
+            <!-- 顶部小组件 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- 在线时长统计 -->
+                <div class="bg-day-card dark:bg-space-light rounded-xl p-4 shadow-lg border border-gray-100 dark:border-space-accent/20 card-hover">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-semibold text-lg">在线探索时长</h3>
+                        <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                            <i class="fa fa-clock-o text-space-accent"></i>
+                        </div>
+                    </div>
+                    <div class="h-32">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                    <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        本周累计: <span id="total-time" class="font-medium text-space-accent">0小时</span>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="container mx-auto px-4 my-6">
-            <div class="ad-container bg-space-dark/30 rounded-xl overflow-hidden border border-space-pink/20 h-32 md:h-40 flex items-center justify-center">
-                <div class="text-center p-4">
-                    <div class="text-gray-400 text-sm">广告位</div>
-                    <div class="text-white">星际旅行指南</div>
+                <!-- 健康提醒 -->
+                <div class="bg-day-card dark:bg-space-light rounded-xl p-4 shadow-lg border border-gray-100 dark:border-space-accent/20 card-hover">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-semibold text-lg">星际健康提醒</h3>
+                        <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                            <i class="fa fa-heartbeat text-green-500 dark:text-green-400"></i>
+                        </div>
+                    </div>
+                    <div id="health-reminders" class="space-y-3">
+                        <div class="flex items-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <i class="fa fa-eye mr-2 text-blue-500"></i>
+                            <div>
+                                <div class="font-medium">眼部休息</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">每50分钟休息10分钟</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <i class="fa fa-coffee mr-2 text-green-500"></i>
+                            <div>
+                                <div class="font-medium">起身活动</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">每小时活动5分钟</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                            <i class="fa fa-bed mr-2 text-purple-500"></i>
+                            <div>
+                                <div class="font-medium">充足睡眠</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">保持每天7-8小时睡眠</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <footer class="mt-12 py-6 border-t border-space-blue/30">
-            <div class="container mx-auto px-4">
-                <div class="dark-white text-center space-y-2">
-                    <div id="total-sites">共收录 0 个网站</div>
-                    <div>
-                        Copyright © 2018-<span id="current-year"></span> 
-                        <span id="site-hostname">星际导航</span>, All Rights Reserved
+                <!-- 世界时间 -->
+                <div class="bg-day-card dark:bg-space-light rounded-xl p-4 shadow-lg border border-gray-100 dark:border-space-accent/20 card-hover">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-semibold text-lg">星际时间</h3>
+                        <div class="flex space-x-1">
+                            <button id="add-timezone" class="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                                <i class="fa fa-plus text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="timezones" class="space-y-3 max-h-40 overflow-y-auto scrollbar-hide">
+                        <!-- 时区将通过JS动态添加 -->
                     </div>
                 </div>
             </div>
-        </footer>
-    </div>
 
-    <div id="edit-page" class="min-h-screen hidden">
-        <div class="container mx-auto px-4 py-6">
-            <div class="flex justify-between items-center mb-8">
-                <h1 class="text-3xl font-space text-shadow">
-                    <i class="fa fa-cog text-space-glow mr-2"></i>书签编辑中心
-                </h1>
-                <button id="back-to-home" class="bg-space-blue/50 hover:bg-space-blue/80 px-4 py-2 rounded-lg transition-colors">
-                    <i class="fa fa-home mr-1"></i> 返回主页
+            <!-- 广告位1 -->
+            <div class="ad-slot relative overflow-hidden rounded-xl h-40 md:h-56 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-space-light dark:to-space-dark border border-gray-200 dark:border-space-accent/30 group">
+                <img id="ad1-img" src="https://picsum.photos/1200/300?random=1" alt="广告图片1" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                <a id="ad1-link" href="#" target="_blank" class="absolute inset-0"></a>
+                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                    <div id="ad1-text" class="text-white font-medium">探索宇宙的奥秘</div>
+                </div>
+            </div>
+
+            <!-- 书签分类 -->
+            <div id="bookmark-categories" class="space-y-6">
+                <!-- 书签分类将通过JS动态添加 -->
+            </div>
+
+            <!-- 广告位2 -->
+            <div class="ad-slot relative overflow-hidden rounded-xl h-40 md:h-56 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-space-light dark:to-space-dark border border-gray-200 dark:border-space-accent/30 group">
+                <img id="ad2-img" src="https://picsum.photos/1200/300?random=2" alt="广告图片2" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                <a id="ad2-link" href="#" target="_blank" class="absolute inset-0"></a>
+                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                    <div id="ad2-text" class="text-white font-medium">发现新的星系</div>
+                </div>
+            </div>
+
+            <!-- 广告位3 -->
+            <div class="ad-slot relative overflow-hidden rounded-xl h-40 md:h-56 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-space-light dark:to-space-dark border border-gray-200 dark:border-space-accent/30 group">
+                <img id="ad3-img" src="https://picsum.photos/1200/300?random=3" alt="广告图片3" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                <a id="ad3-link" href="#" target="_blank" class="absolute inset-0"></a>
+                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                    <div id="ad3-text" class="text-white font-medium">星际旅行指南</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 编辑页视图 -->
+        <section id="edit-view" class="hidden space-y-8">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold">书签编辑中心</h2>
+                <button id="back-to-home" class="px-4 py-2 bg-space-accent hover:bg-space-accent/80 text-white rounded-lg transition-colors">
+                    <i class="fa fa-arrow-left mr-1"></i> 返回主页
                 </button>
             </div>
 
-            <div class="bg-space-dark/50 backdrop-blur-sm rounded-xl p-6 mb-8 border border-space-blue/30">
-                <h2 class="text-xl font-space mb-4 text-space-glow">
-                    <i class="fa fa-github mr-2"></i>GitHub 配置
-                </h2>
+            <!-- GitHub配置 -->
+            <div class="bg-day-card dark:bg-space-light rounded-xl p-5 shadow-lg border border-gray-100 dark:border-space-accent/20">
+                <h3 class="text-xl font-semibold mb-4">GitHub 配置</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-sm mb-1">GitHub Token</label>
-                        <input type="password" id="github-token" placeholder="your github token" class="w-full bg-space-black/70 border border-space-blue/50 rounded p-2 focus:outline-none focus:border-space-glow">
+                        <label class="block text-sm font-medium mb-1">用户名</label>
+                        <input type="text" id="github-username" placeholder="GitHub 用户名" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent">
                     </div>
                     <div>
-                        <label class="block text-sm mb-1">用户名</label>
-                        <input type="text" id="github-username" placeholder="username" class="w-full bg-space-black/70 border border-space-blue/50 rounded p-2 focus:outline-none focus:border-space-glow">
+                        <label class="block text-sm font-medium mb-1">仓库名</label>
+                        <input type="text" id="github-repo" placeholder="仓库名称" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent">
                     </div>
                     <div>
-                        <label class="block text-sm mb-1">仓库名</label>
-                        <input type="text" id="github-repo" placeholder="repo-name" class="w-full bg-space-black/70 border border-space-blue/50 rounded p-2 focus:outline-none focus:border-space-glow">
+                        <label class="block text-sm font-medium mb-1">个人访问令牌 (可选)</label>
+                        <input type="password" id="github-token" placeholder="用于私有仓库" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent">
                     </div>
                 </div>
-                <div class="mt-4 text-sm text-gray-400">
-                    配置后可同步书签数据到GitHub，留空则使用默认公开仓库
+                <div class="mt-4">
+                    <button id="save-github-config" class="px-4 py-2 bg-space-accent hover:bg-space-accent/80 text-white rounded-lg transition-colors">
+                        <i class="fa fa-save mr-1"></i> 保存配置
+                    </button>
+                    <span id="github-config-status" class="ml-3 text-sm"></span>
                 </div>
             </div>
 
-            <div class="bg-space-dark/50 backdrop-blur-sm rounded-xl p-6 mb-8 border border-space-purple/30">
-                <h2 class="text-xl font-space mb-4 text-space-pink">
-                    <i class="fa fa-bookmark mr-2"></i>书签管理
-                </h2>
-                
-                <div class="flex flex-wrap gap-4 mb-6">
-                    <div class="flex items-center">
-                        <label for="import-bookmarks" class="bg-space-purple/50 hover:bg-space-purple/80 px-4 py-2 rounded-lg cursor-pointer transition-colors mr-2">
+            <!-- 书签管理 -->
+            <div class="bg-day-card dark:bg-space-light rounded-xl p-5 shadow-lg border border-gray-100 dark:border-space-accent/20">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold">书签管理</h3>
+                    <div class="flex space-x-2">
+                        <button id="import-bookmarks" class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm transition-colors">
                             <i class="fa fa-upload mr-1"></i> 导入书签
-                        </label>
-                        <input type="file" id="import-bookmarks" accept=".html" class="hidden">
+                        </button>
+                        <button id="export-bookmarks" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm transition-colors">
+                            <i class="fa fa-download mr-1"></i> 导出书签
+                        </button>
+                        <input type="file" id="bookmark-file" accept=".html" class="hidden">
                     </div>
-                    
-                    <button id="export-bookmarks" class="bg-space-purple/50 hover:bg-space-purple/80 px-4 py-2 rounded-lg transition-colors">
-                        <i class="fa fa-download mr-1"></i> 导出书签
-                    </button>
-                    
-                    <button id="load-backup" class="bg-space-blue/50 hover:bg-space-blue/80 px-4 py-2 rounded-lg transition-colors">
-                        <i class="fa fa-restore mr-1"></i> 载入备份
-                    </button>
-                    
-                    <button id="save-backup" class="bg-space-blue/50 hover:bg-space-blue/80 px-4 py-2 rounded-lg transition-colors">
-                        <i class="fa fa-save mr-1"></i> 保存备份
-                    </button>
-                    
-                    <button id="add-new-group" class="bg-space-glow/50 hover:bg-space-glow/80 px-4 py-2 rounded-lg transition-colors">
-                        <i class="fa fa-folder-open mr-1"></i> 添加分组
-                    </button>
                 </div>
                 
-                <div id="bookmarks-edit-container" class="space-y-6 max-h-[500px] overflow-y-auto p-2">
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <button id="add-category" class="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-sm transition-colors">
+                                <i class="fa fa-folder-open mr-1"></i> 添加分类
+                            </button>
+                        </div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            共 <span id="bookmark-count" class="font-medium text-space-accent">0</span> 个书签
+                        </div>
+                    </div>
+                    
+                    <div id="edit-bookmark-categories" class="space-y-6 max-h-[500px] overflow-y-auto pr-2 scrollbar-hide">
+                        <!-- 编辑模式下的书签分类将通过JS动态添加 -->
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-space-dark/50 backdrop-blur-sm rounded-xl p-6 mb-8 border border-space-pink/30">
-                <h2 class="text-xl font-space mb-4 text-space-pink">
-                    <i class="fa fa-bullhorn mr-2"></i>广告管理
-                </h2>
-                
+            <!-- 备份与恢复 -->
+            <div class="bg-day-card dark:bg-space-light rounded-xl p-5 shadow-lg border border-gray-100 dark:border-space-accent/20">
+                <h3 class="text-xl font-semibold mb-4">备份与恢复</h3>
+                <div class="flex flex-wrap gap-3">
+                    <button id="create-backup" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors">
+                        <i class="fa fa-file-code-o mr-1"></i> 创建JSON备份
+                    </button>
+                    <button id="load-backup" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors">
+                        <i class="fa fa-upload mr-1"></i> 从JSON恢复
+                    </button>
+                    <input type="file" id="backup-file" accept=".json" class="hidden">
+                    <button id="save-changes" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors ml-auto">
+                        <i class="fa fa-save mr-1"></i> 保存更改到GitHub
+                    </button>
+                </div>
+                <div id="backup-status" class="mt-3 text-sm"></div>
+            </div>
+
+            <!-- 广告管理 -->
+            <div class="bg-day-card dark:bg-space-light rounded-xl p-5 shadow-lg border border-gray-100 dark:border-space-accent/20">
+                <h3 class="text-xl font-semibold mb-4">广告管理</h3>
                 <div class="space-y-6">
-                    <div>
-                        <h3 class="text-lg mb-3">广告位 1</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <div class="bg-space-black/50 rounded-lg p-2 text-center h-32 flex items-center justify-center border border-dashed border-gray-500">
-                                    <img id="ad1-preview" src="" alt="广告1预览" class="max-h-full max-w-full object-contain hidden">
-                                    <div id="ad1-placeholder" class="text-gray-400">
-                                        <i class="fa fa-picture-o text-2xl block mb-1"></i>
-                                        广告图片
-                                    </div>
+                    <!-- 广告1 -->
+                    <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <h4 class="font-medium mb-3">广告位 1</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-1">广告图片 (最大3M)</label>
+                                <input type="file" id="ad1-upload" accept="image/*" class="w-full text-sm text-gray-500 dark:text-gray-400">
+                                <div class="mt-2 h-32 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                                    <img id="ad1-preview" src="https://picsum.photos/1200/300?random=1" alt="广告1预览" class="w-full h-full object-cover">
                                 </div>
                             </div>
-                            <div class="md:col-span-2 space-y-2">
-                                <div>
-                                    <label class="block text-sm mb-1">图片</label>
-                                    <input type="file" id="ad1-image" accept="image/*" class="w-full bg-space-black/70 border border-space-pink/50 rounded p-2 focus:outline-none focus:border-space-pink">
-                                    <div class="text-xs text-gray-500">最大3MB</div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm mb-1">链接</label>
-                                    <input type="url" id="ad1-url" placeholder="https://example.com" class="w-full bg-space-black/70 border border-space-pink/50 rounded p-2 focus:outline-none focus:border-space-pink">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <h3 class="text-lg mb-3">广告位 2</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <div class="bg-space-black/50 rounded-lg p-2 text-center h-32 flex items-center justify-center border border-dashed border-gray-500">
-                                    <img id="ad2-preview" src="" alt="广告2预览" class="max-h-full max-w-full object-contain hidden">
-                                    <div id="ad2-placeholder" class="text-gray-400">
-                                        <i class="fa fa-picture-o text-2xl block mb-1"></i>
-                                        广告图片
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="md:col-span-2 space-y-2">
-                                <div>
-                                    <label class="block text-sm mb-1">图片</label>
-                                    <input type="file" id="ad2-image" accept="image/*" class="w-full bg-space-black/70 border border-space-pink/50 rounded p-2 focus:outline-none focus:border-space-pink">
-                                    <div class="text-xs text-gray-500">最大3MB</div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm mb-1">链接</label>
-                                    <input type="url" id="ad2-url" placeholder="https://example.com" class="w-full bg-space-black/70 border border-space-pink/50 rounded p-2 focus:outline-none focus:border-space-pink">
-                                </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">广告链接</label>
+                                <input type="url" id="ad1-url" placeholder="https://example.com" value="#" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent mb-3">
+                                
+                                <label class="block text-sm font-medium mb-1">广告文字</label>
+                                <input type="text" id="ad1-title" placeholder="广告标题" value="探索宇宙的奥秘" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent mb-3">
+                                
+                                <button class="save-ad-btn w-full px-3 py-2 bg-space-accent hover:bg-space-accent/80 text-white rounded-lg text-sm transition-colors" data-ad="1">
+                                    <i class="fa fa-save mr-1"></i> 保存广告
+                                </button>
                             </div>
                         </div>
                     </div>
-                    
-                    <div>
-                        <h3 class="text-lg mb-3">广告位 3</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            <div class="md:col-span-1">
-                                <div class="bg-space-black/50 rounded-lg p-2 text-center h-32 flex items-center justify-center border border-dashed border-gray-500">
-                                    <img id="ad3-preview" src="" alt="广告3预览" class="max-h-full max-w-full object-contain hidden">
-                                    <div id="ad3-placeholder" class="text-gray-400">
-                                        <i class="fa fa-picture-o text-2xl block mb-1"></i>
-                                        广告图片
-                                    </div>
+
+                    <!-- 广告2 -->
+                    <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <h4 class="font-medium mb-3">广告位 2</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-1">广告图片 (最大3M)</label>
+                                <input type="file" id="ad2-upload" accept="image/*" class="w-full text-sm text-gray-500 dark:text-gray-400">
+                                <div class="mt-2 h-32 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                                    <img id="ad2-preview" src="https://picsum.photos/1200/300?random=2" alt="广告2预览" class="w-full h-full object-cover">
                                 </div>
                             </div>
-                            <div class="md:col-span-2 space-y-2">
-                                <div>
-                                    <label class="block text-sm mb-1">图片</label>
-                                    <input type="file" id="ad3-image" accept="image/*" class="w-full bg-space-black/70 border border-space-pink/50 rounded p-2 focus:outline-none focus:border-space-pink">
-                                    <div class="text-xs text-gray-500">最大3MB</div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">广告链接</label>
+                                <input type="url" id="ad2-url" placeholder="https://example.com" value="#" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent mb-3">
+                                
+                                <label class="block text-sm font-medium mb-1">广告文字</label>
+                                <input type="text" id="ad2-title" placeholder="广告标题" value="发现新的星系" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent mb-3">
+                                
+                                <button class="save-ad-btn w-full px-3 py-2 bg-space-accent hover:bg-space-accent/80 text-white rounded-lg text-sm transition-colors" data-ad="2">
+                                    <i class="fa fa-save mr-1"></i> 保存广告
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 广告3 -->
+                    <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <h4 class="font-medium mb-3">广告位 3</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium mb-1">广告图片 (最大3M)</label>
+                                <input type="file" id="ad3-upload" accept="image/*" class="w-full text-sm text-gray-500 dark:text-gray-400">
+                                <div class="mt-2 h-32 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                                    <img id="ad3-preview" src="https://picsum.photos/1200/300?random=3" alt="广告3预览" class="w-full h-full object-cover">
                                 </div>
-                                <div>
-                                    <label class="block text-sm mb-1">链接</label>
-                                    <input type="url" id="ad3-url" placeholder="https://example.com" class="w-full bg-space-black/70 border border-space-pink/50 rounded p-2 focus:outline-none focus:border-space-pink">
-                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">广告链接</label>
+                                <input type="url" id="ad3-url" placeholder="https://example.com" value="#" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent mb-3">
+                                
+                                <label class="block text-sm font-medium mb-1">广告文字</label>
+                                <input type="text" id="ad3-title" placeholder="广告标题" value="星际旅行指南" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent mb-3">
+                                
+                                <button class="save-ad-btn w-full px-3 py-2 bg-space-accent hover:bg-space-accent/80 text-white rounded-lg text-sm transition-colors" data-ad="3">
+                                    <i class="fa fa-save mr-1"></i> 保存广告
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </section>
+    </main>
 
-            <div class="text-center mb-8">
-                <button id="save-changes" class="bg-space-glow hover:bg-space-glow/80 text-white px-8 py-3 rounded-lg text-lg font-space transition-colors shadow-lg shadow-space-glow/20">
-                    <i class="fa fa-save mr-2"></i>保存所有更改
+    <!-- 底部信息 -->
+    <footer class="mt-12 py-6 border-t border-gray-200 dark:border-space-light/50 bg-day-bg/50 dark:bg-space-dark/50 backdrop-blur-sm">
+        <div class="container mx-auto px-4">
+            <div class="dark-white flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-3 md:mb-0">共收录 <span id="total-websites" class="font-medium text-space-accent">0</span> 个网站</div>
+                <div>Copyright © 2018-<span id="current-year"></span> <span id="footer-hostname">星际导航</span>, All Rights Reserved</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 模态框 -->
+    <div id="modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-day-card dark:bg-space-light rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl transform transition-all">
+            <div class="flex justify-between items-start mb-4">
+                <h3 id="modal-title" class="text-xl font-semibold"></h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                    <i class="fa fa-times text-xl"></i>
                 </button>
             </div>
-
-            <footer class="mt-12 py-6 border-t border-space-blue/30">
-                <div class="container mx-auto px-4">
-                    <div class="dark-white text-center space-y-2">
-                        <div id="edit-total-sites">共收录 0 个网站</div>
-                        <div>
-                            Copyright © 2018-<span id="edit-current-year"></span> 
-                            <span id="edit-site-hostname">星际导航</span>, All Rights Reserved
-                        </div>
-                    </div>
-                </div>
-            </footer>
-        </div>
-    </div>
-
-    <div id="modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-        <div class="bg-space-dark rounded-xl p-6 max-w-md w-full mx-4 border border-space-glow/30">
-            <h3 id="modal-title" class="text-xl font-space mb-4 text-space-glow"></h3>
-            <div id="modal-content" class="mb-6"></div>
-            <div class="flex justify-end gap-3">
-                <button id="modal-cancel" class="px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800 transition-colors">
+            <div id="modal-content" class="mb-5"></div>
+            <div id="modal-actions" class="flex justify-end space-x-3">
+                <button id="modal-cancel" class="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     取消
                 </button>
-                <button id="modal-confirm" class="px-4 py-2 bg-space-glow text-white rounded-lg hover:bg-space-glow/80 transition-colors">
+                <button id="modal-confirm" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
                     确认
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-6 right-6 bg-space-dark/90 backdrop-blur-sm border border-space-glow/50 rounded-lg p-4 transform translate-y-20 opacity-0 transition-all duration-300 z-50 max-w-sm">
-        <div class="flex items-start">
-            <i id="toast-icon" class="fa fa-info-circle text-space-glow mt-0.5 mr-3 text-xl"></i>
-            <div>
-                <h4 id="toast-title" class="font-medium"></h4>
-                <p id="toast-message" class="text-sm text-gray-300 mt-1"></p>
-            </div>
-        </div>
+    <!-- 通知提示 -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-gray-800 text-white px-4 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center">
+        <i id="toast-icon" class="fa fa-info-circle mr-2"></i>
+        <span id="toast-message"></span>
     </div>
 
     <script>
+        // 全局数据
         const appData = {
-            bookmarks: [],
-            ads: [
-                { image: '', url: '' },
-                { image: '', url: '' },
-                { image: '', url: '' }
-            ],
+            categories: [],
             timezones: [
-                { city: '北京', utcOffset: 8, elementId: 'beijing' },
-                { city: '纽约', utcOffset: -4, elementId: 'newyork' },
-                { city: '伦敦', utcOffset: 1, elementId: 'london' }
+                { name: '北京时间', offset: 8 },
+                { name: '纽约时间', offset: -4 },
+                { name: '伦敦时间', offset: 1 }
             ],
-            github: {
-                token: '',
+            ads: [
+                { id: 1, url: '#', img: 'https://picsum.photos/1200/300?random=1', text: '探索宇宙的奥秘' },
+                { id: 2, url: '#', img: 'https://picsum.photos/1200/300?random=2', text: '发现新的星系' },
+                { id: 3, url: '#', img: 'https://picsum.photos/1200/300?random=3', text: '星际旅行指南' }
+            ],
+            githubConfig: {
                 username: '',
                 repo: '',
-                defaultUsername: 'default-user',
-                defaultRepo: 'space-bookmarks'
+                token: ''
             },
-            stats: {
-                onlineTime: [2.5, 1.8, 3.2, 2.1, 3.0, 4.5, 1.2]
-            }
+            onlineTimeData: [0, 1.5, 2, 0.5, 3, 4, 2.5]
         };
 
+        // DOM 元素
         const elements = {
-            homePage: document.getElementById('home-page'),
-            editPage: document.getElementById('edit-page'),
+            homeView: document.getElementById('home-view'),
+            editView: document.getElementById('edit-view'),
             themeToggle: document.getElementById('theme-toggle'),
-            editPageBtn: document.getElementById('edit-page-btn'),
-            stars: document.getElementById('stars'),
-            widgetsContainer: document.getElementById('widgets-container'),
-            bookmarksContainer: document.getElementById('bookmarks-container'),
-            bookmarksEditContainer: document.getElementById('bookmarks-edit-container'),
+            editBtn: document.getElementById('edit-btn'),
             backToHome: document.getElementById('back-to-home'),
-            importBookmarks: document.getElementById('import-bookmarks'),
-            exportBookmarks: document.getElementById('export-bookmarks'),
-            loadBackup: document.getElementById('load-backup'),
-            saveBackup: document.getElementById('save-backup'),
-            addNewGroup: document.getElementById('add-new-group'),
-            saveChanges: document.getElementById('save-changes'),
-            githubToken: document.getElementById('github-token'),
+            bookmarkCategories: document.getElementById('bookmark-categories'),
+            editBookmarkCategories: document.getElementById('edit-bookmark-categories'),
+            bookmarkCount: document.getElementById('bookmark-count'),
+            totalWebsites: document.getElementById('total-websites'),
+            currentYear: document.getElementById('current-year'),
+            footerHostname: document.getElementById('footer-hostname'),
+            timezonesContainer: document.getElementById('timezones'),
+            addTimezoneBtn: document.getElementById('add-timezone'),
+            importBookmarksBtn: document.getElementById('import-bookmarks'),
+            exportBookmarksBtn: document.getElementById('export-bookmarks'),
+            bookmarkFileInput: document.getElementById('bookmark-file'),
+            createBackupBtn: document.getElementById('create-backup'),
+            loadBackupBtn: document.getElementById('load-backup'),
+            backupFileInput: document.getElementById('backup-file'),
+            saveChangesBtn: document.getElementById('save-changes'),
+            backupStatus: document.getElementById('backup-status'),
             githubUsername: document.getElementById('github-username'),
             githubRepo: document.getElementById('github-repo'),
+            githubToken: document.getElementById('github-token'),
+            saveGithubConfigBtn: document.getElementById('save-github-config'),
+            githubConfigStatus: document.getElementById('github-config-status'),
+            addCategoryBtn: document.getElementById('add-category'),
             modal: document.getElementById('modal'),
             modalTitle: document.getElementById('modal-title'),
             modalContent: document.getElementById('modal-content'),
             modalCancel: document.getElementById('modal-cancel'),
             modalConfirm: document.getElementById('modal-confirm'),
+            closeModal: document.getElementById('close-modal'),
             toast: document.getElementById('toast'),
             toastIcon: document.getElementById('toast-icon'),
-            toastTitle: document.getElementById('toast-title'),
             toastMessage: document.getElementById('toast-message'),
-            totalSites: document.getElementById('total-sites'),
-            editTotalSites: document.getElementById('edit-total-sites'),
-            currentYear: document.getElementById('current-year'),
-            editCurrentYear: document.getElementById('edit-current-year'),
-            addTimezone: document.getElementById('add-timezone'),
-            timezonesContainer: document.getElementById('timezones-container'),
-            ad1Image: document.getElementById('ad1-image'),
-            ad1Url: document.getElementById('ad1-url'),
-            ad1Preview: document.getElementById('ad1-preview'),
-            ad1Placeholder: document.getElementById('ad1-placeholder'),
-            ad2Image: document.getElementById('ad2-image'),
-            ad2Url: document.getElementById('ad2-url'),
-            ad2Preview: document.getElementById('ad2-preview'),
-            ad2Placeholder: document.getElementById('ad2-placeholder'),
-            ad3Image: document.getElementById('ad3-image'),
-            ad3Url: document.getElementById('ad3-url'),
-            ad3Preview: document.getElementById('ad3-preview'),
-            ad3Placeholder: document.getElementById('ad3-placeholder')
+            totalTime: document.getElementById('total-time')
         };
 
-        async function init() {
-            createStars();
-            setCurrentYear();
-            setupEventListeners();
-            loadGitHubConfig();
-            await loadDataFromGitHub();
-            renderTimezones();
-            updateTime();
-            setInterval(updateTime, 1000);
-            renderBookmarks();
-            renderAds();
-            checkEditAccess();
-        }
-
+        // 初始化星空背景
         function createStars() {
-            const count = 200;
+            const starsContainer = document.getElementById('stars');
+            const count = 150;
+            
             for (let i = 0; i < count; i++) {
                 const star = document.createElement('div');
+                const size = Math.random() * 2;
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const duration = 2 + Math.random() * 3;
+                
                 star.classList.add('star');
-                star.style.width = `${Math.random() * 2 + 1}px`;
-                star.style.height = star.style.width;
-                star.style.left = `${Math.random() * 100}%`;
-                star.style.top = `${Math.random() * 100}%`;
-                star.style.opacity = Math.random() * 0.8 + 0.2;
-                star.style.animation = `twinkle ${Math.random() * 3 + 2}s infinite`;
-                star.style.animationDelay = `${Math.random() * 5}s`;
-                elements.stars.appendChild(star);
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${x}%`;
+                star.style.top = `${y}%`;
+                star.style.setProperty('--twinkle-duration', `${duration}s`);
+                
+                starsContainer.appendChild(star);
             }
         }
 
-        function setCurrentYear() {
-            const year = new Date().getFullYear();
-            elements.currentYear.textContent = year;
-            elements.editCurrentYear.textContent = year;
+        // 显示通知提示
+        function showToast(message, type = 'info') {
+            const iconClass = {
+                info: 'fa-info-circle text-blue-400',
+                success: 'fa-check-circle text-green-400',
+                error: 'fa-exclamation-circle text-red-400',
+                warning: 'fa-exclamation-triangle text-yellow-400'
+            };
+            
+            elements.toastIcon.className = `fa ${iconClass[type] || iconClass.info} mr-2`;
+            elements.toastMessage.textContent = message;
+            elements.toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                elements.toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
         }
 
-        function setupEventListeners() {
-            elements.themeToggle.addEventListener('click', toggleTheme);
-            elements.editPageBtn.addEventListener('click', () => {
-                elements.homePage.classList.add('hidden');
-                elements.editPage.classList.remove('hidden');
-            });
+        // 显示模态框
+        function showModal(title, content, confirmCallback, cancelCallback = () => {}) {
+            elements.modalTitle.textContent = title;
+            elements.modalContent.innerHTML = content;
+            elements.modal.classList.remove('hidden');
             
-            let scrollTimeout;
-            window.addEventListener('scroll', () => {
-                elements.themeToggle.classList.remove('opacity-0');
-                elements.themeToggle.classList.add('opacity-100');
-                elements.editPageBtn.classList.remove('opacity-0');
-                elements.editPageBtn.classList.add('opacity-100');
-                
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(() => {
-                    elements.themeToggle.classList.remove('opacity-100');
-                    elements.themeToggle.classList.add('opacity-0');
-                    elements.editPageBtn.classList.remove('opacity-100');
-                    elements.editPageBtn.classList.add('opacity-0');
-                }, 3000);
-            });
+            const confirmHandler = () => {
+                confirmCallback();
+                hideModal();
+                elements.modalConfirm.removeEventListener('click', confirmHandler);
+                elements.modalCancel.removeEventListener('click', cancelHandler);
+            };
             
-            elements.backToHome.addEventListener('click', () => {
-                elements.editPage.classList.add('hidden');
-                elements.homePage.classList.remove('hidden');
-                renderBookmarks();
-                renderAds();
-            });
+            const cancelHandler = () => {
+                cancelCallback();
+                hideModal();
+                elements.modalConfirm.removeEventListener('click', confirmHandler);
+                elements.modalCancel.removeEventListener('click', cancelHandler);
+            };
             
-            elements.importBookmarks.addEventListener('change', handleImportBookmarks);
-            elements.exportBookmarks.addEventListener('click', handleExportBookmarks);
-            
-            elements.loadBackup.addEventListener('click', handleLoadBackup);
-            elements.saveBackup.addEventListener('click', handleSaveBackup);
-            
-            elements.addNewGroup.addEventListener('click', addNewBookmarkGroup);
-            
-            elements.saveChanges.addEventListener('click', handleSaveChanges);
-            
-            elements.githubToken.addEventListener('change', saveGitHubConfig);
-            elements.githubUsername.addEventListener('change', saveGitHubConfig);
-            elements.githubRepo.addEventListener('change', saveGitHubConfig);
-            
-            elements.modalCancel.addEventListener('click', () => {
-                elements.modal.classList.add('hidden');
-            });
-            
-            elements.ad1Image.addEventListener('change', (e) => handleAdImageChange(e, 0));
-            elements.ad2Image.addEventListener('change', (e) => handleAdImageChange(e, 1));
-            elements.ad3Image.addEventListener('change', (e) => handleAdImageChange(e, 2));
-            
-            elements.ad1Url.addEventListener('change', (e) => appData.ads[0].url = e.target.value);
-            elements.ad2Url.addEventListener('change', (e) => appData.ads[1].url = e.target.value);
-            elements.ad3Url.addEventListener('change', (e) => appData.ads[2].url = e.target.value);
-            
-            elements.addTimezone.addEventListener('click', addTimezone);
-            elements.timezonesContainer.addEventListener('click', (e) => {
-                if (e.target.closest('.delete-timezone')) {
-                    const btn = e.target.closest('.delete-timezone');
-                    const city = btn.dataset.city;
-                    deleteTimezone(city);
-                }
+            elements.modalConfirm.addEventListener('click', confirmHandler);
+            elements.modalCancel.addEventListener('click', cancelHandler);
+            elements.closeModal.addEventListener('click', () => {
+                hideModal();
+                elements.modalConfirm.removeEventListener('click', confirmHandler);
+                elements.modalCancel.removeEventListener('click', cancelHandler);
             });
         }
 
+        // 隐藏模态框
+        function hideModal() {
+            elements.modal.classList.add('hidden');
+        }
+
+        // 切换主题模式
         function toggleTheme() {
-            const body = document.getElementById('app-body');
-            const isDark = body.classList.contains('bg-space-black');
-            
-            if (isDark) {
-                body.classList.remove('bg-space-black', 'text-white');
-                body.classList.add('bg-day-bg', 'text-day-text');
-                elements.stars.classList.add('opacity-0');
-                elements.themeToggle.innerHTML = '<i class="fa fa-sun-o text-xl group-hover:text-yellow-500"></i><span class="absolute right-full mr-2 whitespace-nowrap bg-gray-200 text-gray-800 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">切换白天/黑夜模式</span>';
-                
-                document.querySelectorAll('#widgets-container > div').forEach(el => {
-                    el.classList.remove('bg-space-dark/50', 'border-space-blue/30', 'border-space-purple/30');
-                    el.classList.add('bg-day-card', 'border-gray-200', 'shadow-md');
-                });
-                
-                document.querySelectorAll('.ad-container').forEach(el => {
-                    el.classList.remove('bg-space-dark/30', 'border-space-blue/20', 'border-space-purple/20', 'border-space-pink/20');
-                    el.classList.add('bg-gray-100', 'border-gray-200', 'text-gray-800');
-                });
-                
-                document.querySelectorAll('.bookmark-card').forEach(el => {
-                    el.classList.remove('bg-space-dark/50', 'border-space-blue/30');
-                    el.classList.add('bg-day-card', 'border-gray-200', 'shadow-sm');
-                });
-                
-                document.querySelectorAll('#edit-page .bg-space-dark\\/50').forEach(el => {
-                    el.classList.remove('bg-space-dark/50', 'border-space-blue/30', 'border-space-purple/30', 'border-space-pink/30');
-                    el.classList.add('bg-day-card', 'border-gray-200', 'shadow-md');
-                });
-                
-                document.querySelectorAll('#edit-page input').forEach(el => {
-                    el.classList.remove('bg-space-black/70', 'border-space-blue/50', 'border-space-pink/50', 'border-space-purple/50');
-                    el.classList.add('bg-gray-100', 'border-gray-300');
-                });
-                
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        // 初始化主题
+        function initTheme() {
+            if (localStorage.getItem('theme') === 'dark' || 
+                (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
             } else {
-                body.classList.remove('bg-day-bg', 'text-day-text');
-                body.classList.add('bg-space-black', 'text-white');
-                elements.stars.classList.remove('opacity-0');
-                elements.themeToggle.innerHTML = '<i class="fa fa-moon-o text-xl group-hover:text-space-glow"></i><span class="absolute right-full mr-2 whitespace-nowrap bg-space-dark px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">切换白天/黑夜模式</span>';
-                
-                document.querySelectorAll('#widgets-container > div').forEach((el, i) => {
-                    el.classList.remove('bg-day-card', 'border-gray-200', 'shadow-md');
-                    el.classList.add('bg-space-dark/50');
-                    
-                    if (i === 0 || i === 2) {
-                        el.classList.add('border-space-blue/30');
-                    } else {
-                        el.classList.add('border-space-purple/30');
-                    }
-                });
-                
-                const adBorders = ['border-space-blue/20', 'border-space-purple/20', 'border-space-pink/20'];
-                document.querySelectorAll('.ad-container').forEach((el, i) => {
-                    el.classList.remove('bg-gray-100', 'border-gray-200', 'text-gray-800');
-                    el.classList.add('bg-space-dark/30', adBorders[i]);
-                });
-                
-                document.querySelectorAll('.bookmark-card').forEach(el => {
-                    el.classList.remove('bg-day-card', 'border-gray-200', 'shadow-sm');
-                    el.classList.add('bg-space-dark/50', 'border-space-blue/30');
-                });
-                
-                const editBorders = ['border-space-blue/30', 'border-space-purple/30', 'border-space-pink/30'];
-                document.querySelectorAll('#edit-page .bg-day-card').forEach((el, i) => {
-                    el.classList.remove('bg-day-card', 'border-gray-200', 'shadow-md');
-                    el.classList.add('bg-space-dark/50', editBorders[i]);
-                });
-                
-                document.querySelectorAll('#edit-page input').forEach((el, i) => {
-                    el.classList.remove('bg-gray-100', 'border-gray-300');
-                    el.classList.add('bg-space-black/70');
-                });
+                document.documentElement.classList.remove('dark');
             }
         }
 
-        async function loadDataFromGitHub() {
-            try {
-                let username = appData.github.username || appData.github.defaultUsername;
-                let repo = appData.github.repo || appData.github.defaultRepo;
-                let url;
-                
-                if (appData.github.token) {
-                    url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
-                } else {
-                    url = `https://raw.githubusercontent.com/${username}/${repo}/main/bookmarks.json`;
-                }
-                
-                const headers = appData.github.token ? {
-                    'Authorization': `token ${appData.github.token}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                } : {};
-                
-                const response = await fetch(url, { headers });
-                
-                if (!response.ok) {
-                    if (response.status === 404 && (!appData.github.username || !appData.github.repo)) {
-                        showToast('信息', '使用默认书签数据', 'info');
-                        return;
-                    }
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                let data;
-                if (appData.github.token) {
-                    const json = await response.json();
-                    data = JSON.parse(atob(json.content));
-                } else {
-                    data = await response.json();
-                }
-                
-                if (data.bookmarks) appData.bookmarks = data.bookmarks;
-                if (data.ads) appData.ads = data.ads;
-                if (data.timezones) appData.timezones = data.timezones;
-                
-                showToast('成功', '数据加载成功', 'success');
-            } catch (error) {
-                console.error('Error loading data from GitHub:', error);
-                showToast('警告', '无法加载远程数据，使用本地数据', 'warning');
+        // 切换视图
+        function switchView(view) {
+            if (view === 'home') {
+                elements.homeView.classList.remove('hidden');
+                elements.editView.classList.add('hidden');
+                renderBookmarks();
+                renderTimezones();
+            } else {
+                elements.homeView.classList.add('hidden');
+                elements.editView.classList.remove('hidden');
+                renderEditBookmarks();
             }
         }
 
-        async function saveDataToGitHub() {
-            try {
-                const username = appData.github.username || appData.github.defaultUsername;
-                const repo = appData.github.repo || appData.github.defaultRepo;
-                const data = {
-                    bookmarks: appData.bookmarks,
-                    ads: appData.ads,
-                    timezones: appData.timezones
-                };
-                
-                const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-                const url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
-                
-                let sha;
-                if (appData.github.token) {
-                    const checkResponse = await fetch(url, {
-                        headers: {
-                            'Authorization': `token ${appData.github.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-                    
-                    if (checkResponse.ok) {
-                        const existingFile = await checkResponse.json();
-                        sha = existingFile.sha;
-                    }
-                }
-                
-                const response = await fetch(url, {
-                    method: 'PUT',
-                    headers: appData.github.token ? {
-                        'Authorization': `token ${appData.github.token}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    } : {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify({
-                        message: 'Update bookmarks',
-                        content: content,
-                        sha: sha
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('Error saving data to GitHub:', error);
-                showToast('错误', '保存数据到GitHub失败: ' + error.message, 'error');
-                return false;
-            }
-        }
-
-        function loadGitHubConfig() {
-            const savedToken = localStorage.getItem('githubToken');
-            const savedUsername = localStorage.getItem('githubUsername');
-            const savedRepo = localStorage.getItem('githubRepo');
-            
-            if (savedToken) {
-                appData.github.token = savedToken;
-                elements.githubToken.value = savedToken;
-            }
-            
-            if (savedUsername) {
-                appData.github.username = savedUsername;
-                elements.githubUsername.value = savedUsername;
-            }
-            
-            if (savedRepo) {
-                appData.github.repo = savedRepo;
-                elements.githubRepo.value = savedRepo;
-            }
-        }
-
-        function saveGitHubConfig() {
-            appData.github.token = elements.githubToken.value;
-            appData.github.username = elements.githubUsername.value;
-            appData.github.repo = elements.githubRepo.value;
-            
-            localStorage.setItem('githubToken', appData.github.token);
-            localStorage.setItem('githubUsername', appData.github.username);
-            localStorage.setItem('githubRepo', appData.github.repo);
-        }
-
+        // 渲染书签（主页）
         function renderBookmarks() {
-            elements.bookmarksContainer.innerHTML = '';
-            elements.bookmarksEditContainer.innerHTML = '';
+            elements.bookmarkCategories.innerHTML = '';
             
-            if (appData.bookmarks.length === 0) {
-                elements.bookmarksContainer.innerHTML = `
+            if (appData.categories.length === 0) {
+                elements.bookmarkCategories.innerHTML = `
                     <div class="text-center py-12">
-                        <i class="fa fa-folder-open-o text-4xl text-gray-500 mb-3"></i>
-                        <p>暂无书签，请在编辑页添加</p>
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-space-light flex items-center justify-center">
+                            <i class="fa fa-folder-open text-2xl text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400">暂无书签分类</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">点击编辑按钮添加你的第一个书签</p>
                     </div>
                 `;
-                elements.bookmarksEditContainer.innerHTML = `
-                    <div class="text-center py-12">
-                        <i class="fa fa-folder-open-o text-4xl text-gray-500 mb-3"></i>
-                        <p>暂无书签分组，请添加</p>
-                    </div>
-                `;
+                elements.bookmarkCount.textContent = '0';
+                elements.totalWebsites.textContent = '0';
+                return;
             }
             
             let totalCount = 0;
             
-            appData.bookmarks.forEach((group, groupIndex) => {
-                totalCount += group.bookmarks.length;
+            appData.categories.forEach((category, catIndex) => {
+                const catElement = document.createElement('div');
+                catElement.className = 'space-y-3';
                 
-                const groupElement = document.createElement('div');
-                groupElement.className = 'bookmark-group';
-                groupElement.innerHTML = `
-                    <h3 class="text-xl font-space mb-4 flex items-center">
-                        <i class="fa fa-folder text-space-glow mr-2"></i>${group.name}
+                const bookmarksHTML = category.bookmarks.map((bookmark, index) => `
+                    <a href="${bookmark.url}" target="_blank" class="inline-flex items-center px-3 py-2 bg-day-card dark:bg-space-light rounded-lg shadow-sm border border-gray-100 dark:border-gray-800 hover:border-space-accent/50 transition-all card-hover">
+                        <img src="${bookmark.favicon || `https://picsum.photos/32/32?random=${catIndex}${index}`}" alt="${bookmark.title} 图标" class="w-6 h-6 mr-2 rounded">
+                        <span class="text-sm truncate max-w-[120px] sm:max-w-[180px]">${bookmark.title}</span>
+                    </a>
+                `).join('');
+                
+                totalCount += category.bookmarks.length;
+                
+                catElement.innerHTML = `
+                    <h3 class="text-lg font-semibold flex items-center">
+                        <i class="fa fa-folder text-space-accent mr-2"></i>
+                        ${category.name} <span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-1">(${category.bookmarks.length})</span>
                     </h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                        ${group.bookmarks.map(bookmark => `
-                            <a href="${bookmark.url}" target="_blank" class="bookmark-card card-hover bg-space-dark/50 border border-space-blue/30 rounded-lg p-3 flex flex-col items-center justify-center text-center hover:glow transition-all">
-                                <div class="mb-2">
-                                    <img src="${bookmark.favicon || `https://picsum.photos/32/32?random=${bookmark.id}`}" alt="${bookmark.title}图标" class="w-8 h-8 rounded">
-                                </div>
-                                <div class="text-sm truncate w-full">${bookmark.title}</div>
-                            </a>
-                        `).join('')}
+                    <div class="flex flex-wrap gap-2">
+                        ${bookmarksHTML}
                     </div>
                 `;
-                elements.bookmarksContainer.appendChild(groupElement);
                 
-                const editGroupElement = document.createElement('div');
-                editGroupElement.className = 'edit-bookmark-group bg-space-black/30 p-4 rounded-lg';
-                editGroupElement.innerHTML = `
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex items-center">
-                            <i class="fa fa-folder text-space-purple mr-2"></i>
-                            <input type="text" value="${group.name}" class="bg-transparent border-b border-gray-600 focus:border-space-purple focus:outline-none text-lg w-48" data-group-index="${groupIndex}" placeholder="分组名称">
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="add-bookmark p-2 text-space-glow hover:bg-space-glow/20 rounded" data-group-index="${groupIndex}">
-                                <i class="fa fa-plus"></i> 添加书签
-                            </button>
-                            <button class="delete-group p-2 text-red-400 hover:bg-red-400/20 rounded" data-group-index="${groupIndex}">
-                                <i class="fa fa-trash"></i> 删除分组
-                            </button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 gap-2 pl-6 border-l border-gray-700">
-                        ${group.bookmarks.map((bookmark, bookmarkIndex) => `
-                            <div class="flex items-center p-2 hover:bg-space-dark/50 rounded">
-                                <div class="flex-1 grid grid-cols-12 gap-2 items-center">
-                                    <div class="col-span-5">
-                                        <input type="text" value="${bookmark.title}" class="w-full bg-transparent border-b border-gray-600 focus:border-space-glow focus:outline-none text-sm" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}" placeholder="网站标题">
-                                    </div>
-                                    <div class="col-span-6">
-                                        <input type="url" value="${bookmark.url}" class="w-full bg-transparent border-b border-gray-600 focus:border-space-glow focus:outline-none text-sm" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}" placeholder="网站URL">
-                                    </div>
-                                    <div class="col-span-1">
-                                        <button class="delete-bookmark p-1 text-red-400 hover:bg-red-400/20 rounded" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
-                                            <i class="fa fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
+                elements.bookmarkCategories.appendChild(catElement);
+            });
+            
+            elements.bookmarkCount.textContent = totalCount;
+            elements.totalWebsites.textContent = totalCount;
+        }
+
+        // 渲染书签（编辑页）
+        function renderEditBookmarks() {
+            elements.editBookmarkCategories.innerHTML = '';
+            
+            if (appData.categories.length === 0) {
+                elements.editBookmarkCategories.innerHTML = `
+                    <div class="text-center py-10">
+                        <p class="text-gray-500 dark:text-gray-400">暂无书签分类</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">点击"添加分类"按钮开始</p>
                     </div>
                 `;
-                elements.bookmarksEditContainer.appendChild(editGroupElement);
-            });
-            
-            elements.totalSites.textContent = `共收录 ${totalCount} 个网站`;
-            elements.editTotalSites.textContent = `共收录 ${totalCount} 个网站`;
-            
-            document.querySelectorAll('.add-bookmark').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
-                    addNewBookmark(groupIndex);
-                });
-            });
-            
-            document.querySelectorAll('.delete-group').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
-                    confirmDeleteGroup(groupIndex);
-                });
-            });
-            
-            document.querySelectorAll('.delete-bookmark').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
-                    const bookmarkIndex = parseInt(e.currentTarget.dataset.bookmarkIndex);
-                    confirmDeleteBookmark(groupIndex, bookmarkIndex);
-                });
-            });
-            
-            document.querySelectorAll('.edit-bookmark-group input[type="text"]').forEach(input => {
-                if (input.dataset.groupIndex !== undefined) {
-                    input.addEventListener('change', (e) => {
-                        const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
-                        appData.bookmarks[groupIndex].name = e.currentTarget.value;
-                    });
-                }
-            });
-            
-            document.querySelectorAll('.edit-bookmark-group input[type="url"]').forEach(input => {
-                if (input.dataset.groupIndex !== undefined && input.dataset.bookmarkIndex !== undefined) {
-                    input.addEventListener('change', (e) => {
-                        const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
-                        const bookmarkIndex = parseInt(e.currentTarget.dataset.bookmarkIndex);
-                        appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].url = e.currentTarget.value;
-                        updateBookmarkInfo(groupIndex, bookmarkIndex);
-                    });
-                }
-            });
-        }
-
-        function renderAds() {
-            elements.ad1Url.value = appData.ads[0].url;
-            elements.ad2Url.value = appData.ads[1].url;
-            elements.ad3Url.value = appData.ads[2].url;
-            
-            if (appData.ads[0].image) {
-                elements.ad1Preview.src = appData.ads[0].image;
-                elements.ad1Preview.classList.remove('hidden');
-                elements.ad1Placeholder.classList.add('hidden');
-            }
-            
-            if (appData.ads[1].image) {
-                elements.ad2Preview.src = appData.ads[1].image;
-                elements.ad2Preview.classList.remove('hidden');
-                elements.ad2Placeholder.classList.add('hidden');
-            }
-            
-            if (appData.ads[2].image) {
-                elements.ad3Preview.src = appData.ads[2].image;
-                elements.ad3Preview.classList.remove('hidden');
-                elements.ad3Placeholder.classList.add('hidden');
-            }
-            
-            const adContainers = document.querySelectorAll('.ad-container');
-            adContainers.forEach((container, index) => {
-                if (appData.ads[index].image && appData.ads[index].url) {
-                    container.innerHTML = `
-                        <a href="${appData.ads[index].url}" target="_blank" class="block w-full h-full">
-                            <img src="${appData.ads[index].image}" alt="广告图片" class="w-full h-full object-cover">
-                        </a>
-                    `;
-                } else {
-                    container.innerHTML = `
-                        <div class="text-center p-4">
-                            <div class="text-gray-400 text-sm">广告位</div>
-                            <div class="text-white">${index === 0 ? '探索宇宙的奥秘' : index === 1 ? '发现新的星系' : '星际旅行指南'}</div>
-                        </div>
-                    `;
-                }
-            });
-        }
-
-        function handleAdImageChange(event, index) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            if (file.size > 3 * 1024 * 1024) {
-                showToast('错误', '图片大小不能超过3MB', 'error');
-                event.target.value = '';
+                elements.bookmarkCount.textContent = '0';
                 return;
             }
             
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                appData.ads[index].image = e.target.result;
-                
-                const previewId = `ad${index + 1}-preview`;
-                const placeholderId = `ad${index + 1}-placeholder`;
-                document.getElementById(previewId).src = e.target.result;
-                document.getElementById(previewId).classList.remove('hidden');
-                document.getElementById(placeholderId).classList.add('hidden');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function handleImportBookmarks(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+            let totalCount = 0;
             
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(e.target.result, 'text/html');
-                const bookmarks = doc.querySelectorAll('dt a');
+            appData.categories.forEach((category, catIndex) => {
+                const catElement = document.createElement('div');
+                catElement.className = 'p-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg';
                 
-                const newBookmarks = [];
-                let currentFolder = null;
+                const bookmarksHTML = category.bookmarks.map((bookmark, index) => `
+                    <div class="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg">
+                        <img src="${bookmark.favicon || `https://picsum.photos/32/32?random=${catIndex}${index}`}" alt="${bookmark.title} 图标" class="w-6 h-6 mr-2 rounded">
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-medium truncate">${bookmark.title}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate">${bookmark.url}</div>
+                        </div>
+                        <div class="flex space-x-1 ml-2">
+                            <button class="edit-bookmark-btn p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700" data-cat="${catIndex}" data-index="${index}">
+                                <i class="fa fa-pencil text-gray-600 dark:text-gray-300"></i>
+                            </button>
+                            <button class="delete-bookmark-btn p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700" data-cat="${catIndex}" data-index="${index}">
+                                <i class="fa fa-trash text-red-500"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
                 
-                const allElements = Array.from(doc.body.querySelectorAll('*'));
-                allElements.forEach(el => {
-                    if (el.tagName === 'H3') {
-                        currentFolder = {
-                            name: el.textContent.trim() || '未命名文件夹',
-                            bookmarks: []
-                        };
-                        newBookmarks.push(currentFolder);
-                    } else if (el.tagName === 'A' && currentFolder) {
-                        const url = el.href;
-                        const title = el.textContent.trim() || new URL(url).hostname;
-                        
-                        const isDuplicate = currentFolder.bookmarks.some(b => b.url === url);
-                        if (!isDuplicate) {
-                            currentFolder.bookmarks.push({
-                                id: Date.now() + Math.floor(Math.random() * 1000),
-                                title: title,
-                                url: url,
-                                favicon: getFaviconUrl(url)
-                            });
-                        }
-                    }
+                totalCount += category.bookmarks.length;
+                
+                catElement.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-semibold flex items-center">
+                            <i class="fa fa-folder text-space-accent mr-2"></i>
+                            ${category.name} <span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-1">(${category.bookmarks.length})</span>
+                        </h3>
+                        <div class="flex space-x-1">
+                            <button class="add-bookmark-btn px-2 py-1 text-sm bg-green-500 hover:bg-green-600 text-white rounded" data-cat="${catIndex}">
+                                <i class="fa fa-plus mr-1"></i> 添加书签
+                            </button>
+                            <button class="edit-category-btn p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700" data-index="${catIndex}">
+                                <i class="fa fa-pencil text-gray-600 dark:text-gray-300"></i>
+                            </button>
+                            <button class="delete-category-btn p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700" data-index="${catIndex}">
+                                <i class="fa fa-trash text-red-500"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="space-y-1 max-h-60 overflow-y-auto scrollbar-hide">
+                        ${bookmarksHTML || '<div class="text-center py-4 text-sm text-gray-500 dark:text-gray-400">该分类下暂无书签</div>'}
+                    </div>
+                `;
+                
+                elements.editBookmarkCategories.appendChild(catElement);
+            });
+            
+            // 添加事件监听器
+            document.querySelectorAll('.add-bookmark-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const catIndex = parseInt(e.currentTarget.dataset.cat);
+                    showAddBookmarkForm(catIndex);
                 });
-                
-                if (newBookmarks.length === 0 && bookmarks.length > 0) {
-                    currentFolder = {
-                        name: '导入的书签',
-                        bookmarks: []
-                    };
-                    newBookmarks.push(currentFolder);
+            });
+            
+            document.querySelectorAll('.edit-bookmark-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const catIndex = parseInt(e.currentTarget.dataset.cat);
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    showEditBookmarkForm(catIndex, index);
+                });
+            });
+            
+            document.querySelectorAll('.delete-bookmark-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const catIndex = parseInt(e.currentTarget.dataset.cat);
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    const bookmark = appData.categories[catIndex].bookmarks[index];
                     
-                    bookmarks.forEach(bookmark => {
-                        const url = bookmark.href;
-                        const title = bookmark.textContent.trim() || new URL(url).hostname;
-                        
-                        const isDuplicate = currentFolder.bookmarks.some(b => b.url === url);
-                        if (!isDuplicate) {
-                            currentFolder.bookmarks.push({
-                                id: Date.now() + Math.floor(Math.random() * 1000),
-                                title: title,
-                                url: url,
-                                favicon: getFaviconUrl(url)
-                            });
+                    showModal(
+                        '删除书签',
+                        `确定要删除书签 <strong>"${bookmark.title}"</strong> 吗？`,
+                        () => {
+                            appData.categories[catIndex].bookmarks.splice(index, 1);
+                            renderEditBookmarks();
+                            showToast('书签已删除', 'success');
                         }
-                    });
+                    );
+                });
+            });
+            
+            document.querySelectorAll('.edit-category-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    showEditCategoryForm(index);
+                });
+            });
+            
+            document.querySelectorAll('.delete-category-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    const category = appData.categories[index];
+                    
+                    showModal(
+                        '删除分类',
+                        `确定要删除分类 <strong>"${category.name}"</strong> 及其包含的 ${category.bookmarks.length} 个书签吗？`,
+                        () => {
+                            appData.categories.splice(index, 1);
+                            renderEditBookmarks();
+                            showToast('分类已删除', 'success');
+                        }
+                    );
+                });
+            });
+            
+            elements.bookmarkCount.textContent = totalCount;
+        }
+
+        // 显示添加书签表单
+        function showAddBookmarkForm(catIndex) {
+            showModal(
+                '添加新书签',
+                `
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">网站标题</label>
+                            <input type="text" id="new-bookmark-title" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent" placeholder="输入网站标题">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">网站URL</label>
+                            <input type="url" id="new-bookmark-url" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent" placeholder="https://example.com" value="https://">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">网站图标 (可选)</label>
+                            <input type="url" id="new-bookmark-favicon" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent" placeholder="图标URL">
+                        </div>
+                    </div>
+                `,
+                () => {
+                    const title = document.getElementById('new-bookmark-title').value.trim();
+                    let url = document.getElementById('new-bookmark-url').value.trim();
+                    let favicon = document.getElementById('new-bookmark-favicon').value.trim();
+                    
+                    if (!title || !url) {
+                        showToast('标题和URL不能为空', 'error');
+                        return;
+                    }
+                    
+                    // 自动补全URL协议
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        url = 'https://' + url;
+                    }
+                    
+                    // 自动获取favicon
+                    if (!favicon) {
+                        try {
+                            const urlObj = new URL(url);
+                            favicon = `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
+                        } catch (e) {
+                            favicon = '';
+                        }
+                    }
+                    
+                    // 检查是否已存在相同URL的书签（去重）
+                    const existing = appData.categories[catIndex].bookmarks.some(b => b.url === url);
+                    if (existing) {
+                        showToast('已存在相同URL的书签', 'warning');
+                        return;
+                    }
+                    
+                    appData.categories[catIndex].bookmarks.push({ title, url, favicon });
+                    renderEditBookmarks();
+                    showToast('书签添加成功', 'success');
                 }
+            );
+        }
+
+        // 显示编辑书签表单
+        function showEditBookmarkForm(catIndex, index) {
+            const bookmark = appData.categories[catIndex].bookmarks[index];
+            
+            showModal(
+                '编辑书签',
+                `
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">网站标题</label>
+                            <input type="text" id="edit-bookmark-title" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent" value="${bookmark.title}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">网站URL</label>
+                            <input type="url" id="edit-bookmark-url" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent" value="${bookmark.url}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">网站图标</label>
+                            <input type="url" id="edit-bookmark-favicon" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent" value="${bookmark.favicon || ''}">
+                        </div>
+                    </div>
+                `,
+                () => {
+                    const title = document.getElementById('edit-bookmark-title').value.trim();
+                    let url = document.getElementById('edit-bookmark-url').value.trim();
+                    const favicon = document.getElementById('edit-bookmark-favicon').value.trim();
+                    
+                    if (!title || !url) {
+                        showToast('标题和URL不能为空', 'error');
+                        return;
+                    }
+                    
+                    // 自动补全URL协议
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        url = 'https://' + url;
+                    }
+                    
+                    // 检查是否已存在相同URL的书签（去重）
+                    const existing = appData.categories[catIndex].bookmarks.some((b, i) => 
+                        b.url === url && i !== index
+                    );
+                    if (existing) {
+                        showToast('已存在相同URL的书签', 'warning');
+                        return;
+                    }
+                    
+                    appData.categories[catIndex].bookmarks[index] = { title, url, favicon };
+                    renderEditBookmarks();
+                    showToast('书签更新成功', 'success');
+                }
+            );
+        }
+
+        // 添加分类
+        function showAddCategoryForm() {
+            showModal(
+                '添加新分类',
+                `
+                    <div>
+                        <label class="block text-sm font-medium mb-1">分类名称</label>
+                        <input type="text" id="new-category-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent" placeholder="输入分类名称">
+                    </div>
+                `,
+                () => {
+                    const name = document.getElementById('new-category-name').value.trim();
+                    
+                    if (!name) {
+                        showToast('分类名称不能为空', 'error');
+                        return;
+                    }
+                    
+                    if (appData.categories.some(cat => cat.name === name)) {
+                        showToast('该分类名称已存在', 'warning');
+                        return;
+                    }
+                    
+                    appData.categories.push({ name, bookmarks: [] });
+                    renderEditBookmarks();
+                    showToast('分类添加成功', 'success');
+                }
+            );
+        }
+
+        // 编辑分类
+        function showEditCategoryForm(index) {
+            const category = appData.categories[index];
+            
+            showModal(
+                '编辑分类',
+                `
+                    <div>
+                        <label class="block text-sm font-medium mb-1">分类名称</label>
+                        <input type="text" id="edit-category-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent" value="${category.name}">
+                    </div>
+                `,
+                () => {
+                    const name = document.getElementById('edit-category-name').value.trim();
+                    
+                    if (!name) {
+                        showToast('分类名称不能为空', 'error');
+                        return;
+                    }
+                    
+                    if (appData.categories.some((cat, i) => cat.name === name && i !== index)) {
+                        showToast('该分类名称已存在', 'warning');
+                        return;
+                    }
+                    
+                    appData.categories[index].name = name;
+                    renderEditBookmarks();
+                    showToast('分类更新成功', 'success');
+                }
+            );
+        }
+
+        // 渲染时区
+        function renderTimezones() {
+            elements.timezonesContainer.innerHTML = '';
+            
+            appData.timezones.forEach((timezone, index) => {
+                const now = new Date();
+                const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+                const zoneTime = new Date(utcTime + timezone.offset * 3600000);
                 
-                newBookmarks.forEach(newGroup => {
-                    const existingGroup = appData.bookmarks.find(g => g.name === newGroup.name);
-                    if (existingGroup) {
-                        newGroup.bookmarks.forEach(newBookmark => {
-                            const isDuplicate = existingGroup.bookmarks.some(b => b.url === newBookmark.url);
-                            if (!isDuplicate) {
-                                existingGroup.bookmarks.push(newBookmark);
-                            }
-                        });
-                    } else {
-                        appData.bookmarks.push(newGroup);
+                const timeElement = document.createElement('div');
+                timeElement.className = 'flex justify-between items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg';
+                timeElement.innerHTML = `
+                    <div class="font-medium">${timezone.name}</div>
+                    <div class="flex items-center">
+                        <span class="text-sm mr-2">${zoneTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <button class="delete-timezone-btn p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500" data-index="${index}">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                elements.timezonesContainer.appendChild(timeElement);
+            });
+            
+            // 添加删除时区事件
+            document.querySelectorAll('.delete-timezone-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    appData.timezones.splice(index, 1);
+                    renderTimezones();
+                });
+            });
+        }
+
+        // 添加时区
+        function showAddTimezoneForm() {
+            showModal(
+                '添加时区',
+                `
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">时区名称</label>
+                            <input type="text" id="new-timezone-name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent" placeholder="例如：东京时间">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">UTC 偏移量 (小时)</label>
+                            <input type="number" id="new-timezone-offset" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-space-accent" min="-12" max="14" step="0.5" value="8">
+                        </div>
+                    </div>
+                `,
+                () => {
+                    const name = document.getElementById('new-timezone-name').value.trim();
+                    const offset = parseFloat(document.getElementById('new-timezone-offset').value);
+                    
+                    if (!name || isNaN(offset)) {
+                        showToast('请填写完整的时区信息', 'error');
+                        return;
+                    }
+                    
+                    appData.timezones.push({ name, offset });
+                    renderTimezones();
+                    showToast('时区添加成功', 'success');
+                }
+            );
+        }
+
+        // 从HTML导入书签
+        function importBookmarksFromHTML(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const bookmarkElements = doc.querySelectorAll('dt > a');
+            const folders = doc.querySelectorAll('dt:not(:has(a))');
+            
+            const newCategories = [];
+            
+            // 处理文件夹
+            folders.forEach(folder => {
+                const folderName = folder.textContent.trim();
+                if (!folderName) return;
+                
+                const bookmarks = [];
+                const links = folder.querySelectorAll('~ dl dt > a');
+                
+                links.forEach(link => {
+                    const url = link.getAttribute('href');
+                    const title = link.textContent.trim();
+                    
+                    if (url && title) {
+                        let favicon = '';
+                        try {
+                            const urlObj = new URL(url);
+                            favicon = `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
+                        } catch (e) {
+                            favicon = '';
+                        }
+                        
+                        bookmarks.push({ title, url, favicon });
                     }
                 });
                 
-                renderBookmarks();
-                showToast('成功', `成功导入 ${bookmarks.length} 个书签（已去重）`, 'success');
-                event.target.value = '';
-            };
-            reader.readAsText(file);
-        }
-
-        function handleExportBookmarks() {
-            if (appData.bookmarks.length === 0) {
-                showToast('提示', '没有可导出的书签', 'info');
-                return;
+                if (bookmarks.length > 0) {
+                    newCategories.push({ name: folderName, bookmarks });
+                }
+            });
+            
+            // 处理根级书签
+            const rootBookmarks = [];
+            bookmarkElements.forEach(link => {
+                if (!link.closest('dl')) {
+                    const url = link.getAttribute('href');
+                    const title = link.textContent.trim();
+                    
+                    if (url && title) {
+                        let favicon = '';
+                        try {
+                            const urlObj = new URL(url);
+                            favicon = `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
+                        } catch (e) {
+                            favicon = '';
+                        }
+                        
+                        rootBookmarks.push({ title, url, favicon });
+                    }
+                }
+            });
+            
+            if (rootBookmarks.length > 0) {
+                newCategories.push({ name: '导入的书签', bookmarks: rootBookmarks });
             }
             
+            // 合并分类并去重
+            newCategories.forEach(newCat => {
+                const existingCat = appData.categories.find(cat => cat.name === newCat.name);
+                
+                if (existingCat) {
+                    // 合并书签并去重
+                    newCat.bookmarks.forEach(newBookmark => {
+                        const exists = existingCat.bookmarks.some(b => b.url === newBookmark.url);
+                        if (!exists) {
+                            existingCat.bookmarks.push(newBookmark);
+                        }
+                    });
+                } else {
+                    appData.categories.push(newCat);
+                }
+            });
+            
+            renderEditBookmarks();
+            return {
+                total: bookmarkElements.length,
+                imported: newCategories.reduce((sum, cat) => sum + cat.bookmarks.length, 0),
+                duplicates: bookmarkElements.length - newCategories.reduce((sum, cat) => sum + cat.bookmarks.length, 0)
+            };
+        }
+
+        // 导出书签为HTML
+        function exportBookmarksToHTML() {
             let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-<TITLE>书签</TITLE>
+<TITLE>书签导出</TITLE>
 <H1>书签</H1>
 <DL><p>`;
             
-            appData.bookmarks.forEach(group => {
-                html += `<DT><H3>${escapeHtml(group.name)}</H3>
+            appData.categories.forEach(category => {
+                html += `<DT><H3>${category.name}</H3>
 <DL><p>`;
                 
-                group.bookmarks.forEach(bookmark => {
-                    html += `<DT><A HREF="${escapeHtml(bookmark.url)}">${escapeHtml(bookmark.title)}</A>`;
+                category.bookmarks.forEach(bookmark => {
+                    html += `<DT><A HREF="${bookmark.url}" ADD_DATE="${Date.now() / 1000 | 0}">${bookmark.title}</A>`;
                 });
                 
                 html += `</DL><p>`;
@@ -1156,332 +1128,507 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `星际导航书签_${new Date().toISOString().slice(0, 10)}.html`;
+            a.download = `bookmarks_${new Date().toISOString().slice(0, 10)}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // 创建JSON备份
+        function createJSONBackup() {
+            const backupData = {
+                categories: appData.categories,
+                timezones: appData.timezones,
+                ads: appData.ads,
+                timestamp: new Date().toISOString()
+            };
+            
+            const json = JSON.stringify(backupData, null, 2);
+            const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bookmark_backup_${new Date().toISOString().slice(0, 10)}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            showToast('成功', '书签导出成功', 'success');
+            showToast('备份创建成功', 'success');
         }
 
-        function handleLoadBackup() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = function(e) {
+        // 从JSON恢复
+        function restoreFromJSON(json) {
+            try {
+                const data = JSON.parse(json);
+                
+                if (data.categories) appData.categories = data.categories;
+                if (data.timezones) appData.timezones = data.timezones;
+                if (data.ads) appData.ads = data.ads;
+                
+                renderEditBookmarks();
+                renderTimezones();
+                updateAds();
+                
+                return true;
+            } catch (e) {
+                console.error('恢复备份失败:', e);
+                return false;
+            }
+        }
+
+        // 更新广告显示
+        function updateAds() {
+            appData.ads.forEach(ad => {
+                const imgElement = document.getElementById(`ad${ad.id}-img`);
+                const linkElement = document.getElementById(`ad${ad.id}-link`);
+                const textElement = document.getElementById(`ad${ad.id}-text`);
+                const previewElement = document.getElementById(`ad${ad.id}-preview`);
+                const urlInput = document.getElementById(`ad${ad.id}-url`);
+                const titleInput = document.getElementById(`ad${ad.id}-title`);
+                
+                if (imgElement) imgElement.src = ad.img;
+                if (linkElement) linkElement.href = ad.url;
+                if (textElement) textElement.textContent = ad.text;
+                if (previewElement) previewElement.src = ad.img;
+                if (urlInput) urlInput.value = ad.url;
+                if (titleInput) titleInput.value = ad.text;
+            });
+        }
+
+        // 保存广告设置
+        function saveAdSettings(adId) {
+            const ad = appData.ads.find(a => a.id === adId);
+            if (!ad) return;
+            
+            const urlInput = document.getElementById(`ad${adId}-url`);
+            const titleInput = document.getElementById(`ad${adId}-title`);
+            
+            ad.url = urlInput.value.trim() || '#';
+            ad.text = titleInput.value.trim() || `广告 ${adId}`;
+            
+            updateAds();
+            showToast(`广告 ${adId} 已保存`, 'success');
+        }
+
+        // 处理广告图片上传
+        function handleAdImageUpload(adId, file) {
+            if (!file || !file.type.startsWith('image/')) {
+                showToast('请上传图片文件', 'error');
+                return;
+            }
+            
+            if (file.size > 3 * 1024 * 1024) {
+                showToast('图片大小不能超过3MB', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const ad = appData.ads.find(a => a.id === adId);
+                if (ad) {
+                    ad.img = e.target.result;
+                    updateAds();
+                    showToast(`广告 ${adId} 图片已更新`, 'success');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 从GitHub加载数据
+        async function loadDataFromGitHub() {
+            const { username, repo, token } = appData.githubConfig;
+            
+            if (!username || !repo) {
+                return false;
+            }
+            
+            try {
+                let url;
+                let headers = {};
+                
+                if (token) {
+                    url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
+                    headers = {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    };
+                } else {
+                    url = `https://raw.githubusercontent.com/${username}/${repo}/main/bookmarks.json`;
+                }
+                
+                const response = await fetch(url, { headers });
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        showToast('未找到书签数据，将使用默认数据', 'warning');
+                        return false;
+                    }
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                let data;
+                if (token) {
+                    const githubData = await response.json();
+                    data = JSON.parse(atob(githubData.content));
+                } else {
+                    data = await response.json();
+                }
+                
+                // 合并数据
+                if (data.categories) appData.categories = data.categories;
+                if (data.timezones) appData.timezones = data.timezones;
+                if (data.ads) appData.ads = data.ads;
+                
+                showToast('已从GitHub加载数据', 'success');
+                return true;
+            } catch (e) {
+                console.error('从GitHub加载数据失败:', e);
+                showToast(`从GitHub加载数据失败: ${e.message}`, 'error');
+                return false;
+            }
+        }
+
+        // 保存数据到GitHub
+        async function saveDataToGitHub() {
+            const { username, repo, token } = appData.githubConfig;
+            
+            if (!username || !repo || !token) {
+                showToast('请先配置完整的GitHub信息', 'error');
+                return false;
+            }
+            
+            try {
+                // 准备要保存的数据
+                const data = {
+                    categories: appData.categories,
+                    timezones: appData.timezones,
+                    ads: appData.ads,
+                    updatedAt: new Date().toISOString()
+                };
+                
+                const content = JSON.stringify(data, null, 2);
+                
+                // 检查文件是否已存在
+                const url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                let sha = null;
+                if (response.ok) {
+                    const existingData = await response.json();
+                    sha = existingData.sha;
+                }
+                
+                // 编码内容为base64，处理非Latin1字符
+                const base64Content = btoa(unescape(encodeURIComponent(content)));
+                
+                // 保存数据
+                const method = sha ? 'PUT' : 'PUT';
+                const saveResponse = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: `Update bookmarks - ${new Date().toISOString()}`,
+                        content: base64Content,
+                        ...(sha && { sha })
+                    })
+                });
+                
+                if (!saveResponse.ok) {
+                    const errorData = await saveResponse.json();
+                    throw new Error(errorData.message || `HTTP错误: ${saveResponse.status}`);
+                }
+                
+                showToast('数据已成功保存到GitHub', 'success');
+                return true;
+            } catch (e) {
+                console.error('保存数据到GitHub失败:', e);
+                showToast(`保存数据到GitHub失败: ${e.message}`, 'error');
+                return false;
+            }
+        }
+
+        // 保存GitHub配置
+        function saveGitHubConfig() {
+            const username = elements.githubUsername.value.trim();
+            const repo = elements.githubRepo.value.trim();
+            const token = elements.githubToken.value.trim();
+            
+            appData.githubConfig = { username, repo, token };
+            localStorage.setItem('githubConfig', JSON.stringify(appData.githubConfig));
+            
+            elements.githubConfigStatus.textContent = '配置已保存';
+            elements.githubConfigStatus.className = 'ml-3 text-sm text-green-500';
+            
+            setTimeout(() => {
+                elements.githubConfigStatus.textContent = '';
+            }, 3000);
+            
+            // 尝试加载数据
+            loadDataFromGitHub().then(success => {
+                if (success) {
+                    renderEditBookmarks();
+                    renderTimezones();
+                    updateAds();
+                }
+            });
+        }
+
+        // 加载GitHub配置
+        function loadGitHubConfig() {
+            const savedConfig = localStorage.getItem('githubConfig');
+            if (savedConfig) {
+                try {
+                    appData.githubConfig = JSON.parse(savedConfig);
+                    elements.githubUsername.value = appData.githubConfig.username || '';
+                    elements.githubRepo.value = appData.githubConfig.repo || '';
+                    elements.githubToken.value = appData.githubConfig.token || '';
+                } catch (e) {
+                    console.error('加载GitHub配置失败:', e);
+                }
+            }
+        }
+
+        // 初始化在线时长图表
+        function initTimeChart() {
+            const ctx = document.getElementById('timeChart').getContext('2d');
+            const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            const today = new Date().getDay();
+            
+            // 计算本周总时长
+            const totalHours = appData.onlineTimeData.reduce((sum, hours) => sum + hours, 0);
+            elements.totalTime.textContent = totalHours.toFixed(1) + '小时';
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: '在线时长（小时）',
+                        data: appData.onlineTimeData,
+                        borderColor: '#8B5CF6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#8B5CF6',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: true,
+                                color: document.documentElement.classList.contains('dark') 
+                                    ? 'rgba(255, 255, 255, 0.1)' 
+                                    : 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                color: document.documentElement.classList.contains('dark') 
+                                    ? 'rgba(255, 255, 255, 0.7)' 
+                                    : 'rgba(0, 0, 0, 0.7)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: document.documentElement.classList.contains('dark') 
+                                    ? 'rgba(255, 255, 255, 0.7)' 
+                                    : 'rgba(0, 0, 0, 0.7)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // 初始化事件监听
+        function initEventListeners() {
+            // 主题切换
+            elements.themeToggle.addEventListener('click', toggleTheme);
+            
+            // 视图切换
+            elements.editBtn.addEventListener('click', () => switchView('edit'));
+            elements.backToHome.addEventListener('click', () => switchView('home'));
+            
+            // 添加分类
+            elements.addCategoryBtn.addEventListener('click', showAddCategoryForm);
+            
+            // 导入/导出书签
+            elements.importBookmarksBtn.addEventListener('click', () => elements.bookmarkFileInput.click());
+            elements.bookmarkFileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
                 
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function(event) {
                     try {
-                        const data = JSON.parse(e.target.result);
-                        
-                        if (data.bookmarks) appData.bookmarks = data.bookmarks;
-                        if (data.ads) appData.ads = data.ads;
-                        if (data.timezones) appData.timezones = data.timezones;
-                        
-                        renderBookmarks();
-                        renderAds();
-                        renderTimezones();
-                        showToast('成功', '备份加载成功', 'success');
+                        const result = importBookmarksFromHTML(event.target.result);
+                        showToast(`导入成功！共处理 ${result.total} 个书签，新增 ${result.imported} 个，跳过 ${result.duplicates} 个重复项`, 'success');
                     } catch (error) {
-                        showToast('错误', '备份文件格式不正确', 'error');
-                        console.error('Error loading backup:', error);
+                        showToast('导入失败：' + error.message, 'error');
                     }
+                    elements.bookmarkFileInput.value = '';
                 };
                 reader.readAsText(file);
-            };
-            input.click();
-        }
-
-        function handleSaveBackup() {
-            const data = {
-                bookmarks: appData.bookmarks,
-                ads: appData.ads,
-                timezones: appData.timezones
-            };
-            
-            const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `星际导航备份_${new Date().toISOString().slice(0, 10)}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showToast('成功', '备份保存成功', 'success');
-        }
-
-        function addNewBookmarkGroup() {
-            appData.bookmarks.push({
-                name: `新分组 ${appData.bookmarks.length + 1}`,
-                bookmarks: []
             });
-            renderBookmarks();
-        }
-
-        function addNewBookmark(groupIndex) {
-            const newBookmark = {
-                id: Date.now() + Math.floor(Math.random() * 1000),
-                title: '新书签',
-                url: 'https://',
-                favicon: 'https://picsum.photos/32/32'
-            };
             
-            appData.bookmarks[groupIndex].bookmarks.push(newBookmark);
-            renderBookmarks();
-        }
-
-        function confirmDeleteGroup(groupIndex) {
-            const groupName = appData.bookmarks[groupIndex].name;
-            elements.modalTitle.textContent = '确认删除';
-            elements.modalContent.textContent = `确定要删除分组"${groupName}"吗？此操作不可恢复。`;
-            elements.modal.classList.remove('hidden');
+            elements.exportBookmarksBtn.addEventListener('click', exportBookmarksToHTML);
             
-            const confirmHandler = () => {
-                appData.bookmarks.splice(groupIndex, 1);
-                renderBookmarks();
-                elements.modal.classList.add('hidden');
-                elements.modalConfirm.removeEventListener('click', confirmHandler);
-                showToast('信息', '分组已删除', 'info');
-            };
-            
-            elements.modalConfirm.addEventListener('click', confirmHandler);
-        }
-
-        function confirmDeleteBookmark(groupIndex, bookmarkIndex) {
-            const bookmarkTitle = appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].title;
-            elements.modalTitle.textContent = '确认删除';
-            elements.modalContent.textContent = `确定要删除书签"${bookmarkTitle}"吗？`;
-            elements.modal.classList.remove('hidden');
-            
-            const confirmHandler = () => {
-                appData.bookmarks[groupIndex].bookmarks.splice(bookmarkIndex, 1);
-                renderBookmarks();
-                elements.modal.classList.add('hidden');
-                elements.modalConfirm.removeEventListener('click', confirmHandler);
-                showToast('信息', '书签已删除', 'info');
-            };
-            
-            elements.modalConfirm.addEventListener('click', confirmHandler);
-        }
-
-        async function handleSaveChanges() {
-            elements.saveChanges.disabled = true;
-            elements.saveChanges.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>保存中...';
-            
-            try {
-                const success = await saveDataToGitHub();
+            // 备份与恢复
+            elements.createBackupBtn.addEventListener('click', createJSONBackup);
+            elements.loadBackupBtn.addEventListener('click', () => elements.backupFileInput.click());
+            elements.backupFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
                 
-                if (success) {
-                    showToast('成功', '所有更改已保存', 'success');
-                } else {
-                    showToast('部分成功', '本地更改已保存，但同步到GitHub失败', 'warning');
-                }
-            } catch (error) {
-                showToast('错误', '保存失败: ' + error.message, 'error');
-                console.error('Error saving changes:', error);
-            } finally {
-                elements.saveChanges.disabled = false;
-                elements.saveChanges.innerHTML = '<i class="fa fa-save mr-2"></i>保存所有更改';
-            }
-        }
-
-        function updateBookmarkInfo(groupIndex, bookmarkIndex) {
-            const bookmark = appData.bookmarks[groupIndex].bookmarks[bookmarkIndex];
-            
-            try {
-                const url = new URL(bookmark.url);
-                bookmark.favicon = getFaviconUrl(bookmark.url);
-                
-                fetch(bookmark.url)
-                    .then(response => response.text())
-                    .then(html => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const title = doc.title.trim() || url.hostname;
-                        
-                        appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].title = title;
-                        renderBookmarks();
-                    })
-                    .catch(() => {
-                        bookmark.title = url.hostname;
-                        renderBookmarks();
-                    });
-            } catch (e) {
-                console.error('Invalid URL:', e);
-            }
-        }
-
-        function getFaviconUrl(url) {
-            try {
-                const parsedUrl = new URL(url);
-                return `${parsedUrl.protocol}//${parsedUrl.hostname}/favicon.ico`;
-            } catch (e) {
-                return 'https://picsum.photos/32/32';
-            }
-        }
-
-        function showToast(title, message, type = 'info') {
-            elements.toastTitle.textContent = title;
-            elements.toastMessage.textContent = message;
-            
-            elements.toastIcon.className = '';
-            switch (type) {
-                case 'success':
-                    elements.toastIcon.className = 'fa fa-check-circle text-green-400 mt-0.5 mr-3 text-xl';
-                    break;
-                case 'error':
-                    elements.toastIcon.className = 'fa fa-exclamation-circle text-red-400 mt-0.5 mr-3 text-xl';
-                    break;
-                case 'warning':
-                    elements.toastIcon.className = 'fa fa-exclamation-triangle text-yellow-400 mt-0.5 mr-3 text-xl';
-                    break;
-                default:
-                    elements.toastIcon.className = 'fa fa-info-circle text-space-glow mt-0.5 mr-3 text-xl';
-            }
-            
-            elements.toast.classList.remove('translate-y-20', 'opacity-0');
-            elements.toast.classList.add('translate-y-0', 'opacity-100');
-            
-            setTimeout(() => {
-                elements.toast.classList.remove('translate-y-0', 'opacity-100');
-                elements.toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
-
-        function checkEditAccess() {
-            const path = window.location.pathname;
-            if (path.includes('/edit') || path.includes('?edit')) {
-                elements.homePage.classList.add('hidden');
-                elements.editPage.classList.remove('hidden');
-            }
-        }
-
-        function escapeHtml(unsafe) {
-            if (!unsafe) return '';
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        function updateTime() {
-            const now = new Date();
-            
-            appData.timezones.forEach(timezone => {
-                const timeEl = document.getElementById(`time-${timezone.elementId}`);
-                const dateEl = document.getElementById(`date-${timezone.elementId}`);
-                
-                if (timeEl && dateEl) {
-                    const targetTime = new Date(now.getTime() + (timezone.utcOffset - now.getTimezoneOffset() / 60) * 3600000);
-                    
-                    const hours = String(targetTime.getHours()).padStart(2, '0');
-                    const minutes = String(targetTime.getMinutes()).padStart(2, '0');
-                    const seconds = String(targetTime.getSeconds()).padStart(2, '0');
-                    
-                    const year = targetTime.getFullYear();
-                    const month = String(targetTime.getMonth() + 1).padStart(2, '0');
-                    const day = String(targetTime.getDate()).padStart(2, '0');
-                    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-                    const weekday = weekdays[targetTime.getDay()];
-                    
-                    timeEl.textContent = `${hours}:${minutes}:${seconds}`;
-                    dateEl.textContent = `${year}-${month}-${day} 周${weekday}`;
-                }
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const success = restoreFromJSON(event.target.result);
+                        if (success) {
+                            showToast('从备份恢复成功', 'success');
+                        } else {
+                            showToast('备份文件格式不正确', 'error');
+                        }
+                    } catch (error) {
+                        showToast('恢复失败：' + error.message, 'error');
+                    }
+                    elements.backupFileInput.value = '';
+                };
+                reader.readAsText(file);
             });
-        }
-
-        function renderTimezones() {
-            elements.timezonesContainer.innerHTML = '';
             
-            appData.timezones.forEach(timezone => {
-                const timezoneEl = document.createElement('div');
-                timezoneEl.className = 'flex justify-between items-center p-2 bg-space-blue/10 rounded-lg group';
-                timezoneEl.innerHTML = `
-                    <div>
-                        <div class="font-medium">${timezone.city}</div>
-                        <div class="text-sm text-gray-300">UTC${timezone.utcOffset >= 0 ? '+' : ''}${timezone.utcOffset}</div>
-                    </div>
-                    <div class="text-right">
-                        <div id="time-${timezone.elementId}" class="font-mono"></div>
-                        <div id="date-${timezone.elementId}" class="text-sm text-gray-300"></div>
-                    </div>
-                    <button class="delete-timezone opacity-0 group-hover:opacity-100 text-red-400 p-1" data-city="${timezone.city}">
-                        <i class="fa fa-times"></i>
-                    </button>
-                `;
-                elements.timezonesContainer.appendChild(timezoneEl);
-            });
-        }
-
-        function addTimezone() {
-            elements.modalTitle.textContent = '添加时区';
-            elements.modalContent.innerHTML = `
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-sm mb-1">城市名称</label>
-                        <input type="text" id="new-timezone-city" class="w-full bg-space-black/70 border border-space-blue/50 rounded p-2 focus:outline-none focus:border-space-glow" placeholder="例如：东京">
-                    </div>
-                    <div>
-                        <label class="block text-sm mb-1">UTC偏移量</label>
-                        <input type="number" id="new-timezone-offset" class="w-full bg-space-black/70 border border-space-blue/50 rounded p-2 focus:outline-none focus:border-space-glow" placeholder="例如：9">
-                        <div class="text-xs text-gray-500">例如：北京为+8，纽约为-4</div>
-                    </div>
-                </div>
-            `;
-            elements.modal.classList.remove('hidden');
+            // 保存到GitHub
+            elements.saveChangesBtn.addEventListener('click', saveDataToGitHub);
             
-            const confirmHandler = () => {
-                const city = document.getElementById('new-timezone-city').value.trim();
-                const offset = parseInt(document.getElementById('new-timezone-offset').value);
-                
-                if (!city || isNaN(offset)) {
-                    showToast('错误', '请输入有效的城市名称和偏移量', 'error');
-                    return;
-                }
-                
-                const elementId = city.toLowerCase().replace(/\s+/g, '-');
-                
-                const exists = appData.timezones.some(tz => tz.city === city);
-                if (exists) {
-                    showToast('错误', '该城市时区已存在', 'error');
-                    return;
-                }
-                
-                appData.timezones.push({
-                    city: city,
-                    utcOffset: offset,
-                    elementId: elementId
+            // GitHub配置
+            elements.saveGithubConfigBtn.addEventListener('click', saveGitHubConfig);
+            
+            // 时区管理
+            elements.addTimezoneBtn.addEventListener('click', showAddTimezoneForm);
+            
+            // 广告管理
+            document.querySelectorAll('.save-ad-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const adId = parseInt(e.currentTarget.dataset.ad);
+                    saveAdSettings(adId);
                 });
-                
-                renderTimezones();
-                elements.modal.classList.add('hidden');
-                elements.modalConfirm.removeEventListener('click', confirmHandler);
-                showToast('成功', '时区已添加', 'success');
-            };
+            });
             
-            elements.modalConfirm.addEventListener('click', confirmHandler);
+            document.getElementById('ad1-upload').addEventListener('change', (e) => {
+                handleAdImageUpload(1, e.target.files[0]);
+                e.target.value = '';
+            });
+            
+            document.getElementById('ad2-upload').addEventListener('change', (e) => {
+                handleAdImageUpload(2, e.target.files[0]);
+                e.target.value = '';
+            });
+            
+            document.getElementById('ad3-upload').addEventListener('change', (e) => {
+                handleAdImageUpload(3, e.target.files[0]);
+                e.target.value = '';
+            });
+            
+            // 关闭模态框
+            elements.closeModal.addEventListener('click', hideModal);
+            
+            // 点击模态框外部关闭
+            elements.modal.addEventListener('click', (e) => {
+                if (e.target === elements.modal) {
+                    hideModal();
+                }
+            });
+            
+            // 初始化滚动隐藏编辑按钮功能
+            let scrollTimer;
+            window.addEventListener('scroll', () => {
+                clearTimeout(scrollTimer);
+                elements.editBtn.classList.remove('opacity-0');
+                elements.editBtn.classList.add('opacity-100');
+                
+                scrollTimer = setTimeout(() => {
+                    elements.editBtn.classList.remove('opacity-100');
+                    elements.editBtn.classList.add('opacity-0');
+                }, 3000);
+            });
         }
 
-        function deleteTimezone(city) {
-            const index = appData.timezones.findIndex(tz => tz.city === city);
-            if (index !== -1) {
-                appData.timezones.splice(index, 1);
-                renderTimezones();
-                showToast('信息', '时区已删除', 'info');
+        // 初始化页面
+        async function init() {
+            createStars();
+            initTheme();
+            loadGitHubConfig();
+            await loadDataFromGitHub();
+            renderBookmarks();
+            renderTimezones();
+            updateAds();
+            initTimeChart();
+            initEventListeners();
+            
+            // 设置年份和主机名
+            elements.currentYear.textContent = new Date().getFullYear();
+            elements.footerHostname.textContent = window.location.hostname || '星际导航';
+            
+            // 添加一些默认分类和书签（如果没有数据）
+            if (appData.categories.length === 0) {
+                appData.categories = [
+                    {
+                        name: '常用工具',
+                        bookmarks: [
+                            {
+                                title: 'GitHub',
+                                url: 'https://github.com',
+                                favicon: 'https://github.com/favicon.ico'
+                            },
+                            {
+                                title: 'Stack Overflow',
+                                url: 'https://stackoverflow.com',
+                                favicon: 'https://stackoverflow.com/favicon.ico'
+                            }
+                        ]
+                    },
+                    {
+                        name: '学习资源',
+                        bookmarks: [
+                            {
+                                title: 'MDN Web Docs',
+                                url: 'https://developer.mozilla.org',
+                                favicon: 'https://developer.mozilla.org/favicon.ico'
+                            }
+                        ]
+                    }
+                ];
+                renderBookmarks();
             }
         }
 
-        window.addEventListener('DOMContentLoaded', init);
+        // 启动应用
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
-    
