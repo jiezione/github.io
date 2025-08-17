@@ -958,11 +958,6 @@
       "city": "北京",
       "utcOffset": 8,
       "elementId": "beijing"
-    },
-    {
-      "city": "纽约",
-      "utcOffset": -4,
-      "elementId": "newyork"
     }
   ]
 }
