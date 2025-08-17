@@ -252,7 +252,7 @@
                     <button id="save-github-config" class="px-4 py-2 bg-space-accent hover:bg-space-accent/80 text-white rounded-lg transition-colors">
                         <i class="fa fa-save mr-1"></i> 保存配置
                     </button>
-                    <span id="github-config-status" class="ml-3 text-sm">未配置时使用默认公共仓库</span>
+                    <span id="github-config-status" class="ml-3 text-sm">未配置时使用默认公共仓库: https://example.com/repo-name/bookmarks.json</span>
                 </div>
             </div>
 
@@ -447,7 +447,7 @@
                 token: ''
             },
             onlineTimeData: [0, 1.5, 2, 0.5, 3, 4, 2.5],
-            defaultRepoUrl: 'https://example.com/bookmarks.json'
+            defaultRepoUrl: 'https://example.com/repo-name/bookmarks.json' // 更新为指定的默认仓库地址
         };
 
         // DOM 元素
@@ -1278,15 +1278,13 @@
         // 从GitHub或默认仓库加载数据
         async function loadDataFromRepository() {
             const { username, repo, token } = appData.githubConfig;
-            let url = appData.defaultRepoUrl;
+            let url = appData.defaultRepoUrl; // 默认使用指定的仓库地址
             let headers = {};
             let isGitHub = false;
-            let isDefaultRepo = true;
             
             // 如果配置了GitHub信息，使用GitHub
             if (username && repo) {
                 isGitHub = true;
-                isDefaultRepo = false;
                 if (token) {
                     url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
                     headers = {
@@ -1372,9 +1370,15 @@
             
             const { username, repo, token } = appData.githubConfig;
             
-            // 如果没有配置GitHub信息，提示用户但仍返回成功（因为已保存到本地）
-            if (!username || !repo || !token) {
-                showToast('已保存到本地，若要同步到云端请配置GitHub信息', 'info');
+            // 如果没有配置完整的GitHub信息，只保存到本地
+            if (!username || !repo) {
+                showToast('已保存到本地，若要同步到云端请配置完整的GitHub信息', 'info');
+                return true;
+            }
+            
+            // 如果没有提供token，无法保存到GitHub
+            if (!token) {
+                showToast('已保存到本地，同步到GitHub需要提供访问令牌', 'info');
                 return true;
             }
             
@@ -1450,7 +1454,7 @@
             elements.githubConfigStatus.className = 'ml-3 text-sm text-green-500';
             
             setTimeout(() => {
-                elements.githubConfigStatus.textContent = '未配置时使用默认公共仓库';
+                elements.githubConfigStatus.textContent = '未配置时使用默认公共仓库: https://example.com/repo-name/bookmarks.json';
                 elements.githubConfigStatus.className = 'ml-3 text-sm';
             }, 3000);
             
