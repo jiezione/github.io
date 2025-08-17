@@ -1237,16 +1237,56 @@
             reader.readAsDataURL(file);
         }
 
+        // 从本地存储加载数据
+        function loadDataFromLocalStorage() {
+            try {
+                const savedData = localStorage.getItem('bookmarkData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    
+                    if (data.categories) appData.categories = data.categories;
+                    if (data.timezones) appData.timezones = data.timezones;
+                    if (data.ads) appData.ads = data.ads;
+                    
+                    return true;
+                }
+                return false;
+            } catch (e) {
+                console.error('从本地存储加载数据失败:', e);
+                return false;
+            }
+        }
+
+        // 保存数据到本地存储
+        function saveDataToLocalStorage() {
+            try {
+                const data = {
+                    categories: appData.categories,
+                    timezones: appData.timezones,
+                    ads: appData.ads,
+                    updatedAt: new Date().toISOString()
+                };
+                
+                localStorage.setItem('bookmarkData', JSON.stringify(data));
+                return true;
+            } catch (e) {
+                console.error('保存数据到本地存储失败:', e);
+                return false;
+            }
+        }
+
         // 从GitHub或默认仓库加载数据
         async function loadDataFromRepository() {
             const { username, repo, token } = appData.githubConfig;
             let url = appData.defaultRepoUrl;
             let headers = {};
             let isGitHub = false;
+            let isDefaultRepo = true;
             
             // 如果配置了GitHub信息，使用GitHub
             if (username && repo) {
                 isGitHub = true;
+                isDefaultRepo = false;
                 if (token) {
                     url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
                     headers = {
@@ -1259,14 +1299,27 @@
             }
             
             try {
-                const response = await fetch(url, { headers });
+                // 添加超时设置（10秒）
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                
+                const response = await fetch(url, { 
+                    headers,
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
                 
                 if (!response.ok) {
                     if (response.status === 404) {
-                        showToast(isGitHub ? '未找到GitHub书签数据，使用默认数据' : '未找到默认仓库数据，使用本地数据', 'warning');
-                        return false;
+                        showToast(isGitHub ? '未找到GitHub书签数据' : '未找到默认仓库数据', 'warning');
+                    } else {
+                        showToast(`${isGitHub ? 'GitHub' : '默认仓库'}请求失败: HTTP ${response.status}`, 'warning');
                     }
-                    throw new Error(`HTTP错误: ${response.status}`);
+                    
+                    // 尝试从本地存储加载
+                    const localLoaded = loadDataFromLocalStorage();
+                    return localLoaded;
                 }
                 
                 let data;
@@ -1282,28 +1335,47 @@
                 if (data.timezones) appData.timezones = data.timezones;
                 if (data.ads) appData.ads = data.ads;
                 
+                // 同时保存到本地存储作为备份
+                saveDataToLocalStorage();
+                
                 showToast(isGitHub ? '已从GitHub加载数据' : '已从默认仓库加载数据', 'success');
                 return true;
             } catch (e) {
-                console.error('从仓库加载数据失败:', e);
-                showToast(`从${isGitHub ? 'GitHub' : '默认仓库'}加载数据失败: ${e.message}，使用本地数据`, 'warning');
-                return false;
+                console.error(`从${isGitHub ? 'GitHub' : '默认仓库'}加载数据失败:`, e);
+                
+                // 处理不同类型的错误
+                let errorMsg;
+                if (e.name === 'AbortError') {
+                    errorMsg = `${isGitHub ? 'GitHub' : '默认仓库'}请求超时`;
+                } else if (e.message.includes('Failed to fetch')) {
+                    errorMsg = `无法连接到${isGitHub ? 'GitHub' : '默认仓库'}`;
+                } else {
+                    errorMsg = e.message;
+                }
+                
+                showToast(`${errorMsg}，尝试使用本地数据`, 'error');
+                
+                // 尝试从本地存储加载
+                const localLoaded = loadDataFromLocalStorage();
+                return localLoaded;
             }
         }
 
         // 保存数据到配置的仓库
         async function saveDataToRepository() {
+            // 总是先保存到本地存储
+            const localSaved = saveDataToLocalStorage();
+            if (!localSaved) {
+                showToast('保存到本地存储失败', 'error');
+                return false;
+            }
+            
             const { username, repo, token } = appData.githubConfig;
             
-            // 如果没有配置GitHub信息，提示用户
+            // 如果没有配置GitHub信息，提示用户但仍返回成功（因为已保存到本地）
             if (!username || !repo || !token) {
-                showModal(
-                    '无法保存',
-                    '未配置完整的GitHub信息，无法保存更改到远程仓库。您可以：<br><br>1. 配置GitHub信息以启用远程保存<br>2. 使用"创建JSON备份"功能保存到本地',
-                    () => {},
-                    () => {}
-                );
-                return false;
+                showToast('已保存到本地，若要同步到云端请配置GitHub信息', 'info');
+                return true;
             }
             
             try {
@@ -1356,12 +1428,12 @@
                     throw new Error(errorData.message || `HTTP错误: ${saveResponse.status}`);
                 }
                 
-                showToast('数据已成功保存到GitHub', 'success');
+                showToast('数据已成功保存到本地和GitHub', 'success');
                 return true;
             } catch (e) {
                 console.error('保存数据到GitHub失败:', e);
-                showToast(`保存数据到GitHub失败: ${e.message}`, 'error');
-                return false;
+                showToast(`已保存到本地，但同步到GitHub失败: ${e.message}`, 'warning');
+                return true; // 即使GitHub失败，本地保存成功也返回true
             }
         }
 
@@ -1591,19 +1663,12 @@
             createStars();
             initTheme();
             loadGitHubConfig();
-            await loadDataFromRepository();
-            renderBookmarks();
-            renderTimezones();
-            updateAds();
-            initTimeChart();
-            initEventListeners();
             
-            // 设置年份和主机名
-            elements.currentYear.textContent = new Date().getFullYear();
-            elements.footerHostname.textContent = window.location.hostname || '星际导航';
+            // 先尝试从仓库加载，如果失败则从本地存储加载
+            const repoLoaded = await loadDataFromRepository();
             
-            // 添加一些默认分类和书签（如果没有数据）
-            if (appData.categories.length === 0) {
+            // 如果都没有加载到数据，使用默认数据
+            if (!repoLoaded && appData.categories.length === 0) {
                 appData.categories = [
                     {
                         name: '常用工具',
@@ -1631,8 +1696,19 @@
                         ]
                     }
                 ];
-                renderBookmarks();
+                // 保存默认数据到本地
+                saveDataToLocalStorage();
             }
+            
+            renderBookmarks();
+            renderTimezones();
+            updateAds();
+            initTimeChart();
+            initEventListeners();
+            
+            // 设置年份和主机名
+            elements.currentYear.textContent = new Date().getFullYear();
+            elements.footerHostname.textContent = window.location.hostname || '星际导航';
         }
 
         // 启动应用
@@ -1640,3 +1716,4 @@
     </script>
 </body>
 </html>
+    
