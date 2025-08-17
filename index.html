@@ -9,7 +9,41 @@
 </head>
 <body class="bg-gray-50">
     <div class="container mx-auto p-4 max-w-4xl">
-        <h1 class="text-3xl font-bold mb-6 text-gray-800">Bookmark Manager</h1>
+        <div class="flex justify-content-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Bookmark Manager</h1>
+            <button id="config-btn" class="bg-blue-500 text-white px-4 py-2 rounded rounded hover:bg-blue-600">
+                <i class="fa fa-cog mr-1"></i> Settings
+            </button>
+        </div>
+
+        <!-- 配置面板 -->
+        <div id="config-panel" class="hidden bg-white p-6 rounded-lg shadow-md mb-6 hidden">
+            <h2 class="text-xl font-semibold mb-4">Repository Settings</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 mb-1">Default GitHub Repository (owner/repo)</label>
+                    <input type="text" id="default-repo-input" 
+                           class="w-full p-2 border border-gray-300 rounded"
+                           placeholder="your-username/your-repo">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-1">File Path</label>
+                    <input type="text" id="file-path-input" 
+                           class="w-full p-2 border border-gray-300 rounded"
+                           value="bookmarks.json">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-1">Your GitHub Token (optional, for private repos)</label>
+                    <input type="text" id="github-token-input" 
+                           class="w-full p-2 border border-gray-300 rounded"
+                           placeholder="ghp_...">
+                </div>
+                <button id="save-config" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Save Settings
+                </button>
+            </div>
+        </div>
+
         <div id="bookmarks-container" class="space-y-4"></div>
         <div id="loading" class="py-8 text-center text-gray-500">
             <i class="fa fa-spinner fa-spin mr-2"></i> Loading bookmarks...
@@ -18,43 +52,71 @@
     </div>
 
     <script>
-        // 配置区域 - 用户可自定义的仓库信息（可留空）
-        const USER_CONFIG = {
-            githubToken: '', // 用户的GitHub token（可选）
-            githubRepo: '',  // 格式："用户名/仓库名"（可选）
-            filePath: 'bookmarks.json' // 书签文件路径（默认即可）
-        };
+        // 从本地存储加载配置，没有则使用初始默认值
+        function loadConfig() {
+            const savedConfig = localStorage.getItem('bookmarkConfig');
+            if (savedConfig) {
+                return JSON.parse(savedConfig);
+            }
+            
+            // 初始默认配置 - 可根据需要修改
+            return {
+                githubRepo: '',
+                filePath: 'bookmarks.json',
+                githubToken: ''
+            };
+        }
 
-        // 默认公开仓库配置（当用户未配置时使用）
-        const DEFAULT_REPO = {
-            githubRepo: 'jiezione/jznav', // 替换为你的公开仓库
+        // 保存配置到本地存储
+        function saveConfig(config) {
+            localStorage.setItem('bookmarkConfig', JSON.stringify(config));
+        }
+
+        // 应用级默认仓库 - 当用户未配置任何仓库时使用
+        const FALLBACK_REPO = {
+            githubRepo: 'example/public-bookmarks', // 这里可以使用一个公开的示例仓库
             filePath: 'bookmarks.json'
         };
 
+        // 加载并显示配置
+        function initConfigPanel() {
+            const config = loadConfig();
+            document.getElementById('default-repo-input').value = config.githubRepo || '';
+            document.getElementById('file-path-input').value = config.filePath || 'bookmarks.json';
+            document.getElementById('github-token-input').value = config.githubToken || '';
+        }
+
         // 确定最终使用的仓库信息
-        const finalConfig = {
-            githubRepo: USER_CONFIG.githubRepo || DEFAULT_REPO.githubRepo,
-            filePath: USER_CONFIG.filePath || DEFAULT_REPO.filePath,
-            githubToken: USER_CONFIG.githubToken // token可选，公开仓库无需token
-        };
+        function getFinalConfig() {
+            const userConfig = loadConfig();
+            
+            // 优先使用用户配置，用户未配置则使用 fallback
+            return {
+                githubRepo: userConfig.githubRepo || FALLBACK_REPO.githubRepo,
+                filePath: userConfig.filePath || FALLBACK_REPO.filePath,
+                githubToken: userConfig.githubToken || ''
+            };
+        }
 
         // 加载GitHub仓库中的书签数据
         async function loadBookmarks() {
             try {
-                const [owner, repo] = finalConfig.githubRepo.split('/');
+                const config = getFinalConfig();
+                const [owner, repo] = config.githubRepo.split('/');
+                
                 if (!owner || !repo) {
                     throw new Error('Invalid repository format (expected "owner/repo")');
                 }
 
                 // 构建GitHub API请求URL
-                const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${finalConfig.filePath}`;
+                const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${config.filePath}`;
                 
-                // 配置请求头（有token则添加，无则不添加）
+                // 配置请求头
                 const headers = {
                     'Accept': 'application/vnd.github.v3.raw'
                 };
-                if (finalConfig.githubToken) {
-                    headers['Authorization'] = `token ${finalConfig.githubToken}`;
+                if (config.githubToken) {
+                    headers['Authorization'] = `token ${config.githubToken}`;
                 }
 
                 // 发起请求
@@ -90,8 +152,41 @@
             document.getElementById('loading').classList.add('hidden');
         }
 
-        // 页面加载时启动
-        window.addEventListener('DOMContentLoaded', loadBookmarks);
+        // 事件监听
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化配置面板
+            initConfigPanel();
+            
+            // 加载书签
+            loadBookmarks();
+            
+            // 配置按钮点击事件
+            document.getElementById('config-btn').addEventListener('click', () => {
+                const panel = document.getElementById('config-panel');
+                panel.classList.toggle('hidden');
+            });
+            
+            // 保存配置
+            document.getElementById('save-config').addEventListener('click', () => {
+                const newConfig = {
+                    githubRepo: document.getElementById('default-repo-input').value.trim(),
+                    filePath: document.getElementById('file-path-input').value.trim() || 'bookmarks.json',
+                    githubToken: document.getElementById('github-token-input').value.trim()
+                };
+                
+                saveConfig(newConfig);
+                
+                // 重新加载书签
+                document.getElementById('loading').classList.remove('hidden');
+                document.getElementById('bookmarks-container').innerHTML = '';
+                document.getElementById('error').classList.add('hidden');
+                loadBookmarks();
+                
+                // 隐藏配置面板
+                document.getElementById('config-panel').classList.add('hidden');
+            });
+        });
     </script>
 </body>
 </html>
+    
