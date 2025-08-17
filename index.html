@@ -94,7 +94,7 @@
 
     <main class="container mx-auto px-4 pt-24 pb-20 relative z-10">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="bg-white dark:bg-space-dark rounded-xl p-5 shadow-lg dark:shadow-space-blue/20 border border-gray-200 dark:border-space-blue/30 transform hover:-translate-y-1 transition-all">
+            <div class="bg-white dark:bg-space-dark-dark rounded-xl p-5 shadow-lg dark:shadow-space-blue/20 border border-gray-200 dark:border-space-blue/30 transform hover:-translate-y-1 transition-all">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-semibold text-lg font-space">在线时长</h3>
                     <i class="fa fa-clock-o text-space-glow"></i>
@@ -557,7 +557,7 @@
                 showNotification('success', '数据加载成功', '已从GitHub加载最新数据');
             } catch (error) {
                 console.error('Failed to load data from GitHub:', error);
-                showNotification('error', '数据加载失败', '使用本地默认数据');
+                showNotification('info', '使用默认数据', '未配置或无法访问GitHub，使用默认数据');
                 
                 const localData = localStorage.getItem('backupData');
                 if (localData) {
@@ -577,6 +577,10 @@
         
         async function saveDataToGitHub() {
             try {
+                if (!appData.github.repo) {
+                    appData.github.repo = DEFAULT_GITHUB_REPO;
+                }
+                
                 const dataToSave = {
                     bookmarks: appData.bookmarks,
                     ads: appData.ads,
@@ -595,7 +599,7 @@
                 try {
                     const checkResponse = await fetch(url, {
                         headers: {
-                            'Authorization': `token ${appData.github.token}`,
+                            'Authorization': appData.github.token ? `token ${appData.github.token}` : '',
                             'Accept': 'application/vnd.github.v3+json'
                         }
                     });
@@ -605,13 +609,13 @@
                         sha = existingData.sha;
                     }
                 } catch (error) {
-                    console.log('File does not exist, creating new one');
+                    console.log('File does not exist or no token, creating new one');
                 }
                 
                 const response = await fetch(url, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `token ${appData.github.token}`,
+                        'Authorization': appData.github.token ? `token ${appData.github.token}` : '',
                         'Accept': 'application/vnd.github.v3+json',
                         'Content-Type': 'application/json'
                     },
@@ -1185,15 +1189,8 @@
             });
             
             elements.editBtn.addEventListener('click', () => {
-                const savedGithubRepo = localStorage.getItem('githubRepo');
-                
-                if (!savedGithubRepo) {
-                    elements.githubSettingsModal.classList.remove('hidden');
-                    elements.githubSettingsModal.classList.add('flex');
-                } else {
-                    elements.editModal.classList.remove('hidden');
-                    elements.editModal.classList.add('flex');
-                }
+                elements.editModal.classList.remove('hidden');
+                elements.editModal.classList.add('flex');
             });
             
             elements.closeEdit.addEventListener('click', () => {
@@ -1207,13 +1204,8 @@
             });
             
             elements.saveGithubSettings.addEventListener('click', () => {
-                const repo = elements.githubRepo.value.trim();
+                const repo = elements.githubRepo.value.trim() || DEFAULT_GITHUB_REPO;
                 const token = elements.githubToken.value.trim();
-                
-                if (!repo) {
-                    showNotification('error', '配置错误', '请输入GitHub仓库地址');
-                    return;
-                }
                 
                 localStorage.setItem('githubRepo', repo);
                 localStorage.setItem('githubToken', token);
@@ -1223,8 +1215,6 @@
                 
                 elements.githubSettingsModal.classList.remove('flex');
                 elements.githubSettingsModal.classList.add('hidden');
-                elements.editModal.classList.remove('hidden');
-                elements.editModal.classList.add('flex');
                 
                 showNotification('success', '配置已保存', 'GitHub设置已更新');
             });
@@ -1413,6 +1403,12 @@
             });
             
             elements.saveChanges.addEventListener('click', async () => {
+                if (!appData.github.repo) {
+                    elements.githubSettingsModal.classList.remove('hidden');
+                    elements.githubSettingsModal.classList.add('flex');
+                    return;
+                }
+                
                 elements.saveChanges.disabled = true;
                 elements.saveChanges.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>保存中...';
                 
