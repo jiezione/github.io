@@ -30,6 +30,10 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
+        .status-message {
+            color: #666;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -48,6 +52,7 @@
             <input type="text" id="file-path" value="bookmarks.json" placeholder="文件路径">
         </div>
         <button onclick="loadBookmarks()">加载书签</button>
+        <div class="status-message" id="status-message"></div>
     </div>
 
     <div id="bookmarks-container"></div>
@@ -96,6 +101,8 @@
             const owner = document.getElementById('github-owner').value;
             const repo = document.getElementById('github-repo').value;
             const filePath = document.getElementById('file-path').value;
+            const statusElement = document.getElementById('status-message');
+            const container = document.getElementById('bookmarks-container');
             
             // 基本验证
             if (!owner || !repo) {
@@ -105,7 +112,8 @@
 
             try {
                 // 显示加载状态
-                document.getElementById('bookmarks-container').innerHTML = '加载中...';
+                statusElement.textContent = '正在加载书签数据...';
+                container.innerHTML = '';
                 
                 // 使用GitHub API获取文件
                 // 公开仓库不需要token即可访问
@@ -121,17 +129,40 @@
                 
                 // GitHub API返回的文件内容是base64编码的
                 if (data.content) {
-                    const decodedContent = atob(data.content);
+                    // 修复Base64解码问题
+                    // 1. 先替换可能存在的URL安全字符
+                    const safeContent = data.content.replace(/-/g, '+').replace(/_/g, '/');
+                    // 2. 处理填充字符
+                    const padLength = (4 - (safeContent.length % 4)) % 4;
+                    const paddedContent = safeContent + '='.repeat(padLength);
+                    
+                    // 3. 解码并处理UTF-8
+                    const decodedArray = Uint8Array.from(atob(paddedContent), c => c.charCodeAt(0));
+                    const decoder = new TextDecoder('utf-8');
+                    const decodedContent = decoder.decode(decodedArray);
+                    
                     const bookmarks = JSON.parse(decodedContent);
+                    statusElement.textContent = `成功加载 ${countBookmarks(bookmarks)} 个书签`;
                     renderBookmarks(bookmarks);
                 } else {
                     throw new Error('无法获取书签数据');
                 }
             } catch (error) {
                 console.error('加载书签失败:', error);
-                document.getElementById('bookmarks-container').innerHTML = 
-                    `加载失败: ${error.message}<br>请检查仓库配置是否正确`;
+                statusElement.textContent = `加载失败: ${error.message}`;
+                container.innerHTML = `请检查仓库配置是否正确，确保 ${filePath} 文件存在且可访问`;
             }
+        }
+
+        // 统计书签数量
+        function countBookmarks(bookmarksData) {
+            if (!bookmarksData || !bookmarksData.bookmarks) return 0;
+            
+            let count = 0;
+            bookmarksData.bookmarks.forEach(folder => {
+                if (folder.bookmarks) count += folder.bookmarks.length;
+            });
+            return count;
         }
 
         // 渲染书签
@@ -150,7 +181,7 @@
                 
                 const folderName = document.createElement('div');
                 folderName.className = 'folder-name';
-                folderName.textContent = folder.name;
+                folderName.textContent = folder.name || '未命名文件夹';
                 folderName.onclick = () => toggleFolder(folderContent);
                 folderDiv.appendChild(folderName);
                 
