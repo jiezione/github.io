@@ -1,4 +1,4 @@
-name: Inject Repository Info
+name: Inject Repository Info and Deploy
 
 on:
   push:
@@ -6,57 +6,55 @@ on:
   workflow_dispatch:  # 允许手动触发
 
 jobs:
-  inject-repo-info:
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 授予写入内容的权限
     
     steps:
     - uses: actions/checkout@v3
-    
-    - name: Check if index.html exists
-      run: |
-        if [ ! -f "index.html" ]; then
-          echo "Error: index.html not found in repository root"
-          exit 1
-        fi
+      with:
+        fetch-depth: 0  # 确保获取所有历史记录
     
     - name: Show repository info for debugging
       run: |
         echo "Current repository: ${{ github.repository }}"
-        echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
+        echo "GitHub actor: ${{ github.actor }}"
+        echo "Branch: ${{ github.ref }}"
+    
+    - name: Check if index.html exists
+      run: |
+        if [ -f "index.html" ]; then
+          echo "index.html found"
+        else
+          echo "Error: index.html not found"
+          exit 1
+        fi
     
     - name: Inject default repository info
       run: |
         # 获取当前仓库信息 (owner/repo)
         REPO_FULL_NAME="${{ github.repository }}"
+        echo "Injecting repo info: $REPO_FULL_NAME"
         
-        # 创建临时文件存储注入的脚本
-        echo "<script>window.defaultRepo = '${REPO_FULL_NAME}';</script>" > repo-script.js
-        
-        # 更可靠的注入方法：在head标签结束前插入
-        sed -i '/<\/head>/e cat repo-script.js' index.html
+        # 使用更可靠的方法注入仓库信息
+        if grep -q "</head>" index.html; then
+          sed -i "s|</head>|<script>window.defaultRepo = '${REPO_FULL_NAME}';</script></head>|g" index.html
+        else
+          # 如果找不到</head>标签，在文件开头添加
+          sed -i "1i <script>window.defaultRepo = '${REPO_FULL_NAME}';</script>" index.html
+        fi
         
         # 显示注入结果
         echo "Modified index.html content:"
-        grep -A 5 "<\/head>" index.html
+        grep -A 5 "window.defaultRepo" index.html
     
-    - name: Verify injection success
-      run: |
-        if ! grep -q "window.defaultRepo" index.html; then
-          echo "Error: Repository info injection failed"
-          exit 1
-        fi
-    
-    - name: Commit changes
-      run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add index.html
-        git commit -m "Inject default repo info: ${{ github.repository }}" || echo "No changes to commit"
-        git push || echo "Push failed - maybe no changes"
-      
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: gh-pages
         publish_dir: ./
-        publish_branch: gh-pages  # 明确指定部署到gh-pages分支
+        force_orphan: false  # 保留历史记录
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
