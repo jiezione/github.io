@@ -70,7 +70,7 @@
                         placeholder="username/repo"
                         aria-describedby="repoHelp"
                     >
-                    <p id="repoHelp" class="text-sm text-gray-500 mt-1">e.g. octocat/bookmarks</p>
+                    <p id="repoHelp" class="text-sm text-gray-500 mt-1">e.g. your-username/your-repo</p>
                 </div>
                 
                 <div>
@@ -94,7 +94,12 @@
                     placeholder="ghp_..."
                     aria-describedby="tokenHelp"
                 >
-                <p id="tokenHelp" class="text-sm text-gray-500 mt-1">Only needed for private repositories</p>
+                <p id="tokenHelp" class="text-sm text-gray-500 mt-1">
+                    Needed for private repositories or to increase API rate limits. 
+                    <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token" target="_blank" class="text-primary hover:underline">
+                        How to create
+                    </a>
+                </p>
             </div>
             
             <div class="mt-6 flex space-x-4">
@@ -102,7 +107,7 @@
                     <i class="fa fa-save mr-1"></i> Save Configuration
                 </button>
                 <button id="useDefault" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-all">
-                    <i class="fa fa-refresh mr-1"></i> Use Default Repository
+                    <i class="fa fa-refresh mr-1"></i> Use Demo Repository
                 </button>
                 <button id="clearConfig" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-all">
                     <i class="fa fa-trash mr-1"></i> Clear Configuration
@@ -132,6 +137,9 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-sm text-red-700" id="errorDetails"></p>
+                        <div id="errorActions" class="mt-2">
+                            <!-- 错误处理按钮将在这里动态添加 -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -160,9 +168,9 @@
     </footer>
 
     <script>
-        // 默认仓库配置 - 可以根据需要修改
+        // 使用一个包含bookmarks.json的公开演示仓库
         const DEFAULT_CONFIG = {
-            repo: 'github/explore', // 示例默认仓库
+            repo: 'adarsh-dhakal/bookmark-example', // 这个仓库包含示例bookmarks.json
             path: 'bookmarks.json',
             token: ''
         };
@@ -180,6 +188,7 @@
             loadingMessage: document.getElementById('loadingMessage'),
             errorMessage: document.getElementById('errorMessage'),
             errorDetails: document.getElementById('errorDetails'),
+            errorActions: document.getElementById('errorActions'),
             bookmarksContainer: document.getElementById('bookmarksContainer')
         };
         
@@ -258,13 +267,13 @@
             
             try {
                 localStorage.setItem('githubBookmarksConfig', JSON.stringify(DEFAULT_CONFIG));
-                showConfigStatus('Using default configuration', 'success');
+                showConfigStatus('Using demo configuration', 'success');
                 
                 // 切换后重新加载书签
                 loadBookmarks();
             } catch (e) {
                 console.error('Error setting default config:', e);
-                showConfigStatus('Failed to set default configuration', 'error');
+                showConfigStatus('Failed to set demo configuration', 'error');
             }
         }
         
@@ -316,8 +325,19 @@
         }
         
         // 显示错误消息
-        function showError(message) {
+        function showError(message, actions = []) {
             elements.errorDetails.textContent = message;
+            elements.errorActions.innerHTML = '';
+            
+            // 添加错误处理按钮
+            actions.forEach(action => {
+                const button = document.createElement('button');
+                button.textContent = action.label;
+                button.className = 'bg-gray-200 text-gray-800 px-3 py-1 rounded-md hover:bg-gray-300 text-sm mr-2 mt-1';
+                button.addEventListener('click', action.callback);
+                elements.errorActions.appendChild(button);
+            });
+            
             elements.errorMessage.classList.remove('hidden');
             elements.loadingIndicator.classList.add('hidden');
         }
@@ -411,6 +431,26 @@
                 if (!response.ok) {
                     // 处理API错误
                     const errorData = await response.json().catch(() => ({}));
+                    
+                    // 针对403错误提供更具体的信息
+                    if (response.status === 403) {
+                        let errorMsg = 'Access forbidden. This may be due to GitHub API rate limits.';
+                        
+                        // 添加解决方案
+                        const actions = [
+                            {
+                                label: 'Use demo repository',
+                                callback: useDefaultConfiguration
+                            },
+                            {
+                                label: 'Enter access token',
+                                callback: () => elements.githubToken.focus()
+                            }
+                        ];
+                        
+                        throw new Error(errorMsg);
+                    }
+                    
                     throw new Error(errorData.message || `Failed to fetch data (HTTP ${response.status})`);
                 }
                 
@@ -428,42 +468,38 @@
                 
             } catch (error) {
                 console.error('Error loading bookmarks:', error);
-                showError(`Error: ${error.message}. Trying default repository...`);
                 
-                // 尝试使用默认仓库
-                try {
-                    const defaultConfig = { ...DEFAULT_CONFIG };
-                    showLoading(`Trying default repository: ${defaultConfig.repo}...`);
-                    
-                    const apiUrl = buildGitHubApiUrl(defaultConfig);
-                    const response = await fetch(apiUrl, {
-                        method: 'GET',
-                        headers: { 'Accept': 'application/vnd.github.v3+json' }
-                    });
-                    
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    
-                    const data = await response.json();
-                    if (data.content) {
-                        const decodedContent = atob(data.content);
-                        const bookmarks = JSON.parse(decodedContent);
-                        renderBookmarks(bookmarks);
-                        hideStatusIndicators();
-                        // 更新表单显示默认仓库
-                        elements.githubRepo.value = defaultConfig.repo;
-                    } else {
-                        throw new Error('No content in default repository');
+                // 准备错误处理动作
+                const actions = [
+                    {
+                        label: 'Use demo repository',
+                        callback: useDefaultConfiguration
+                    },
+                    {
+                        label: 'Check configuration',
+                        callback: () => elements.githubRepo.focus()
                     }
-                } catch (defaultError) {
-                    console.error('Error with default repository:', defaultError);
-                    showError(`Failed to load from default repository: ${defaultError.message}`);
-                    elements.bookmarksContainer.innerHTML = `
-                        <div class="text-center py-12 text-gray-500">
-                            <i class="fa fa-exclamation-triangle text-4xl mb-4 text-yellow-500"></i>
-                            <p>Could not load bookmarks. Please check your configuration.</p>
-                        </div>
-                    `;
+                ];
+                
+                // 如果是404错误，可能是文件不存在
+                if (error.message.includes('HTTP 404')) {
+                    showError(`The file was not found in this repository. Please check the path.`, actions);
+                } 
+                // 如果是403错误，提示速率限制或权限问题
+                else if (error.message.includes('403')) {
+                    showError(`Access denied. This may be due to GitHub API rate limits or insufficient permissions. Try using a personal access token.`, actions);
                 }
+                // 其他错误
+                else {
+                    showError(`Error: ${error.message}`, actions);
+                }
+                
+                elements.bookmarksContainer.innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fa fa-exclamation-triangle text-4xl mb-4 text-yellow-500"></i>
+                        <p>Could not load bookmarks. Please check your configuration.</p>
+                    </div>
+                `;
             }
         }
         
