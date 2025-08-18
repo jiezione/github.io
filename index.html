@@ -10,68 +10,101 @@
     <style>
         /* 基础样式 */
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            line-height: 1.6;
         }
         .bookmark-folder {
             margin: 10px 0;
             padding-left: 20px;
         }
         .folder-name {
-            font-weight: bold;
-            margin: 5px 0;
+            font-weight: 600;
+            margin: 8px 0;
             cursor: pointer;
-            transition: color 0.2s;
+            transition: all 0.2s ease;
+            padding: 4px 0;
         }
         .folder-name:hover {
-            color: #007bff;
+            color: #165DFF;
         }
         .bookmark-item {
-            margin: 3px 0;
+            margin: 4px 0;
+            padding: 2px 0;
         }
         .config-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
+            margin-bottom: 25px;
+            padding: 18px;
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
-            background-color: #f8f9fa;
+            background-color: #f9fafb;
         }
         .status-message {
-            color: #666;
-            margin: 10px 0;
-            padding: 8px;
-            border-radius: 4px;
+            color: #4b5563;
+            margin: 12px 0;
+            padding: 10px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
         }
         .error {
-            color: #dc3545;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
+            color: #dc2626;
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
         }
         .success {
-            color: #28a745;
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
+            color: #059669;
+            background-color: #dcfce7;
+            border: 1px solid #bbf7d0;
+        }
+        .info {
+            color: #0284c7;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
         }
         input {
-            margin: 5px 0 10px 0;
-            padding: 6px;
-            width: 300px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            margin: 6px 0 12px 0;
+            padding: 8px 12px;
+            width: 320px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #165DFF;
+            box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
         }
         button {
-            padding: 8px 16px;
-            background-color: #007bff;
+            padding: 9px 18px;
+            background-color: #165DFF;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
             transition: background-color 0.2s;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #0E42D2;
+        }
+        .hint-box {
+            margin-top: 15px;
+            padding: 12px;
+            font-size: 0.92em;
+            border-radius: 6px;
+            background-color: #f3f4f6;
+            border-left: 3px solid #6b7280;
+        }
+        a {
+            color: #165DFF;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -80,21 +113,23 @@
         <h3>仓库配置</h3>
         <div>
             <label for="github-owner">GitHub 用户名/组织名:</label><br>
-            <input type="text" id="github-owner" placeholder="用户名或组织名">
+            <input type="text" id="github-owner" placeholder="例如: octocat">
         </div>
         <div>
             <label for="github-repo">仓库名:</label><br>
-            <input type="text" id="github-repo" placeholder="仓库名称">
+            <input type="text" id="github-repo" placeholder="例如: my-bookmarks">
         </div>
         <div>
             <label for="file-path">文件路径:</label><br>
-            <input type="text" id="file-path" value="bookmarks.json" placeholder="文件路径">
+            <input type="text" id="file-path" value="bookmarks.json" placeholder="文件在仓库中的路径">
         </div>
         <button onclick="loadBookmarks()">加载书签</button>
         <div class="status-message" id="status-message"></div>
-        <div id="custom-domain-hint" style="margin-top: 10px; font-size: 0.9em; color: #666; display: none;">
-            提示：如果使用自定义域名，可在HTML头部添加meta标签预设仓库信息<br>
-            示例: &lt;meta name="github-owner" content="你的用户名"&gt;
+        <div id="custom-domain-hint" class="hint-box" style="display: none;">
+            <strong>自定义域名配置提示:</strong><br>
+            若使用自定义域名，可在HTML头部添加meta标签预设仓库信息：<br>
+            <code>&lt;meta name="github-owner" content="你的用户名"&gt;</code><br>
+            <code>&lt;meta name="github-repo" content="你的仓库名"&gt;</code>
         </div>
     </div>
 
@@ -108,7 +143,10 @@
             loadBookmarks();
         });
 
-        // 自动检测默认仓库信息（支持自定义域名）
+        /**
+         * 自动检测默认仓库信息
+         * 支持标准GitHub Pages和自定义域名场景
+         */
         function autoDetectDefaultRepo() {
             const ownerInput = document.getElementById('github-owner');
             const repoInput = document.getElementById('github-repo');
@@ -119,40 +157,43 @@
 
             try {
                 // 1. 优先从meta标签获取（适用于自定义域名）
-                const metaOwner = document.querySelector('meta[name="github-owner"]')?.content;
-                const metaRepo = document.querySelector('meta[name="github-repo"]')?.content;
+                const metaOwner = getMetaContent('github-owner');
+                const metaRepo = getMetaContent('github-repo');
                 
                 if (metaOwner && metaRepo) {
                     ownerInput.value = metaOwner;
                     repoInput.value = metaRepo;
+                    logDetection('从meta标签获取仓库信息');
                     return;
                 }
 
                 // 2. 尝试从URL解析（标准GitHub Pages格式）
-                const currentHost = window.location.hostname;
-                const pathSegments = window.location.pathname.split('/').filter(segment => segment);
-                
-                // 解析用户名
-                if (currentHost.endsWith('.github.io')) {
-                    const owner = currentHost.replace('.github.io', '');
-                    ownerInput.value = ownerInput.value || owner;
+                const { owner: urlOwner, repo: urlRepo } = parseRepoFromUrl();
+                if (urlOwner && urlRepo) {
+                    ownerInput.value = ownerInput.value || urlOwner;
+                    repoInput.value = repoInput.value || urlRepo;
+                    logDetection('从URL解析获取仓库信息');
+                    return;
                 }
 
-                // 解析仓库名 (通常是路径的第一段)
-                if (pathSegments.length > 0) {
-                    repoInput.value = repoInput.value || pathSegments[0];
+                // 3. 尝试从本地存储获取（用户之前成功配置过）
+                const storedOwner = localStorage.getItem('githubOwner');
+                const storedRepo = localStorage.getItem('githubRepo');
+                if (storedOwner && storedRepo) {
+                    ownerInput.value = ownerInput.value || storedOwner;
+                    repoInput.value = repoInput.value || storedRepo;
+                    logDetection('从本地存储获取仓库信息');
+                    return;
                 }
 
-                // 3. 如果仍未获取到信息，显示自定义域名提示
-                if (!ownerInput.value || !repoInput.value) {
-                    customDomainHint.style.display = 'block';
-                }
+                // 4. 仍未获取到信息，显示自定义域名提示
+                customDomainHint.style.display = 'block';
 
             } catch (e) {
                 console.error('自动检测仓库信息失败:', e);
                 customDomainHint.style.display = 'block';
             } finally {
-                // 4. 如果所有方法都失败，使用默认公开仓库作为最后的fallback
+                // 5. 最终fallback：使用默认公开仓库
                 if (!ownerInput.value) {
                     ownerInput.value = 'fmies-projects';
                 }
@@ -162,11 +203,58 @@
             }
         }
 
+        /**
+         * 从meta标签获取内容
+         */
+        function getMetaContent(name) {
+            const meta = document.querySelector(`meta[name="${name}"]`);
+            return meta ? meta.content.trim() : null;
+        }
+
+        /**
+         * 从URL解析仓库信息
+         */
+        function parseRepoFromUrl() {
+            const result = { owner: null, repo: null };
+            const currentHost = window.location.hostname;
+            const pathSegments = window.location.pathname.split('/').filter(segment => segment);
+            
+            // 标准GitHub Pages格式: https://<owner>.github.io/<repo>/
+            if (currentHost.endsWith('.github.io')) {
+                result.owner = currentHost.replace('.github.io', '').trim();
+                // 提取仓库名（路径第一段）
+                if (pathSegments.length > 0) {
+                    result.repo = pathSegments[0].trim();
+                }
+            }
+            
+            return result;
+        }
+
+        /**
+         * 记录检测信息
+         */
+        function logDetection(method) {
+            console.log(`自动检测仓库信息: ${method}`);
+        }
+
+        /**
+         * 保存配置到本地存储
+         */
+        function saveConfigToLocalStorage(owner, repo) {
+            try {
+                localStorage.setItem('githubOwner', owner);
+                localStorage.setItem('githubRepo', repo);
+            } catch (e) {
+                console.warn('无法保存到本地存储:', e);
+            }
+        }
+
         // 加载书签数据
         async function loadBookmarks() {
-            const owner = document.getElementById('github-owner').value;
-            const repo = document.getElementById('github-repo').value;
-            const filePath = document.getElementById('file-path').value;
+            const owner = document.getElementById('github-owner').value.trim();
+            const repo = document.getElementById('github-repo').value.trim();
+            const filePath = document.getElementById('file-path').value.trim();
             const statusElement = document.getElementById('status-message');
             const container = document.getElementById('bookmarks-container');
             
@@ -180,8 +268,11 @@
             try {
                 // 显示加载状态
                 statusElement.textContent = '正在加载书签数据...';
-                statusElement.className = 'status-message';
+                statusElement.className = 'status-message info';
                 container.innerHTML = '';
+                
+                // 保存配置到本地存储
+                saveConfigToLocalStorage(owner, repo);
                 
                 // 使用GitHub API获取文件
                 const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
@@ -189,6 +280,9 @@
                 const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error(`未找到文件，请确认仓库"${owner}/${repo}"中存在"${filePath}"`);
+                    }
                     throw new Error(`请求失败: ${response.status} ${response.statusText}`);
                 }
                 
@@ -217,7 +311,12 @@
                 console.error('加载书签失败:', error);
                 statusElement.textContent = `加载失败: ${error.message}`;
                 statusElement.className = 'status-message error';
-                container.innerHTML = `请检查仓库配置是否正确，确保 ${filePath} 文件存在且可访问`;
+                container.innerHTML = `<p>请检查以下事项：</p>
+                                      <ul>
+                                        <li>确认GitHub用户名和仓库名正确</li>
+                                        <li>确认${filePath}文件存在于仓库中</li>
+                                        <li>确认仓库是公开可访问的</li>
+                                      </ul>`;
             }
         }
 
@@ -237,8 +336,8 @@
             const container = document.getElementById('bookmarks-container');
             container.innerHTML = '';
             
-            if (!bookmarksData || !bookmarksData.bookmarks) {
-                container.innerHTML = '未找到书签数据';
+            if (!bookmarksData || !bookmarksData.bookmarks || bookmarksData.bookmarks.length === 0) {
+                container.innerHTML = '<p>未找到书签数据或书签为空</p>';
                 return;
             }
             
@@ -264,10 +363,6 @@
                         link.href = bookmark.url;
                         link.textContent = bookmark.title || bookmark.url;
                         link.target = '_blank';
-                        link.style.textDecoration = 'none';
-                        link.style.color = '#007bff';
-                        link.onmouseover = () => link.style.textDecoration = 'underline';
-                        link.onmouseout = () => link.style.textDecoration = 'none';
                         
                         bookmarkItem.appendChild(link);
                         folderContent.appendChild(bookmarkItem);
