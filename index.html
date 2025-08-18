@@ -16,29 +16,74 @@
 
     <script>
         // 调试信息 - 检查是否注入了默认仓库
-        console.log('window.defaultRepo:', window.defaultRepo);
+        console.log('window.defaultRepo (from workflow):', window.defaultRepo);
+        
+        // 备用方法：从当前URL解析仓库信息
+        function getRepoFromUrl() {
+            try {
+                const hostname = window.location.hostname;
+                const pathname = window.location.pathname.split('/').filter(part => part);
+                
+                // 情况1: 标准GitHub Pages域名 (username.github.io/repo)
+                if (hostname.endsWith('.github.io') && pathname.length > 0) {
+                    const username = hostname.split('.')[0];
+                    const repo = pathname[0];
+                    return `${username}/${repo}`;
+                }
+                
+                // 情况2: 自定义域名但路径包含仓库信息
+                if (pathname.length >= 2) {
+                    return `${pathname[0]}/${pathname[1]}`;
+                }
+                
+                return null;
+            } catch (e) {
+                console.error('Error parsing repo from URL:', e);
+                return null;
+            }
+        }
+        
+        // 获取最终的仓库信息
+        function getRepository() {
+            // 1. 优先使用工作流注入的信息
+            if (window.defaultRepo) {
+                return window.defaultRepo;
+            }
+            
+            // 2. 尝试从URL解析
+            const urlRepo = getRepoFromUrl();
+            if (urlRepo) {
+                console.log('Using repo parsed from URL:', urlRepo);
+                return urlRepo;
+            }
+            
+            // 3. 最后使用一个公开的默认仓库作为 fallback
+            const fallbackRepo = 'yourusername/yourrepo'; // 请替换为你的仓库
+            console.log('Using fallback repository:', fallbackRepo);
+            return fallbackRepo;
+        }
         
         // 书签加载逻辑
         async function loadBookmarks() {
             try {
-                // 获取默认仓库信息
-                let repo = window.defaultRepo;
-                
-                // 调试信息
-                console.log('Using repository:', repo);
+                // 获取仓库信息
+                const repo = getRepository();
                 
                 if (!repo) {
-                    throw new Error('未获取到默认仓库信息，请检查工作流配置');
+                    throw new Error('无法获取仓库信息，请检查配置');
                 }
                 
                 // 构建API URL
                 const apiUrl = `https://api.github.com/repos/${repo}/contents/bookmarks.json`;
-                console.log('Loading from API:', apiUrl);
+                console.log('Loading bookmarks from:', apiUrl);
                 
                 // 尝试从GitHub API加载
                 const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error(`在仓库 ${repo} 中未找到 bookmarks.json 文件`);
+                    }
                     throw new Error(`API请求失败: ${response.status} ${response.statusText}`);
                 }
                 
@@ -50,8 +95,16 @@
                 displayBookmarks(bookmarks);
             } catch (error) {
                 console.error('加载失败:', error);
-                document.getElementById('error-message').textContent = `加载失败: ${error.message}`;
-                document.getElementById('error-message').classList.remove('hidden');
+                const errorEl = document.getElementById('error-message');
+                errorEl.textContent = `加载失败: ${error.message}`;
+                errorEl.classList.remove('hidden');
+                
+                // 显示调试信息
+                errorEl.innerHTML += `<div class="mt-2 text-sm bg-red-50 p-2 rounded">
+                    调试信息:
+                    <br>注入的仓库: ${window.defaultRepo || '未注入'}
+                    <br>URL解析的仓库: ${getRepoFromUrl() || '无法解析'}
+                </div>`;
             } finally {
                 document.getElementById('loading').classList.add('hidden');
             }

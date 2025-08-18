@@ -10,51 +10,53 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
+    
+    - name: Check if index.html exists
+      run: |
+        if [ ! -f "index.html" ]; then
+          echo "Error: index.html not found in repository root"
+          exit 1
+        fi
     
     - name: Show repository info for debugging
       run: |
         echo "Current repository: ${{ github.repository }}"
-        echo "Current branch: ${{ github.ref }}"
+        echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
     
     - name: Inject default repository info
-      id: inject
       run: |
         # 获取当前仓库信息 (owner/repo)
         REPO_FULL_NAME="${{ github.repository }}"
         
-        # 更健壮的sed命令，处理可能的空格
-        sed -i.bak "s|</body>|<script>window.defaultRepo = '${REPO_FULL_NAME}';</script></body>|g" index.html
+        # 创建临时文件存储注入的脚本
+        echo "<script>window.defaultRepo = '${REPO_FULL_NAME}';</script>" > repo-script.js
         
-        # 检查是否成功注入
-        if grep -q "window.defaultRepo" index.html; then
-          echo "注入成功: $REPO_FULL_NAME"
-          echo "injected=true" >> $GITHUB_OUTPUT
-        else
-          echo "注入失败"
-          echo "injected=false" >> $GITHUB_OUTPUT
-        fi
+        # 更可靠的注入方法：在head标签结束前插入
+        sed -i '/<\/head>/e cat repo-script.js' index.html
         
-        # 清理备份文件
-        rm -f index.html.bak
-      
-    - name: Show modified file (for debugging)
-      if: steps.inject.outputs.injected == 'true'
+        # 显示注入结果
+        echo "Modified index.html content:"
+        grep -A 5 "<\/head>" index.html
+    
+    - name: Verify injection success
       run: |
-        cat index.html | grep "window.defaultRepo"
+        if ! grep -q "window.defaultRepo" index.html; then
+          echo "Error: Repository info injection failed"
+          exit 1
+        fi
     
     - name: Commit changes
-      if: steps.inject.outputs.injected == 'true'
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git add index.html
         git commit -m "Inject default repo info: ${{ github.repository }}" || echo "No changes to commit"
-        git push
+        git push || echo "Push failed - maybe no changes"
       
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
+      uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./
-        publish_branch: gh-pages  # 明确指定部署分支
+        publish_branch: gh-pages  # 明确指定部署到gh-pages分支
