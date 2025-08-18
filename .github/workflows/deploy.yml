@@ -1,0 +1,57 @@
+<name: Deploy Bookmarks
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 关键权限设置
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare repository info
+        id: repo-info
+        run: |
+          echo "REPO_FULL_NAME=${{ github.repository }}" >> $GITHUB_ENV
+          echo "Injecting repository: ${{ github.repository }}"
+
+      - name: Create config file (fallback method)
+        run: |
+          # 创建一个单独的配置文件作为备用方案
+          echo "window.defaultRepo = '${{ env.REPO_FULL_NAME }}';" > repo-config.js
+
+      - name: Inject repo info into index.html
+        run: |
+          # 主方法：直接修改index.html
+          if [ -f "index.html" ]; then
+            # 使用更可靠的注入方式
+            awk -v repo="${{ env.REPO_FULL_NAME }}" '
+              /<head>/ { print; print "  <script>window.defaultRepo = \x27" repo "\x27;</script>"; next }
+              1
+            ' index.html > temp.html && mv temp.html index.html
+            
+            # 验证注入结果
+            echo "验证注入结果:"
+            grep "window.defaultRepo" index.html
+          else
+            echo "Error: index.html not found"
+            exit 1
+          fi
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./
+          force_orphan: false
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
