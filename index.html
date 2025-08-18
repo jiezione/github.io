@@ -7,18 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     
-    <!-- Tailwind 配置 -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         primary: '#2563eb',
-                        secondary: '#64748b',
-                        neutral: '#f1f5f9',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
                     },
                 }
             }
@@ -27,9 +21,6 @@
     
     <style type="text/tailwindcss">
         @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
             .bookmark-card {
                 @apply bg-white rounded-lg shadow-md p-4 mb-4 transition-all duration-300 hover:shadow-lg;
             }
@@ -49,16 +40,13 @@
                 <i class="fa fa-bookmark-o mr-3 text-primary"></i>
                 GitHub Bookmarks Loader
             </h1>
-            <p class="text-gray-600 mt-1">Load and manage your bookmarks from GitHub</p>
         </div>
     </header>
 
     <main class="container mx-auto px-4 py-8">
         <!-- 配置区域 -->
         <section class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                <i class="fa fa-cog mr-2 text-primary"></i> Repository Configuration
-            </h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Repository Configuration</h2>
             
             <div class="grid md:grid-cols-2 gap-6">
                 <div>
@@ -67,10 +55,10 @@
                         type="text" 
                         id="githubRepo" 
                         class="input-field" 
-                        placeholder="username/repo"
+                        placeholder="username/repo (optional)"
                         aria-describedby="repoHelp"
                     >
-                    <p id="repoHelp" class="text-sm text-gray-500 mt-1">e.g. your-username/your-repo</p>
+                    <p id="repoHelp" class="text-sm text-gray-500 mt-1">Leave empty to use default public repo</p>
                 </div>
                 
                 <div>
@@ -86,7 +74,7 @@
             </div>
             
             <div class="mt-4">
-                <label for="githubToken" class="block text-gray-700 mb-2">GitHub Personal Access Token (optional)</label>
+                <label for="githubToken" class="block text-gray-700 mb-2">GitHub Token (optional)</label>
                 <input 
                     type="text" 
                     id="githubToken" 
@@ -95,10 +83,7 @@
                     aria-describedby="tokenHelp"
                 >
                 <p id="tokenHelp" class="text-sm text-gray-500 mt-1">
-                    Needed for private repositories or to increase API rate limits. 
-                    <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token" target="_blank" class="text-primary hover:underline">
-                        How to create
-                    </a>
+                    Only for private repos or rate limit issues
                 </p>
             </div>
             
@@ -106,24 +91,19 @@
                 <button id="saveConfig" class="btn-primary">
                     <i class="fa fa-save mr-1"></i> Save Configuration
                 </button>
-                <button id="useDefault" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-all">
-                    <i class="fa fa-refresh mr-1"></i> Use Demo Repository
-                </button>
                 <button id="clearConfig" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-all">
-                    <i class="fa fa-trash mr-1"></i> Clear Configuration
+                    <i class="fa fa-trash mr-1"></i> Clear
                 </button>
             </div>
             
             <div id="configStatus" class="mt-4 hidden"></div>
         </section>
         
-        <!-- 状态和加载区域 -->
+        <!-- 状态区域 -->
         <section id="statusSection" class="mb-8">
             <div id="loadingIndicator" class="hidden bg-blue-50 border-l-4 border-primary p-4 rounded">
                 <div class="flex">
-                    <div class="flex-shrink-0">
-                        <i class="fa fa-circle-o-notch fa-spin text-primary"></i>
-                    </div>
+                    <i class="fa fa-circle-o-notch fa-spin text-primary mt-1"></i>
                     <div class="ml-3">
                         <p class="text-sm text-blue-700" id="loadingMessage">Loading bookmarks...</p>
                     </div>
@@ -132,14 +112,9 @@
             
             <div id="errorMessage" class="hidden bg-red-50 border-l-4 border-red-400 p-4 rounded">
                 <div class="flex">
-                    <div class="flex-shrink-0">
-                        <i class="fa fa-exclamation-circle text-red-500"></i>
-                    </div>
+                    <i class="fa fa-exclamation-circle text-red-500 mt-1"></i>
                     <div class="ml-3">
                         <p class="text-sm text-red-700" id="errorDetails"></p>
-                        <div id="errorActions" class="mt-2">
-                            <!-- 错误处理按钮将在这里动态添加 -->
-                        </div>
                     </div>
                 </div>
             </div>
@@ -147,419 +122,224 @@
         
         <!-- 书签展示区域 -->
         <section>
-            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                <i class="fa fa-bookmarks mr-2 text-primary"></i> Bookmarks
-            </h2>
-            
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Bookmarks</h2>
             <div id="bookmarksContainer" class="space-y-4">
-                <!-- 书签内容将在这里动态加载 -->
                 <div class="text-center py-12 text-gray-500">
                     <i class="fa fa-folder-open-o text-4xl mb-4 opacity-30"></i>
-                    <p>Your bookmarks will appear here once loaded</p>
+                    <p>Loading bookmarks...</p>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="bg-gray-800 text-white py-6 mt-12">
-        <div class="container mx-auto px-4 text-center">
-            <p>Deployed on GitHub Pages | <a href="https://github.com" class="text-blue-300 hover:underline">GitHub</a></p>
-        </div>
-    </footer>
-
     <script>
-        // 使用一个包含bookmarks.json的公开演示仓库
-        const DEFAULT_CONFIG = {
-            repo: 'adarsh-dhakal/bookmark-example', // 这个仓库包含示例bookmarks.json
-            path: 'bookmarks.json',
-            token: ''
-        };
+        // 预设的默认仓库（作为动态填充的基准）
+        const DEFAULT_REPO = "adarsh-dhakal/bookmark-example"; // 包含有效的bookmarks.json
+        const DEFAULT_PATH = "bookmarks.json";
         
-        // DOM 元素
+        // DOM元素
         const elements = {
             githubRepo: document.getElementById('githubRepo'),
             githubPath: document.getElementById('githubPath'),
             githubToken: document.getElementById('githubToken'),
             saveConfig: document.getElementById('saveConfig'),
-            useDefault: document.getElementById('useDefault'),
             clearConfig: document.getElementById('clearConfig'),
             configStatus: document.getElementById('configStatus'),
             loadingIndicator: document.getElementById('loadingIndicator'),
             loadingMessage: document.getElementById('loadingMessage'),
             errorMessage: document.getElementById('errorMessage'),
             errorDetails: document.getElementById('errorDetails'),
-            errorActions: document.getElementById('errorActions'),
             bookmarksContainer: document.getElementById('bookmarksContainer')
         };
         
-        // 初始化应用
+        // 初始化：自动填充默认配置（无用户配置时）
         function initApp() {
-            // 加载保存的配置
-            loadSavedConfig();
-            
-            // 添加事件监听器
+            loadOrFillDefaultConfig(); // 加载保存的配置，无则填充默认值
             elements.saveConfig.addEventListener('click', saveConfiguration);
-            elements.useDefault.addEventListener('click', useDefaultConfiguration);
             elements.clearConfig.addEventListener('click', clearConfiguration);
-            
-            // 尝试加载书签
-            loadBookmarks();
+            loadBookmarks(); // 自动加载书签（无需用户手动触发）
         }
         
-        // 加载保存的配置
-        function loadSavedConfig() {
+        // 加载保存的配置，若无则自动填充默认值
+        function loadOrFillDefaultConfig() {
             const savedConfig = localStorage.getItem('githubBookmarksConfig');
             if (savedConfig) {
                 try {
-                    const config = JSON.parse(savedConfig);
-                    elements.githubRepo.value = config.repo || '';
-                    elements.githubPath.value = config.path || 'bookmarks.json';
-                    elements.githubToken.value = config.token || '';
-                    return config;
+                    const { repo, path, token } = JSON.parse(savedConfig);
+                    elements.githubRepo.value = repo || ''; // 允许为空
+                    elements.githubPath.value = path || DEFAULT_PATH;
+                    elements.githubToken.value = token || ''; // 允许为空
+                    return;
                 } catch (e) {
-                    console.error('Error loading saved config:', e);
-                    showError('Failed to load saved configuration. Using defaults.');
+                    console.error('Failed to parse saved config:', e);
                 }
             }
             
-            // 如果没有保存的配置，使用默认值填充
-            elements.githubRepo.value = DEFAULT_CONFIG.repo;
-            elements.githubPath.value = DEFAULT_CONFIG.path;
-            return DEFAULT_CONFIG;
+            // 无保存的配置时，自动填充默认仓库（实现“动态填充”效果）
+            elements.githubRepo.value = ''; // 初始为空，让用户知道可修改
+            elements.githubPath.value = DEFAULT_PATH;
         }
         
-        // 保存配置
+        // 保存配置（移除强制校验）
         function saveConfiguration() {
             const config = {
-                repo: elements.githubRepo.value.trim(),
-                path: elements.githubPath.value.trim() || 'bookmarks.json',
-                token: elements.githubToken.value.trim()
+                repo: elements.githubRepo.value.trim(), // 允许为空
+                path: elements.githubPath.value.trim() || DEFAULT_PATH,
+                token: elements.githubToken.value.trim() // 允许为空
             };
-            
-            // 基本验证
-            if (!config.repo) {
-                showConfigStatus('Please enter a repository (username/repo)', 'error');
-                return;
-            }
-            
-            if (!config.repo.includes('/')) {
-                showConfigStatus('Repository should be in format: username/repo', 'error');
-                return;
-            }
             
             try {
                 localStorage.setItem('githubBookmarksConfig', JSON.stringify(config));
-                showConfigStatus('Configuration saved successfully!', 'success');
-                
-                // 保存后重新加载书签
-                loadBookmarks();
+                showConfigStatus('Configuration saved', 'success');
+                loadBookmarks(); // 保存后立即加载
             } catch (e) {
-                console.error('Error saving config:', e);
-                showConfigStatus('Failed to save configuration', 'error');
+                showConfigStatus('Failed to save', 'error');
             }
         }
         
-        // 使用默认配置
-        function useDefaultConfiguration() {
-            elements.githubRepo.value = DEFAULT_CONFIG.repo;
-            elements.githubPath.value = DEFAULT_CONFIG.path;
-            elements.githubToken.value = '';
-            
-            try {
-                localStorage.setItem('githubBookmarksConfig', JSON.stringify(DEFAULT_CONFIG));
-                showConfigStatus('Using demo configuration', 'success');
-                
-                // 切换后重新加载书签
-                loadBookmarks();
-            } catch (e) {
-                console.error('Error setting default config:', e);
-                showConfigStatus('Failed to set demo configuration', 'error');
-            }
-        }
-        
-        // 清除配置
+        // 清除配置（恢复默认填充）
         function clearConfiguration() {
+            localStorage.removeItem('githubBookmarksConfig');
             elements.githubRepo.value = '';
-            elements.githubPath.value = 'bookmarks.json';
+            elements.githubPath.value = DEFAULT_PATH;
             elements.githubToken.value = '';
-            
-            try {
-                localStorage.removeItem('githubBookmarksConfig');
-                showConfigStatus('Configuration cleared', 'info');
-                
-                // 清除后使用默认配置重新加载书签
-                loadBookmarks();
-            } catch (e) {
-                console.error('Error clearing config:', e);
-                showConfigStatus('Failed to clear configuration', 'error');
-            }
+            showConfigStatus('Configuration cleared', 'info');
+            loadBookmarks(); // 清除后用默认值加载
         }
         
-        // 显示配置状态消息
-        function showConfigStatus(message, type = 'info') {
-            elements.configStatus.textContent = message;
-            elements.configStatus.classList.remove('hidden', 'text-green-600', 'text-red-600', 'text-blue-600');
-            
-            switch(type) {
-                case 'success':
-                    elements.configStatus.classList.add('text-green-600');
-                    break;
-                case 'error':
-                    elements.configStatus.classList.add('text-red-600');
-                    break;
-                default:
-                    elements.configStatus.classList.add('text-blue-600');
-            }
-            
-            // 3秒后隐藏消息
-            setTimeout(() => {
-                elements.configStatus.classList.add('hidden');
-            }, 3000);
-        }
-        
-        // 显示加载指示器
-        function showLoading(message = 'Loading bookmarks...') {
-            elements.loadingMessage.textContent = message;
-            elements.loadingIndicator.classList.remove('hidden');
-            elements.errorMessage.classList.add('hidden');
-        }
-        
-        // 显示错误消息
-        function showError(message, actions = []) {
-            elements.errorDetails.textContent = message;
-            elements.errorActions.innerHTML = '';
-            
-            // 添加错误处理按钮
-            actions.forEach(action => {
-                const button = document.createElement('button');
-                button.textContent = action.label;
-                button.className = 'bg-gray-200 text-gray-800 px-3 py-1 rounded-md hover:bg-gray-300 text-sm mr-2 mt-1';
-                button.addEventListener('click', action.callback);
-                elements.errorActions.appendChild(button);
-            });
-            
-            elements.errorMessage.classList.remove('hidden');
-            elements.loadingIndicator.classList.add('hidden');
-        }
-        
-        // 隐藏所有状态指示器
-        function hideStatusIndicators() {
-            elements.loadingIndicator.classList.add('hidden');
-            elements.errorMessage.classList.add('hidden');
-        }
-        
-        // 获取当前配置
-        function getCurrentConfig() {
-            // 首先检查表单中的值
-            const formConfig = {
-                repo: elements.githubRepo.value.trim(),
-                path: elements.githubPath.value.trim() || 'bookmarks.json',
-                token: elements.githubToken.value.trim()
-            };
-            
-            // 如果表单中有仓库信息，使用表单配置
-            if (formConfig.repo) {
-                return formConfig;
-            }
-            
-            // 否则尝试从本地存储获取
+        // 获取当前生效的配置（无配置时自动使用默认仓库）
+        function getEffectiveConfig() {
             const savedConfig = localStorage.getItem('githubBookmarksConfig');
             if (savedConfig) {
                 try {
-                    const config = JSON.parse(savedConfig);
+                    const { repo, path, token } = JSON.parse(savedConfig);
                     return {
-                        repo: config.repo || DEFAULT_CONFIG.repo,
-                        path: config.path || DEFAULT_CONFIG.path,
-                        token: config.token || ''
+                        repo: repo || DEFAULT_REPO, // 为空时用默认
+                        path: path || DEFAULT_PATH,
+                        token: token || ''
                     };
                 } catch (e) {
-                    console.error('Error parsing saved config:', e);
+                    console.error('Failed to parse config:', e);
                 }
             }
             
-            // 最后使用默认配置
-            return DEFAULT_CONFIG;
+            // 完全无配置时，使用默认仓库
+            return {
+                repo: DEFAULT_REPO,
+                path: DEFAULT_PATH,
+                token: ''
+            };
         }
         
-        // 构建GitHub API URL
-        function buildGitHubApiUrl(config) {
-            const [owner, repo] = config.repo.split('/');
-            if (!owner || !repo) {
-                throw new Error('Invalid repository format. Use username/repo');
-            }
-            
-            // 编码文件路径以处理特殊字符
-            const encodedPath = encodeURIComponent(config.path);
-            
-            // GitHub API v3 用于获取文件内容
-            return `https://api.github.com/repos/${owner}/${repo}/contents/${encodedPath}`;
-        }
-        
-        // 从GitHub加载书签
+        // 加载书签（核心逻辑）
         async function loadBookmarks() {
+            const config = getEffectiveConfig();
+            showLoading(`Loading from ${config.repo}...`);
+            
             try {
-                const config = getCurrentConfig();
+                const [owner, repo] = config.repo.split('/');
+                if (!owner || !repo) throw new Error('Invalid repo format (username/repo)');
                 
-                // 如果没有配置仓库，使用默认值
-                if (!config.repo) {
-                    config.repo = DEFAULT_CONFIG.repo;
-                    elements.githubRepo.value = DEFAULT_CONFIG.repo;
-                }
+                const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(config.path)}`;
+                const headers = { 'Accept': 'application/vnd.github.v3+json' };
+                if (config.token) headers['Authorization'] = `token ${config.token}`;
                 
-                showLoading(`Loading bookmarks from ${config.repo}...`);
-                elements.bookmarksContainer.innerHTML = '';
-                
-                const apiUrl = buildGitHubApiUrl(config);
-                console.log('Loading from:', apiUrl);
-                
-                // 准备请求选项
-                const requestOptions = {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/vnd.github.v3+json',
-                    }
-                };
-                
-                // 如果提供了token，添加到请求头
-                if (config.token) {
-                    requestOptions.headers['Authorization'] = `token ${config.token}`;
-                }
-                
-                // 发送请求
-                const response = await fetch(apiUrl, requestOptions);
-                
-                if (!response.ok) {
-                    // 处理API错误
-                    const errorData = await response.json().catch(() => ({}));
-                    
-                    // 针对403错误提供更具体的信息
-                    if (response.status === 403) {
-                        let errorMsg = 'Access forbidden. This may be due to GitHub API rate limits.';
-                        
-                        // 添加解决方案
-                        const actions = [
-                            {
-                                label: 'Use demo repository',
-                                callback: useDefaultConfiguration
-                            },
-                            {
-                                label: 'Enter access token',
-                                callback: () => elements.githubToken.focus()
-                            }
-                        ];
-                        
-                        throw new Error(errorMsg);
-                    }
-                    
-                    throw new Error(errorData.message || `Failed to fetch data (HTTP ${response.status})`);
-                }
+                const response = await fetch(url, { headers });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 
                 const data = await response.json();
-                
-                // GitHub API返回的是base64编码的内容
-                if (data.content) {
-                    const decodedContent = atob(data.content);
-                    const bookmarks = JSON.parse(decodedContent);
-                    renderBookmarks(bookmarks);
-                    hideStatusIndicators();
-                } else {
-                    throw new Error('No content found in the response');
-                }
+                const bookmarks = JSON.parse(atob(data.content));
+                renderBookmarks(bookmarks);
+                hideStatusIndicators();
                 
             } catch (error) {
-                console.error('Error loading bookmarks:', error);
+                console.error('Load error:', error);
+                showError(`Failed to load: ${error.message}. Using default repo...`);
                 
-                // 准备错误处理动作
-                const actions = [
-                    {
-                        label: 'Use demo repository',
-                        callback: useDefaultConfiguration
-                    },
-                    {
-                        label: 'Check configuration',
-                        callback: () => elements.githubRepo.focus()
+                // 最终回退到预设默认仓库
+                if (config.repo !== DEFAULT_REPO) {
+                    try {
+                        const fallbackConfig = { ...config, repo: DEFAULT_REPO };
+                        const [owner, repo] = fallbackConfig.repo.split('/');
+                        const url = `https://api.github.com/repos/${owner}/${repo}/contents/${DEFAULT_PATH}`;
+                        
+                        const response = await fetch(url, { 
+                            headers: { 'Accept': 'application/vnd.github.v3+json' } 
+                        });
+                        if (!response.ok) throw new Error(`Fallback failed (${response.status})`);
+                        
+                        const data = await response.json();
+                        const bookmarks = JSON.parse(atob(data.content));
+                        renderBookmarks(bookmarks);
+                        hideStatusIndicators();
+                        // 自动填充默认仓库到输入框，让用户知情
+                        elements.githubRepo.value = DEFAULT_REPO;
+                    } catch (fallbackError) {
+                        showError(`Fallback failed: ${fallbackError.message}`);
+                        elements.bookmarksContainer.innerHTML = '<p class="text-center py-8 text-gray-500">No bookmarks available</p>';
                     }
-                ];
-                
-                // 如果是404错误，可能是文件不存在
-                if (error.message.includes('HTTP 404')) {
-                    showError(`The file was not found in this repository. Please check the path.`, actions);
-                } 
-                // 如果是403错误，提示速率限制或权限问题
-                else if (error.message.includes('403')) {
-                    showError(`Access denied. This may be due to GitHub API rate limits or insufficient permissions. Try using a personal access token.`, actions);
                 }
-                // 其他错误
-                else {
-                    showError(`Error: ${error.message}`, actions);
-                }
-                
-                elements.bookmarksContainer.innerHTML = `
-                    <div class="text-center py-12 text-gray-500">
-                        <i class="fa fa-exclamation-triangle text-4xl mb-4 text-yellow-500"></i>
-                        <p>Could not load bookmarks. Please check your configuration.</p>
-                    </div>
-                `;
             }
         }
         
         // 渲染书签
         function renderBookmarks(bookmarks) {
-            if (!bookmarks || !bookmarks.length) {
-                elements.bookmarksContainer.innerHTML = `
-                    <div class="text-center py-12 text-gray-500">
-                        <i class="fa fa-folder-open-o text-4xl mb-4 opacity-30"></i>
-                        <p>No bookmarks found in this file</p>
-                    </div>
-                `;
+            if (!bookmarks?.length) {
+                elements.bookmarksContainer.innerHTML = '<p class="text-center py-8 text-gray-500">No bookmarks found</p>';
                 return;
             }
             
-            // 按类别分组书签
-            const groupedBookmarks = {};
-            bookmarks.forEach(bookmark => {
-                const category = bookmark.category || 'Uncategorized';
-                if (!groupedBookmarks[category]) {
-                    groupedBookmarks[category] = [];
-                }
-                groupedBookmarks[category].push(bookmark);
+            // 按类别分组
+            const groups = {};
+            bookmarks.forEach(b => {
+                const category = b.category || 'Uncategorized';
+                if (!groups[category]) groups[category] = [];
+                groups[category].push(b);
             });
             
-            // 生成HTML
-            let html = '';
-            Object.keys(groupedBookmarks).forEach(category => {
-                html += `
-                    <div class="mb-6">
-                        <h3 class="text-lg font-medium text-gray-800 mb-3 flex items-center">
-                            <i class="fa fa-folder mr-2 text-primary"></i> ${category}
-                        </h3>
-                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                `;
-                
-                groupedBookmarks[category].forEach(bookmark => {
-                    html += `
-                        <div class="bookmark-card">
-                            <a href="${bookmark.url}" target="_blank" rel="noopener noreferrer" class="block">
-                                <h4 class="font-medium text-gray-900 hover:text-primary transition-colors">
-                                    ${bookmark.name || 'Untitled'}
-                                </h4>
-                                ${bookmark.description ? `<p class="text-sm text-gray-600 mt-1">${bookmark.description}</p>` : ''}
-                                <div class="mt-2 flex items-center text-xs text-gray-500">
-                                    <i class="fa fa-external-link mr-1"></i>
-                                    <span>${new URL(bookmark.url).hostname}</span>
-                                </div>
-                            </a>
-                        </div>
-                    `;
-                });
-                
-                html += `
-                        </div>
+            elements.bookmarksContainer.innerHTML = Object.entries(groups).map(([category, items]) => `
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-800 mb-3">${category}</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${items.map(item => `
+                            <div class="bookmark-card">
+                                <a href="${item.url}" target="_blank" class="block">
+                                    <h4 class="font-medium hover:text-primary">${item.name || 'Untitled'}</h4>
+                                    ${item.description ? `<p class="text-sm text-gray-600 mt-1">${item.description}</p>` : ''}
+                                    <p class="text-xs text-gray-500 mt-2">${new URL(item.url).hostname}</p>
+                                </a>
+                            </div>
+                        `).join('')}
                     </div>
-                `;
-            });
-            
-            elements.bookmarksContainer.innerHTML = html;
+                </div>
+            `).join('');
+        }
+        
+        // 辅助函数：状态提示
+        function showLoading(msg) {
+            elements.loadingMessage.textContent = msg;
+            elements.loadingIndicator.classList.remove('hidden');
+            elements.errorMessage.classList.add('hidden');
+        }
+        
+        function showError(msg) {
+            elements.errorDetails.textContent = msg;
+            elements.errorMessage.classList.remove('hidden');
+            elements.loadingIndicator.classList.add('hidden');
+        }
+        
+        function hideStatusIndicators() {
+            elements.loadingIndicator.classList.add('hidden');
+            elements.errorMessage.classList.add('hidden');
+        }
+        
+        function showConfigStatus(msg, type) {
+            elements.configStatus.textContent = msg;
+            elements.configStatus.className = `mt-4 text-sm ${
+                type === 'success' ? 'text-green-600' : 
+                type === 'error' ? 'text-red-600' : 'text-blue-600'
+            }`;
+            setTimeout(() => elements.configStatus.classList.add('hidden'), 3000);
         }
         
         // 初始化应用
