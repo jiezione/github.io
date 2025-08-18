@@ -3,35 +3,58 @@ name: Inject Repository Info
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:  # 允许手动触发
 
 jobs:
   inject-repo-info:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    
+    - name: Show repository info for debugging
+      run: |
+        echo "Current repository: ${{ github.repository }}"
+        echo "Current branch: ${{ github.ref }}"
     
     - name: Inject default repository info
+      id: inject
       run: |
         # 获取当前仓库信息 (owner/repo)
         REPO_FULL_NAME="${{ github.repository }}"
         
-        # 在index.html中注入仓库信息
-        # 查找并替换占位符，或者添加一个脚本标签
-        sed -i "s|</body>|<script>window.defaultRepo = '${REPO_FULL_NAME}';</script></body>|g" index.html
+        # 更健壮的sed命令，处理可能的空格
+        sed -i.bak "s|</body>|<script>window.defaultRepo = '${REPO_FULL_NAME}';</script></body>|g" index.html
         
-        # 检查修改
-        git status
+        # 检查是否成功注入
+        if grep -q "window.defaultRepo" index.html; then
+          echo "注入成功: $REPO_FULL_NAME"
+          echo "injected=true" >> $GITHUB_OUTPUT
+        else
+          echo "注入失败"
+          echo "injected=false" >> $GITHUB_OUTPUT
+        fi
         
-        # 提交修改
+        # 清理备份文件
+        rm -f index.html.bak
+      
+    - name: Show modified file (for debugging)
+      if: steps.inject.outputs.injected == 'true'
+      run: |
+        cat index.html | grep "window.defaultRepo"
+    
+    - name: Commit changes
+      if: steps.inject.outputs.injected == 'true'
+      run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git add index.html
-        git commit -m "Inject default repo info: ${REPO_FULL_NAME}" || echo "No changes to commit"
+        git commit -m "Inject default repo info: ${{ github.repository }}" || echo "No changes to commit"
         git push
       
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./
+        publish_branch: gh-pages  # 明确指定部署分支
