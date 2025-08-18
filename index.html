@@ -1,349 +1,188 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Bookmarks Loader</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#2563eb',
-                    },
-                }
-            }
+    <title>书签管理器</title>
+    <style>
+        /* 基础样式 */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
-    </script>
-    
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .bookmark-card {
-                @apply bg-white rounded-lg shadow-md p-4 mb-4 transition-all duration-300 hover:shadow-lg;
-            }
-            .btn-primary {
-                @apply bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-all;
-            }
-            .input-field {
-                @apply border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary/50;
-            }
+        .bookmark-folder {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .folder-name {
+            font-weight: bold;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        .bookmark-item {
+            margin: 3px 0;
+        }
+        .config-section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <header class="bg-white shadow-sm">
-        <div class="container mx-auto px-4 py-6">
-            <h1 class="text-3xl font-bold text-gray-800 flex items-center">
-                <i class="fa fa-bookmark-o mr-3 text-primary"></i>
-                GitHub Bookmarks Loader
-            </h1>
+<body>
+    <div class="config-section">
+        <h3>仓库配置</h3>
+        <div>
+            <label for="github-owner">GitHub 用户名/组织名:</label>
+            <input type="text" id="github-owner" placeholder="用户名或组织名">
         </div>
-    </header>
+        <div>
+            <label for="github-repo">仓库名:</label>
+            <input type="text" id="github-repo" placeholder="仓库名称">
+        </div>
+        <div>
+            <label for="file-path">文件路径:</label>
+            <input type="text" id="file-path" value="bookmarks.json" placeholder="文件路径">
+        </div>
+        <button onclick="loadBookmarks()">加载书签</button>
+    </div>
 
-    <main class="container mx-auto px-4 py-8">
-        <!-- 配置区域 -->
-        <section class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Repository Configuration</h2>
-            
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label for="githubRepo" class="block text-gray-700 mb-2">GitHub Repository</label>
-                    <input 
-                        type="text" 
-                        id="githubRepo" 
-                        class="input-field" 
-                        placeholder="username/repo (optional)"
-                        aria-describedby="repoHelp"
-                    >
-                    <p id="repoHelp" class="text-sm text-gray-500 mt-1">Leave empty to use default public repo</p>
-                </div>
-                
-                <div>
-                    <label for="githubPath" class="block text-gray-700 mb-2">File Path</label>
-                    <input 
-                        type="text" 
-                        id="githubPath" 
-                        class="input-field" 
-                        value="bookmarks.json"
-                        placeholder="Path to bookmarks file"
-                    >
-                </div>
-            </div>
-            
-            <div class="mt-4">
-                <label for="githubToken" class="block text-gray-700 mb-2">GitHub Token (optional)</label>
-                <input 
-                    type="text" 
-                    id="githubToken" 
-                    class="input-field" 
-                    placeholder="ghp_..."
-                    aria-describedby="tokenHelp"
-                >
-                <p id="tokenHelp" class="text-sm text-gray-500 mt-1">
-                    Only for private repos or rate limit issues
-                </p>
-            </div>
-            
-            <div class="mt-6 flex space-x-4">
-                <button id="saveConfig" class="btn-primary">
-                    <i class="fa fa-save mr-1"></i> Save Configuration
-                </button>
-                <button id="clearConfig" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-all">
-                    <i class="fa fa-trash mr-1"></i> Clear
-                </button>
-            </div>
-            
-            <div id="configStatus" class="mt-4 hidden"></div>
-        </section>
-        
-        <!-- 状态区域 -->
-        <section id="statusSection" class="mb-8">
-            <div id="loadingIndicator" class="hidden bg-blue-50 border-l-4 border-primary p-4 rounded">
-                <div class="flex">
-                    <i class="fa fa-circle-o-notch fa-spin text-primary mt-1"></i>
-                    <div class="ml-3">
-                        <p class="text-sm text-blue-700" id="loadingMessage">Loading bookmarks...</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="errorMessage" class="hidden bg-red-50 border-l-4 border-red-400 p-4 rounded">
-                <div class="flex">
-                    <i class="fa fa-exclamation-circle text-red-500 mt-1"></i>
-                    <div class="ml-3">
-                        <p class="text-sm text-red-700" id="errorDetails"></p>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- 书签展示区域 -->
-        <section>
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Bookmarks</h2>
-            <div id="bookmarksContainer" class="space-y-4">
-                <div class="text-center py-12 text-gray-500">
-                    <i class="fa fa-folder-open-o text-4xl mb-4 opacity-30"></i>
-                    <p>Loading bookmarks...</p>
-                </div>
-            </div>
-        </section>
-    </main>
+    <div id="bookmarks-container"></div>
 
     <script>
-        // 预设的默认仓库（作为动态填充的基准）
-        const DEFAULT_REPO = "adarsh-dhakal/bookmark-example"; // 包含有效的bookmarks.json
-        const DEFAULT_PATH = "bookmarks.json";
-        
-        // DOM元素
-        const elements = {
-            githubRepo: document.getElementById('githubRepo'),
-            githubPath: document.getElementById('githubPath'),
-            githubToken: document.getElementById('githubToken'),
-            saveConfig: document.getElementById('saveConfig'),
-            clearConfig: document.getElementById('clearConfig'),
-            configStatus: document.getElementById('configStatus'),
-            loadingIndicator: document.getElementById('loadingIndicator'),
-            loadingMessage: document.getElementById('loadingMessage'),
-            errorMessage: document.getElementById('errorMessage'),
-            errorDetails: document.getElementById('errorDetails'),
-            bookmarksContainer: document.getElementById('bookmarksContainer')
-        };
-        
-        // 初始化：自动填充默认配置（无用户配置时）
-        function initApp() {
-            loadOrFillDefaultConfig(); // 加载保存的配置，无则填充默认值
-            elements.saveConfig.addEventListener('click', saveConfiguration);
-            elements.clearConfig.addEventListener('click', clearConfiguration);
-            loadBookmarks(); // 自动加载书签（无需用户手动触发）
-        }
-        
-        // 加载保存的配置，若无则自动填充默认值
-        function loadOrFillDefaultConfig() {
-            const savedConfig = localStorage.getItem('githubBookmarksConfig');
-            if (savedConfig) {
-                try {
-                    const { repo, path, token } = JSON.parse(savedConfig);
-                    elements.githubRepo.value = repo || ''; // 允许为空
-                    elements.githubPath.value = path || DEFAULT_PATH;
-                    elements.githubToken.value = token || ''; // 允许为空
-                    return;
-                } catch (e) {
-                    console.error('Failed to parse saved config:', e);
-                }
-            }
+        // 页面加载时自动获取并填充默认仓库信息
+        document.addEventListener('DOMContentLoaded', () => {
+            autoDetectDefaultRepo();
+            // 自动尝试加载书签
+            loadBookmarks();
+        });
+
+        // 从当前URL自动检测GitHub Pages对应的仓库信息
+        function autoDetectDefaultRepo() {
+            const ownerInput = document.getElementById('github-owner');
+            const repoInput = document.getElementById('github-repo');
             
-            // 无保存的配置时，自动填充默认仓库（实现“动态填充”效果）
-            elements.githubRepo.value = ''; // 初始为空，让用户知道可修改
-            elements.githubPath.value = DEFAULT_PATH;
-        }
-        
-        // 保存配置（移除强制校验）
-        function saveConfiguration() {
-            const config = {
-                repo: elements.githubRepo.value.trim(), // 允许为空
-                path: elements.githubPath.value.trim() || DEFAULT_PATH,
-                token: elements.githubToken.value.trim() // 允许为空
-            };
-            
+            // 如果已经有值，则不覆盖
+            if (ownerInput.value && repoInput.value) return;
+
             try {
-                localStorage.setItem('githubBookmarksConfig', JSON.stringify(config));
-                showConfigStatus('Configuration saved', 'success');
-                loadBookmarks(); // 保存后立即加载
+                // GitHub Pages的URL格式通常是: https://<owner>.github.io/<repo>/
+                const currentHost = window.location.hostname;
+                const pathSegments = window.location.pathname.split('/').filter(segment => segment);
+                
+                // 解析用户名
+                if (currentHost.endsWith('.github.io')) {
+                    const owner = currentHost.replace('.github.io', '');
+                    ownerInput.value = ownerInput.value || owner;
+                }
+
+                // 解析仓库名 (通常是路径的第一段)
+                if (pathSegments.length > 0) {
+                    repoInput.value = repoInput.value || pathSegments[0];
+                }
             } catch (e) {
-                showConfigStatus('Failed to save', 'error');
+                console.error('自动检测仓库信息失败:', e);
+                // 设置一个默认的公开仓库作为 fallback
+                ownerInput.value = ownerInput.value || 'fmies-projects';
+                repoInput.value = repoInput.value || 'bookmarks';
             }
         }
-        
-        // 清除配置（恢复默认填充）
-        function clearConfiguration() {
-            localStorage.removeItem('githubBookmarksConfig');
-            elements.githubRepo.value = '';
-            elements.githubPath.value = DEFAULT_PATH;
-            elements.githubToken.value = '';
-            showConfigStatus('Configuration cleared', 'info');
-            loadBookmarks(); // 清除后用默认值加载
-        }
-        
-        // 获取当前生效的配置（无配置时自动使用默认仓库）
-        function getEffectiveConfig() {
-            const savedConfig = localStorage.getItem('githubBookmarksConfig');
-            if (savedConfig) {
-                try {
-                    const { repo, path, token } = JSON.parse(savedConfig);
-                    return {
-                        repo: repo || DEFAULT_REPO, // 为空时用默认
-                        path: path || DEFAULT_PATH,
-                        token: token || ''
-                    };
-                } catch (e) {
-                    console.error('Failed to parse config:', e);
-                }
-            }
-            
-            // 完全无配置时，使用默认仓库
-            return {
-                repo: DEFAULT_REPO,
-                path: DEFAULT_PATH,
-                token: ''
-            };
-        }
-        
-        // 加载书签（核心逻辑）
+
+        // 加载书签数据
         async function loadBookmarks() {
-            const config = getEffectiveConfig();
-            showLoading(`Loading from ${config.repo}...`);
+            const owner = document.getElementById('github-owner').value;
+            const repo = document.getElementById('github-repo').value;
+            const filePath = document.getElementById('file-path').value;
             
+            // 基本验证
+            if (!owner || !repo) {
+                alert('请填写GitHub用户名和仓库名');
+                return;
+            }
+
             try {
-                const [owner, repo] = config.repo.split('/');
-                if (!owner || !repo) throw new Error('Invalid repo format (username/repo)');
+                // 显示加载状态
+                document.getElementById('bookmarks-container').innerHTML = '加载中...';
                 
-                const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(config.path)}`;
-                const headers = { 'Accept': 'application/vnd.github.v3+json' };
-                if (config.token) headers['Authorization'] = `token ${config.token}`;
+                // 使用GitHub API获取文件
+                // 公开仓库不需要token即可访问
+                const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
                 
-                const response = await fetch(url, { headers });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`请求失败: ${response.status} ${response.statusText}`);
+                }
                 
                 const data = await response.json();
-                const bookmarks = JSON.parse(atob(data.content));
-                renderBookmarks(bookmarks);
-                hideStatusIndicators();
                 
-            } catch (error) {
-                console.error('Load error:', error);
-                showError(`Failed to load: ${error.message}. Using default repo...`);
-                
-                // 最终回退到预设默认仓库
-                if (config.repo !== DEFAULT_REPO) {
-                    try {
-                        const fallbackConfig = { ...config, repo: DEFAULT_REPO };
-                        const [owner, repo] = fallbackConfig.repo.split('/');
-                        const url = `https://api.github.com/repos/${owner}/${repo}/contents/${DEFAULT_PATH}`;
-                        
-                        const response = await fetch(url, { 
-                            headers: { 'Accept': 'application/vnd.github.v3+json' } 
-                        });
-                        if (!response.ok) throw new Error(`Fallback failed (${response.status})`);
-                        
-                        const data = await response.json();
-                        const bookmarks = JSON.parse(atob(data.content));
-                        renderBookmarks(bookmarks);
-                        hideStatusIndicators();
-                        // 自动填充默认仓库到输入框，让用户知情
-                        elements.githubRepo.value = DEFAULT_REPO;
-                    } catch (fallbackError) {
-                        showError(`Fallback failed: ${fallbackError.message}`);
-                        elements.bookmarksContainer.innerHTML = '<p class="text-center py-8 text-gray-500">No bookmarks available</p>';
-                    }
+                // GitHub API返回的文件内容是base64编码的
+                if (data.content) {
+                    const decodedContent = atob(data.content);
+                    const bookmarks = JSON.parse(decodedContent);
+                    renderBookmarks(bookmarks);
+                } else {
+                    throw new Error('无法获取书签数据');
                 }
+            } catch (error) {
+                console.error('加载书签失败:', error);
+                document.getElementById('bookmarks-container').innerHTML = 
+                    `加载失败: ${error.message}<br>请检查仓库配置是否正确`;
             }
         }
-        
+
         // 渲染书签
-        function renderBookmarks(bookmarks) {
-            if (!bookmarks?.length) {
-                elements.bookmarksContainer.innerHTML = '<p class="text-center py-8 text-gray-500">No bookmarks found</p>';
+        function renderBookmarks(bookmarksData) {
+            const container = document.getElementById('bookmarks-container');
+            container.innerHTML = '';
+            
+            if (!bookmarksData || !bookmarksData.bookmarks) {
+                container.innerHTML = '未找到书签数据';
                 return;
             }
             
-            // 按类别分组
-            const groups = {};
-            bookmarks.forEach(b => {
-                const category = b.category || 'Uncategorized';
-                if (!groups[category]) groups[category] = [];
-                groups[category].push(b);
+            bookmarksData.bookmarks.forEach(folder => {
+                const folderDiv = document.createElement('div');
+                folderDiv.className = 'bookmark-folder';
+                
+                const folderName = document.createElement('div');
+                folderName.className = 'folder-name';
+                folderName.textContent = folder.name;
+                folderName.onclick = () => toggleFolder(folderContent);
+                folderDiv.appendChild(folderName);
+                
+                const folderContent = document.createElement('div');
+                folderContent.style.display = 'none';
+                
+                if (folder.bookmarks && folder.bookmarks.length > 0) {
+                    folder.bookmarks.forEach(bookmark => {
+                        const bookmarkItem = document.createElement('div');
+                        bookmarkItem.className = 'bookmark-item';
+                        
+                        const link = document.createElement('a');
+                        link.href = bookmark.url;
+                        link.textContent = bookmark.title || bookmark.url;
+                        link.target = '_blank';
+                        
+                        bookmarkItem.appendChild(link);
+                        folderContent.appendChild(bookmarkItem);
+                    });
+                } else {
+                    folderContent.innerHTML = '<div>空文件夹</div>';
+                }
+                
+                folderDiv.appendChild(folderContent);
+                container.appendChild(folderDiv);
             });
-            
-            elements.bookmarksContainer.innerHTML = Object.entries(groups).map(([category, items]) => `
-                <div class="mb-6">
-                    <h3 class="text-lg font-medium text-gray-800 mb-3">${category}</h3>
-                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        ${items.map(item => `
-                            <div class="bookmark-card">
-                                <a href="${item.url}" target="_blank" class="block">
-                                    <h4 class="font-medium hover:text-primary">${item.name || 'Untitled'}</h4>
-                                    ${item.description ? `<p class="text-sm text-gray-600 mt-1">${item.description}</p>` : ''}
-                                    <p class="text-xs text-gray-500 mt-2">${new URL(item.url).hostname}</p>
-                                </a>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
         }
-        
-        // 辅助函数：状态提示
-        function showLoading(msg) {
-            elements.loadingMessage.textContent = msg;
-            elements.loadingIndicator.classList.remove('hidden');
-            elements.errorMessage.classList.add('hidden');
+
+        // 折叠/展开文件夹
+        function toggleFolder(element) {
+            element.style.display = element.style.display === 'none' ? 'block' : 'none';
         }
-        
-        function showError(msg) {
-            elements.errorDetails.textContent = msg;
-            elements.errorMessage.classList.remove('hidden');
-            elements.loadingIndicator.classList.add('hidden');
-        }
-        
-        function hideStatusIndicators() {
-            elements.loadingIndicator.classList.add('hidden');
-            elements.errorMessage.classList.add('hidden');
-        }
-        
-        function showConfigStatus(msg, type) {
-            elements.configStatus.textContent = msg;
-            elements.configStatus.className = `mt-4 text-sm ${
-                type === 'success' ? 'text-green-600' : 
-                type === 'error' ? 'text-red-600' : 'text-blue-600'
-            }`;
-            setTimeout(() => elements.configStatus.classList.add('hidden'), 3000);
-        }
-        
-        // 初始化应用
-        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
