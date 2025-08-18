@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 对于自定义域名，可通过以下meta标签手动指定仓库信息 -->
+    <!-- <meta name="github-owner" content="你的用户名"> -->
+    <!-- <meta name="github-repo" content="你的仓库名"> -->
     <title>书签管理器</title>
     <style>
         /* 基础样式 */
@@ -20,19 +23,55 @@
             font-weight: bold;
             margin: 5px 0;
             cursor: pointer;
+            transition: color 0.2s;
+        }
+        .folder-name:hover {
+            color: #007bff;
         }
         .bookmark-item {
             margin: 3px 0;
         }
         .config-section {
             margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #f8f9fa;
         }
         .status-message {
             color: #666;
             margin: 10px 0;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            color: #28a745;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        input {
+            margin: 5px 0 10px 0;
+            padding: 6px;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -40,19 +79,23 @@
     <div class="config-section">
         <h3>仓库配置</h3>
         <div>
-            <label for="github-owner">GitHub 用户名/组织名:</label>
+            <label for="github-owner">GitHub 用户名/组织名:</label><br>
             <input type="text" id="github-owner" placeholder="用户名或组织名">
         </div>
         <div>
-            <label for="github-repo">仓库名:</label>
+            <label for="github-repo">仓库名:</label><br>
             <input type="text" id="github-repo" placeholder="仓库名称">
         </div>
         <div>
-            <label for="file-path">文件路径:</label>
+            <label for="file-path">文件路径:</label><br>
             <input type="text" id="file-path" value="bookmarks.json" placeholder="文件路径">
         </div>
         <button onclick="loadBookmarks()">加载书签</button>
         <div class="status-message" id="status-message"></div>
+        <div id="custom-domain-hint" style="margin-top: 10px; font-size: 0.9em; color: #666; display: none;">
+            提示：如果使用自定义域名，可在HTML头部添加meta标签预设仓库信息<br>
+            示例: &lt;meta name="github-owner" content="你的用户名"&gt;
+        </div>
     </div>
 
     <div id="bookmarks-container"></div>
@@ -65,16 +108,27 @@
             loadBookmarks();
         });
 
-        // 从当前URL自动检测GitHub Pages对应的仓库信息
+        // 自动检测默认仓库信息（支持自定义域名）
         function autoDetectDefaultRepo() {
             const ownerInput = document.getElementById('github-owner');
             const repoInput = document.getElementById('github-repo');
+            const customDomainHint = document.getElementById('custom-domain-hint');
             
             // 如果已经有值，则不覆盖
             if (ownerInput.value && repoInput.value) return;
 
             try {
-                // GitHub Pages的URL格式通常是: https://<owner>.github.io/<repo>/
+                // 1. 优先从meta标签获取（适用于自定义域名）
+                const metaOwner = document.querySelector('meta[name="github-owner"]')?.content;
+                const metaRepo = document.querySelector('meta[name="github-repo"]')?.content;
+                
+                if (metaOwner && metaRepo) {
+                    ownerInput.value = metaOwner;
+                    repoInput.value = metaRepo;
+                    return;
+                }
+
+                // 2. 尝试从URL解析（标准GitHub Pages格式）
                 const currentHost = window.location.hostname;
                 const pathSegments = window.location.pathname.split('/').filter(segment => segment);
                 
@@ -88,11 +142,23 @@
                 if (pathSegments.length > 0) {
                     repoInput.value = repoInput.value || pathSegments[0];
                 }
+
+                // 3. 如果仍未获取到信息，显示自定义域名提示
+                if (!ownerInput.value || !repoInput.value) {
+                    customDomainHint.style.display = 'block';
+                }
+
             } catch (e) {
                 console.error('自动检测仓库信息失败:', e);
-                // 设置一个默认的公开仓库作为 fallback
-                ownerInput.value = ownerInput.value || 'fmies-projects';
-                repoInput.value = repoInput.value || 'bookmarks';
+                customDomainHint.style.display = 'block';
+            } finally {
+                // 4. 如果所有方法都失败，使用默认公开仓库作为最后的fallback
+                if (!ownerInput.value) {
+                    ownerInput.value = 'fmies-projects';
+                }
+                if (!repoInput.value) {
+                    repoInput.value = 'bookmarks';
+                }
             }
         }
 
@@ -106,17 +172,18 @@
             
             // 基本验证
             if (!owner || !repo) {
-                alert('请填写GitHub用户名和仓库名');
+                statusElement.textContent = '请填写GitHub用户名和仓库名';
+                statusElement.className = 'status-message error';
                 return;
             }
 
             try {
                 // 显示加载状态
                 statusElement.textContent = '正在加载书签数据...';
+                statusElement.className = 'status-message';
                 container.innerHTML = '';
                 
                 // 使用GitHub API获取文件
-                // 公开仓库不需要token即可访问
                 const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
                 
                 const response = await fetch(apiUrl);
@@ -127,29 +194,29 @@
                 
                 const data = await response.json();
                 
-                // GitHub API返回的文件内容是base64编码的
+                // 处理GitHub API返回的base64编码内容
                 if (data.content) {
                     // 修复Base64解码问题
-                    // 1. 先替换可能存在的URL安全字符
                     const safeContent = data.content.replace(/-/g, '+').replace(/_/g, '/');
-                    // 2. 处理填充字符
                     const padLength = (4 - (safeContent.length % 4)) % 4;
                     const paddedContent = safeContent + '='.repeat(padLength);
                     
-                    // 3. 解码并处理UTF-8
                     const decodedArray = Uint8Array.from(atob(paddedContent), c => c.charCodeAt(0));
                     const decoder = new TextDecoder('utf-8');
                     const decodedContent = decoder.decode(decodedArray);
                     
                     const bookmarks = JSON.parse(decodedContent);
-                    statusElement.textContent = `成功加载 ${countBookmarks(bookmarks)} 个书签`;
+                    const count = countBookmarks(bookmarks);
+                    statusElement.textContent = `成功加载 ${count} 个书签`;
+                    statusElement.className = 'status-message success';
                     renderBookmarks(bookmarks);
                 } else {
-                    throw new Error('无法获取书签数据');
+                    throw new Error('无法获取书签数据，文件可能为空');
                 }
             } catch (error) {
                 console.error('加载书签失败:', error);
                 statusElement.textContent = `加载失败: ${error.message}`;
+                statusElement.className = 'status-message error';
                 container.innerHTML = `请检查仓库配置是否正确，确保 ${filePath} 文件存在且可访问`;
             }
         }
@@ -197,6 +264,10 @@
                         link.href = bookmark.url;
                         link.textContent = bookmark.title || bookmark.url;
                         link.target = '_blank';
+                        link.style.textDecoration = 'none';
+                        link.style.color = '#007bff';
+                        link.onmouseover = () => link.style.textDecoration = 'underline';
+                        link.onmouseout = () => link.style.textDecoration = 'none';
                         
                         bookmarkItem.appendChild(link);
                         folderContent.appendChild(bookmarkItem);
