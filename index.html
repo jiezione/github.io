@@ -47,14 +47,20 @@
                 position: absolute;
                 background-color: white;
                 border-radius: 50%;
-                animation: twinkle 3s infinite ease-in-out;
+                animation: twinkle 2s infinite ease-in-out;
             }
             @keyframes twinkle {
                 0%, 100% { opacity: 0.5; }
                 50% { opacity: 1; }
             }
-            .widget-style {
-                @apply bg-space-darker/80 border border-space-accent/30 rounded-xl p-4 shadow-[0_0_15px_rgba(59,130,246,0.15)] transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.25)];
+            .widget-card {
+                @apply bg-space-light/40 backdrop-blur-md rounded-xl border border-space-accent/20 overflow-hidden transition-all duration-300 hover:border-space-accent/50 hover:shadow-lg hover:shadow-space-accent/10;
+            }
+            .widget-header {
+                @apply px-4 py-3 border-b border-space-accent/20 flex justify-between items-center;
+            }
+            .widget-title {
+                @apply font-medium text-space-glow flex items-center;
             }
         }
     </style>
@@ -62,17 +68,17 @@
 <body class="bg-space-dark text-white min-h-screen relative overflow-x-hidden">
     <div id="stars" class="fixed inset-0 z-0"></div>
     
-    <header id="header" class="fixed top-0 left-0 right-0 z-40 transition-all duration-500 bg-space-dark/60 backdrop-blur-md border-b border-space-accent/20">
+    <header id="header" class="fixed top-0 left-0 right-0 z-40 transition-all duration-500 bg-space-dark/80 backdrop-blur-md border-b border-space-accent/20">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <svg width="24" height="24" viewBox="0 0 100 100" class="text-space-accent">
-                    <circle cx="50" cy="50" r="45" fill="#1a202c"/>
+                    <circle cx="50" cy="50" r="45" fill="#0b0e1a"/>
                     <circle cx="50" cy="50" r="25" fill="#3b82f6"/>
                     <circle cx="35" cy="40" r="5" fill="white"/>
                     <circle cx="65" cy="40" r="3" fill="white"/>
                     <circle cx="45" cy="60" r="4" fill="white"/>
                 </svg>
-                <h1 class="text-xl font-bold bg-gradient-to-r from-space-accent to-space-nebula bg-clip-text text-transparent">星际导航</h1>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-space-accent to-space-nebula">星际导航</h1>
             </div>
             
             <div class="flex items-center space-x-4">
@@ -91,40 +97,71 @@
     
     <main class="container mx-auto px-4 pt-24 pb-16 relative z-10">
         <!-- 时间和搜索 -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-            <div class="widget-style w-full md:w-auto">
-                <div id="time-display" class="text-3xl md:text-4xl font-bold text-space-glow"></div>
-                <div id="date-display" class="text-gray-400 text-sm mt-1"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="lg:col-span-2 widget-card">
+                <div class="p-6">
+                    <div id="time-display" class="text-4xl md:text-5xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-space-accent to-space-nebula mb-2">
+                        00:00:00
+                    </div>
+                    <div id="date-display" class="text-center text-gray-400">
+                        2023年1月1日 星期日
+                    </div>
+                </div>
             </div>
             
-            <div class="w-full md:w-auto flex-1 md:max-w-md">
-                <div class="relative">
-                    <input type="text" placeholder="搜索..." class="w-full bg-space-light/50 border border-space-accent/30 rounded-full py-3 px-5 pr-12 focus:outline-none focus:ring-2 focus:ring-space-accent/50 transition-all">
-                    <button class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-space-accent">
-                        <i class="fa fa-search"></i>
-                    </button>
+            <div class="widget-card">
+                <div class="p-6">
+                    <div class="relative">
+                        <input type="text" placeholder="搜索..." class="w-full bg-space-darker border border-space-accent/30 rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-space-accent transition-colors">
+                        <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-space-accent">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="mt-4 flex justify-between text-sm text-gray-400">
+                        <div>
+                            <span class="text-space-accent">百度</span> | 谷歌 | 必应
+                        </div>
+                        <button class="hover:text-space-accent transition-colors">
+                            <i class="fa fa-sliders mr-1"></i> 搜索设置
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- 时区显示 -->
-        <div id="timezones-container" class="flex flex-wrap gap-4 mb-8">
-            <!-- 时区将通过JS动态生成 -->
-        </div>
-        
-        <!-- 访问统计 -->
-        <div class="widget-style mb-8">
-            <h2 class="text-lg font-semibold mb-3">本周访问统计</h2>
-            <div class="h-40">
-                <canvas id="usage-chart"></canvas>
+        <!-- 时区和使用统计 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fa fa-globe mr-2"></i>世界时钟
+                    </h3>
+                    <button id="add-timezone" class="text-xs px-2 py-1 bg-space-accent/20 rounded hover:bg-space-accent/30 transition-colors">
+                        <i class="fa fa-plus mr-1"></i>添加
+                    </button>
+                </div>
+                <div id="timezones-container" class="p-4 grid grid-cols-2 gap-4">
+                    <!-- 时区将通过JS动态生成 -->
+                </div>
+            </div>
+            
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fa fa-line-chart mr-2"></i>使用统计
+                    </h3>
+                </div>
+                <div class="p-4">
+                    <canvas id="usage-chart" height="180"></canvas>
+                </div>
             </div>
         </div>
         
         <!-- 广告位 1 -->
-        <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group">
+        <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group widget-card">
             <div class="ad-container aspect-video bg-space-light/30 flex items-center justify-center overflow-hidden">
                 <img id="ad1-img" src="https://picsum.photos/1200/400?random=1" alt="广告图片1" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                <a id="ad1-link" href="#" class="absolute inset-0" target="_blank"></a>
+                <a id="ad1-link" href="#" target="_blank" class="absolute inset-0"></a>
             </div>
         </div>
         
@@ -133,19 +170,19 @@
             <!-- 书签分组将通过JS动态生成 -->
         </div>
         
-        <!-- 广告位 2 -->
-        <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group">
-            <div class="ad-container aspect-[3/2] bg-space-light/30 flex items-center justify-center overflow-hidden">
+        <!-- 广告位 2 - 尺寸调小 -->
+        <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group widget-card">
+            <div class="ad-container aspect-[21/9] bg-space-light/30 flex items-center justify-center overflow-hidden">
                 <img id="ad2-img" src="https://picsum.photos/1200/400?random=2" alt="广告图片2" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                <a id="ad2-link" href="#" class="absolute inset-0" target="_blank"></a>
+                <a id="ad2-link" href="#" target="_blank" class="absolute inset-0"></a>
             </div>
         </div>
         
-        <!-- 广告位 3 -->
-        <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group">
-            <div class="ad-container aspect-[3/2] bg-space-light/30 flex items-center justify-center overflow-hidden">
+        <!-- 广告位 3 - 尺寸调小 -->
+        <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group widget-card">
+            <div class="ad-container aspect-[21/9] bg-space-light/30 flex items-center justify-center overflow-hidden">
                 <img id="ad3-img" src="https://picsum.photos/1200/400?random=3" alt="广告图片3" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                <a id="ad3-link" href="#" class="absolute inset-0" target="_blank"></a>
+                <a id="ad3-link" href="#" target="_blank" class="absolute inset-0"></a>
             </div>
         </div>
     </main>
@@ -337,18 +374,20 @@
         </div>
     </div>
     
-    <!-- 通知组件 -->
-    <div id="notification" class="fixed bottom-4 right-4 bg-space-light border border-space-accent/30 rounded-lg p-4 shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-start space-x-3 max-w-sm">
-        <div id="notification-icon" class="text-space-accent text-xl mt-0.5">
-            <i class="fa fa-info-circle"></i>
+    <!-- 通知提示 -->
+    <div id="notification" class="fixed bottom-4 right-4 bg-space-light border border-space-accent/30 rounded-lg p-4 shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 max-w-xs">
+        <div class="flex items-start">
+            <div id="notification-icon" class="mr-3 text-xl">
+                <i class="fa fa-info-circle text-space-accent"></i>
+            </div>
+            <div class="flex-1">
+                <h4 id="notification-title" class="font-medium text-white"></h4>
+                <p id="notification-message" class="text-sm text-gray-300 mt-1"></p>
+            </div>
+            <button id="close-notification" class="ml-2 text-gray-400 hover:text-white">
+                <i class="fa fa-times"></i>
+            </button>
         </div>
-        <div class="flex-1">
-            <h4 id="notification-title" class="font-medium text-white"></h4>
-            <p id="notification-message" class="text-sm text-gray-300 mt-1"></p>
-        </div>
-        <button id="close-notification" class="text-gray-400 hover:text-white">
-            <i class="fa fa-times"></i>
-        </button>
     </div>
     
     <script>
@@ -439,7 +478,7 @@
             ad3Upload: document.getElementById('ad3-upload')
         };
         
-        // 确认操作回调
+        // 确认对话框回调
         let confirmCallback = null;
         
         // 初始化函数
@@ -486,10 +525,6 @@
                 star.style.top = `${y}%`;
                 star.style.animationDelay = `${delay}s`;
                 
-                // 随机亮度
-                const opacity = 0.3 + Math.random() * 0.7;
-                star.style.opacity = opacity;
-                
                 elements.stars.appendChild(star);
             }
         }
@@ -513,6 +548,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -528,13 +568,6 @@
                                 color: 'rgba(255, 255, 255, 0.05)'
                             },
                             ticks: {
-                                color: 'rgba(255, 255, 255, 0.7)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
                                 color: 'rgba(255, 255, 255, 0.7)'
                             }
                         }
@@ -581,23 +614,31 @@
                 if (data.ads) appData.ads = data.ads;
                 if (data.timezones) appData.timezones = data.timezones;
                 
+                return true;
             } catch (error) {
                 console.error('加载数据失败:', error);
-                showNotification('数据加载失败', '使用本地默认数据', 'warning');
+                showNotification('加载失败', '使用本地数据或默认数据', 'warning');
+                return false;
             }
         }
         
         // 保存数据到GitHub
         async function saveDataToGitHub() {
             if (!appData.github.repo || !appData.github.token) {
-                showNotification('保存失败', '请先配置GitHub信息', 'error');
-                return false;
+                // 保存到本地存储
+                localStorage.setItem('spaceNavigatorLocalData', JSON.stringify({
+                    bookmarks: appData.bookmarks,
+                    ads: appData.ads,
+                    timezones: appData.timezones
+                }));
+                showNotification('保存成功', '已保存到本地存储', 'success');
+                return true;
             }
             
             try {
                 const [owner, repo] = appData.github.repo.split('/');
                 if (!owner || !repo) {
-                    showNotification('保存失败', '仓库格式不正确 (username/repo)', 'error');
+                    showNotification('保存失败', '仓库格式不正确', 'error');
                     return false;
                 }
                 
@@ -642,18 +683,14 @@
                 });
                 
                 if (!saveResponse.ok) {
-                    const errorData = await saveResponse.json();
-                    console.error('保存失败:', errorData);
-                    showNotification('保存失败', errorData.message || '未知错误', 'error');
-                    return false;
+                    throw new Error(`保存失败: ${saveResponse.statusText}`);
                 }
                 
-                showNotification('保存成功', '您的更改已同步到GitHub', 'success');
+                showNotification('保存成功', '数据已同步到GitHub', 'success');
                 return true;
-                
             } catch (error) {
                 console.error('保存数据失败:', error);
-                showNotification('保存失败', '网络错误或配置不正确', 'error');
+                showNotification('保存失败', '请检查GitHub配置', 'error');
                 return false;
             }
         }
@@ -661,14 +698,12 @@
         // 验证GitHub Token
         async function verifyGitHubToken() {
             if (!appData.github.repo || !appData.github.token) {
-                showNotification('验证失败', '请填写仓库和Token信息', 'error');
                 return false;
             }
             
             try {
                 const [owner, repo] = appData.github.repo.split('/');
                 if (!owner || !repo) {
-                    showNotification('验证失败', '仓库格式不正确 (username/repo)', 'error');
                     return false;
                 }
                 
@@ -732,7 +767,7 @@
                     <div class="flex justify-between items-center mb-3">
                         <div class="flex items-center">
                             <i class="fa fa-folder-open-o mr-2 text-space-accent"></i>
-                            <input type="text" value="${group.name}" class="group-name-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-white" data-group-index="${groupIndex}">
+                            <input type="text" value="${group.name}" class="bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-white" data-group-index="${groupIndex}">
                         </div>
                         <div class="flex space-x-1">
                             <button class="add-bookmark p-1.5 rounded hover:bg-space-light transition-colors" data-group-index="${groupIndex}">
@@ -773,8 +808,9 @@
                 });
             });
             
-            document.querySelectorAll('.editor-bookmark-group .group-name-input').forEach(input => {
-                input.addEventListener('change', (e) => {
+            document.querySelectorAll('.editor-bookmark-group input[type="text"]').forEach(input => {
+                // 使用input事件而非change事件，避免焦点问题
+                input.addEventListener('input', (e) => {
                     const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
                     appData.bookmarks[groupIndex].name = e.currentTarget.value.trim() || '未命名组';
                 });
@@ -782,6 +818,8 @@
             
             document.querySelectorAll('.edit-bookmark').forEach(btn => {
                 btn.addEventListener('click', (e) => {
+                    // 阻止事件冒泡，避免触发父元素事件
+                    e.stopPropagation();
                     const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
                     const bookmarkIndex = parseInt(e.currentTarget.dataset.bookmarkIndex);
                     editBookmark(groupIndex, bookmarkIndex);
@@ -790,6 +828,8 @@
             
             document.querySelectorAll('.delete-bookmark').forEach(btn => {
                 btn.addEventListener('click', (e) => {
+                    // 阻止事件冒泡
+                    e.stopPropagation();
                     const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
                     const bookmarkIndex = parseInt(e.currentTarget.dataset.bookmarkIndex);
                     const bookmarkName = appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].title;
@@ -853,7 +893,7 @@
             `;
         }
         
-        // 添加新书签组
+        // 添加新书签组 - 插入到顶部
         function addNewBookmarkGroup() {
             appData.bookmarks.unshift({
                 name: '新书签组',
@@ -884,7 +924,7 @@
             // 当URL改变时尝试获取favicon
             const urlInputs = document.querySelectorAll(`input[data-group-index="${groupIndex}"][data-bookmark-index="${bookmarkIndex}"][data-field="url"]`);
             urlInputs.forEach(input => {
-                input.addEventListener('change', () => {
+                input.addEventListener('input', () => {
                     bookmark.url = input.value.trim();
                     fetchFavicon(groupIndex, bookmarkIndex);
                 });
@@ -893,10 +933,15 @@
             // 标题改变事件
             const titleInputs = document.querySelectorAll(`input[data-group-index="${groupIndex}"][data-bookmark-index="${bookmarkIndex}"][data-field="title"]`);
             titleInputs.forEach(input => {
-                input.addEventListener('change', () => {
+                input.addEventListener('input', () => {
                     bookmark.title = input.value.trim();
                 });
             });
+            
+            // 自动聚焦到标题输入框
+            setTimeout(() => {
+                titleInputs[0]?.focus();
+            }, 100);
         }
         
         // 获取网站favicon
@@ -998,8 +1043,8 @@
                                 }
                             });
                         } else {
-                            // 添加新组
-                            appData.bookmarks.push(newGroup);
+                            // 添加新组到顶部
+                            appData.bookmarks.unshift(newGroup);
                         }
                     });
                     
@@ -1135,7 +1180,6 @@
             if (appData.ads.length >= 1) {
                 elements.ad1Img.src = appData.ads[0].imgUrl;
                 elements.ad1Link.href = appData.ads[0].linkUrl;
-                elements.ad1Link.target = "_blank";
                 elements.ad1UrlInput.value = appData.ads[0].imgUrl;
                 elements.ad1LinkInput.value = appData.ads[0].linkUrl;
             }
@@ -1143,7 +1187,6 @@
             if (appData.ads.length >= 2) {
                 elements.ad2Img.src = appData.ads[1].imgUrl;
                 elements.ad2Link.href = appData.ads[1].linkUrl;
-                elements.ad2Link.target = "_blank";
                 elements.ad2UrlInput.value = appData.ads[1].imgUrl;
                 elements.ad2LinkInput.value = appData.ads[1].linkUrl;
             }
@@ -1151,7 +1194,6 @@
             if (appData.ads.length >= 3) {
                 elements.ad3Img.src = appData.ads[2].imgUrl;
                 elements.ad3Link.href = appData.ads[2].linkUrl;
-                elements.ad3Link.target = "_blank";
                 elements.ad3UrlInput.value = appData.ads[2].imgUrl;
                 elements.ad3LinkInput.value = appData.ads[2].linkUrl;
             }
@@ -1181,87 +1223,89 @@
             
             appData.timezones.forEach((timezone, index) => {
                 // 主页面时区显示
-                const timezoneEl = document.createElement('div');
-                timezoneEl.className = 'timezone-item widget-style';
-                
-                // 计算当前时区时间
-                const now = new Date();
-                const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
-                const timezoneTime = new Date(utcTime + timezone.offset * 3600000);
-                
-                timezoneEl.innerHTML = `
-                    <div class="font-medium">${timezone.name}</div>
-                    <div class="text-lg font-bold text-space-glow">${timezoneTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                    <div class="text-xs text-gray-400">UTC${timezone.offset >= 0 ? '+' : ''}${timezone.offset}</div>
+                const timezoneElement = document.createElement('div');
+                timezoneElement.className = 'bg-space-dark/30 rounded-lg p-3';
+                timezoneElement.innerHTML = `
+                    <div class="text-sm font-medium mb-1">${timezone.name}</div>
+                    <div class="text-lg font-bold" data-timezone-offset="${timezone.offset}">--:--:--</div>
                 `;
-                elements.timezonesContainer.appendChild(timezoneEl);
+                elements.timezonesContainer.appendChild(timezoneElement);
                 
-                // 编辑页时区显示
-                const editTimezoneEl = document.createElement('div');
-                editTimezoneEl.className = 'flex items-center justify-between bg-space-darker/50 rounded-lg p-2';
-                editTimezoneEl.innerHTML = `
-                    <div class="flex items-center">
-                        <i class="fa fa-clock-o mr-2 text-space-accent"></i>
-                        <span>${timezone.name} (UTC${timezone.offset >= 0 ? '+' : ''}${timezone.offset})</span>
-                    </div>
-                    <button class="delete-timezone p-1 rounded hover:bg-space-light transition-colors text-red-400" data-index="${index}">
-                        <i class="fa fa-trash text-sm"></i>
+                // 编辑页时区列表
+                const timezoneItem = document.createElement('div');
+                timezoneItem.className = 'flex justify-between items-center bg-space-dark/30 rounded-lg p-2';
+                timezoneItem.innerHTML = `
+                    <span>${timezone.name} (GMT${timezone.offset >= 0 ? '+' : ''}${timezone.offset})</span>
+                    <button class="delete-timezone text-red-400 hover:text-red-300 p-1" data-index="${index}">
+                        <i class="fa fa-times"></i>
                     </button>
                 `;
-                elements.timezonesList.appendChild(editTimezoneEl);
+                elements.timezonesList.appendChild(timezoneItem);
             });
             
             // 添加删除时区事件
             document.querySelectorAll('.delete-timezone').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const index = parseInt(e.currentTarget.dataset.index);
-                    const timezoneName = appData.timezones[index].name;
-                    
-                    confirmAction(
-                        '删除时区',
-                        `您确定要删除"${timezoneName}"时区吗？`,
-                        () => {
-                            appData.timezones.splice(index, 1);
-                            renderTimezones();
-                        }
-                    );
+                    appData.timezones.splice(index, 1);
+                    renderTimezones();
                 });
             });
         }
         
         // 添加新时区
         function addNewTimezone(cityName) {
-            if (!cityName.trim()) return;
+            if (!cityName) return;
             
-            // 简单的时区偏移猜测（实际应用中可能需要更复杂的地理编码）
-            const offsetGuess = 8; // 默认北京时间偏移
+            // 简单的时区偏移量猜测（实际应用中应该使用更精确的方法）
+            const offsetMap = {
+                '北京': 8,
+                '上海': 8,
+                '香港': 8,
+                '台北': 8,
+                '纽约': -4,
+                '洛杉矶': -7,
+                '伦敦': 1,
+                '巴黎': 2,
+                '东京': 9,
+                '悉尼': 10
+            };
+            
+            const offset = offsetMap[cityName] || 0;
+            
+            // 检查是否已存在同名时区
+            const exists = appData.timezones.some(tz => tz.name === cityName);
+            if (exists) {
+                showNotification('添加失败', '该城市时区已存在', 'error');
+                return;
+            }
             
             appData.timezones.push({
                 name: cityName,
-                offset: offsetGuess
+                offset: offset
             });
             
             elements.newTimezone.value = '';
             renderTimezones();
+            showNotification('添加成功', `已添加${cityName}时区`, 'success');
         }
         
         // 更新时间显示
         function updateTimeDisplay() {
             const now = new Date();
             
-            // 时间显示
-            elements.timeDisplay.textContent = now.toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
+            // 更新主时间
+            elements.timeDisplay.textContent = now.toTimeString().slice(0, 8);
             
-            // 日期显示
-            elements.dateDisplay.textContent = now.toLocaleDateString('zh-CN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                weekday: 'long'
+            // 更新日期
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            elements.dateDisplay.textContent = now.toLocaleDateString('zh-CN', options);
+            
+            // 更新各时区时间
+            document.querySelectorAll('[data-timezone-offset]').forEach(el => {
+                const offset = parseInt(el.dataset.timezoneOffset);
+                const timezoneTime = new Date(now.getTime() + (offset - now.getTimezoneOffset() / 60) * 3600000);
+                el.textContent = timezoneTime.toTimeString().slice(0, 8);
             });
         }
         
@@ -1270,21 +1314,29 @@
             elements.notificationTitle.textContent = title;
             elements.notificationMessage.textContent = message;
             
-            // 设置图标
-            let iconClass = 'fa-info-circle';
-            if (type === 'success') iconClass = 'fa-check-circle';
-            if (type === 'error') iconClass = 'fa-exclamation-circle';
-            if (type === 'warning') iconClass = 'fa-exclamation-triangle';
-            
+            // 设置通知图标
+            let iconClass = '';
+            switch (type) {
+                case 'success':
+                    iconClass = 'fa-check-circle text-green-500';
+                    break;
+                case 'error':
+                    iconClass = 'fa-exclamation-circle text-red-500';
+                    break;
+                case 'warning':
+                    iconClass = 'fa-exclamation-triangle text-yellow-500';
+                    break;
+                default:
+                    iconClass = 'fa-info-circle text-space-accent';
+            }
             elements.notificationIcon.innerHTML = `<i class="fa ${iconClass}"></i>`;
-            elements.notificationIcon.className = `text-${type === 'success' ? 'green-400' : type === 'error' ? 'red-400' : type === 'warning' ? 'yellow-400' : 'space-accent'} text-xl mt-0.5`;
             
             // 显示通知
             elements.notification.classList.remove('translate-y-20', 'opacity-0');
             elements.notification.classList.add('translate-y-0', 'opacity-100');
             
-            // 自动隐藏
-            setTimeout(hideNotification, 5000);
+            // 3秒后自动隐藏
+            setTimeout(hideNotification, 3000);
         }
         
         // 隐藏通知
@@ -1378,14 +1430,12 @@
                 reader.onload = function(event) {
                     if (adIndex === 0) {
                         elements.ad1UrlInput.value = event.target.result;
-                        elements.ad1Img.src = event.target.result;
                     } else if (adIndex === 1) {
                         elements.ad2UrlInput.value = event.target.result;
-                        elements.ad2Img.src = event.target.result;
                     } else if (adIndex === 2) {
                         elements.ad3UrlInput.value = event.target.result;
-                        elements.ad3Img.src = event.target.result;
                     }
+                    showNotification('上传成功', '图片已上传，点击保存生效', 'success');
                 };
                 reader.readAsDataURL(file);
             };
@@ -1418,20 +1468,20 @@
                 appData.github.repo = elements.githubRepo.value.trim();
                 appData.github.token = elements.githubToken.value.trim();
                 
-                const isValid = await verifyGitHubToken();
-                if (isValid) {
+                if (!appData.github.repo || !appData.github.token) {
+                    showNotification('验证失败', '请填写仓库和Token信息', 'error');
+                    return;
+                }
+                
+                const isVerified = await verifyGitHubToken();
+                if (isVerified) {
                     saveLocalSettings();
                     elements.settingsModal.classList.add('hidden');
                     elements.editorModal.classList.remove('hidden');
                     showNotification('验证成功', '已进入编辑模式', 'success');
                 } else {
-                    showNotification('验证失败', '仓库或Token不正确', 'error');
+                    showNotification('验证失败', '仓库或Token信息不正确', 'error');
                 }
-            });
-            
-            // 打开编辑模式
-            elements.authenticateBtn.addEventListener('click', async () => {
-                // 已在上面实现
             });
             
             // 关闭编辑模式
@@ -1471,7 +1521,6 @@
                 input.accept = '.json';
                 
                 input.onchange = e => {
-                    const file = e.target.files[0];
                     const file = e.target.files[0];
                     if (file) {
                         loadJSONBackup(file);
@@ -1550,7 +1599,6 @@
                     elements.header.classList.add('opacity-100', 'pointer-events-auto');
                 }
                 
-                let scrollTimer = null;
                 scrollTimer = setTimeout(() => {
                     if (window.scrollY > 100) {
                         elements.header.classList.add('opacity-0', 'pointer-events-none');
