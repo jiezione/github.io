@@ -1,7 +1,7 @@
 {
   "bookmarks": [
     {
-      "name": "myhost",
+      "name": "https://abc.com",
       "bookmarks": [
         {
           "title": "Toivomme Maailman Rauhaa",
@@ -46,6 +46,11 @@
         {
           "title": "Élan Beauty | Premium Kosmetik & Wellness",
           "url": "https://jiezione.dpdns.org/",
+          "favicon": ""
+        },
+        {
+          "title": "abc",
+          "url": "https://abc.com",
           "favicon": ""
         }
       ]
@@ -179,20 +184,6 @@
           "favicon": ""
         }
       ]
-    },
-    {
-      "name": "新书签组",
-      "bookmarks": [
-        {
-          "title": "新书签",
-          "url": "https://",
-          "favicon": ""
-        }
-      ]
-    },
-    {
-      "name": "新书签组",
-      "bookmarks": []
     }
   ],
   "ads": [
@@ -223,5 +214,5 @@
       "offset": 1
     }
   ],
-  "updatedAt": "2025-08-19T08:39:04.502Z"
+  "updatedAt": "2025-08-19T08:40:30.481Z"
 }
