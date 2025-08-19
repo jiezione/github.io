@@ -5,8 +5,8 @@
       "bookmarks": [
         {
           "title": "baidu",
-          "url": "https://baid.com",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fbaid.com&size=32"
+          "url": "https://baidu.com",
+          "favicon": "https://baidu.com/favicon.ico"
         }
       ]
     },
