@@ -133,11 +133,6 @@
       "name": "接码平台",
       "bookmarks": [
         {
-          "title": "在线接收短信至虚拟号码获取一次性密码 | SMS-Activate",
-          "url": "https://sms-activate.world/en",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fsms-activate.world%2Fen&size=32"
-        },
-        {
           "title": "临时邮箱、十分钟邮箱（10分钟)、临时邮、临时Email、快速注册Email、24Mail--查错网",
           "url": "http://24mail.chacuo.net/",
           "favicon": ""
@@ -812,6 +807,16 @@
           "favicon": ""
         }
       ]
+    },
+    {
+      "name": "新书签组",
+      "bookmarks": [
+        {
+          "title": "新书签",
+          "url": "https://",
+          "favicon": ""
+        }
+      ]
     }
   ],
   "ads": [
@@ -842,5 +847,5 @@
       "offset": 1
     }
   ],
-  "updatedAt": "2025-08-18T23:23:22.712Z"
+  "updatedAt": "2025-08-19T07:42:12.050Z"
 }
