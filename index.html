@@ -75,34 +75,20 @@
             .touch-target {
                 @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
             }
-            /* 浅色模式样式 */
-            .light {
-                --bg-color: #f8fafc;
-                --text-color: #1e293b;
+            /* 搜索容器样式 - 修复按钮移位问题 */
+            .search-container {
+                @apply relative;
             }
-            .light .bg-space-dark {
-                background-color: #f1f5f9;
+            .search-input {
+                @apply w-full bg-space-darker border border-space-accent/30 rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-space-accent transition-colors text-base;
             }
-            .light .bg-space-darker {
-                background-color: #e2e8f0;
-            }
-            .light .bg-space-light {
-                background-color: #ffffff;
-            }
-            .light text-white, .light .text-white {
-                color: #1e293b !important;
-            }
-            .light .text-gray-400 {
-                color: #64748b !important;
-            }
-            /* 编辑页输入框优化 */
-            .editor-input {
-                @apply w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-white focus:outline-none focus:border-space-accent;
+            .search-button {
+                @apply absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-space-accent touch-target;
             }
         }
     </style>
 </head>
-<body class="bg-space-dark text-white min-h-screen relative overflow-x-hidden">
+<body class="bg-space-dark text-white min-h-screen relative overflow-x-hidden transition-colors duration-300">
     <div id="stars" class="fixed inset-0 z-0"></div>
     
     <header id="header" class="fixed top-0 left-0 right-0 z-40 transition-all duration-500 bg-space-dark/80 backdrop-blur-md border-b border-space-accent/20">
@@ -115,7 +101,8 @@
                     <circle cx="65" cy="40" r="3" fill="white"/>
                     <circle cx="45" cy="60" r="4" fill="white"/>
                 </svg>
-                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-space-accent to-space-nebula">星际导航</h1>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-space-accent to-space-nebula">星际                    星际导航
+                </h1>
             </div>
             
             <div class="flex items-center space-x-2">
@@ -145,14 +132,13 @@
             
             <div class="widget-card">
                 <div class="p-4">
-                    <!-- 仅保留站内搜索 -->
-                    <div class="relative">
+                    <!-- 仅保留留站内                <div class="relative search-container">
                         <div class="flex border-b border-space-accent/30 mb-2">
                             <button id="search-type-site" class="flex-1 py-1 text-sm font-medium text-space-glow border-b-2 border-space-accent">站内搜索</button>
                         </div>
                         
-                        <input type="text" id="search-input" placeholder="搜索书签..." class="w-full bg-space-darker border border-space-accent/30 rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-space-accent transition-colors text-base">
-                        <button id="search-btn" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-space-accent touch-target">
+                        <input type="text" id="search-input" placeholder="搜索书签..." class="search-input">
+                        <button id="search-btn" class="search-button">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -208,7 +194,8 @@
                         <i class="fa fa-line-chart mr-2"></i>使用统计
                     </h3>
                 </div>
-                <div class="p-4">
+                <!-- 修复统计标签窗口无限延伸问题：添加max-h和overflow-hidden -->
+                <div class="p-4 max-h-[400px] overflow-hidden">
                     <canvas id="usage-chart" height="180"></canvas>
                     <div class="mt-4 text-center text-sm text-gray-400">
                         <p>已运行: <span id="uptime-display">0天0小时0分钟</span></p>
@@ -250,7 +237,7 @@
     <!-- 底部信息 -->
     <footer class="bg-space-dark/80 backdrop-blur-md py-4 border-t border-space-accent/20 relative z-10">
         <div class="container mx-auto px-4">
-            <div class="dark-white flex flex-col md:flex-row justify-between items-center">
+            <div class="flex flex-col md:flex-row justify-between items-center">
                 <div>共收录<span id="total-bookmarks">0</span>个网站</div>
                 <div class="mt-2 md:mt-0">Copyright © 2018-<span id="current-year"></span> <span id="hostname">SpaceNavigator</span>, All Rights Reserved</div>
             </div>
@@ -325,11 +312,11 @@
                                 <div class="space-y-2">
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">图片URL</label>
-                                        <input type="text" id="ad1-url-input" class="editor-input">
+                                        <input type="text" id="ad1-url-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-white focus:outline-none focus:border-space-accent">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">链接URL</label>
-                                        <input type="text" id="ad1-link-input" class="editor-input">
+                                        <input type="text" id="ad1-link-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-white focus:outline-none focus:border-space-accent">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">上传图片</label>
@@ -344,11 +331,11 @@
                                 <div class="space-y-2">
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">图片URL</label>
-                                        <input type="text" id="ad2-url-input" class="editor-input">
+                                        <input type="text" id="ad2-url-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-white focus:outline-none focus:border-space-accent">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">链接URL</label>
-                                        <input type="text" id="ad2-link-input" class="editor-input">
+                                        <input type="text" id="ad2-link-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-white focus:outline-none focus:border-space-accent">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">上传图片</label>
@@ -363,11 +350,11 @@
                                 <div class="space-y-2">
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">图片URL</label>
-                                        <input type="text" id="ad3-url-input" class="editor-input">
+                                        <input type="text" id="ad3-url-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-white focus:outline-none focus:border-space-accent">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">链接URL</label>
-                                        <input type="text" id="ad3-link-input" class="editor-input">
+                                        <input type="text" id="ad3-link-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-white focus:outline-none focus:border-space-accent">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">上传图片</label>
@@ -621,10 +608,7 @@
             setInterval(updateUptime, 60000); // 每分钟更新一次
             
             // 检查主题设置并应用
-            if (appData.currentTheme === 'light') {
-                document.body.classList.add('light');
-                elements.themeToggle.innerHTML = '<i class="fa fa-sun-o text-space-accent"></i>';
-            }
+            applyTheme(appData.currentTheme);
         }
         
         // 创建星空背景
@@ -892,17 +876,32 @@
             });
         }
         
-        // 切换主题
-        function toggleTheme() {
-            if (appData.currentTheme === 'dark') {
-                appData.currentTheme = 'light';
-                document.body.classList.add('light');
+        // 应用主题设置
+        function applyTheme(theme) {
+            const body = document.body;
+            
+            if (theme === 'light') {
+                body.classList.add('light');
+                body.classList.remove('bg-space-dark');
+                body.classList.add('bg-gray-100');
+                body.classList.add('text-gray-900');
                 elements.themeToggle.innerHTML = '<i class="fa fa-sun-o text-space-accent"></i>';
             } else {
-                appData.currentTheme = 'dark';
-                document.body.classList.remove('light');
+                body.classList.remove('light');
+                body.classList.add('bg-space-dark');
+                body.classList.remove('bg-gray-100');
+                body.classList.remove('text-gray-900');
                 elements.themeToggle.innerHTML = '<i class="fa fa-moon-o text-space-accent"></i>';
             }
+            
+            // 更新星星可见性
+            elements.stars.style.display = theme === 'light' ? 'none' : 'block';
+        }
+        
+        // 切换主题
+        function toggleTheme() {
+            appData.currentTheme = appData.currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(appData.currentTheme);
             saveLocalSettings();
         }
         
@@ -1080,7 +1079,7 @@
                 const groupNameInput = document.createElement('input');
                 groupNameInput.type = 'text';
                 groupNameInput.value = group.name;
-                groupNameInput.className = 'flex-1 editor-input mr-2';
+                groupNameInput.className = 'flex-1 w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-white focus:outline-none focus:border-space-accent mr-2';
                 groupNameInput.addEventListener('change', (e) => {
                     group.name = e.target.value;
                 });
@@ -1132,7 +1131,7 @@
                     const nameInput = document.createElement('input');
                     nameInput.type = 'text';
                     nameInput.value = bookmark.name;
-                    nameInput.className = 'editor-input text-sm';
+                    nameInput.className = 'w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-white focus:outline-none focus:border-space-accent text-sm';
                     nameInput.addEventListener('change', (e) => {
                         bookmark.name = e.target.value;
                     });
@@ -1140,7 +1139,7 @@
                     const urlInput = document.createElement('input');
                     urlInput.type = 'url';
                     urlInput.value = bookmark.url;
-                    urlInput.className = 'editor-input text-sm text-gray-400';
+                    urlInput.className = 'w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-white focus:outline-none focus:border-space-accent text-sm text-gray-400';
                     urlInput.addEventListener('change', (e) => {
                         bookmark.url = e.target.value;
                     });
@@ -1345,8 +1344,10 @@
             appData.timezones.forEach((tz, index) => {
                 const element = document.getElementById(`timezone-${index}`);
                 if (element) {
-                    const timezoneTime = new Date(now.toLocaleString('en-US', { timeZone: tz.timezone }));
-                    element.textContent = timezoneTime.toTimeString().slice(0, 8);
+                    // 使用toLocaleTimeString确保时区正确转换
+                    const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: tz.timezone };
+                    const timezoneTime = now.toLocaleTimeString('zh-CN', options);
+                    element.textContent = timezoneTime;
                 }
             });
         }
