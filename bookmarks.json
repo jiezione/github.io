@@ -1,6 +1,21 @@
 {
   "bookmarks": [
     {
+      "name": "look",
+      "bookmarks": [
+        {
+          "title": "baidu",
+          "url": "https://baidu.com",
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fbaidu.com&size=32"
+        },
+        {
+          "title": "googel",
+          "url": "https://google.com",
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fgoogle.com&size=32"
+        }
+      ]
+    },
+    {
       "name": "My files",
       "bookmarks": [
         {
@@ -136,7 +151,7 @@
         {
           "title": "临时邮箱、十分钟邮箱（10分钟)、临时邮、临时Email、快速注册Email、24Mail--查错网",
           "url": "http://24mail.chacuo.net/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http%3A%2F%2F24mail.chacuo.net%2F&size=32"
         },
         {
           "title": "免费台湾手机号码:在线接收短信(+886 Taiwan) - SMSOnline",
@@ -266,7 +281,7 @@
         {
           "title": "GPT-4 | OpenAI",
           "url": "https://openai.com/index/gpt-4/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fopenai.com%2Findex%2Fgpt-4%2F&size=32"
         },
         {
           "title": "Grok",
@@ -286,7 +301,7 @@
         {
           "title": "Llama",
           "url": "https://www.llama.com/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwww.llama.com%2F&size=32"
         },
         {
           "title": "Le Chat - Mistral AI",
@@ -311,7 +326,7 @@
         {
           "title": "通义 - 你的实用AI助手",
           "url": "https://www.tongyi.com/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwww.tongyi.com%2F&size=32"
         }
       ]
     },
@@ -321,7 +336,7 @@
         {
           "title": "DALL·E 3 | OpenAI",
           "url": "https://openai.com/index/dall-e-3/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fopenai.com%2Findex%2Fdall-e-3%2F&size=32"
         },
         {
           "title": "Midjourney",
@@ -356,7 +371,7 @@
         {
           "title": "Sora | OpenAI",
           "url": "https://openai.com/sora/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fopenai.com%2Fsora%2F&size=32"
         },
         {
           "title": "Runway | Tools for human imagination.",
@@ -465,7 +480,7 @@
         {
           "title": "DNS Lookup Tool | Check DNS Records for Any Domain - WhatIsMyIP.com®",
           "url": "https://www.whatismyip.com/dns-lookup/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwww.whatismyip.com%2Fdns-lookup%2F&size=32"
         },
         {
           "title": "FOFA网络空间测绘，网络空间安全搜索引擎，网络空间搜索引擎，安全态势感知 - FOFA网络空间测绘系统",
@@ -495,7 +510,7 @@
         {
           "title": "What Is My IP Address - See Your Public Address - IPv4 & IPv6",
           "url": "https://whatismyipaddress.com/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwhatismyipaddress.com%2F&size=32"
         },
         {
           "title": "IP/DNS Detect - What is your IP, what is your DNS, what informations you send to websites.",
@@ -505,7 +520,7 @@
         {
           "title": "IP泄漏检测-高精度IP地址归属地查询-全球小鸡监控平台",
           "url": "https://ping0.cc/",
-          "favicon": ""
+          "favicon": "https://ping0.cc/favicon.ico"
         }
       ]
     },
@@ -515,22 +530,22 @@
         {
           "title": "US.KG 域名注册局 – NIC",
           "url": "https://nic.us.kg/",
-          "favicon": ""
+          "favicon": "https://nic.us.kg/favicon.ico"
         },
         {
           "title": "随时随地连接、保护和构建 | Cloudflare",
           "url": "https://www.cloudflare.com/zh-cn/",
-          "favicon": ""
+          "favicon": "https://www.cloudflare.com/favicon.ico"
         },
         {
           "title": "Free DNS hosting, Cloud DNS hosting and Domain names | ClouDNS",
           "url": "https://www.cloudns.net/",
-          "favicon": ""
+          "favicon": "https://www.cloudns.net/favicon.ico"
         },
         {
           "title": "科赋锐信息科技Cloudflare | Cloudflare",
           "url": "https://www.cloudflare-cn.com/",
-          "favicon": ""
+          "favicon": "https://www.cloudflare-cn.com/favicon.ico"
         }
       ]
     },
@@ -540,17 +555,17 @@
         {
           "title": "Serv00.com » 首页",
           "url": "https://www.serv00.com/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwww.serv00.com%2F&size=32"
         },
         {
           "title": "登录",
           "url": "https://panel12.serv00.com/login/?next=/",
-          "favicon": ""
+          "favicon": "https://panel12.serv00.com/favicon.ico"
         },
         {
           "title": "Zaloguj się",
           "url": "https://panel16.serv00.com/login/?next=/",
-          "favicon": ""
+          "favicon": "https://panel16.serv00.com/favicon.ico"
         },
         {
           "title": "Log In To Client Area - Web Host Most",
@@ -560,12 +575,12 @@
         {
           "title": "客户专区 - 虚拟主机 大多数",
           "url": "https://webhostmost.com/clientarea.php",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwebhostmost.com%2Fclientarea.php&size=32"
         },
         {
           "title": "Byethost Free Webhosting | Facebook",
           "url": "https://www.facebook.com/free.byethost",
-          "favicon": ""
+          "favicon": "https://www.facebook.com/favicon.ico"
         },
         {
           "title": "server3.webhostmost.com | Dashboard",
@@ -575,17 +590,17 @@
         {
           "title": "云计算服务 | Google Cloud",
           "url": "https://cloud.google.com/?hl=zh-cn",
-          "favicon": ""
+          "favicon": "https://cloud.google.com/favicon.ico"
         },
         {
           "title": "VP Login",
           "url": "https://cpanel.byethost.com/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fcpanel.byethost.com%2F&size=32"
         },
         {
           "title": "The Ultimate Web Hosting For People - Web Host Most",
           "url": "https://webhostmost.com/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwebhostmost.com%2F&size=32"
         },
         {
           "title": "server3.webhostmost.com | Login",
@@ -595,22 +610,22 @@
         {
           "title": "server4.webhostmost.com | Dashboard",
           "url": "https://server4.webhostmost.com:2222/evo/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fserver4.webhostmost.com%3A2222%2Fevo%2F&size=32"
         },
         {
           "title": "server5.webhostmost.com | Dashboard",
           "url": "https://server5.webhostmost.com:2222/evo/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fserver5.webhostmost.com%3A2222%2Fevo%2F&size=32"
         },
         {
           "title": "server6.webhostmost.com | Login",
           "url": "https://server6.webhostmost.com:2222/evo/login",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fserver6.webhostmost.com%3A2222%2Fevo%2Flogin&size=32"
         },
         {
           "title": "server7.webhostmost.com | 错误404: 未找到文件",
           "url": "https://server7.webhostmost.com:2222/evo/login",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fserver7.webhostmost.com%3A2222%2Fevo%2Flogin&size=32"
         },
         {
           "title": "server8.webhostmost.com | Login",
@@ -620,7 +635,7 @@
         {
           "title": "cpanel.byethost.com/panel/indexpl.php?id=cab6482d1091645837f9a22fe0e5f6cd930861b7",
           "url": "https://cpanel.byethost.com/panel/indexpl.php?id=cab6482d1091645837f9a22fe0e5f6cd930861b7",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fcpanel.byethost.com%2Fpanel%2Findexpl.php%3Fid%3Dcab6482d1091645837f9a22fe0e5f6cd930861b7&size=32"
         },
         {
           "title": "HN 用戶服務綜合系統 | HNICS",
@@ -640,17 +655,17 @@
         {
           "title": "Proteggiamo i Piccoli Animali",
           "url": "http://a.fmie.ip-ddns.com/",
-          "favicon": ""
+          "favicon": "http://a.fmie.ip-ddns.com/favicon.ico"
         },
         {
           "title": "jz.ip-ddns.com",
           "url": "http://jz.ip-ddns.com/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http%3A%2F%2Fjz.ip-ddns.com%2F&size=32"
         },
         {
           "title": "Notre mission climatique",
           "url": "https://jiezione.serv00.net/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fjiezione.serv00.net%2F&size=32"
         },
         {
           "title": "努力总会有成就",
@@ -660,12 +675,12 @@
         {
           "title": "Effort Leads to Success",
           "url": "http://fmie.dpdns.org/index.html",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http%3A%2F%2Ffmie.dpdns.org%2Findex.html&size=32"
         },
         {
           "title": "Kochaj i ceni dobre chwile.",
           "url": "https://jiezi.serv00.net/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fjiezi.serv00.net%2F&size=32"
         },
         {
           "title": "String Symphony | Custom Guitars",
@@ -695,7 +710,7 @@
         {
           "title": "Free VPN Accounts • 100% Free PPTP and OpenVPN Service",
           "url": "https://www.vpnbook.com/freevpn",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwww.vpnbook.com%2Ffreevpn&size=32"
         },
         {
           "title": "用于安全网络的商业VPN |开放VPN",
@@ -705,7 +720,7 @@
         {
           "title": "批量获取免费的VPN节点，用不完真用不完….. BPB-Worker-Panel 面板BUG利用！！-零度博客",
           "url": "https://www.freedidi.com/17131.html",
-          "favicon": ""
+          "favicon": "https://www.freedidi.com/favicon.ico"
         },
         {
           "title": "85LA - 免费高速节点、科学上网资源与技术交流 | 节点列表与软件推荐",
@@ -770,7 +785,7 @@
         {
           "title": "APKMirror - Free APK Downloads - Free and safe Android APK downloads",
           "url": "https://www.apkmirror.com/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwww.apkmirror.com%2F&size=32"
         },
         {
           "title": "在APKPure使用免费在线APK下载器下载APK到安卓",
@@ -790,12 +805,12 @@
         {
           "title": "Client Area - Pine Hosting",
           "url": "https://pinehosting.com/clientarea/clientarea.php",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fpinehosting.com%2Fclientarea%2Fclientarea.php&size=32"
         },
         {
           "title": "腾讯云代码助手CodeBuddy：接入DeepSeek 满血版，支持全免费、不限量、免部署的 AI 编程 - A姐分享",
           "url": "https://www.ahhhhfs.com/71301/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwww.ahhhhfs.com%2F71301%2F&size=32"
         },
         {
           "title": "VirScan - 多引擎文件在线检测平台",
