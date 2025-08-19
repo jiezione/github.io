@@ -75,32 +75,6 @@
             .touch-target {
                 @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
             }
-            /* 书签样式优化 - 确保大小统一 */
-            .bookmark-item {
-                @apply relative overflow-hidden group transition-all duration-300 flex flex-col;
-                height: 100px; /* 固定高度 */
-            }
-            .bookmark-item::after {
-                content: '';
-                @apply absolute inset-0 bg-space-accent/10 scale-x-0 transition-transform duration-300 origin-left;
-            }
-            .bookmark-item:hover::after {
-                @apply scale-x-100;
-            }
-            /* 搜索框样式优化 */
-            .search-container {
-                @apply relative w-full;
-            }
-            .search-input {
-                @apply w-full bg-space-darker border border-space-accent/30 rounded-lg px-4 py-3 pr-12 focus:outline-none focus:border-space-accent transition-colors text-base;
-            }
-            .search-button {
-                @apply absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-space-accent touch-target z-10;
-            }
-            /* 编辑页输入框样式 - 解决文字不可见问题 */
-            .editor-input {
-                @apply w-full bg-space-darker/80 border border-gray-700 text-white px-3 py-2 rounded focus:outline-none focus:border-space-accent transition-colors;
-            }
             /* 浅色模式样式 */
             .light {
                 --bg-color: #f8fafc;
@@ -120,11 +94,6 @@
             }
             .light .text-gray-400 {
                 color: #64748b !important;
-            }
-            .light .editor-input {
-                background-color: #e2e8f0;
-                color: #1e293b;
-                border-color: #94a3b8;
             }
         }
     </style>
@@ -172,20 +141,18 @@
             
             <div class="widget-card">
                 <div class="p-4">
-                    <!-- 仅保留站内搜索 -->
+                    <!-- 优化的搜索引擎 -->
                     <div class="relative">
-                        <!-- 移除网页搜索选项 -->
-                        <div class="flex border-b border-space-accent/30 mb-3">
+                        <!-- 搜索类型切换 -->
+                        <div class="flex border-b border-space-accent/30 mb-2">
                             <button id="search-type-site" class="flex-1 py-1 text-sm font-medium text-space-glow border-b-2 border-space-accent">站内搜索</button>
+                            <button id="search-type-web" class="flex-1 py-1 text-sm font-medium text-gray-400 hover:text-white">网页搜索</button>
                         </div>
                         
-                        <!-- 搜索框和按钮 - 修复移位问题 -->
-                        <div class="search-container">
-                            <input type="text" id="search-input" placeholder="搜索书签..." class="search-input">
-                            <button id="search-btn" class="search-button">
-                                <i class="fa fa-search text-lg"></i>
-                            </button>
-                        </div>
+                        <input type="text" id="search-input" placeholder="搜索书签或网页..." class="w-full bg-space-darker border border-space-accent/30 rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-space-accent transition-colors text-base">
+                        <button id="search-btn" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-space-accent touch-target">
+                            <i class="fa fa-search"></i>
+                        </button>
                     </div>
                     
                     <!-- 搜索结果容器 -->
@@ -199,6 +166,23 @@
                         <div id="search-results" class="max-h-80 overflow-y-auto scrollbar-hide space-y-2">
                             <!-- 搜索结果将通过JS动态生成 -->
                         </div>
+                    </div>
+                    
+                    <!-- 搜索建议下拉框 -->
+                    <div id="search-suggestions" class="absolute left-0 right-0 mt-1 bg-space-light border border-space-accent/30 rounded-lg shadow-xl z-20 hidden max-h-60 overflow-y-auto scrollbar-hide">
+                        <!-- 搜索建议将通过JS动态生成 -->
+                    </div>
+                    
+                    <!-- 搜索引擎切换 -->
+                    <div id="web-search-options" class="mt-4 flex justify-between text-sm text-gray-400 hidden">
+                        <div class="flex space-x-3">
+                            <button class="search-engine-btn active px-2 py-1 rounded hover:bg-space-light/30 transition-colors" data-engine="baidu">百度</button>
+                            <button class="search-engine-btn px-2 py-1 rounded hover:bg-space-light/30 transition-colors" data-engine="google">谷歌</button>
+                            <button class="search-engine-btn px-2 py-1 rounded hover:bg-space-light/30 transition-colors" data-engine="bing">必应</button>
+                        </div>
+                        <button id="search-settings" class="hover:text-space-accent transition-colors touch-target">
+                            <i class="fa fa-sliders mr-1"></i>
+                        </button>
                     </div>
                     
                     <!-- 搜索历史 -->
@@ -235,11 +219,7 @@
                     </h3>
                 </div>
                 <div class="p-4">
-                    <div class="mb-4">
-                        <div class="text-sm text-gray-400 mb-1">已运行时间</div>
-                        <div id="uptime-display" class="text-xl font-semibold text-space-glow">0天0时0分</div>
-                    </div>
-                    <canvas id="usage-chart" height="140"></canvas>
+                    <canvas id="usage-chart" height="180"></canvas>
                 </div>
             </div>
         </div>
@@ -264,6 +244,14 @@
                 <a id="ad2-link" href="#" target="_blank" class="absolute inset-0"></a>
             </div>
         </div>
+        
+        <!-- 广告位 3 -->
+        <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group widget-card">
+            <div class="ad-container aspect-[21/9] bg-space-light/30 flex items-center justify-center overflow-hidden">
+                <img id="ad3-img" src="https://picsum.photos/1200/400?random=3" alt="广告图片3" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                <a id="ad3-link" href="#" target="_blank" class="absolute inset-0"></a>
+            </div>
+        </div>
     </main>
     
     <!-- 底部信息 -->
@@ -286,11 +274,11 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm text-gray-300 mb-1">仓库 (username/repo-name)</label>
-                    <input type="text" id="github-repo" placeholder="username/repo-name" class="editor-input" readonly>
+                    <input type="text" id="github-repo" placeholder="username/repo-name" class="w-full bg-space-dark border border-space-accent/50 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-space-accent" readonly>
                 </div>
                 <div>
                     <label class="block text-sm text-gray-300 mb-1">个人访问令牌 (Token)</label>
-                    <input type="password" id="github-token" placeholder="ghp_..." class="editor-input">
+                    <input type="password" id="github-token" placeholder="ghp_..." class="w-full bg-space-dark border border-space-accent/50 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-space-accent">
                     <p class="text-xs text-gray-500 mt-1">需要 repo 权限，用于读写书签数据</p>
                 </div>
                 <button id="authenticate-btn" class="w-full bg-gradient-to-r from-space-accent to-space-nebula py-3 rounded-lg hover:opacity-90 transition-opacity font-medium">
@@ -344,11 +332,11 @@
                                 <div class="space-y-2">
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">图片URL</label>
-                                        <input type="text" id="ad1-url-input" class="editor-input text-sm">
+                                        <input type="text" id="ad1-url-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-space-accent">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">链接URL</label>
-                                        <input type="text" id="ad1-link-input" class="editor-input text-sm">
+                                        <input type="text" id="ad1-link-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-space-accent">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">上传图片</label>
@@ -363,11 +351,11 @@
                                 <div class="space-y-2">
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">图片URL</label>
-                                        <input type="text" id="ad2-url-input" class="editor-input text-sm">
+                                        <input type="text" id="ad2-url-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-space-accent">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">链接URL</label>
-                                        <input type="text" id="ad2-link-input" class="editor-input text-sm">
+                                        <input type="text" id="ad2-link-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-space-accent">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-400 block mb-1">上传图片</label>
@@ -375,28 +363,38 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- 广告3编辑 -->
+                            <div class="bg-space-dark/50 rounded-lg p-3">
+                                <h4 class="text-sm font-medium mb-2">广告位 3</h4>
+                                <div class="space-y-2">
+                                    <div>
+                                        <label class="text-xs text-gray-400 block mb-1">图片URL</label>
+                                        <input type="text" id="ad3-url-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-space-accent">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-400 block mb-1">链接URL</label>
+                                        <input type="text" id="ad3-link-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-space-accent">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-400 block mb-1">上传图片</label>
+                                        <input type="file" id="ad3-upload" accept="image/*" class="w-full text-xs text-gray-400">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         
-                        <!-- 时区编辑区 - 带实时时间显示 -->
+                        <!-- 时区编辑区 - 仅在编辑中心显示 -->
                         <h3 class="text-lg font-semibold mb-3 mt-8">时区管理</h3>
                         <div class="space-y-4">
                             <div class="flex">
-                                <input type="text" id="new-timezone" placeholder="城市名称 (如: 北京, New York)" class="editor-input rounded-l-lg focus:rounded-r-none flex-1">
+                                <input type="text" id="new-timezone" placeholder="城市名称" class="flex-1 bg-space-dark border border-space-accent/50 rounded-l-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-space-accent">
                                 <button id="add-timezone-btn" class="bg-space-accent px-4 py-2 rounded-r-lg hover:bg-space-accent/80 transition-colors touch-target">
                                     添加
                                 </button>
                             </div>
                             <div id="timezones-list" class="space-y-2 max-h-60 overflow-y-auto scrollbar-hide">
                                 <!-- 时区列表将通过JS动态生成 -->
-                            </div>
-                            
-                            <!-- 时区帮助信息 -->
-                            <div class="text-xs text-gray-500 p-2 bg-space-dark/30 rounded">
-                                <p class="mb-1"><i class="fa fa-info-circle text-space-accent mr-1"></i>常用城市示例：</p>
-                                <div class="grid grid-cols-2 gap-1">
-                                    <span>北京、上海、香港</span>
-                                    <span>纽约、伦敦、东京</span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -446,56 +444,65 @@
         </div>
     </div>
     
+    <!-- 搜索设置对话框 -->
+    <div id="search-settings-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-space-light rounded-xl w-full max-w-md p-6 border border-space-accent/30 mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">搜索设置</h3>
+                <button id="close-search-settings" class="text-gray-400 hover:text-white touch-target">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-300 mb-1">默认搜索引擎</label>
+                    <select id="default-search-engine" class="w-full bg-space-dark border border-space-accent/50 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-space-accent">
+                        <option value="baidu">百度</option>
+                        <option value="google">谷歌</option>
+                        <option value="bing">必应</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="save-search-history" class="form-checkbox h-4 w-4 text-space-accent bg-space-dark border-gray-700 rounded">
+                        <span class="ml-2 text-sm">保存搜索历史</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="show-search-suggestions" class="form-checkbox h-4 w-4 text-space-accent bg-space-dark border-gray-700 rounded">
+                        <span class="ml-2 text-sm">显示搜索建议</span>
+                    </label>
+                </div>
+                <button id="save-search-settings" class="w-full bg-gradient-to-r from-space-accent to-space-nebula py-2 rounded-lg hover:opacity-90 transition-opacity font-medium">
+                    保存设置
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // 由GitHub Actions自动注入的仓库信息（部署时替换）
         const DEFAULT_REPO = "your-username/your-repo"; // 占位符，Actions会替换
         const DEFAULT_RAW_URL = `https://raw.githubusercontent.com/${DEFAULT_REPO}/main/bookmarks.json`;
-        // 应用部署时间 - 首次使用时设置
-        const DEPLOYMENT_START_KEY = 'spaceNavigatorDeploymentStart';
         
-        // 城市到时区的映射 - 更准确的时区数据
-        const cityTimezoneMap = {
-            // 中国
-            '北京': 'Asia/Shanghai',
-            '上海': 'Asia/Shanghai',
-            '广州': 'Asia/Shanghai',
-            '深圳': 'Asia/Shanghai',
-            '香港': 'Asia/Hong_Kong',
-            '澳门': 'Asia/Macau',
-            '台北': 'Asia/Taipei',
-            
-            // 美国
-            '纽约': 'America/New_York',
-            '洛杉矶': 'America/Los_Angeles',
-            '芝加哥': 'America/Chicago',
-            '休斯顿': 'America/Chicago',
-            '迈阿密': 'America/New_York',
-            '西雅图': 'America/Los_Angeles',
-            '旧金山': 'America/Los_Angeles',
-            '华盛顿': 'America/New_York',
-            
-            // 欧洲
-            '伦敦': 'Europe/London',
-            '巴黎': 'Europe/Paris',
-            '柏林': 'Europe/Berlin',
-            '罗马': 'Europe/Rome',
-            '马德里': 'Europe/Madrid',
-            '莫斯科': 'Europe/Moscow',
-            
-            // 亚洲
-            '东京': 'Asia/Tokyo',
-            '首尔': 'Asia/Seoul',
-            '新加坡': 'Asia/Singapore',
-            '曼谷': 'Asia/Bangkok',
-            '新德里': 'Asia/Kolkata',
-            '迪拜': 'Asia/Dubai',
-            
-            // 大洋洲
-            '悉尼': 'Australia/Sydney',
-            '墨尔本': 'Australia/Melbourne',
-            
-            // 其他
-            ' UTC': 'UTC'
+        // 搜索引擎配置
+        const searchEngines = {
+            baidu: {
+                name: "百度",
+                url: "https://www.baidu.com/s?wd=",
+                suggestionsUrl: "https://suggestion.baidu.com/su?wd={{query}}&json=1&p=3"
+            },
+            google: {
+                name: "谷歌",
+                url: "https://www.google.com/search?q=",
+                suggestionsUrl: "https://suggestqueries.google.com/complete/search?client=firefox&q={{query}}"
+            },
+            bing: {
+                name: "必应",
+                url: "https://www.bing.com/search?q=",
+                suggestionsUrl: "https://api.bing.com/osjson.aspx?query={{query}}"
+            }
         };
         
         // 全局数据存储
@@ -503,25 +510,27 @@
             bookmarks: [],
             ads: [
                 { imgUrl: "https://picsum.photos/1200/400?random=1", linkUrl: "#" },
-                { imgUrl: "https://picsum.photos/1200/400?random=2", linkUrl: "#" }
+                { imgUrl: "https://picsum.photos/1200/400?random=2", linkUrl: "#" },
+                { imgUrl: "https://picsum.photos/1200/400?random=3", linkUrl: "#" }
             ],
             timezones: [
-                { name: "北京", timezone: "Asia/Shanghai" },
-                { name: "纽约", timezone: "America/New_York" },
-                { name: "伦敦", timezone: "Europe/London" }
+                { name: "北京", offset: 8 },
+                { name: "纽约", offset: -4 },
+                { name: "伦敦", offset: 1 }
             ],
             github: {
                 repo: "",
                 token: ""
             },
             search: {
-                type: "site", // 仅保留站内搜索
+                type: "site", // site 或 web
+                engine: "baidu",
                 history: [],
-                saveHistory: true
+                saveHistory: true,
+                showSuggestions: true
             },
             usageData: [1.2, 0.8, 1.5, 0.6, 2.1, 1.8, 3.5],
-            currentTheme: "dark",
-            deploymentStart: null // 部署开始时间
+            currentTheme: "dark"
         };
         
         // DOM元素
@@ -563,7 +572,6 @@
             timezonesList: document.getElementById('timezones-list'),
             timeDisplay: document.getElementById('time-display'),
             dateDisplay: document.getElementById('date-display'),
-            uptimeDisplay: document.getElementById('uptime-display'), // 新增：显示运行时间
             ad1Img: document.getElementById('ad1-img'),
             ad1Link: document.getElementById('ad1-link'),
             ad1UrlInput: document.getElementById('ad1-url-input'),
@@ -574,14 +582,29 @@
             ad2UrlInput: document.getElementById('ad2-url-input'),
             ad2LinkInput: document.getElementById('ad2-link-input'),
             ad2Upload: document.getElementById('ad2-upload'),
+            ad3Img: document.getElementById('ad3-img'),
+            ad3Link: document.getElementById('ad3-link'),
+            ad3UrlInput: document.getElementById('ad3-url-input'),
+            ad3LinkInput: document.getElementById('ad3-link-input'),
+            ad3Upload: document.getElementById('ad3-upload'),
             // 搜索引擎相关元素
             searchInput: document.getElementById('search-input'),
             searchBtn: document.getElementById('search-btn'),
+            searchSuggestions: document.getElementById('search-suggestions'),
             searchHistory: document.getElementById('search-history'),
             historyList: document.getElementById('history-list'),
             clearHistory: document.getElementById('clear-history'),
-            // 搜索类型切换（仅保留站内搜索）
+            searchSettings: document.getElementById('search-settings'),
+            searchSettingsModal: document.getElementById('search-settings-modal'),
+            closeSearchSettings: document.getElementById('close-search-settings'),
+            defaultSearchEngine: document.getElementById('default-search-engine'),
+            saveSearchHistory: document.getElementById('save-search-history'),
+            showSearchSuggestions: document.getElementById('show-search-suggestions'),
+            saveSearchSettings: document.getElementById('save-search-settings'),
+            // 搜索类型切换
             searchTypeSite: document.getElementById('search-type-site'),
+            searchTypeWeb: document.getElementById('search-type-web'),
+            webSearchOptions: document.getElementById('web-search-options'),
             // 搜索结果
             searchResultsContainer: document.getElementById('search-results-container'),
             searchResults: document.getElementById('search-results'),
@@ -592,6 +615,8 @@
         // 确认对话框回调
         let confirmCallback = null;
         let scrollTimer;
+        let searchSuggestionIndex = -1;
+        let searchSuggestionTimeout = null;
         
         // 初始化函数
         async function init() {
@@ -599,9 +624,6 @@
             initUsageChart();
             setupEventListeners();
             loadLocalSettings();
-            
-            // 设置部署开始时间（首次使用时）
-            setupDeploymentStartTime();
             
             // 自动填充仓库信息
             document.getElementById('github-repo').value = DEFAULT_REPO;
@@ -615,12 +637,10 @@
             setupAdEditor();
             elements.currentYear.textContent = new Date().getFullYear();
             
-            // 初始化搜索功能（仅站内搜索）
+            // 初始化搜索引擎
+            initSearchEngine();
             loadSearchHistory();
             renderSearchHistory();
-            
-            // 确保搜索框可聚焦
-            ensureSearchInputFocusable();
             
             // 检查主题设置并应用
             if (appData.currentTheme === 'light') {
@@ -628,56 +648,6 @@
             } else {
                 switchToDarkMode();
             }
-            
-            // 更新运行时间显示
-            updateUptimeDisplay();
-            setInterval(updateUptimeDisplay, 60000); // 每分钟更新一次
-        }
-        
-        // 设置部署开始时间
-        function setupDeploymentStartTime() {
-            const savedStart = localStorage.getItem(DEPLOYMENT_START_KEY);
-            if (savedStart) {
-                appData.deploymentStart = new Date(savedStart);
-            } else {
-                // 首次使用，设置为当前时间
-                appData.deploymentStart = new Date();
-                localStorage.setItem(DEPLOYMENT_START_KEY, appData.deploymentStart.toISOString());
-            }
-        }
-        
-        // 更新运行时间显示
-        function updateUptimeDisplay() {
-            if (!appData.deploymentStart) return;
-            
-            const now = new Date();
-            const diffMs = now - appData.deploymentStart;
-            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-            const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-            
-            elements.uptimeDisplay.textContent = `${diffDays}天${diffHours}时${diffMinutes}分`;
-        }
-        
-        // 确保搜索框可以获取焦点（修复无法输入问题）
-        function ensureSearchInputFocusable() {
-            // 移除可能阻止焦点的属性
-            elements.searchInput.removeAttribute('disabled');
-            elements.searchInput.removeAttribute('readonly');
-            
-            // 确保没有覆盖层阻止点击
-            elements.searchInput.style.pointerEvents = 'auto';
-            elements.searchInput.style.zIndex = '10';
-            
-            // 测试焦点功能
-            setTimeout(() => {
-                try {
-                    elements.searchInput.focus();
-                    elements.searchInput.blur();
-                } catch (e) {
-                    console.error('搜索框焦点设置失败:', e);
-                }
-            }, 500);
         }
         
         // 创建星空背景
@@ -897,12 +867,66 @@
             }
         }
         
-        // 执行搜索（仅站内搜索）
+        // 初始化搜索引擎
+        function initSearchEngine() {
+            // 设置默认搜索引擎
+            elements.defaultSearchEngine.value = appData.search.engine;
+            elements.saveSearchHistory.checked = appData.search.saveHistory;
+            elements.showSearchSuggestions.checked = appData.search.showSuggestions;
+            
+            // 高亮当前选中的搜索引擎
+            document.querySelectorAll('.search-engine-btn').forEach(btn => {
+                if (btn.dataset.engine === appData.search.engine) {
+                    btn.classList.add('active', 'bg-space-accent/20', 'text-space-glow');
+                } else {
+                    btn.classList.remove('active', 'bg-space-accent/20', 'text-space-glow');
+                }
+            });
+            
+            // 设置搜索类型
+            setSearchType(appData.search.type);
+        }
+        
+        // 设置搜索类型（站内/网页）
+        function setSearchType(type) {
+            appData.search.type = type;
+            
+            if (type === 'site') {
+                elements.searchTypeSite.classList.add('text-space-glow', 'border-b-2', 'border-space-accent');
+                elements.searchTypeSite.classList.remove('text-gray-400');
+                elements.searchTypeWeb.classList.remove('text-space-glow', 'border-b-2', 'border-space-accent');
+                elements.searchTypeWeb.classList.add('text-gray-400');
+                elements.webSearchOptions.classList.add('hidden');
+                elements.searchInput.placeholder = '搜索书签...';
+            } else {
+                elements.searchTypeWeb.classList.add('text-space-glow', 'border-b-2', 'border-space-accent');
+                elements.searchTypeWeb.classList.remove('text-gray-400');
+                elements.searchTypeSite.classList.remove('text-space-glow', 'border-b-2', 'border-space-accent');
+                elements.searchTypeSite.classList.add('text-gray-400');
+                elements.webSearchOptions.classList.remove('hidden');
+                elements.searchInput.placeholder = '搜索网页...';
+            }
+            
+            // 重置搜索状态
+            elements.searchInput.value = '';
+            hideSearchSuggestions();
+            elements.searchResultsContainer.classList.add('hidden');
+            elements.searchHistory.classList.add('hidden');
+            
+            saveSearchSettings();
+        }
+        
+        // 执行搜索
         function performSearch(query) {
             if (!query.trim()) return;
             
-            // 仅执行站内搜索
-            performSiteSearch(query);
+            if (appData.search.type === 'site') {
+                // 站内搜索
+                performSiteSearch(query);
+            } else {
+                // 网页搜索
+                performWebSearch(query);
+            }
         }
         
         // 执行站内搜索
@@ -1005,6 +1029,7 @@
             }
             
             elements.searchResultsContainer.classList.remove('hidden');
+            hideSearchSuggestions();
             elements.searchHistory.classList.add('hidden');
         }
         
@@ -1019,6 +1044,111 @@
         // 转义正则表达式特殊字符
         function escapeRegExp(str) {
             return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+        
+        // 执行网页搜索
+        function performWebSearch(query) {
+            const engine = searchEngines[appData.search.engine];
+            if (engine) {
+                // 保存搜索历史
+                if (appData.search.saveHistory) {
+                    addToSearchHistory(query);
+                }
+                
+                // 跳转到搜索引擎结果页
+                window.open(engine.url + encodeURIComponent(query), '_blank');
+            }
+        }
+        
+        // 获取搜索建议
+        async function fetchSearchSuggestions(query) {
+            // 仅在网页搜索模式下显示建议
+            if (appData.search.type !== 'web' || !query.trim() || !appData.search.showSuggestions) {
+                hideSearchSuggestions();
+                return;
+            }
+            
+            const engine = searchEngines[appData.search.engine];
+            if (!engine || !engine.suggestionsUrl) {
+                hideSearchSuggestions();
+                return;
+            }
+            
+            try {
+                // 替换URL中的查询参数
+                const url = engine.suggestionsUrl.replace('{{query}}', encodeURIComponent(query));
+                
+                // 使用CORS代理处理跨域请求
+                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                let suggestions = [];
+                
+                // 解析不同搜索引擎的返回结果
+                if (appData.search.engine === 'baidu') {
+                    suggestions = data.s || [];
+                } else if (appData.search.engine === 'google') {
+                    suggestions = data[1] || [];
+                } else if (appData.search.engine === 'bing') {
+                    suggestions = data[1] || [];
+                }
+                
+                // 显示搜索建议
+                showSearchSuggestions(suggestions);
+                
+            } catch (error) {
+                console.error('获取搜索建议失败:', error);
+                hideSearchSuggestions();
+            }
+        }
+        
+        // 显示搜索建议
+        function showSearchSuggestions(suggestions) {
+            // 仅在网页搜索模式下显示建议
+            if (appData.search.type !== 'web' || suggestions.length === 0) {
+                hideSearchSuggestions();
+                return;
+            }
+            
+            elements.searchSuggestions.innerHTML = '';
+            searchSuggestionIndex = -1;
+            
+            suggestions.forEach((suggestion, index) => {
+                const div = document.createElement('div');
+                div.className = `search-suggestion ${index === searchSuggestionIndex ? 'search-suggestion-active' : ''}`;
+                div.innerHTML = highlightMatch(suggestion, elements.searchInput.value.trim());
+                div.dataset.index = index;
+                div.dataset.suggestion = suggestion;
+                
+                // 点击建议执行搜索
+                div.addEventListener('click', () => {
+                    elements.searchInput.value = suggestion;
+                    performSearch(suggestion);
+                    hideSearchSuggestions();
+                });
+                
+                elements.searchSuggestions.appendChild(div);
+            });
+            
+            // 定位搜索建议框
+            const searchInputRect = elements.searchInput.getBoundingClientRect();
+            elements.searchSuggestions.style.top = `${searchInputRect.bottom}px`;
+            elements.searchSuggestions.style.left = `${searchInputRect.left}px`;
+            elements.searchSuggestions.style.width = `${searchInputRect.width}px`;
+            
+            elements.searchSuggestions.classList.remove('hidden');
+        }
+        
+        // 隐藏搜索建议
+        function hideSearchSuggestions() {
+            elements.searchSuggestions.classList.add('hidden');
+            elements.searchSuggestions.innerHTML = '';
+            searchSuggestionIndex = -1;
         }
         
         // 清除搜索结果
@@ -1120,14 +1250,23 @@
         
         // 保存搜索设置
         function saveSearchSettings() {
+            appData.search.engine = elements.defaultSearchEngine.value;
+            appData.search.saveHistory = elements.saveSearchHistory.checked;
+            appData.search.showSuggestions = elements.showSuggestions.checked;
+            
             // 保存到本地存储
             localStorage.setItem('spaceNavigatorSearchSettings', JSON.stringify({
                 type: appData.search.type,
-                saveHistory: appData.search.saveHistory
+                engine: appData.search.engine,
+                saveHistory: appData.search.saveHistory,
+                showSuggestions: appData.search.showSuggestions
             }));
             
             // 保存搜索历史
             localStorage.setItem('spaceNavigatorSearchHistory', JSON.stringify(appData.search.history));
+            
+            // 更新UI
+            initSearchEngine();
             
             if (!appData.search.saveHistory) {
                 elements.searchHistory.classList.add('hidden');
@@ -1136,7 +1275,7 @@
             }
         }
         
-        // 渲染书签 - 优化标签界面，使书签标签规则统一
+        // 渲染书签
         function renderBookmarks() {
             // 清空容器
             elements.bookmarksContainer.innerHTML = '';
@@ -1163,15 +1302,14 @@
             appData.bookmarks.forEach((group, groupIndex) => {
                 const groupId = `group-${Date.now()}-${groupIndex}`;
                 
-                // 主页书签组 - 优化布局和样式，使标签规则统一
+                // 主页书签组
                 const groupElement = document.createElement('div');
                 groupElement.className = 'bookmark-group';
                 groupElement.dataset.groupId = groupId;
                 groupElement.innerHTML = `
-                    <h2 class="text-lg font-semibold mb-3 flex items-center group-hover:text-space-glow transition-colors">
+                    <h2 class="text-lg font-semibold mb-3 flex items-center">
                         <i class="fa fa-folder-open-o mr-2 text-space-accent"></i>
                         ${group.name}
-                        <span class="ml-2 text-xs bg-space-accent/20 px-2 py-0.5 rounded-full">${group.bookmarks.length}</span>
                     </h2>
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                         ${group.bookmarks.map((bookmark, bookmarkIndex) => 
@@ -1191,7 +1329,7 @@
                         <div class="flex items-center">
                             <i class="fa fa-folder-open-o mr-2 text-space-accent"></i>
                             <input type="text" value="${escapeHTML(group.name)}" 
-                                   class="editor-input group-name-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-white w-auto" 
+                                   class="group-name-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-white" 
                                    data-group-id="${groupId}" data-index="${groupIndex}">
                         </div>
                         <div class="flex space-x-1">
@@ -1215,7 +1353,7 @@
             });
         }
         
-        // 创建书签元素 - 优化UI，确保大小完全统一
+        // 创建书签元素
         function createBookmarkElement(bookmark, groupId, bookmarkIndex) {
             let favicon = '';
             if (bookmark.favicon) {
@@ -1227,45 +1365,32 @@
                 favicon = `<i class="fa fa-globe w-5 h-5 mr-2 text-space-accent"></i>`;
             }
             
-            // 提取域名作为辅助信息
-            let domain = '';
-            try {
-                const url = new URL(bookmark.url);
-                domain = url.hostname.replace('www.', '');
-            } catch (e) {
-                domain = '';
-            }
-            
             return `
-                <a href="${escapeHTML(bookmark.url)}" target="_blank" 
-                   class="bookmark-item bg-space-light/30 backdrop-blur-sm rounded-lg p-3 flex flex-col items-start transition-all group touch-target"
+                <a href="${escapeHTML(bookmark.url)}" target="_blank" class="bookmark-item bg-space-light/30 hover:bg-space-light/50 backdrop-blur-sm rounded-lg p-3 flex items-center transition-all group touch-target"
                    data-group-id="${groupId}" data-bookmark-index="${bookmarkIndex}">
-                    <div class="flex items-center w-full mb-1 flex-shrink-0">
-                        <div class="flex-shrink-0">
-                            ${favicon}
-                        </div>
-                        <div class="overflow-hidden">
-                            <p class="text-sm font-medium truncate group-hover:text-space-glow transition-colors">${escapeHTML(bookmark.title)}</p>
-                        </div>
+                    <div class="flex-shrink-0">
+                        ${favicon}
                     </div>
-                    ${domain ? `<p class="text-xs text-gray-500 self-start truncate w-full mt-auto">${domain}</p>` : ''}
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-medium truncate group-hover:text-space-glow transition-colors">${escapeHTML(bookmark.title)}</p>
+                    </div>
                 </a>
             `;
         }
         
-        // 创建编辑页书签元素 - 使用唯一ID避免冲突，解决文字不可见问题
+        // 创建编辑页书签元素 - 使用唯一ID避免冲突
         function createEditorBookmarkElement(bookmark, groupId, groupIndex, bookmarkIndex) {
             return `
-                <div class="editor-bookmark bg-space-darker/50 rounded-lg p-3 flex justify-between items-center hover:bg-space-darker transition-colors"
+                <div class="editor-bookmark bg-space-darker/50 rounded-lg p-3 flex justify-between items-center"
                      data-group-id="${groupId}" data-bookmark-index="${bookmarkIndex}">
                     <div class="flex-1 min-w-0 mr-2">
                         <div class="flex items-center mb-1">
                             <input type="text" value="${escapeHTML(bookmark.title)}" 
-                                   class="editor-input bookmark-title-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-sm text-white w-full" 
+                                   class="bookmark-title-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-sm text-white w-full" 
                                    data-group-id="${groupId}" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
                         </div>
                         <input type="text" value="${escapeHTML(bookmark.url)}" 
-                               class="editor-input bookmark-url-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-xs text-gray-300 w-full" 
+                               class="bookmark-url-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-xs text-gray-400 w-full" 
                                data-group-id="${groupId}" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
                     </div>
                     <div class="flex space-x-1">
@@ -1354,7 +1479,7 @@
             elements.bookmarkCountDisplay.textContent = `共 ${total} 个书签`;
         }
         
-        // 导入HTML书签 - 按原顺序导入
+        // 导入HTML书签
         function importHTMLBookmarks(file) {
             const reader = new FileReader();
             
@@ -1398,32 +1523,25 @@
                         }
                     });
                     
-                    // 按原顺序合并新书签（解决顺序颠倒问题）
-                    // 先创建一个映射表，用于快速查找现有组
-                    const groupMap = {};
-                    appData.bookmarks.forEach((group, index) => {
-                        groupMap[group.name.toLowerCase()] = index;
-                    });
-                    
-                    // 按原书签文件顺序处理新书签组
+                    // 合并新书签（去重）
                     newBookmarks.forEach(newGroup => {
-                        const key = newGroup.name.toLowerCase();
-                        if (groupMap[key] !== undefined) {
+                        // 查找是否已有同名组
+                        const existingGroup = appData.bookmarks.find(g => g.name === newGroup.name);
+                        
+                        if (existingGroup) {
                             // 向现有组添加新书签（去重）
-                            const existingIndex = groupMap[key];
                             newGroup.bookmarks.forEach(newBookmark => {
-                                const isDuplicate = appData.bookmarks[existingIndex].bookmarks.some(b => 
+                                const isDuplicate = existingGroup.bookmarks.some(b => 
                                     b.url.toLowerCase() === newBookmark.url.toLowerCase()
                                 );
                                 
                                 if (!isDuplicate) {
-                                    appData.bookmarks[existingIndex].bookmarks.push(newBookmark);
+                                    existingGroup.bookmarks.push(newBookmark);
                                 }
                             });
                         } else {
-                            // 添加新组到末尾，保持原顺序
-                            appData.bookmarks.push(newGroup);
-                            groupMap[key] = appData.bookmarks.length - 1;
+                            // 添加新组到顶部
+                            appData.bookmarks.unshift(newGroup);
                         }
                     });
                     
@@ -1501,6 +1619,61 @@
             showNotification('导出成功', '书签已导出为HTML文件', 'success');
         }
         
+        // 备份JSON数据
+        function backupJSONData() {
+            const dataToBackup = {
+                bookmarks: appData.bookmarks,
+                ads: appData.ads,
+                timezones: appData.timezones,
+                exportedAt: new Date().toISOString()
+            };
+            
+            const jsonString = JSON.stringify(dataToBackup, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `space_navigator_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('备份成功', '数据已导出为JSON文件', 'success');
+        }
+        
+        // 加载JSON备份
+        function loadJSONBackup(file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const backupData = JSON.parse(e.target.result);
+                    
+                    if (backupData.bookmarks) appData.bookmarks = backupData.bookmarks;
+                    if (backupData.ads) appData.ads = backupData.ads;
+                    if (backupData.timezones) appData.timezones = backupData.timezones;
+                    
+                    renderBookmarks();
+                    setupBookmarkEventListeners();
+                    updateBookmarkCount();
+                    renderTimezones();
+                    setupAdEditor();
+                    
+                    showNotification('恢复成功', '已从备份文件加载数据', 'success');
+                } catch (error) {
+                    console.error('加载备份失败:', error);
+                    showNotification('恢复失败', '无法解析备份文件', 'error');
+                }
+            };
+            
+            reader.onerror = function() {
+                showNotification('恢复失败', '读取文件时发生错误', 'error');
+            };
+            
+            reader.readAsText(file);
+        }
+        
         // 设置广告编辑区
         function setupAdEditor() {
             if (appData.ads.length >= 1) {
@@ -1516,6 +1689,12 @@
                 elements.ad2UrlInput.value = appData.ads[1].imgUrl;
                 elements.ad2LinkInput.value = appData.ads[1].linkUrl;
             }
+            
+            if (appData.ads.length >= 3) {
+                elements.ad3Img.src = appData.ads[2].imgUrl;
+                elements.ad3Link.href = appData.ads[2].linkUrl;
+                elements.ad3UrlInput.value = appData.ads[2].imgUrl;
+                elements.ad3LinkInput.value = appData.ads[2].linkUrl;
             }
         }
         
@@ -1529,10 +1708,14 @@
             appData.ads[1].imgUrl = elements.ad2UrlInput.value;
             appData.ads[1].linkUrl = elements.ad2LinkInput.value;
             
+            if (appData.ads.length < 3) appData.ads.push({});
+            appData.ads[2].imgUrl = elements.ad3UrlInput.value;
+            appData.ads[2].linkUrl = elements.ad3LinkInput.value;
+            
             setupAdEditor();
         }
         
-        // 渲染时区列表 - 使用更准确的时区计算
+        // 渲染时区列表
         function renderTimezones() {
             elements.timezonesContainer.innerHTML = '';
             elements.timezonesList.innerHTML = '';
@@ -1540,31 +1723,18 @@
             appData.timezones.forEach((timezone, index) => {
                 // 主页面时区显示
                 const timezoneElement = document.createElement('div');
-                timezoneElement.className = 'bg-space-dark/30 rounded-lg p-3 hover:bg-space-dark/50 transition-colors';
+                timezoneElement.className = 'bg-space-dark/30 rounded-lg p-3';
                 timezoneElement.innerHTML = `
                     <div class="text-sm font-medium mb-1">${timezone.name}</div>
-                    <div class="text-lg font-bold timezone-time" data-timezone="${timezone.timezone}">--:--:--</div>
-                    <div class="text-xs text-gray-500 mt-1" data-timezone-offset="${timezone.timezone}">UTC±0</div>
+                    <div class="text-lg font-bold" data-timezone-offset="${timezone.offset}">--:--:--</div>
                 `;
                 elements.timezonesContainer.appendChild(timezoneElement);
                 
-                // 编辑页时区列表 - 带实时时间显示
-                const now = new Date();
-                const options = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
-                const tzTime = new Date(now.toLocaleString('en-US', { 
-                    timeZone: timezone.timezone,
-                    hour12: false
-                }));
-                
+                // 编辑页时区列表
                 const timezoneItem = document.createElement('div');
-                timezoneItem.className = 'flex justify-between items-center bg-space-dark/30 rounded-lg p-2 hover:bg-space-dark/50 transition-colors';
+                timezoneItem.className = 'flex justify-between items-center bg-space-dark/30 rounded-lg p-2';
                 timezoneItem.innerHTML = `
-                    <div>
-                        <div>${timezone.name}</div>
-                        <div class="text-xs text-gray-400 timezone-edit-time" data-timezone="${timezone.timezone}">
-                            ${tzTime.toTimeString().slice(0, 8)}
-                        </div>
-                    </div>
+                    <span>${timezone.name} (GMT${timezone.offset >= 0 ? '+' : ''}${timezone.offset})</span>
                     <button class="delete-timezone text-red-400 hover:text-red-300 p-1 touch-target" data-index="${index}">
                         <i class="fa fa-times"></i>
                     </button>
@@ -1583,52 +1753,44 @@
             });
         }
         
-        // 添加新时区 - 使用更准确的时区数据
+        // 添加新时区
         function addNewTimezone(cityName) {
             if (!cityName) return;
             
-            // 规范化城市名称（去除空格，统一大小写）
-            const normalizedCity = cityName.trim().replace(/\s+/g, ' ');
+            // 简单的时区偏移量猜测
+            const offsetMap = {
+                '北京': 8,
+                '上海': 8,
+                '香港': 8,
+                '台北': 8,
+                '纽约': -4,
+                '洛杉矶': -7,
+                '伦敦': 1,
+                '巴黎': 2,
+                '东京': 9,
+                '悉尼': 10
+            };
             
-            // 查找对应的时区
-            let timezone = cityTimezoneMap[normalizedCity];
-            
-            // 如果没有找到精确匹配，尝试模糊匹配
-            if (!timezone) {
-                const lowerCity = normalizedCity.toLowerCase();
-                for (const city in cityTimezoneMap) {
-                    if (city.toLowerCase().includes(lowerCity) || 
-                        lowerCity.includes(city.toLowerCase())) {
-                        timezone = cityTimezoneMap[city];
-                        break;
-                    }
-                }
-            }
-            
-            // 如果仍然没有找到，使用用户输入的城市名并默认为UTC
-            if (!timezone) {
-                timezone = 'UTC';
-                showNotification('提示', `未找到"${normalizedCity}"的时区信息，默认使用UTC时间`, 'warning');
-            }
+            const offset = offsetMap[cityName] || 0;
             
             // 检查是否已存在同名时区
-            const exists = appData.timezones.some(tz => tz.name === normalizedCity);
+            const exists = appData.timezones.some(tz => tz.name === cityName);
             if (exists) {
                 showNotification('添加失败', '该城市时区已存在', 'error');
                 return;
             }
             
             appData.timezones.push({
-                name: normalizedCity,
-                timezone: timezone
+                name: cityName,
+                offset: offset
             });
             
             elements.newTimezone.value = '';
             renderTimezones();
-            showNotification('添加成功', `已添加${normalizedCity}时区`, 'success');
+            showNotification('添加成功', `已添加${cityName}时区`, 'success');
         }
         
-        // 更新时间显示 - 更准确的时区计算
+        // 更新时间显示
         function updateTimeDisplay() {
             const now = new Date();
             
@@ -1640,58 +1802,10 @@
             elements.dateDisplay.textContent = now.toLocaleDateString('zh-CN', options);
             
             // 更新各时区时间
-            document.querySelectorAll('.timezone-time').forEach(el => {
-                const timezone = el.dataset.timezone;
-                const options = { 
-                    hour: '2-digit', 
-                    minute: '2-digit', 
-                    second: '2-digit',
-                    hour12: false
-                };
-                
-                // 使用toLocaleTimeString计算特定时区的时间
-                const tzTimeStr = now.toLocaleTimeString('zh-CN', { 
-                    ...options,
-                    timeZone: timezone
-                });
-                
-                el.textContent = tzTimeStr;
-            });
-            
-            // 更新时区偏移显示
             document.querySelectorAll('[data-timezone-offset]').forEach(el => {
-                const timezone = el.dataset.timezoneOffset;
-                try {
-                    // 计算时区偏移
-                    const offsetMs = new Date().getTimezoneOffset() * 60000;
-                    const tzDate = new Date(now.getTime() - offsetMs);
-                    const tzOffset = tzDate.toLocaleString('en-US', {
-                        timeZone: timezone,
-                        timeZoneName: 'short'
-                    }).split(' ').pop();
-                    
-                    el.textContent = tzOffset;
-                } catch (e) {
-                    el.textContent = 'UTC±0';
-                }
-            });
-            
-            // 更新编辑区的时间显示
-            document.querySelectorAll('.timezone-edit-time').forEach(el => {
-                const timezone = el.dataset.timezone;
-                const options = { 
-                    hour: '2-digit', 
-                    minute: '2-digit', 
-                    second: '2-digit',
-                    hour12: false
-                };
-                
-                const tzTimeStr = now.toLocaleTimeString('zh-CN', { 
-                    ...options,
-                    timeZone: timezone
-                });
-                
-                el.textContent = tzTimeStr;
+                const offset = parseInt(el.dataset.timezoneOffset);
+                const timezoneTime = new Date(now.getTime() + (offset - now.getTimezoneOffset() / 60) * 3600000);
+                el.textContent = timezoneTime.toTimeString().slice(0, 8);
             });
         }
         
@@ -1746,7 +1860,9 @@
                 currentTheme: appData.currentTheme,
                 search: {
                     type: appData.search.type,
-                    saveHistory: appData.search.saveHistory
+                    engine: appData.search.engine,
+                    saveHistory: appData.search.saveHistory,
+                    showSuggestions: appData.search.showSuggestions
                 }
             };
             
@@ -1838,6 +1954,8 @@
                         elements.ad1UrlInput.value = event.target.result;
                     } else if (adIndex === 1) {
                         elements.ad2UrlInput.value = event.target.result;
+                    } else if (adIndex === 2) {
+                        elements.ad3UrlInput.value = event.target.result;
                     }
                     showNotification('上传成功', '图片已上传，点击保存生效', 'success');
                 };
@@ -2061,6 +2179,7 @@
             // 广告图片上传
             elements.ad1Upload.addEventListener('change', handleAdImageUpload(0));
             elements.ad2Upload.addEventListener('change', handleAdImageUpload(1));
+            elements.ad3Upload.addEventListener('change', handleAdImageUpload(2));
             
             // 滚动事件 - 控制顶部导航栏显示/隐藏
             window.addEventListener('scroll', () => {
@@ -2082,7 +2201,25 @@
                 }, 3000);
             });
             
-            // 搜索按钮点击 - 确保按钮点击正常工作
+            // 搜索引擎切换
+            document.querySelectorAll('.search-engine-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    appData.search.engine = btn.dataset.engine;
+                    saveSearchSettings();
+                    initSearchEngine();
+                });
+            });
+            
+            // 搜索类型切换
+            elements.searchTypeSite.addEventListener('click', () => {
+                setSearchType('site');
+            });
+            
+            elements.searchTypeWeb.addEventListener('click', () => {
+                setSearchType('web');
+            });
+            
+            // 搜索按钮点击
             elements.searchBtn.addEventListener('click', () => {
                 performSearch(elements.searchInput.value);
             });
@@ -2091,31 +2228,55 @@
             elements.searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     performSearch(elements.searchInput.value);
+                    hideSearchSuggestions();
                 }
             });
             
-            // 搜索输入框输入 - 确保可以正常输入
+            // 搜索输入框输入
             elements.searchInput.addEventListener('input', (e) => {
                 const query = e.target.value.trim();
                 
                 // 隐藏搜索结果
                 elements.searchResultsContainer.classList.add('hidden');
                 
-                // 仅处理站内搜索
-                if (query === '' && appData.search.saveHistory && appData.search.history.length > 0) {
-                    elements.searchHistory.classList.remove('hidden');
-                } else if (query === '') {
-                    elements.searchHistory.classList.add('hidden');
+                if (appData.search.type === 'site') {
+                    // 站内搜索模式
+                    hideSearchSuggestions();
+                    
+                    if (query === '' && appData.search.saveHistory && appData.search.history.length > 0) {
+                        elements.searchHistory.classList.remove('hidden');
+                    } else if (query === '') {
+                        elements.searchHistory.classList.add('hidden');
+                    } else {
+                        // 实时搜索
+                        clearTimeout(searchSuggestionTimeout);
+                        searchSuggestionTimeout = setTimeout(() => {
+                            performSiteSearch(query);
+                        }, 300);
+                        elements.searchHistory.classList.add('hidden');
+                    }
                 } else {
-                    // 实时搜索
-                    setTimeout(() => {
-                        performSiteSearch(query);
-                    }, 300);
-                    elements.searchHistory.classList.add('hidden');
+                    // 网页搜索模式
+                    if (query === '' && appData.search.saveHistory && appData.search.history.length > 0) {
+                        elements.searchHistory.classList.remove('hidden');
+                        hideSearchSuggestions();
+                    } else if (query === '') {
+                        elements.searchHistory.classList.add('hidden');
+                        hideSearchSuggestions();
+                    } else {
+                        // 隐藏搜索历史，显示搜索建议
+                        elements.searchHistory.classList.add('hidden');
+                        
+                        // 防抖处理搜索建议请求
+                        clearTimeout(searchSuggestionTimeout);
+                        searchSuggestionTimeout = setTimeout(() => {
+                            fetchSearchSuggestions(query);
+                        }, 300);
+                    }
                 }
             });
             
-            // 搜索输入框聚焦 - 确保可以聚焦
+            // 搜索输入框聚焦
             elements.searchInput.addEventListener('focus', () => {
                 const query = elements.searchInput.value.trim();
                 if (query === '' && appData.search.saveHistory && appData.search.history.length > 0) {
@@ -2125,8 +2286,10 @@
             
             // 搜索输入框失焦
             elements.searchInput.addEventListener('blur', () => {
-                // 延迟隐藏，以便点击历史项
+                // 延迟隐藏，以便点击建议
                 setTimeout(() => {
+                    hideSearchSuggestions();
+                    // 保留搜索结果显示
                     if (!elements.searchResultsContainer.classList.contains('hidden')) {
                         elements.searchHistory.classList.add('hidden');
                     } else if (elements.searchInput.value.trim() === '') {
@@ -2135,18 +2298,72 @@
                 }, 200);
             });
             
+            // 搜索建议键盘导航
+            elements.searchInput.addEventListener('keydown', (e) => {
+                const suggestions = elements.searchSuggestions.querySelectorAll('.search-suggestion');
+                if (suggestions.length === 0) return;
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    searchSuggestionIndex = (searchSuggestionIndex + 1) % suggestions.length;
+                    updateSearchSuggestionHighlight();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    searchSuggestionIndex = (searchSuggestionIndex - 1 + suggestions.length) % suggestions.length;
+                    updateSearchSuggestionHighlight();
+                } else if (e.key === 'Tab') {
+                    e.preventDefault();
+                    if (searchSuggestionIndex >= 0) {
+                        elements.searchInput.value = suggestions[searchSuggestionIndex].dataset.suggestion;
+                    }
+                }
+            });
+            
             // 清除搜索历史
             elements.clearHistory.addEventListener('click', clearSearchHistory);
             
             // 清除搜索结果
             elements.clearSearch.addEventListener('click', clearSearchResults);
             
-            // 点击页面其他地方隐藏搜索历史
+            // 打开搜索设置
+            elements.searchSettings.addEventListener('click', () => {
+                elements.searchSettingsModal.classList.remove('hidden');
+            });
+            
+            // 关闭搜索设置
+            elements.closeSearchSettings.addEventListener('click', () => {
+                elements.searchSettingsModal.classList.add('hidden');
+            });
+            
+            // 保存搜索设置
+            elements.saveSearchSettings.addEventListener('click', () => {
+                saveSearchSettings();
+                elements.searchSettingsModal.classList.add('hidden');
+                showNotification('设置已保存', '搜索设置已更新', 'success');
+            });
+            
+            // 点击页面其他地方隐藏搜索建议和历史
             document.addEventListener('click', (e) => {
                 if (!elements.searchInput.contains(e.target) && 
+                    !elements.searchSuggestions.contains(e.target) &&
                     !elements.searchHistory.contains(e.target) &&
+                    !elements.searchSettings.contains(e.target) &&
                     !elements.searchResultsContainer.contains(e.target)) {
+                    hideSearchSuggestions();
                     elements.searchHistory.classList.add('hidden');
+                }
+            });
+        }
+        
+        // 更新搜索建议高亮
+        function updateSearchSuggestionHighlight() {
+            const suggestions = elements.searchSuggestions.querySelectorAll('.search-suggestion');
+            suggestions.forEach((suggestion, index) => {
+                if (index === searchSuggestionIndex) {
+                    suggestion.classList.add('search-suggestion-active');
+                    elements.searchInput.value = suggestion.dataset.suggestion;
+                } else {
+                    suggestion.classList.remove('search-suggestion-active');
                 }
             });
         }
