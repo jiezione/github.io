@@ -1,197 +1,22 @@
 {
   "bookmarks": [
     {
-      "name": "LOOK",
+      "name": "AAA",
       "bookmarks": [
-        {
-          "title": "baidu",
-          "url": "https://baidu.com",
-          "favicon": "https://baidu.com/favicon.ico"
-        }
-      ]
-    },
-    {
-      "name": "https://abc.com",
-      "bookmarks": [
-        {
-          "title": "Toivomme Maailman Rauhaa",
-          "url": "https://jiezi.dpdns.org/",
-          "favicon": ""
-        },
-        {
-          "title": "Proteggiamo i Piccoli Animali",
-          "url": "http://a.fmie.ip-ddns.com/",
-          "favicon": ""
-        },
-        {
-          "title": "jz.ip-ddns.com",
-          "url": "http://jz.ip-ddns.com/",
-          "favicon": ""
-        },
-        {
-          "title": "Notre mission climatique",
-          "url": "https://jiezione.serv00.net/",
-          "favicon": ""
-        },
-        {
-          "title": "努力总会有成就",
-          "url": "https://jc.ddns-ip.net/",
-          "favicon": ""
-        },
-        {
-          "title": "Effort Leads to Success",
-          "url": "http://fmie.dpdns.org/index.html",
-          "favicon": ""
-        },
-        {
-          "title": "Kochaj i ceni dobre chwile.",
-          "url": "https://jiezi.serv00.net/",
-          "favicon": ""
-        },
-        {
-          "title": "String Symphony | Custom Guitars",
-          "url": "https://ad.jiezione.dpdns.org/",
-          "favicon": ""
-        },
-        {
-          "title": "Élan Beauty | Premium Kosmetik & Wellness",
-          "url": "https://jiezione.dpdns.org/",
-          "favicon": ""
-        },
         {
           "title": "abc",
           "url": "https://abc.com",
-          "favicon": "https://abc.com/favicon.ico"
-        }
-      ]
-    },
-    {
-      "name": "Navigation Station",
-      "bookmarks": [
-        {
-          "title": "爱分享导航站",
-          "url": "https://afengxiang.github.io/afx/",
-          "favicon": ""
-        }
-      ]
-    },
-    {
-      "name": "Bypassing",
-      "bookmarks": [
-        {
-          "title": "Free VPN Accounts • 100% Free PPTP and OpenVPN Service",
-          "url": "https://www.vpnbook.com/freevpn",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fabc.com&size=32"
         },
         {
-          "title": "用于安全网络的商业VPN |开放VPN",
-          "url": "https://openvpn.net/",
-          "favicon": ""
+          "title": "123",
+          "url": "https://123.com",
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2F123.com&size=32"
         },
         {
-          "title": "批量获取免费的VPN节点，用不完真用不完….. BPB-Worker-Panel 面板BUG利用！！-零度博客",
-          "url": "https://www.freedidi.com/17131.html",
-          "favicon": ""
-        },
-        {
-          "title": "85LA - 免费高速节点、科学上网资源与技术交流 | 节点列表与软件推荐",
-          "url": "https://www.85la.com/",
-          "favicon": ""
-        },
-        {
-          "title": "Open Proxy List - Free VPN & Proxy",
-          "url": "https://openproxylist.com/",
-          "favicon": ""
-        },
-        {
-          "title": "Borderfree – The world's first Web3.0 AI browser",
-          "url": "https://borderfree.app/",
-          "favicon": ""
-        }
-      ]
-    },
-    {
-      "name": "Development polatform",
-      "bookmarks": [
-        {
-          "title": "GitHub · Build and ship software on a single, collaborative platform · GitHub",
-          "url": "https://github.com/",
-          "favicon": "https://github.com/favicon.ico"
-        },
-        {
-          "title": "项目 V",
-          "url": "https://github.com/v2ray",
-          "favicon": "https://github.com/favicon.ico"
-        },
-        {
-          "title": "louwangzhiyu001",
-          "url": "https://github.com/louwangzhiyu001/",
-          "favicon": "https://github.com/favicon.ico"
-        }
-      ]
-    },
-    {
-      "name": "cloud storage",
-      "bookmarks": [
-        {
-          "title": "【夸克网盘】夸克网盘PC网页版端入口",
-          "url": "https://pan.quark.cn/",
-          "favicon": ""
-        }
-      ]
-    },
-    {
-      "name": "my sunpanel",
-      "bookmarks": [
-        {
-          "title": "YouTube",
-          "url": "https://www.youtube.com/channel/UCYfdidRxbB8Qhf0Nx7ioOYw",
-          "favicon": ""
-        }
-      ]
-    },
-    {
-      "name": "APK related",
-      "bookmarks": [
-        {
-          "title": "APKMirror - Free APK Downloads - Free and safe Android APK downloads",
-          "url": "https://www.apkmirror.com/",
-          "favicon": ""
-        },
-        {
-          "title": "在APKPure使用免费在线APK下载器下载APK到安卓",
-          "url": "https://apkpure.com/cn/",
-          "favicon": ""
-        }
-      ]
-    },
-    {
-      "name": "容器",
-      "bookmarks": [
-        {
-          "title": "FreezeHost",
-          "url": "https://free.freezehost.pro/dashboard?news=true&loggedin=true",
-          "favicon": ""
-        },
-        {
-          "title": "Client Area - Pine Hosting",
-          "url": "https://pinehosting.com/clientarea/clientarea.php",
-          "favicon": ""
-        },
-        {
-          "title": "腾讯云代码助手CodeBuddy：接入DeepSeek 满血版，支持全免费、不限量、免部署的 AI 编程 - A姐分享",
-          "url": "https://www.ahhhhfs.com/71301/",
-          "favicon": ""
-        },
-        {
-          "title": "VirScan - 多引擎文件在线检测平台",
-          "url": "https://www.virscan.org/report/db5ca872df1bb6e1f59609f53ed603c44a394fee6d94d9656f25c97ba8a0a0dc",
-          "favicon": ""
-        },
-        {
-          "title": "银河录像局 次世代合租平台",
-          "url": "https://nf.video/6US2b",
-          "favicon": ""
+          "title": "google",
+          "url": "https://www.google.com",
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwww.google.com&size=32"
         }
       ]
     }
@@ -203,7 +28,7 @@
     },
     {
       "imgUrl": "https://picsum.photos/1200/400?random=2",
-      "linkUrl": "#"
+      "linkUrl": "https://www.google.com"
     },
     {
       "imgUrl": "https://picsum.photos/1200/400?random=3",
