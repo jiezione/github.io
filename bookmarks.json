@@ -1,21 +1,6 @@
 {
   "bookmarks": [
     {
-      "name": "PaaS 平台",
-      "bookmarks": [
-        {
-          "title": "渲染仪表板",
-          "url": "https://dashboard.render.com/",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fdashboard.render.com%2F&size=32"
-        },
-        {
-          "title": "sshweb - Overview – Vercel",
-          "url": "https://vercel.com/fmies-projects/sshweb/settings/domains",
-          "favicon": "https://vercel.com/favicon.ico"
-        }
-      ]
-    },
-    {
       "name": "在线转换工具",
       "bookmarks": [
         {
@@ -787,5 +772,5 @@
       "offset": 1
     }
   ],
-  "updatedAt": "2025-08-19T08:21:02.244Z"
+  "updatedAt": "2025-08-19T08:22:43.538Z"
 }
