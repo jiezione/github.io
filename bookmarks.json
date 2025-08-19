@@ -1,8 +1,14 @@
 {
   "bookmarks": [
     {
-      "name": "新书签组",
-      "bookmarks": []
+      "name": "LOOK",
+      "bookmarks": [
+        {
+          "title": "baidu",
+          "url": "https://baid.com",
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fbaid.com&size=32"
+        }
+      ]
     },
     {
       "name": "https://abc.com",
@@ -186,16 +192,6 @@
           "title": "银河录像局 次世代合租平台",
           "url": "https://nf.video/6US2b",
           "favicon": ""
-        }
-      ]
-    },
-    {
-      "name": "look",
-      "bookmarks": [
-        {
-          "title": "123",
-          "url": "https://123.com",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2F123.com&size=32"
         }
       ]
     }
