@@ -15,8 +15,8 @@
         },
         {
           "title": "google",
-          "url": "https://google.com",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fgoogle.com&size=32"
+          "url": "https://www.google.com",
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwww.google.com&size=32"
         }
       ]
     }
@@ -28,7 +28,7 @@
     },
     {
       "imgUrl": "https://picsum.photos/1200/400?random=2",
-      "linkUrl": "https://google.com"
+      "linkUrl": "https://www.google.com"
     },
     {
       "imgUrl": "https://picsum.photos/1200/400?random=3",
