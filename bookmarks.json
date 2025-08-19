@@ -1,6 +1,10 @@
 {
   "bookmarks": [
     {
+      "name": "新书签组",
+      "bookmarks": []
+    },
+    {
       "name": "https://abc.com",
       "bookmarks": [
         {
@@ -190,21 +194,6 @@
       "bookmarks": [
         {
           "title": "新书签",
-          "url": "https://baidu.com",
-          "favicon": ""
-        },
-        {
-          "title": "新书签",
-          "url": "https://",
-          "favicon": ""
-        }
-      ]
-    },
-    {
-      "name": "https://123.com",
-      "bookmarks": [
-        {
-          "title": "新书签",
           "url": "https://",
           "favicon": ""
         }
@@ -238,6 +227,5 @@
       "name": "伦敦",
       "offset": 1
     }
-  ],
-  "updatedAt": "2025-08-19T10:59:33.417Z"
+  ]
 }
