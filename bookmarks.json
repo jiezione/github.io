@@ -11,7 +11,7 @@
         {
           "title": "googel",
           "url": "https://google.com",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fgoogle.com&size=32"
+          "favicon": "https://google.com/favicon.ico"
         }
       ]
     },
@@ -823,6 +823,10 @@
           "favicon": "https://nf.video/favicon.ico"
         }
       ]
+    },
+    {
+      "name": "书签栏",
+      "bookmarks": []
     }
   ],
   "ads": [
