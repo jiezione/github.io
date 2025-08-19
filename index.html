@@ -86,6 +86,16 @@
             .bookmark-item:hover::after {
                 @apply scale-x-100;
             }
+            /* 搜索框样式优化 */
+            .search-container {
+                @apply relative w-full;
+            }
+            .search-input {
+                @apply w-full bg-space-darker border border-space-accent/30 rounded-lg px-4 py-3 pr-12 focus:outline-none focus:border-space-accent transition-colors text-base;
+            }
+            .search-button {
+                @apply absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-space-accent touch-target z-10;
+            }
             /* 浅色模式样式 */
             .light {
                 --bg-color: #f8fafc;
@@ -155,15 +165,18 @@
                     <!-- 优化的搜索引擎 -->
                     <div class="relative">
                         <!-- 搜索类型切换 -->
-                        <div class="flex border-b border-space-accent/30 mb-2">
+                        <div class="flex border-b border-space-accent/30 mb-3">
                             <button id="search-type-site" class="flex-1 py-1 text-sm font-medium text-space-glow border-b-2 border-space-accent">站内搜索</button>
                             <button id="search-type-web" class="flex-1 py-1 text-sm font-medium text-gray-400 hover:text-white">网页搜索</button>
                         </div>
                         
-                        <input type="text" id="search-input" placeholder="搜索书签或网页..." class="w-full bg-space-darker border border-space-accent/30 rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-space-accent transition-colors text-base">
-                        <button id="search-btn" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-space-accent touch-target">
-                            <i class="fa fa-search"></i>
-                        </button>
+                        <!-- 搜索框和按钮 - 修复移位问题 -->
+                        <div class="search-container">
+                            <input type="text" id="search-input" placeholder="搜索书签或网页..." class="search-input">
+                            <button id="search-btn" class="search-button">
+                                <i class="fa fa-search text-lg"></i>
+                            </button>
+                        </div>
                     </div>
                     
                     <!-- 搜索结果容器 -->
@@ -576,12 +589,36 @@
             loadSearchHistory();
             renderSearchHistory();
             
+            // 确保搜索框可聚焦
+            ensureSearchInputFocusable();
+            
             // 检查主题设置并应用
             if (appData.currentTheme === 'light') {
                 switchToLightMode();
             } else {
                 switchToDarkMode();
             }
+        }
+        
+        // 确保搜索框可以获取焦点（修复无法输入问题）
+        function ensureSearchInputFocusable() {
+            // 移除可能阻止焦点的属性
+            elements.searchInput.removeAttribute('disabled');
+            elements.searchInput.removeAttribute('readonly');
+            
+            // 确保没有覆盖层阻止点击
+            elements.searchInput.style.pointerEvents = 'auto';
+            elements.searchInput.style.zIndex = '10';
+            
+            // 测试焦点功能
+            setTimeout(() => {
+                try {
+                    elements.searchInput.focus();
+                    elements.searchInput.blur();
+                } catch (e) {
+                    console.error('搜索框焦点设置失败:', e);
+                }
+            }, 500);
         }
         
         // 创建星空背景
@@ -1778,7 +1815,6 @@
             const now = new Date();
             
             // 更新主时间
-            // 更新主时间
             elements.timeDisplay.textContent = now.toTimeString().slice(0, 8);
             
             // 更新日期
@@ -2200,7 +2236,7 @@
                 setSearchType('web');
             });
             
-            // 搜索按钮点击
+            // 搜索按钮点击 - 确保按钮点击正常工作
             elements.searchBtn.addEventListener('click', () => {
                 performSearch(elements.searchInput.value);
             });
@@ -2213,7 +2249,7 @@
                 }
             });
             
-            // 搜索输入框输入
+            // 搜索输入框输入 - 确保可以正常输入
             elements.searchInput.addEventListener('input', (e) => {
                 const query = e.target.value.trim();
                 
@@ -2257,7 +2293,7 @@
                 }
             });
             
-            // 搜索输入框聚焦
+            // 搜索输入框聚焦 - 确保可以聚焦
             elements.searchInput.addEventListener('focus', () => {
                 const query = elements.searchInput.value.trim();
                 if (query === '' && appData.search.saveHistory && appData.search.history.length > 0) {
