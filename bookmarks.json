@@ -51,7 +51,7 @@
         {
           "title": "abc",
           "url": "https://abc.com",
-          "favicon": ""
+          "favicon": "https://abc.com/favicon.ico"
         }
       ]
     },
@@ -184,6 +184,16 @@
           "favicon": ""
         }
       ]
+    },
+    {
+      "name": "https://baidu.com",
+      "bookmarks": [
+        {
+          "title": "新书签",
+          "url": "https://",
+          "favicon": ""
+        }
+      ]
     }
   ],
   "ads": [
@@ -214,5 +224,5 @@
       "offset": 1
     }
   ],
-  "updatedAt": "2025-08-19T08:40:30.481Z"
+  "updatedAt": "2025-08-19T08:42:41.446Z"
 }
