@@ -186,7 +186,7 @@
       ]
     },
     {
-      "name": "BAIDU",
+      "name": "baidu",
       "bookmarks": [
         {
           "title": "新书签",
@@ -224,5 +224,5 @@
       "offset": 1
     }
   ],
-  "updatedAt": "2025-08-19T08:53:27.370Z"
+  "updatedAt": "2025-08-19T08:55:13.414Z"
 }
