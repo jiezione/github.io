@@ -62,6 +62,26 @@
             .widget-title {
                 @apply font-medium text-space-glow flex items-center;
             }
+            /* 浅色模式样式 */
+            .light {
+                --bg-color: #f8fafc;
+                --text-color: #1e293b;
+            }
+            .light .bg-space-dark {
+                background-color: #f1f5f9;
+            }
+            .light .bg-space-darker {
+                background-color: #e2e8f0;
+            }
+            .light .bg-space-light {
+                background-color: #ffffff;
+            }
+            .light text-white, .light .text-white {
+                color: #1e293b !important;
+            }
+            .light .text-gray-400 {
+                color: #64748b !important;
+            }
         }
     </style>
 </head>
@@ -136,9 +156,7 @@
                     <h3 class="widget-title">
                         <i class="fa fa-globe mr-2"></i>世界时钟
                     </h3>
-                    <button id="add-timezone" class="text-xs px-2 py-1 bg-space-accent/20 rounded hover:bg-space-accent/30 transition-colors">
-                        <i class="fa fa-plus mr-1"></i>添加
-                    </button>
+                    <!-- 移除主页的添加时区按钮 -->
                 </div>
                 <div id="timezones-container" class="p-4 grid grid-cols-2 gap-4">
                     <!-- 时区将通过JS动态生成 -->
@@ -261,7 +279,7 @@
                         </div>
                     </div>
                     
-                    <!-- 广告编辑区 -->
+                    <!-- 广告和时区编辑区 -->
                     <div class="w-80 border-l border-space-accent/20 p-4 overflow-y-auto">
                         <h3 class="text-lg font-semibold mb-3">广告管理</h3>
                         <div class="space-y-6">
@@ -322,6 +340,20 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- 时区编辑区 - 仅在编辑中心显示 -->
+                        <h3 class="text-lg font-semibold mb-3 mt-8">时区管理</h3>
+                        <div class="space-y-4">
+                            <div class="flex">
+                                <input type="text" id="new-timezone" placeholder="城市名称" class="flex-1 bg-space-dark border border-space-accent/50 rounded-l-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-space-accent">
+                                <button id="add-timezone-btn" class="bg-space-accent px-4 py-2 rounded-r-lg hover:bg-space-accent/80 transition-colors">
+                                    添加
+                                </button>
+                            </div>
+                            <div id="timezones-list" class="space-y-2 max-h-60 overflow-y-auto scrollbar-hide">
+                                <!-- 时区列表将通过JS动态生成 -->
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -353,26 +385,7 @@
         </div>
     </div>
     
-    <!-- 时区编辑对话框 -->
-    <div id="timezone-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-        <div class="bg-space-light rounded-xl w-full max-w-md p-6 border border-space-accent/30 relative">
-            <button id="close-timezone-modal" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-                <i class="fa fa-times"></i>
-            </button>
-            <h2 class="text-xl font-bold mb-4">时区管理</h2>
-            <div class="mb-4">
-                <div class="flex">
-                    <input type="text" id="new-timezone" placeholder="城市名称" class="flex-1 bg-space-dark border border-space-accent/50 rounded-l-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-space-accent">
-                    <button id="add-timezone-btn" class="bg-space-accent px-4 py-2 rounded-r-lg hover:bg-space-accent/80 transition-colors">
-                        添加
-                    </button>
-                </div>
-            </div>
-            <div id="timezones-list" class="space-y-2 max-h-60 overflow-y-auto scrollbar-hide">
-                <!-- 时区列表将通过JS动态生成 -->
-            </div>
-        </div>
-    </div>
+    <!-- 时区编辑对话框已移除，合并到编辑中心 -->
     
     <!-- 通知提示 -->
     <div id="notification" class="fixed bottom-4 right-4 bg-space-light border border-space-accent/30 rounded-lg p-4 shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 max-w-xs">
@@ -451,10 +464,7 @@
             currentYear: document.getElementById('current-year'),
             hostname: document.getElementById('hostname'),
             bookmarkCountDisplay: document.getElementById('bookmark-count-display'),
-            addTimezone: document.getElementById('add-timezone'),
             editTimezones: document.getElementById('edit-timezones'),
-            timezoneModal: document.getElementById('timezone-modal'),
-            closeTimezoneModal: document.getElementById('close-timezone-modal'),
             newTimezone: document.getElementById('new-timezone'),
             addTimezoneBtn: document.getElementById('add-timezone-btn'),
             timezonesContainer: document.getElementById('timezones-container'),
@@ -480,6 +490,7 @@
         
         // 确认对话框回调
         let confirmCallback = null;
+        let scrollTimer;
         
         // 初始化函数
         async function init() {
@@ -500,9 +511,11 @@
             setupAdEditor();
             elements.currentYear.textContent = new Date().getFullYear();
             
-            // 检查主题设置
+            // 检查主题设置并应用
             if (appData.currentTheme === 'light') {
                 switchToLightMode();
+            } else {
+                switchToDarkMode();
             }
         }
         
@@ -723,7 +736,7 @@
             }
         }
         
-        // 渲染书签
+        // 渲染书签 - 修复编辑干扰问题
         function renderBookmarks() {
             elements.bookmarksContainer.innerHTML = '';
             elements.bookmarksEditorContainer.innerHTML = '';
@@ -760,42 +773,50 @@
                 `;
                 elements.bookmarksContainer.appendChild(groupElement);
                 
-                // 编辑页书签组
+                // 编辑页书签组 - 使用唯一ID避免事件冲突
                 const editorGroupElement = document.createElement('div');
                 editorGroupElement.className = 'editor-bookmark-group bg-space-dark/30 rounded-xl p-4';
+                editorGroupElement.dataset.groupId = `group-${groupIndex}`;
                 editorGroupElement.innerHTML = `
                     <div class="flex justify-between items-center mb-3">
                         <div class="flex items-center">
                             <i class="fa fa-folder-open-o mr-2 text-space-accent"></i>
-                            <input type="text" value="${group.name}" class="bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-white" data-group-index="${groupIndex}">
+                            <input type="text" value="${escapeHTML(group.name)}" 
+                                   class="group-name-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-white" 
+                                   data-group-index="${groupIndex}">
                         </div>
                         <div class="flex space-x-1">
-                            <button class="add-bookmark p-1.5 rounded hover:bg-space-light transition-colors" data-group-index="${groupIndex}">
+                            <button class="add-bookmark p-1.5 rounded hover:bg-space-light transition-colors" 
+                                    data-group-index="${groupIndex}">
                                 <i class="fa fa-plus text-sm"></i>
                             </button>
-                            <button class="delete-group p-1.5 rounded hover:bg-space-light transition-colors text-red-400" data-group-index="${groupIndex}">
+                            <button class="delete-group p-1.5 rounded hover:bg-space-light transition-colors text-red-400" 
+                                    data-group-index="${groupIndex}">
                                 <i class="fa fa-trash text-sm"></i>
                             </button>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto scrollbar-hide">
-                        ${group.bookmarks.map((bookmark, bookmarkIndex) => createEditorBookmarkElement(bookmark, groupIndex, bookmarkIndex)).join('')}
+                        ${group.bookmarks.map((bookmark, bookmarkIndex) => 
+                            createEditorBookmarkElement(bookmark, groupIndex, bookmarkIndex)
+                        ).join('')}
                     </div>
                 `;
                 elements.bookmarksEditorContainer.appendChild(editorGroupElement);
             });
             
-            // 添加编辑功能事件监听
-            document.querySelectorAll('.add-bookmark').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
+            // 使用事件委托处理书签编辑事件，避免相互干扰
+            elements.bookmarksEditorContainer.addEventListener('click', (e) => {
+                const addBtn = e.target.closest('.add-bookmark');
+                if (addBtn) {
+                    const groupIndex = parseInt(addBtn.dataset.groupIndex);
                     addNewBookmark(groupIndex);
-                });
-            });
-            
-            document.querySelectorAll('.delete-group').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
+                    return;
+                }
+                
+                const deleteGroupBtn = e.target.closest('.delete-group');
+                if (deleteGroupBtn) {
+                    const groupIndex = parseInt(deleteGroupBtn.dataset.groupIndex);
                     confirmAction(
                         '删除书签组',
                         `您确定要删除"${appData.bookmarks[groupIndex].name}"书签组吗？此操作不可恢复。`,
@@ -805,33 +826,25 @@
                             updateBookmarkCount();
                         }
                     );
-                });
-            });
-            
-            document.querySelectorAll('.editor-bookmark-group input[type="text"]').forEach(input => {
-                // 使用input事件而非change事件，避免焦点问题
-                input.addEventListener('input', (e) => {
-                    const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
-                    appData.bookmarks[groupIndex].name = e.currentTarget.value.trim() || '未命名组';
-                });
-            });
-            
-            document.querySelectorAll('.edit-bookmark').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    // 阻止事件冒泡，避免触发父元素事件
+                    return;
+                }
+                
+                const editBtn = e.target.closest('.edit-bookmark');
+                if (editBtn) {
                     e.stopPropagation();
-                    const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
-                    const bookmarkIndex = parseInt(e.currentTarget.dataset.bookmarkIndex);
-                    editBookmark(groupIndex, bookmarkIndex);
-                });
-            });
-            
-            document.querySelectorAll('.delete-bookmark').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    // 阻止事件冒泡
+                    const groupIndex = parseInt(editBtn.dataset.groupIndex);
+                    const bookmarkIndex = parseInt(editBtn.dataset.bookmarkIndex);
+                    // 聚焦到对应的输入框
+                    const titleInput = document.querySelector(`.bookmark-title-input[data-group-index="${groupIndex}"][data-bookmark-index="${bookmarkIndex}"]`);
+                    if (titleInput) titleInput.focus();
+                    return;
+                }
+                
+                const deleteBtn = e.target.closest('.delete-bookmark');
+                if (deleteBtn) {
                     e.stopPropagation();
-                    const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
-                    const bookmarkIndex = parseInt(e.currentTarget.dataset.bookmarkIndex);
+                    const groupIndex = parseInt(deleteBtn.dataset.groupIndex);
+                    const bookmarkIndex = parseInt(deleteBtn.dataset.bookmarkIndex);
                     const bookmarkName = appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].title;
                     
                     confirmAction(
@@ -843,7 +856,36 @@
                             updateBookmarkCount();
                         }
                     );
-                });
+                    return;
+                }
+            });
+            
+            // 使用事件委托处理输入框变化
+            elements.bookmarksEditorContainer.addEventListener('input', (e) => {
+                const groupNameInput = e.target.closest('.group-name-input');
+                if (groupNameInput) {
+                    const groupIndex = parseInt(groupNameInput.dataset.groupIndex);
+                    appData.bookmarks[groupIndex].name = groupNameInput.value.trim() || '未命名组';
+                    return;
+                }
+                
+                const titleInput = e.target.closest('.bookmark-title-input');
+                if (titleInput) {
+                    const groupIndex = parseInt(titleInput.dataset.groupIndex);
+                    const bookmarkIndex = parseInt(titleInput.dataset.bookmarkIndex);
+                    appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].title = titleInput.value.trim();
+                    return;
+                }
+                
+                const urlInput = e.target.closest('.bookmark-url-input');
+                if (urlInput) {
+                    const groupIndex = parseInt(urlInput.dataset.groupIndex);
+                    const bookmarkIndex = parseInt(urlInput.dataset.bookmarkIndex);
+                    appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].url = urlInput.value.trim();
+                    // 更新favicon
+                    fetchFavicon(groupIndex, bookmarkIndex);
+                    return;
+                }
             });
         }
         
@@ -851,7 +893,7 @@
         function createBookmarkElement(bookmark) {
             let favicon = '';
             if (bookmark.favicon) {
-                favicon = `<img src="${bookmark.favicon}" alt="${bookmark.title}图标" class="w-5 h-5 mr-2 object-contain">`;
+                favicon = `<img src="${escapeHTML(bookmark.favicon)}" alt="${escapeHTML(bookmark.title)}图标" class="w-5 h-5 mr-2 object-contain">`;
             } else if (bookmark.title) {
                 const initial = bookmark.title.charAt(0).toUpperCase();
                 favicon = `<div class="w-5 h-5 mr-2 rounded bg-space-accent/30 flex items-center justify-center text-xs">${initial}</div>`;
@@ -860,32 +902,38 @@
             }
             
             return `
-                <a href="${bookmark.url}" target="_blank" class="bookmark-item bg-space-light/30 hover:bg-space-light/50 backdrop-blur-sm rounded-lg p-3 flex items-center transition-all group">
+                <a href="${escapeHTML(bookmark.url)}" target="_blank" class="bookmark-item bg-space-light/30 hover:bg-space-light/50 backdrop-blur-sm rounded-lg p-3 flex items-center transition-all group">
                     <div class="flex-shrink-0">
                         ${favicon}
                     </div>
                     <div class="overflow-hidden">
-                        <p class="text-sm font-medium truncate group-hover:text-space-glow transition-colors">${bookmark.title}</p>
+                        <p class="text-sm font-medium truncate group-hover:text-space-glow transition-colors">${escapeHTML(bookmark.title)}</p>
                     </div>
                 </a>
             `;
         }
         
-        // 创建编辑页书签元素
+        // 创建编辑页书签元素 - 使用唯一类名避免冲突
         function createEditorBookmarkElement(bookmark, groupIndex, bookmarkIndex) {
             return `
                 <div class="editor-bookmark bg-space-darker/50 rounded-lg p-3 flex justify-between items-center">
                     <div class="flex-1 min-w-0 mr-2">
                         <div class="flex items-center mb-1">
-                            <input type="text" value="${bookmark.title}" class="bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-sm text-white w-full" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}" data-field="title">
+                            <input type="text" value="${escapeHTML(bookmark.title)}" 
+                                   class="bookmark-title-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-sm text-white w-full" 
+                                   data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
                         </div>
-                        <input type="text" value="${bookmark.url}" class="bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-xs text-gray-400 w-full" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}" data-field="url">
+                        <input type="text" value="${escapeHTML(bookmark.url)}" 
+                               class="bookmark-url-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-xs text-gray-400 w-full" 
+                               data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
                     </div>
                     <div class="flex space-x-1">
-                        <button class="edit-bookmark p-1.5 rounded hover:bg-space-light transition-colors" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
+                        <button class="edit-bookmark p-1.5 rounded hover:bg-space-light transition-colors" 
+                                data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
                             <i class="fa fa-pencil text-sm"></i>
                         </button>
-                        <button class="delete-bookmark p-1.5 rounded hover:bg-space-light transition-colors text-red-400" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
+                        <button class="delete-bookmark p-1.5 rounded hover:bg-space-light transition-colors text-red-400" 
+                                data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
                             <i class="fa fa-trash text-sm"></i>
                         </button>
                     </div>
@@ -915,32 +963,11 @@
             // 自动获取favicon
             const bookmarkIndex = appData.bookmarks[groupIndex].bookmarks.length - 1;
             fetchFavicon(groupIndex, bookmarkIndex);
-        }
-        
-        // 编辑书签
-        function editBookmark(groupIndex, bookmarkIndex) {
-            const bookmark = appData.bookmarks[groupIndex].bookmarks[bookmarkIndex];
             
-            // 当URL改变时尝试获取favicon
-            const urlInputs = document.querySelectorAll(`input[data-group-index="${groupIndex}"][data-bookmark-index="${bookmarkIndex}"][data-field="url"]`);
-            urlInputs.forEach(input => {
-                input.addEventListener('input', () => {
-                    bookmark.url = input.value.trim();
-                    fetchFavicon(groupIndex, bookmarkIndex);
-                });
-            });
-            
-            // 标题改变事件
-            const titleInputs = document.querySelectorAll(`input[data-group-index="${groupIndex}"][data-bookmark-index="${bookmarkIndex}"][data-field="title"]`);
-            titleInputs.forEach(input => {
-                input.addEventListener('input', () => {
-                    bookmark.title = input.value.trim();
-                });
-            });
-            
-            // 自动聚焦到标题输入框
+            // 聚焦到新添加的书签
             setTimeout(() => {
-                titleInputs[0]?.focus();
+                const newInput = document.querySelector(`.bookmark-title-input[data-group-index="${groupIndex}"][data-bookmark-index="${bookmarkIndex}"]`);
+                if (newInput) newInput.focus();
             }, 100);
         }
         
@@ -1243,13 +1270,14 @@
                 elements.timezonesList.appendChild(timezoneItem);
             });
             
-            // 添加删除时区事件
-            document.querySelectorAll('.delete-timezone').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const index = parseInt(e.currentTarget.dataset.index);
+            // 时区删除事件委托
+            elements.timezonesList.addEventListener('click', (e) => {
+                const deleteBtn = e.target.closest('.delete-timezone');
+                if (deleteBtn) {
+                    const index = parseInt(deleteBtn.dataset.index);
                     appData.timezones.splice(index, 1);
                     renderTimezones();
-                });
+                }
             });
         }
         
@@ -1257,7 +1285,7 @@
         function addNewTimezone(cityName) {
             if (!cityName) return;
             
-            // 简单的时区偏移量猜测（实际应用中应该使用更精确的方法）
+            // 简单的时区偏移量猜测
             const offsetMap = {
                 '北京': 8,
                 '上海': 8,
@@ -1399,6 +1427,7 @@
             document.documentElement.classList.add('light');
             elements.themeToggle.innerHTML = '<i class="fa fa-sun-o text-yellow-500"></i>';
             appData.currentTheme = 'light';
+            saveLocalSettings();
         }
         
         // 切换到深色模式
@@ -1406,6 +1435,7 @@
             document.documentElement.classList.remove('light');
             elements.themeToggle.innerHTML = '<i class="fa fa-moon-o text-space-accent"></i>';
             appData.currentTheme = 'dark';
+            saveLocalSettings();
         }
         
         // 处理广告图片上传
@@ -1443,14 +1473,13 @@
         
         // 设置事件监听器
         function setupEventListeners() {
-            // 主题切换
+            // 主题切换 - 修复切换失效问题
             elements.themeToggle.addEventListener('click', () => {
                 if (appData.currentTheme === 'dark') {
                     switchToLightMode();
                 } else {
                     switchToDarkMode();
                 }
-                saveLocalSettings();
             });
             
             // 打开设置面板
@@ -1489,6 +1518,17 @@
                 elements.editorModal.classList.add('hidden');
             });
             
+            // 点击编辑时区按钮，直接打开编辑中心
+            elements.editTimezones.addEventListener('click', () => {
+                // 检查是否已认证
+                if (appData.github.repo && appData.github.token) {
+                    elements.editorModal.classList.remove('hidden');
+                } else {
+                    elements.settingsModal.classList.remove('hidden');
+                    showNotification('提示', '请先配置GitHub信息进入编辑模式', 'info');
+                }
+            });
+            
             // 添加书签组
             elements.addBookmarkGroup.addEventListener('click', addNewBookmarkGroup);
             
@@ -1512,6 +1552,7 @@
             elements.exportBookmarks.addEventListener('click', exportHTMLBookmarks);
             
             // 备份JSON
+            // 备份JSON
             elements.backupJson.addEventListener('click', backupJSONData);
             
             // 加载备份
@@ -1530,12 +1571,13 @@
                 input.click();
             });
             
-            // 保存更改
+            // 保存更改 - 所有编辑（包括时区）仅在此处保存
             elements.saveChanges.addEventListener('click', async () => {
                 saveAdSettings();
                 const success = await saveDataToGitHub();
                 if (success) {
                     renderBookmarks();
+                    renderTimezones(); // 保存后更新时区显示
                     elements.editorModal.classList.add('hidden');
                 }
             });
@@ -1558,17 +1600,7 @@
             // 关闭通知
             elements.closeNotification.addEventListener('click', hideNotification);
             
-            // 显示时区编辑对话框
-            elements.editTimezones.addEventListener('click', () => {
-                elements.timezoneModal.classList.remove('hidden');
-            });
-            
-            // 关闭时区编辑对话框
-            elements.closeTimezoneModal.addEventListener('click', () => {
-                elements.timezoneModal.classList.add('hidden');
-            });
-            
-            // 添加时区按钮
+            // 添加时区按钮（仅在编辑中心）
             elements.addTimezoneBtn.addEventListener('click', () => {
                 const cityName = elements.newTimezone.value.trim();
                 addNewTimezone(cityName);
