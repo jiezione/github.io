@@ -11,7 +11,7 @@
         {
           "title": "Client Area - Pine Hosting",
           "url": "https://pinehosting.com/clientarea/clientarea.php",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fpinehosting.com%2Fclientarea%2Fclientarea.php&size=32"
         },
         {
           "title": "腾讯云代码助手CodeBuddy：接入DeepSeek 满血版，支持全免费、不限量、免部署的 AI 编程 - A姐分享",
@@ -71,17 +71,17 @@
         {
           "title": "GitHub · Build and ship software on a single, collaborative platform · GitHub",
           "url": "https://github.com/",
-          "favicon": ""
+          "favicon": "https://github.com/favicon.ico"
         },
         {
           "title": "项目 V",
           "url": "https://github.com/v2ray",
-          "favicon": ""
+          "favicon": "https://github.com/favicon.ico"
         },
         {
           "title": "louwangzhiyu001",
           "url": "https://github.com/louwangzhiyu001/",
-          "favicon": ""
+          "favicon": "https://github.com/favicon.ico"
         }
       ]
     },
@@ -91,7 +91,7 @@
         {
           "title": "Free VPN Accounts • 100% Free PPTP and OpenVPN Service",
           "url": "https://www.vpnbook.com/freevpn",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fwww.vpnbook.com%2Ffreevpn&size=32"
         },
         {
           "title": "用于安全网络的商业VPN |开放VPN",
@@ -111,12 +111,12 @@
         {
           "title": "Open Proxy List - Free VPN & Proxy",
           "url": "https://openproxylist.com/",
-          "favicon": ""
+          "favicon": "https://openproxylist.com/favicon.ico"
         },
         {
           "title": "Borderfree – The world's first Web3.0 AI browser",
           "url": "https://borderfree.app/",
-          "favicon": ""
+          "favicon": "https://borderfree.app/favicon.ico"
         }
       ]
     },
@@ -126,7 +126,7 @@
         {
           "title": "爱分享导航站",
           "url": "https://afengxiang.github.io/afx/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fafengxiang.github.io%2Fafx%2F&size=32"
         }
       ]
     },
@@ -136,7 +136,7 @@
         {
           "title": "Toivomme Maailman Rauhaa",
           "url": "https://jiezi.dpdns.org/",
-          "favicon": ""
+          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fjiezi.dpdns.org%2F&size=32"
         },
         {
           "title": "Proteggiamo i Piccoli Animali",
@@ -385,7 +385,7 @@
         {
           "title": "GitHub Copilot（由OpenAI与GitHub合作开发）- 基于Codex模型，集成于多种IDE，提供实时代码补全和建议 https://github.com/features/copilot",
           "url": "https://github.com/features/copilot",
-          "favicon": ""
+          "favicon": "https://github.com/favicon.ico"
         },
         {
           "title": "Claude 3系列（特别是Opus和Sonnet版本）- 在复杂代码理解、生成和调试方面表现卓越 https://www.anthropic.com/claude",
@@ -420,7 +420,7 @@
         {
           "title": "Code Llama（Meta）- 专门针对代码优化的开源大语言模型 https://github.com/facebookresearch/codellama",
           "url": "https://github.com/meta-llama/codellama",
-          "favicon": ""
+          "favicon": "https://github.com/favicon.ico"
         }
       ]
     },
@@ -555,7 +555,7 @@
         {
           "title": "nhitoshi60/sms-reception: 2024年推荐的短信接码平台(收费+免费、国内+国外,建议收藏！！！)",
           "url": "https://github.com/nhitoshi60/sms-reception",
-          "favicon": ""
+          "favicon": "https://github.com/favicon.ico"
         },
         {
           "title": "在线接收短信 - 虚拟手机 - 临时电话 - SMSCodeOnline",
@@ -645,7 +645,7 @@
         {
           "title": "GitHub - XIU2/CloudflareSpeedTest: 🌩「自选优选 IP」测试 Cloudflare CDN 延迟和速度，获取最快 IP ！当然也支持其他 CDN / 网站 IP ~",
           "url": "https://github.com/xiu2/cloudflareSpeedTest",
-          "favicon": ""
+          "favicon": "https://github.com/favicon.ico"
         },
         {
           "title": "Simple Copy and Paste | Bulk IP Geolocation Lookup Tool Online",
