@@ -1,76 +1,6 @@
 {
   "bookmarks": [
     {
-      "name": "书签栏",
-      "bookmarks": [
-        {
-          "title": "新书签",
-          "url": "https://",
-          "favicon": ""
-        }
-      ]
-    },
-    {
-      "name": "My files",
-      "bookmarks": [
-        {
-          "title": "文件管理器",
-          "url": "https://cmjwork.dpdns.org/",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fcmjwork.dpdns.org%2F&size=32"
-        },
-        {
-          "title": "Fmie导航网站",
-          "url": "https://cmjlss.dpdns.org/#/",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fcmjlss.dpdns.org%2F%23%2F&size=32"
-        }
-      ]
-    },
-    {
-      "name": "tutorial",
-      "bookmarks": [
-        {
-          "title": "Terser 深度混淆教程 | 结合其他技术的实现方案",
-          "url": "https://tutorial.cmjwork.dpdns.org/",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Ftutorial.cmjwork.dpdns.org%2F&size=32"
-        }
-      ]
-    },
-    {
-      "name": "Time tunnel",
-      "bookmarks": [
-        {
-          "title": "幻彩星渊-pg_tj",
-          "url": "https://h.jiezione.dpdns.org/",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fh.jiezione.dpdns.org%2F&size=32"
-        },
-        {
-          "title": "幻彩星渊-wk_tj",
-          "url": "https://tj.fmienbone.dpdns.org/",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Ftj.fmienbone.dpdns.org%2F&size=32"
-        },
-        {
-          "title": "宇宙炫酷页面-pg_vl",
-          "url": "https://fmls.pages.dev/",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Ffmls.pages.dev%2F&size=32"
-        },
-        {
-          "title": "宇宙炫酷页面-wk_vl",
-          "url": "https://fmienbone.dpdns.org/",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Ffmienbone.dpdns.org%2F&size=32"
-        },
-        {
-          "title": "Cosmic Proxy-wk_vln",
-          "url": "https://vln.fmienbone.dpdns.org/",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Fvln.fmienbone.dpdns.org%2F&size=32"
-        },
-        {
-          "title": "Time Travel-pg_tjn",
-          "url": "https://tjn.fmienbone.dpdns.org/",
-          "favicon": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https%3A%2F%2Ftjn.fmienbone.dpdns.org%2F&size=32"
-        }
-      ]
-    },
-    {
       "name": "PaaS 平台",
       "bookmarks": [
         {
@@ -857,5 +787,5 @@
       "offset": 1
     }
   ],
-  "updatedAt": "2025-08-19T08:02:51.045Z"
+  "updatedAt": "2025-08-19T08:21:02.244Z"
 }
