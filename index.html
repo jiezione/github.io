@@ -75,6 +75,17 @@
             .touch-target {
                 @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
             }
+            /* 标签样式优化 */
+            .bookmark-item {
+                @apply relative overflow-hidden group transition-all duration-300;
+            }
+            .bookmark-item::after {
+                content: '';
+                @apply absolute inset-0 bg-space-accent/10 scale-x-0 transition-transform duration-300 origin-left;
+            }
+            .bookmark-item:hover::after {
+                @apply scale-x-100;
+            }
             /* 浅色模式样式 */
             .light {
                 --bg-color: #f8fafc;
@@ -173,16 +184,14 @@
                         <!-- 搜索建议将通过JS动态生成 -->
                     </div>
                     
-                    <!-- 搜索引擎切换 -->
-                    <div id="web-search-options" class="mt-4 flex justify-between text-sm text-gray-400 hidden">
+                    <!-- 搜索引擎自动切换 -->
+                    <div id="web-search-options" class="mt-4 flex justify-between text-sm text-gray-400">
                         <div class="flex space-x-3">
                             <button class="search-engine-btn active px-2 py-1 rounded hover:bg-space-light/30 transition-colors" data-engine="baidu">百度</button>
                             <button class="search-engine-btn px-2 py-1 rounded hover:bg-space-light/30 transition-colors" data-engine="google">谷歌</button>
                             <button class="search-engine-btn px-2 py-1 rounded hover:bg-space-light/30 transition-colors" data-engine="bing">必应</button>
                         </div>
-                        <button id="search-settings" class="hover:text-space-accent transition-colors touch-target">
-                            <i class="fa fa-sliders mr-1"></i>
-                        </button>
+                        <span id="search-status" class="text-xs hidden"></span>
                     </div>
                     
                     <!-- 搜索历史 -->
@@ -242,14 +251,6 @@
             <div class="ad-container aspect-[21/9] bg-space-light/30 flex items-center justify-center overflow-hidden">
                 <img id="ad2-img" src="https://picsum.photos/1200/400?random=2" alt="广告图片2" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                 <a id="ad2-link" href="#" target="_blank" class="absolute inset-0"></a>
-            </div>
-        </div>
-        
-        <!-- 广告位 3 -->
-        <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group widget-card">
-            <div class="ad-container aspect-[21/9] bg-space-light/30 flex items-center justify-center overflow-hidden">
-                <img id="ad3-img" src="https://picsum.photos/1200/400?random=3" alt="广告图片3" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                <a id="ad3-link" href="#" target="_blank" class="absolute inset-0"></a>
             </div>
         </div>
     </main>
@@ -363,25 +364,6 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- 广告3编辑 -->
-                            <div class="bg-space-dark/50 rounded-lg p-3">
-                                <h4 class="text-sm font-medium mb-2">广告位 3</h4>
-                                <div class="space-y-2">
-                                    <div>
-                                        <label class="text-xs text-gray-400 block mb-1">图片URL</label>
-                                        <input type="text" id="ad3-url-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-space-accent">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs text-gray-400 block mb-1">链接URL</label>
-                                        <input type="text" id="ad3-link-input" class="w-full bg-space-dark border border-gray-700 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-space-accent">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs text-gray-400 block mb-1">上传图片</label>
-                                        <input type="file" id="ad3-upload" accept="image/*" class="w-full text-xs text-gray-400">
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                         
                         <!-- 时区编辑区 - 仅在编辑中心显示 -->
@@ -444,49 +426,12 @@
         </div>
     </div>
     
-    <!-- 搜索设置对话框 -->
-    <div id="search-settings-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-        <div class="bg-space-light rounded-xl w-full max-w-md p-6 border border-space-accent/30 mx-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold">搜索设置</h3>
-                <button id="close-search-settings" class="text-gray-400 hover:text-white touch-target">
-                    <i class="fa fa-times"></i>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm text-gray-300 mb-1">默认搜索引擎</label>
-                    <select id="default-search-engine" class="w-full bg-space-dark border border-space-accent/50 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-space-accent">
-                        <option value="baidu">百度</option>
-                        <option value="google">谷歌</option>
-                        <option value="bing">必应</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="save-search-history" class="form-checkbox h-4 w-4 text-space-accent bg-space-dark border-gray-700 rounded">
-                        <span class="ml-2 text-sm">保存搜索历史</span>
-                    </label>
-                </div>
-                <div>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="show-search-suggestions" class="form-checkbox h-4 w-4 text-space-accent bg-space-dark border-gray-700 rounded">
-                        <span class="ml-2 text-sm">显示搜索建议</span>
-                    </label>
-                </div>
-                <button id="save-search-settings" class="w-full bg-gradient-to-r from-space-accent to-space-nebula py-2 rounded-lg hover:opacity-90 transition-opacity font-medium">
-                    保存设置
-                </button>
-            </div>
-        </div>
-    </div>
-    
     <script>
         // 由GitHub Actions自动注入的仓库信息（部署时替换）
         const DEFAULT_REPO = "your-username/your-repo"; // 占位符，Actions会替换
         const DEFAULT_RAW_URL = `https://raw.githubusercontent.com/${DEFAULT_REPO}/main/bookmarks.json`;
         
-        // 搜索引擎配置
+        // 搜索引擎配置 - 自动切换逻辑
         const searchEngines = {
             baidu: {
                 name: "百度",
@@ -510,8 +455,7 @@
             bookmarks: [],
             ads: [
                 { imgUrl: "https://picsum.photos/1200/400?random=1", linkUrl: "#" },
-                { imgUrl: "https://picsum.photos/1200/400?random=2", linkUrl: "#" },
-                { imgUrl: "https://picsum.photos/1200/400?random=3", linkUrl: "#" }
+                { imgUrl: "https://picsum.photos/1200/400?random=2", linkUrl: "#" }
             ],
             timezones: [
                 { name: "北京", offset: 8 },
@@ -524,7 +468,7 @@
             },
             search: {
                 type: "site", // site 或 web
-                engine: "baidu",
+                engine: "baidu", // 默认搜索引擎
                 history: [],
                 saveHistory: true,
                 showSuggestions: true
@@ -582,11 +526,6 @@
             ad2UrlInput: document.getElementById('ad2-url-input'),
             ad2LinkInput: document.getElementById('ad2-link-input'),
             ad2Upload: document.getElementById('ad2-upload'),
-            ad3Img: document.getElementById('ad3-img'),
-            ad3Link: document.getElementById('ad3-link'),
-            ad3UrlInput: document.getElementById('ad3-url-input'),
-            ad3LinkInput: document.getElementById('ad3-link-input'),
-            ad3Upload: document.getElementById('ad3-upload'),
             // 搜索引擎相关元素
             searchInput: document.getElementById('search-input'),
             searchBtn: document.getElementById('search-btn'),
@@ -594,13 +533,7 @@
             searchHistory: document.getElementById('search-history'),
             historyList: document.getElementById('history-list'),
             clearHistory: document.getElementById('clear-history'),
-            searchSettings: document.getElementById('search-settings'),
-            searchSettingsModal: document.getElementById('search-settings-modal'),
-            closeSearchSettings: document.getElementById('close-search-settings'),
-            defaultSearchEngine: document.getElementById('default-search-engine'),
-            saveSearchHistory: document.getElementById('save-search-history'),
-            showSearchSuggestions: document.getElementById('show-search-suggestions'),
-            saveSearchSettings: document.getElementById('save-search-settings'),
+            searchStatus: document.getElementById('search-status'),
             // 搜索类型切换
             searchTypeSite: document.getElementById('search-type-site'),
             searchTypeWeb: document.getElementById('search-type-web'),
@@ -617,6 +550,7 @@
         let scrollTimer;
         let searchSuggestionIndex = -1;
         let searchSuggestionTimeout = null;
+        let searchAttempts = 0; // 搜索尝试计数器，用于自动切换搜索引擎
         
         // 初始化函数
         async function init() {
@@ -869,11 +803,6 @@
         
         // 初始化搜索引擎
         function initSearchEngine() {
-            // 设置默认搜索引擎
-            elements.defaultSearchEngine.value = appData.search.engine;
-            elements.saveSearchHistory.checked = appData.search.saveHistory;
-            elements.showSearchSuggestions.checked = appData.search.showSuggestions;
-            
             // 高亮当前选中的搜索引擎
             document.querySelectorAll('.search-engine-btn').forEach(btn => {
                 if (btn.dataset.engine === appData.search.engine) {
@@ -896,14 +825,12 @@
                 elements.searchTypeSite.classList.remove('text-gray-400');
                 elements.searchTypeWeb.classList.remove('text-space-glow', 'border-b-2', 'border-space-accent');
                 elements.searchTypeWeb.classList.add('text-gray-400');
-                elements.webSearchOptions.classList.add('hidden');
                 elements.searchInput.placeholder = '搜索书签...';
             } else {
                 elements.searchTypeWeb.classList.add('text-space-glow', 'border-b-2', 'border-space-accent');
                 elements.searchTypeWeb.classList.remove('text-gray-400');
                 elements.searchTypeSite.classList.remove('text-space-glow', 'border-b-2', 'border-space-accent');
                 elements.searchTypeSite.classList.add('text-gray-400');
-                elements.webSearchOptions.classList.remove('hidden');
                 elements.searchInput.placeholder = '搜索网页...';
             }
             
@@ -920,11 +847,14 @@
         function performSearch(query) {
             if (!query.trim()) return;
             
+            // 重置搜索尝试计数器
+            searchAttempts = 0;
+            
             if (appData.search.type === 'site') {
                 // 站内搜索
                 performSiteSearch(query);
             } else {
-                // 网页搜索
+                // 网页搜索 - 支持自动切换搜索引擎
                 performWebSearch(query);
             }
         }
@@ -1046,21 +976,99 @@
             return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
         
-        // 执行网页搜索
+        // 执行网页搜索 - 支持自动切换搜索引擎
         function performWebSearch(query) {
-            const engine = searchEngines[appData.search.engine];
-            if (engine) {
-                // 保存搜索历史
-                if (appData.search.saveHistory) {
-                    addToSearchHistory(query);
+            // 显示搜索状态
+            elements.searchStatus.textContent = `正在使用${searchEngines[appData.search.engine].name}搜索...`;
+            elements.searchStatus.classList.remove('hidden');
+            
+            // 尝试打开当前搜索引擎
+            try {
+                const engine = searchEngines[appData.search.engine];
+                if (engine) {
+                    // 保存搜索历史
+                    if (appData.search.saveHistory) {
+                        addToSearchHistory(query);
+                    }
+                    
+                    // 创建一个隐藏的链接并点击
+                    const link = document.createElement('a');
+                    link.href = engine.url + encodeURIComponent(query);
+                    link.target = '_blank';
+                    document.body.appendChild(link);
+                    
+                    // 设置一个超时检查，若3秒后仍未成功打开，则尝试切换搜索引擎
+                    const timeoutId = setTimeout(() => {
+                        // 移除临时链接
+                        document.body.removeChild(link);
+                        
+                        // 尝试切换到下一个搜索引擎
+                        searchAttempts++;
+                        if (searchAttempts < Object.keys(searchEngines).length) {
+                            const engines = Object.keys(searchEngines);
+                            const currentIndex = engines.indexOf(appData.search.engine);
+                            const nextIndex = (currentIndex + 1) % engines.length;
+                            appData.search.engine = engines[nextIndex];
+                            
+                            // 更新UI
+                            initSearchEngine();
+                            
+                            // 显示切换提示
+                            elements.searchStatus.textContent = `${searchEngines[appData.search.engine].name}搜索失败，尝试${searchEngines[appData.search.engine].name}...`;
+                            
+                            // 重试搜索
+                            performWebSearch(query);
+                        } else {
+                            // 所有搜索引擎都尝试过，显示错误
+                            elements.searchStatus.textContent = '所有搜索引擎均无法使用';
+                            showNotification('搜索失败', '所有搜索引擎均无法使用，请稍后再试', 'error');
+                            
+                            // 5秒后隐藏状态提示
+                            setTimeout(() => {
+                                elements.searchStatus.classList.add('hidden');
+                            }, 5000);
+                        }
+                    }, 3000);
+                    
+                    // 执行点击
+                    link.click();
+                    
+                    // 短时间后隐藏状态提示
+                    setTimeout(() => {
+                        clearTimeout(timeoutId);
+                        elements.searchStatus.classList.add('hidden');
+                        document.body.removeChild(link);
+                    }, 1000);
                 }
+            } catch (error) {
+                console.error('搜索执行失败:', error);
+                elements.searchStatus.textContent = '搜索失败';
                 
-                // 跳转到搜索引擎结果页
-                window.open(engine.url + encodeURIComponent(query), '_blank');
+                // 尝试切换搜索引擎
+                searchAttempts++;
+                if (searchAttempts < Object.keys(searchEngines).length) {
+                    const engines = Object.keys(searchEngines);
+                    const currentIndex = engines.indexOf(appData.search.engine);
+                    const nextIndex = (currentIndex + 1) % engines.length;
+                    appData.search.engine = engines[nextIndex];
+                    
+                    // 更新UI
+                    initSearchEngine();
+                    
+                    // 2秒后重试
+                    setTimeout(() => {
+                        performWebSearch(query);
+                    }, 2000);
+                } else {
+                    showNotification('搜索失败', '无法完成搜索，请稍后再试', 'error');
+                    setTimeout(() => {
+                        elements.searchStatus.classList.add('hidden');
+                    }, 3000);
+                }
             }
         }
         
-        // 获取搜索建议
+        // 获取搜索建议 - 带错误处理和自动切换
         async function fetchSearchSuggestions(query) {
             // 仅在网页搜索模式下显示建议
             if (appData.search.type !== 'web' || !query.trim() || !appData.search.showSuggestions) {
@@ -1075,12 +1083,23 @@
             }
             
             try {
+                // 显示加载状态
+                elements.searchSuggestions.innerHTML = '<div class="search-suggestion"><i class="fa fa-spinner fa-spin mr-2"></i>加载建议...</div>';
+                elements.searchSuggestions.classList.remove('hidden');
+                
                 // 替换URL中的查询参数
                 const url = engine.suggestionsUrl.replace('{{query}}', encodeURIComponent(query));
                 
                 // 使用CORS代理处理跨域请求
                 const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
-                const response = await fetch(proxyUrl);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+                
+                const response = await fetch(proxyUrl, { 
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -1103,7 +1122,28 @@
                 
             } catch (error) {
                 console.error('获取搜索建议失败:', error);
-                hideSearchSuggestions();
+                
+                // 如果是超时或错误，尝试切换搜索引擎
+                const engines = Object.keys(searchEngines);
+                const currentIndex = engines.indexOf(appData.search.engine);
+                const nextIndex = (currentIndex + 1) % engines.length;
+                
+                // 只尝试一次切换
+                if (searchAttempts < 1) {
+                    searchAttempts++;
+                    appData.search.engine = engines[nextIndex];
+                    initSearchEngine();
+                    fetchSearchSuggestions(query); // 重试
+                } else {
+                    // 所有尝试失败，显示错误信息
+                    elements.searchSuggestions.innerHTML = '<div class="search-suggestion text-red-400"><i class="fa fa-exclamation-circle mr-2"></i>无法获取搜索建议</div>';
+                    searchAttempts = 0; // 重置计数器
+                    
+                    // 3秒后隐藏错误提示
+                    setTimeout(() => {
+                        hideSearchSuggestions();
+                    }, 3000);
+                }
             }
         }
         
@@ -1250,10 +1290,6 @@
         
         // 保存搜索设置
         function saveSearchSettings() {
-            appData.search.engine = elements.defaultSearchEngine.value;
-            appData.search.saveHistory = elements.saveSearchHistory.checked;
-            appData.search.showSuggestions = elements.showSuggestions.checked;
-            
             // 保存到本地存储
             localStorage.setItem('spaceNavigatorSearchSettings', JSON.stringify({
                 type: appData.search.type,
@@ -1275,7 +1311,7 @@
             }
         }
         
-        // 渲染书签
+        // 渲染书签 - 优化标签界面
         function renderBookmarks() {
             // 清空容器
             elements.bookmarksContainer.innerHTML = '';
@@ -1302,14 +1338,15 @@
             appData.bookmarks.forEach((group, groupIndex) => {
                 const groupId = `group-${Date.now()}-${groupIndex}`;
                 
-                // 主页书签组
+                // 主页书签组 - 优化布局和样式
                 const groupElement = document.createElement('div');
                 groupElement.className = 'bookmark-group';
                 groupElement.dataset.groupId = groupId;
                 groupElement.innerHTML = `
-                    <h2 class="text-lg font-semibold mb-3 flex items-center">
+                    <h2 class="text-lg font-semibold mb-3 flex items-center group-hover:text-space-glow transition-colors">
                         <i class="fa fa-folder-open-o mr-2 text-space-accent"></i>
                         ${group.name}
+                        <span class="ml-2 text-xs bg-space-accent/20 px-2 py-0.5 rounded-full">${group.bookmarks.length}</span>
                     </h2>
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                         ${group.bookmarks.map((bookmark, bookmarkIndex) => 
@@ -1353,7 +1390,7 @@
             });
         }
         
-        // 创建书签元素
+        // 创建书签元素 - 优化UI
         function createBookmarkElement(bookmark, groupId, bookmarkIndex) {
             let favicon = '';
             if (bookmark.favicon) {
@@ -1365,15 +1402,27 @@
                 favicon = `<i class="fa fa-globe w-5 h-5 mr-2 text-space-accent"></i>`;
             }
             
+            // 提取域名作为辅助信息
+            let domain = '';
+            try {
+                const url = new URL(bookmark.url);
+                domain = url.hostname.replace('www.', '');
+            } catch (e) {
+                domain = '';
+            }
+            
             return `
-                <a href="${escapeHTML(bookmark.url)}" target="_blank" class="bookmark-item bg-space-light/30 hover:bg-space-light/50 backdrop-blur-sm rounded-lg p-3 flex items-center transition-all group touch-target"
+                <a href="${escapeHTML(bookmark.url)}" target="_blank" class="bookmark-item bg-space-light/30 backdrop-blur-sm rounded-lg p-3 flex flex-col items-start transition-all group touch-target"
                    data-group-id="${groupId}" data-bookmark-index="${bookmarkIndex}">
-                    <div class="flex-shrink-0">
-                        ${favicon}
+                    <div class="flex items-center w-full mb-1">
+                        <div class="flex-shrink-0">
+                            ${favicon}
+                        </div>
+                        <div class="overflow-hidden">
+                            <p class="text-sm font-medium truncate group-hover:text-space-glow transition-colors">${escapeHTML(bookmark.title)}</p>
+                        </div>
                     </div>
-                    <div class="overflow-hidden">
-                        <p class="text-sm font-medium truncate group-hover:text-space-glow transition-colors">${escapeHTML(bookmark.title)}</p>
-                    </div>
+                    ${domain ? `<p class="text-xs text-gray-500 self-start truncate w-full">${domain}</p>` : ''}
                 </a>
             `;
         }
@@ -1381,7 +1430,7 @@
         // 创建编辑页书签元素 - 使用唯一ID避免冲突
         function createEditorBookmarkElement(bookmark, groupId, groupIndex, bookmarkIndex) {
             return `
-                <div class="editor-bookmark bg-space-darker/50 rounded-lg p-3 flex justify-between items-center"
+                <div class="editor-bookmark bg-space-darker/50 rounded-lg p-3 flex justify-between items-center hover:bg-space-darker transition-colors"
                      data-group-id="${groupId}" data-bookmark-index="${bookmarkIndex}">
                     <div class="flex-1 min-w-0 mr-2">
                         <div class="flex items-center mb-1">
@@ -1619,61 +1668,6 @@
             showNotification('导出成功', '书签已导出为HTML文件', 'success');
         }
         
-        // 备份JSON数据
-        function backupJSONData() {
-            const dataToBackup = {
-                bookmarks: appData.bookmarks,
-                ads: appData.ads,
-                timezones: appData.timezones,
-                exportedAt: new Date().toISOString()
-            };
-            
-            const jsonString = JSON.stringify(dataToBackup, null, 2);
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `space_navigator_backup_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showNotification('备份成功', '数据已导出为JSON文件', 'success');
-        }
-        
-        // 加载JSON备份
-        function loadJSONBackup(file) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                try {
-                    const backupData = JSON.parse(e.target.result);
-                    
-                    if (backupData.bookmarks) appData.bookmarks = backupData.bookmarks;
-                    if (backupData.ads) appData.ads = backupData.ads;
-                    if (backupData.timezones) appData.timezones = backupData.timezones;
-                    
-                    renderBookmarks();
-                    setupBookmarkEventListeners();
-                    updateBookmarkCount();
-                    renderTimezones();
-                    setupAdEditor();
-                    
-                    showNotification('恢复成功', '已从备份文件加载数据', 'success');
-                } catch (error) {
-                    console.error('加载备份失败:', error);
-                    showNotification('恢复失败', '无法解析备份文件', 'error');
-                }
-            };
-            
-            reader.onerror = function() {
-                showNotification('恢复失败', '读取文件时发生错误', 'error');
-            };
-            
-            reader.readAsText(file);
-        }
-        
         // 设置广告编辑区
         function setupAdEditor() {
             if (appData.ads.length >= 1) {
@@ -1689,13 +1683,6 @@
                 elements.ad2UrlInput.value = appData.ads[1].imgUrl;
                 elements.ad2LinkInput.value = appData.ads[1].linkUrl;
             }
-            
-            if (appData.ads.length >= 3) {
-                elements.ad3Img.src = appData.ads[2].imgUrl;
-                elements.ad3Link.href = appData.ads[2].linkUrl;
-                elements.ad3UrlInput.value = appData.ads[2].imgUrl;
-                elements.ad3LinkInput.value = appData.ads[2].linkUrl;
-            }
         }
         
         // 保存广告设置
@@ -1708,10 +1695,6 @@
             appData.ads[1].imgUrl = elements.ad2UrlInput.value;
             appData.ads[1].linkUrl = elements.ad2LinkInput.value;
             
-            if (appData.ads.length < 3) appData.ads.push({});
-            appData.ads[2].imgUrl = elements.ad3UrlInput.value;
-            appData.ads[2].linkUrl = elements.ad3LinkInput.value;
-            
             setupAdEditor();
         }
         
@@ -1723,7 +1706,7 @@
             appData.timezones.forEach((timezone, index) => {
                 // 主页面时区显示
                 const timezoneElement = document.createElement('div');
-                timezoneElement.className = 'bg-space-dark/30 rounded-lg p-3';
+                timezoneElement.className = 'bg-space-dark/30 rounded-lg p-3 hover:bg-space-dark/50 transition-colors';
                 timezoneElement.innerHTML = `
                     <div class="text-sm font-medium mb-1">${timezone.name}</div>
                     <div class="text-lg font-bold" data-timezone-offset="${timezone.offset}">--:--:--</div>
@@ -1732,11 +1715,11 @@
                 
                 // 编辑页时区列表
                 const timezoneItem = document.createElement('div');
-                timezoneItem.className = 'flex justify-between items-center bg-space-dark/30 rounded-lg p-2';
+                timezoneItem.className = 'flex justify-between items-center bg-space-dark/30 rounded-lg p-2 hover:bg-space-dark/50 transition-colors';
                 timezoneItem.innerHTML = `
                     <span>${timezone.name} (GMT${timezone.offset >= 0 ? '+' : ''}${timezone.offset})</span>
                     <button class="delete-timezone text-red-400 hover:text-red-300 p-1 touch-target" data-index="${index}">
-                        <i class="fa fa-times"></i></i>
+                        <i class="fa fa-times"></i>
                     </button>
                 `;
                 elements.timezonesList.appendChild(timezoneItem);
@@ -1794,6 +1777,7 @@
         function updateTimeDisplay() {
             const now = new Date();
             
+            // 更新主时间
             // 更新主时间
             elements.timeDisplay.textContent = now.toTimeString().slice(0, 8);
             
@@ -1954,8 +1938,6 @@
                         elements.ad1UrlInput.value = event.target.result;
                     } else if (adIndex === 1) {
                         elements.ad2UrlInput.value = event.target.result;
-                    } else if (adIndex === 2) {
-                        elements.ad3UrlInput.value = event.target.result;
                     }
                     showNotification('上传成功', '图片已上传，点击保存生效', 'success');
                 };
@@ -2179,7 +2161,6 @@
             // 广告图片上传
             elements.ad1Upload.addEventListener('change', handleAdImageUpload(0));
             elements.ad2Upload.addEventListener('change', handleAdImageUpload(1));
-            elements.ad3Upload.addEventListener('change', handleAdImageUpload(2));
             
             // 滚动事件 - 控制顶部导航栏显示/隐藏
             window.addEventListener('scroll', () => {
@@ -2325,29 +2306,11 @@
             // 清除搜索结果
             elements.clearSearch.addEventListener('click', clearSearchResults);
             
-            // 打开搜索设置
-            elements.searchSettings.addEventListener('click', () => {
-                elements.searchSettingsModal.classList.remove('hidden');
-            });
-            
-            // 关闭搜索设置
-            elements.closeSearchSettings.addEventListener('click', () => {
-                elements.searchSettingsModal.classList.add('hidden');
-            });
-            
-            // 保存搜索设置
-            elements.saveSearchSettings.addEventListener('click', () => {
-                saveSearchSettings();
-                elements.searchSettingsModal.classList.add('hidden');
-                showNotification('设置已保存', '搜索设置已更新', 'success');
-            });
-            
             // 点击页面其他地方隐藏搜索建议和历史
             document.addEventListener('click', (e) => {
                 if (!elements.searchInput.contains(e.target) && 
                     !elements.searchSuggestions.contains(e.target) &&
                     !elements.searchHistory.contains(e.target) &&
-                    !elements.searchSettings.contains(e.target) &&
                     !elements.searchResultsContainer.contains(e.target)) {
                     hideSearchSuggestions();
                     elements.searchHistory.classList.add('hidden');
