@@ -75,9 +75,10 @@
             .touch-target {
                 @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
             }
-            /* 标签样式优化 */
+            /* 书签样式优化 - 确保大小统一 */
             .bookmark-item {
-                @apply relative overflow-hidden group transition-all duration-300;
+                @apply relative overflow-hidden group transition-all duration-300 flex flex-col;
+                height: 100px; /* 固定高度 */
             }
             .bookmark-item::after {
                 content: '';
@@ -234,7 +235,11 @@
                     </h3>
                 </div>
                 <div class="p-4">
-                    <canvas id="usage-chart" height="180"></canvas>
+                    <div class="mb-4">
+                        <div class="text-sm text-gray-400 mb-1">已运行时间</div>
+                        <div id="uptime-display" class="text-xl font-semibold text-space-glow">0天0时0分</div>
+                    </div>
+                    <canvas id="usage-chart" height="140"></canvas>
                 </div>
             </div>
         </div>
@@ -372,17 +377,26 @@
                             </div>
                         </div>
                         
-                        <!-- 时区编辑区 - 仅在编辑中心显示 -->
+                        <!-- 时区编辑区 - 带实时时间显示 -->
                         <h3 class="text-lg font-semibold mb-3 mt-8">时区管理</h3>
                         <div class="space-y-4">
                             <div class="flex">
-                                <input type="text" id="new-timezone" placeholder="城市名称" class="editor-input rounded-l-lg focus:rounded-r-none flex-1">
+                                <input type="text" id="new-timezone" placeholder="城市名称 (如: 北京, New York)" class="editor-input rounded-l-lg focus:rounded-r-none flex-1">
                                 <button id="add-timezone-btn" class="bg-space-accent px-4 py-2 rounded-r-lg hover:bg-space-accent/80 transition-colors touch-target">
                                     添加
                                 </button>
                             </div>
                             <div id="timezones-list" class="space-y-2 max-h-60 overflow-y-auto scrollbar-hide">
                                 <!-- 时区列表将通过JS动态生成 -->
+                            </div>
+                            
+                            <!-- 时区帮助信息 -->
+                            <div class="text-xs text-gray-500 p-2 bg-space-dark/30 rounded">
+                                <p class="mb-1"><i class="fa fa-info-circle text-space-accent mr-1"></i>常用城市示例：</p>
+                                <div class="grid grid-cols-2 gap-1">
+                                    <span>北京、上海、香港</span>
+                                    <span>纽约、伦敦、东京</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -436,6 +450,53 @@
         // 由GitHub Actions自动注入的仓库信息（部署时替换）
         const DEFAULT_REPO = "your-username/your-repo"; // 占位符，Actions会替换
         const DEFAULT_RAW_URL = `https://raw.githubusercontent.com/${DEFAULT_REPO}/main/bookmarks.json`;
+        // 应用部署时间 - 首次使用时设置
+        const DEPLOYMENT_START_KEY = 'spaceNavigatorDeploymentStart';
+        
+        // 城市到时区的映射 - 更准确的时区数据
+        const cityTimezoneMap = {
+            // 中国
+            '北京': 'Asia/Shanghai',
+            '上海': 'Asia/Shanghai',
+            '广州': 'Asia/Shanghai',
+            '深圳': 'Asia/Shanghai',
+            '香港': 'Asia/Hong_Kong',
+            '澳门': 'Asia/Macau',
+            '台北': 'Asia/Taipei',
+            
+            // 美国
+            '纽约': 'America/New_York',
+            '洛杉矶': 'America/Los_Angeles',
+            '芝加哥': 'America/Chicago',
+            '休斯顿': 'America/Chicago',
+            '迈阿密': 'America/New_York',
+            '西雅图': 'America/Los_Angeles',
+            '旧金山': 'America/Los_Angeles',
+            '华盛顿': 'America/New_York',
+            
+            // 欧洲
+            '伦敦': 'Europe/London',
+            '巴黎': 'Europe/Paris',
+            '柏林': 'Europe/Berlin',
+            '罗马': 'Europe/Rome',
+            '马德里': 'Europe/Madrid',
+            '莫斯科': 'Europe/Moscow',
+            
+            // 亚洲
+            '东京': 'Asia/Tokyo',
+            '首尔': 'Asia/Seoul',
+            '新加坡': 'Asia/Singapore',
+            '曼谷': 'Asia/Bangkok',
+            '新德里': 'Asia/Kolkata',
+            '迪拜': 'Asia/Dubai',
+            
+            // 大洋洲
+            '悉尼': 'Australia/Sydney',
+            '墨尔本': 'Australia/Melbourne',
+            
+            // 其他
+            ' UTC': 'UTC'
+        };
         
         // 全局数据存储
         const appData = {
@@ -445,9 +506,9 @@
                 { imgUrl: "https://picsum.photos/1200/400?random=2", linkUrl: "#" }
             ],
             timezones: [
-                { name: "北京", offset: 8 },
-                { name: "纽约", offset: -4 },
-                { name: "伦敦", offset: 1 }
+                { name: "北京", timezone: "Asia/Shanghai" },
+                { name: "纽约", timezone: "America/New_York" },
+                { name: "伦敦", timezone: "Europe/London" }
             ],
             github: {
                 repo: "",
@@ -459,7 +520,8 @@
                 saveHistory: true
             },
             usageData: [1.2, 0.8, 1.5, 0.6, 2.1, 1.8, 3.5],
-            currentTheme: "dark"
+            currentTheme: "dark",
+            deploymentStart: null // 部署开始时间
         };
         
         // DOM元素
@@ -501,6 +563,7 @@
             timezonesList: document.getElementById('timezones-list'),
             timeDisplay: document.getElementById('time-display'),
             dateDisplay: document.getElementById('date-display'),
+            uptimeDisplay: document.getElementById('uptime-display'), // 新增：显示运行时间
             ad1Img: document.getElementById('ad1-img'),
             ad1Link: document.getElementById('ad1-link'),
             ad1UrlInput: document.getElementById('ad1-url-input'),
@@ -537,6 +600,9 @@
             setupEventListeners();
             loadLocalSettings();
             
+            // 设置部署开始时间（首次使用时）
+            setupDeploymentStartTime();
+            
             // 自动填充仓库信息
             document.getElementById('github-repo').value = DEFAULT_REPO;
             
@@ -562,6 +628,35 @@
             } else {
                 switchToDarkMode();
             }
+            
+            // 更新运行时间显示
+            updateUptimeDisplay();
+            setInterval(updateUptimeDisplay, 60000); // 每分钟更新一次
+        }
+        
+        // 设置部署开始时间
+        function setupDeploymentStartTime() {
+            const savedStart = localStorage.getItem(DEPLOYMENT_START_KEY);
+            if (savedStart) {
+                appData.deploymentStart = new Date(savedStart);
+            } else {
+                // 首次使用，设置为当前时间
+                appData.deploymentStart = new Date();
+                localStorage.setItem(DEPLOYMENT_START_KEY, appData.deploymentStart.toISOString());
+            }
+        }
+        
+        // 更新运行时间显示
+        function updateUptimeDisplay() {
+            if (!appData.deploymentStart) return;
+            
+            const now = new Date();
+            const diffMs = now - appData.deploymentStart;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            
+            elements.uptimeDisplay.textContent = `${diffDays}天${diffHours}时${diffMinutes}分`;
         }
         
         // 确保搜索框可以获取焦点（修复无法输入问题）
@@ -1120,7 +1215,7 @@
             });
         }
         
-        // 创建书签元素 - 优化UI，使标签规则统一
+        // 创建书签元素 - 优化UI，确保大小完全统一
         function createBookmarkElement(bookmark, groupId, bookmarkIndex) {
             let favicon = '';
             if (bookmark.favicon) {
@@ -1142,9 +1237,10 @@
             }
             
             return `
-                <a href="${escapeHTML(bookmark.url)}" target="_blank" class="bookmark-item bg-space-light/30 backdrop-blur-sm rounded-lg p-3 flex flex-col items-start transition-all group touch-target h-24 flex-shrink-0"
+                <a href="${escapeHTML(bookmark.url)}" target="_blank" 
+                   class="bookmark-item bg-space-light/30 backdrop-blur-sm rounded-lg p-3 flex flex-col items-start transition-all group touch-target"
                    data-group-id="${groupId}" data-bookmark-index="${bookmarkIndex}">
-                    <div class="flex items-center w-full mb-1">
+                    <div class="flex items-center w-full mb-1 flex-shrink-0">
                         <div class="flex-shrink-0">
                             ${favicon}
                         </div>
@@ -1211,7 +1307,6 @@
             const bookmarkIndex = appData.bookmarks[groupIndex].bookmarks.length - 1;
             fetchFavicon(groupIndex, bookmarkIndex);
             
-            // 聚焦到新添加的书签
             // 聚焦到新添加的书签
             setTimeout(() => {
                 const newInput = document.querySelector(`.bookmark-title-input[data-group-index="${groupIndex}"][data-bookmark-index="${bookmarkIndex}"]`);
@@ -1421,6 +1516,7 @@
                 elements.ad2UrlInput.value = appData.ads[1].imgUrl;
                 elements.ad2LinkInput.value = appData.ads[1].linkUrl;
             }
+            }
         }
         
         // 保存广告设置
@@ -1436,7 +1532,7 @@
             setupAdEditor();
         }
         
-        // 渲染时区列表
+        // 渲染时区列表 - 使用更准确的时区计算
         function renderTimezones() {
             elements.timezonesContainer.innerHTML = '';
             elements.timezonesList.innerHTML = '';
@@ -1447,15 +1543,28 @@
                 timezoneElement.className = 'bg-space-dark/30 rounded-lg p-3 hover:bg-space-dark/50 transition-colors';
                 timezoneElement.innerHTML = `
                     <div class="text-sm font-medium mb-1">${timezone.name}</div>
-                    <div class="text-lg font-bold" data-timezone-offset="${timezone.offset}">--:--:--</div>
+                    <div class="text-lg font-bold timezone-time" data-timezone="${timezone.timezone}">--:--:--</div>
+                    <div class="text-xs text-gray-500 mt-1" data-timezone-offset="${timezone.timezone}">UTC±0</div>
                 `;
                 elements.timezonesContainer.appendChild(timezoneElement);
                 
-                // 编辑页时区列表
+                // 编辑页时区列表 - 带实时时间显示
+                const now = new Date();
+                const options = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+                const tzTime = new Date(now.toLocaleString('en-US', { 
+                    timeZone: timezone.timezone,
+                    hour12: false
+                }));
+                
                 const timezoneItem = document.createElement('div');
                 timezoneItem.className = 'flex justify-between items-center bg-space-dark/30 rounded-lg p-2 hover:bg-space-dark/50 transition-colors';
                 timezoneItem.innerHTML = `
-                    <span>${timezone.name} (GMT${timezone.offset >= 0 ? '+' : ''}${timezone.offset})</span>
+                    <div>
+                        <div>${timezone.name}</div>
+                        <div class="text-xs text-gray-400 timezone-edit-time" data-timezone="${timezone.timezone}">
+                            ${tzTime.toTimeString().slice(0, 8)}
+                        </div>
+                    </div>
                     <button class="delete-timezone text-red-400 hover:text-red-300 p-1 touch-target" data-index="${index}">
                         <i class="fa fa-times"></i>
                     </button>
@@ -1474,44 +1583,52 @@
             });
         }
         
-        // 添加新时区
+        // 添加新时区 - 使用更准确的时区数据
         function addNewTimezone(cityName) {
             if (!cityName) return;
             
-            // 简单的时区偏移量猜测
-            const offsetMap = {
-                '北京': 8,
-                '上海': 8,
-                '香港': 8,
-                '台北': 8,
-                '纽约': -4,
-                '洛杉矶': -7,
-                '伦敦': 1,
-                '巴黎': 2,
-                '东京': 9,
-                '悉尼': 10
-            };
+            // 规范化城市名称（去除空格，统一大小写）
+            const normalizedCity = cityName.trim().replace(/\s+/g, ' ');
             
-            const offset = offsetMap[cityName] || 0;
+            // 查找对应的时区
+            let timezone = cityTimezoneMap[normalizedCity];
+            
+            // 如果没有找到精确匹配，尝试模糊匹配
+            if (!timezone) {
+                const lowerCity = normalizedCity.toLowerCase();
+                for (const city in cityTimezoneMap) {
+                    if (city.toLowerCase().includes(lowerCity) || 
+                        lowerCity.includes(city.toLowerCase())) {
+                        timezone = cityTimezoneMap[city];
+                        break;
+                    }
+                }
+            }
+            
+            // 如果仍然没有找到，使用用户输入的城市名并默认为UTC
+            if (!timezone) {
+                timezone = 'UTC';
+                showNotification('提示', `未找到"${normalizedCity}"的时区信息，默认使用UTC时间`, 'warning');
+            }
             
             // 检查是否已存在同名时区
-            const exists = appData.timezones.some(tz => tz.name === cityName);
+            const exists = appData.timezones.some(tz => tz.name === normalizedCity);
             if (exists) {
                 showNotification('添加失败', '该城市时区已存在', 'error');
                 return;
             }
             
             appData.timezones.push({
-                name: cityName,
-                offset: offset
+                name: normalizedCity,
+                timezone: timezone
             });
             
             elements.newTimezone.value = '';
             renderTimezones();
-            showNotification('添加成功', `已添加${cityName}时区`, 'success');
+            showNotification('添加成功', `已添加${normalizedCity}时区`, 'success');
         }
         
-        // 更新时间显示
+        // 更新时间显示 - 更准确的时区计算
         function updateTimeDisplay() {
             const now = new Date();
             
@@ -1523,10 +1640,58 @@
             elements.dateDisplay.textContent = now.toLocaleDateString('zh-CN', options);
             
             // 更新各时区时间
+            document.querySelectorAll('.timezone-time').forEach(el => {
+                const timezone = el.dataset.timezone;
+                const options = { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit',
+                    hour12: false
+                };
+                
+                // 使用toLocaleTimeString计算特定时区的时间
+                const tzTimeStr = now.toLocaleTimeString('zh-CN', { 
+                    ...options,
+                    timeZone: timezone
+                });
+                
+                el.textContent = tzTimeStr;
+            });
+            
+            // 更新时区偏移显示
             document.querySelectorAll('[data-timezone-offset]').forEach(el => {
-                const offset = parseInt(el.dataset.timezoneOffset);
-                const timezoneTime = new Date(now.getTime() + (offset - now.getTimezoneOffset() / 60) * 3600000);
-                el.textContent = timezoneTime.toTimeString().slice(0, 8);
+                const timezone = el.dataset.timezoneOffset;
+                try {
+                    // 计算时区偏移
+                    const offsetMs = new Date().getTimezoneOffset() * 60000;
+                    const tzDate = new Date(now.getTime() - offsetMs);
+                    const tzOffset = tzDate.toLocaleString('en-US', {
+                        timeZone: timezone,
+                        timeZoneName: 'short'
+                    }).split(' ').pop();
+                    
+                    el.textContent = tzOffset;
+                } catch (e) {
+                    el.textContent = 'UTC±0';
+                }
+            });
+            
+            // 更新编辑区的时间显示
+            document.querySelectorAll('.timezone-edit-time').forEach(el => {
+                const timezone = el.dataset.timezone;
+                const options = { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit',
+                    hour12: false
+                };
+                
+                const tzTimeStr = now.toLocaleTimeString('zh-CN', { 
+                    ...options,
+                    timeZone: timezone
+                });
+                
+                el.textContent = tzTimeStr;
             });
         }
         
