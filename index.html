@@ -102,9 +102,7 @@
             </div>
             
             <div class="flex items-center space-x-4">
-                <button id="edit-timezones" class="p-2 rounded-full hover:bg-space-light/30 transition-colors">
-                    <i class="fa fa-clock-o text-space-accent"></i>
-                </button>
+                <!-- 完全移除主页的时区编辑按钮 -->
                 <button id="settings-btn" class="p-2 rounded-full hover:bg-space-light/30 transition-colors">
                     <i class="fa fa-cog text-space-accent"></i>
                 </button>
@@ -156,7 +154,7 @@
                     <h3 class="widget-title">
                         <i class="fa fa-globe mr-2"></i>世界时钟
                     </h3>
-                    <!-- 移除主页的添加时区按钮 -->
+                    <!-- 彻底移除主页的时区添加/编辑按钮 -->
                 </div>
                 <div id="timezones-container" class="p-4 grid grid-cols-2 gap-4">
                     <!-- 时区将通过JS动态生成 -->
@@ -188,7 +186,7 @@
             <!-- 书签分组将通过JS动态生成 -->
         </div>
         
-        <!-- 广告位 2 - 尺寸调小 -->
+        <!-- 广告位 2 -->
         <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group widget-card">
             <div class="ad-container aspect-[21/9] bg-space-light/30 flex items-center justify-center overflow-hidden">
                 <img id="ad2-img" src="https://picsum.photos/1200/400?random=2" alt="广告图片2" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
@@ -196,7 +194,7 @@
             </div>
         </div>
         
-        <!-- 广告位 3 - 尺寸调小 -->
+        <!-- 广告位 3 -->
         <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group widget-card">
             <div class="ad-container aspect-[21/9] bg-space-light/30 flex items-center justify-center overflow-hidden">
                 <img id="ad3-img" src="https://picsum.photos/1200/400?random=3" alt="广告图片3" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
@@ -385,8 +383,6 @@
         </div>
     </div>
     
-    <!-- 时区编辑对话框已移除，合并到编辑中心 -->
-    
     <!-- 通知提示 -->
     <div id="notification" class="fixed bottom-4 right-4 bg-space-light border border-space-accent/30 rounded-lg p-4 shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 max-w-xs">
         <div class="flex items-start">
@@ -464,7 +460,6 @@
             currentYear: document.getElementById('current-year'),
             hostname: document.getElementById('hostname'),
             bookmarkCountDisplay: document.getElementById('bookmark-count-display'),
-            editTimezones: document.getElementById('edit-timezones'),
             newTimezone: document.getElementById('new-timezone'),
             addTimezoneBtn: document.getElementById('add-timezone-btn'),
             timezonesContainer: document.getElementById('timezones-container'),
@@ -736,8 +731,9 @@
             }
         }
         
-        // 渲染书签 - 修复编辑干扰问题
+        // 渲染书签 - 彻底修复编辑干扰问题
         function renderBookmarks() {
+            // 清空容器
             elements.bookmarksContainer.innerHTML = '';
             elements.bookmarksEditorContainer.innerHTML = '';
             
@@ -758,17 +754,23 @@
                 return;
             }
             
+            // 为每个书签组生成唯一ID，防止DOM干扰
             appData.bookmarks.forEach((group, groupIndex) => {
+                const groupId = `group-${Date.now()}-${groupIndex}`;
+                
                 // 主页书签组
                 const groupElement = document.createElement('div');
                 groupElement.className = 'bookmark-group';
+                groupElement.dataset.groupId = groupId;
                 groupElement.innerHTML = `
                     <h2 class="text-lg font-semibold mb-3 flex items-center">
                         <i class="fa fa-folder-open-o mr-2 text-space-accent"></i>
                         ${group.name}
                     </h2>
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                        ${group.bookmarks.map(bookmark => createBookmarkElement(bookmark)).join('')}
+                        ${group.bookmarks.map((bookmark, bookmarkIndex) => 
+                            createBookmarkElement(bookmark, groupId, bookmarkIndex)
+                        ).join('')}
                     </div>
                 `;
                 elements.bookmarksContainer.appendChild(groupElement);
@@ -776,121 +778,39 @@
                 // 编辑页书签组 - 使用唯一ID避免事件冲突
                 const editorGroupElement = document.createElement('div');
                 editorGroupElement.className = 'editor-bookmark-group bg-space-dark/30 rounded-xl p-4';
-                editorGroupElement.dataset.groupId = `group-${groupIndex}`;
+                editorGroupElement.dataset.groupId = groupId;
+                editorGroupElement.dataset.index = groupIndex;
                 editorGroupElement.innerHTML = `
                     <div class="flex justify-between items-center mb-3">
                         <div class="flex items-center">
                             <i class="fa fa-folder-open-o mr-2 text-space-accent"></i>
                             <input type="text" value="${escapeHTML(group.name)}" 
                                    class="group-name-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-white" 
-                                   data-group-index="${groupIndex}">
+                                   data-group-id="${groupId}" data-index="${groupIndex}">
                         </div>
                         <div class="flex space-x-1">
                             <button class="add-bookmark p-1.5 rounded hover:bg-space-light transition-colors" 
-                                    data-group-index="${groupIndex}">
+                                    data-group-id="${groupId}" data-index="${groupIndex}">
                                 <i class="fa fa-plus text-sm"></i>
                             </button>
                             <button class="delete-group p-1.5 rounded hover:bg-space-light transition-colors text-red-400" 
-                                    data-group-index="${groupIndex}">
+                                    data-group-id="${groupId}" data-index="${groupIndex}">
                                 <i class="fa fa-trash text-sm"></i>
                             </button>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto scrollbar-hide">
                         ${group.bookmarks.map((bookmark, bookmarkIndex) => 
-                            createEditorBookmarkElement(bookmark, groupIndex, bookmarkIndex)
+                            createEditorBookmarkElement(bookmark, groupId, groupIndex, bookmarkIndex)
                         ).join('')}
                     </div>
                 `;
                 elements.bookmarksEditorContainer.appendChild(editorGroupElement);
             });
-            
-            // 使用事件委托处理书签编辑事件，避免相互干扰
-            elements.bookmarksEditorContainer.addEventListener('click', (e) => {
-                const addBtn = e.target.closest('.add-bookmark');
-                if (addBtn) {
-                    const groupIndex = parseInt(addBtn.dataset.groupIndex);
-                    addNewBookmark(groupIndex);
-                    return;
-                }
-                
-                const deleteGroupBtn = e.target.closest('.delete-group');
-                if (deleteGroupBtn) {
-                    const groupIndex = parseInt(deleteGroupBtn.dataset.groupIndex);
-                    confirmAction(
-                        '删除书签组',
-                        `您确定要删除"${appData.bookmarks[groupIndex].name}"书签组吗？此操作不可恢复。`,
-                        () => {
-                            appData.bookmarks.splice(groupIndex, 1);
-                            renderBookmarks();
-                            updateBookmarkCount();
-                        }
-                    );
-                    return;
-                }
-                
-                const editBtn = e.target.closest('.edit-bookmark');
-                if (editBtn) {
-                    e.stopPropagation();
-                    const groupIndex = parseInt(editBtn.dataset.groupIndex);
-                    const bookmarkIndex = parseInt(editBtn.dataset.bookmarkIndex);
-                    // 聚焦到对应的输入框
-                    const titleInput = document.querySelector(`.bookmark-title-input[data-group-index="${groupIndex}"][data-bookmark-index="${bookmarkIndex}"]`);
-                    if (titleInput) titleInput.focus();
-                    return;
-                }
-                
-                const deleteBtn = e.target.closest('.delete-bookmark');
-                if (deleteBtn) {
-                    e.stopPropagation();
-                    const groupIndex = parseInt(deleteBtn.dataset.groupIndex);
-                    const bookmarkIndex = parseInt(deleteBtn.dataset.bookmarkIndex);
-                    const bookmarkName = appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].title;
-                    
-                    confirmAction(
-                        '删除书签',
-                        `您确定要删除"${bookmarkName}"吗？`,
-                        () => {
-                            appData.bookmarks[groupIndex].bookmarks.splice(bookmarkIndex, 1);
-                            renderBookmarks();
-                            updateBookmarkCount();
-                        }
-                    );
-                    return;
-                }
-            });
-            
-            // 使用事件委托处理输入框变化
-            elements.bookmarksEditorContainer.addEventListener('input', (e) => {
-                const groupNameInput = e.target.closest('.group-name-input');
-                if (groupNameInput) {
-                    const groupIndex = parseInt(groupNameInput.dataset.groupIndex);
-                    appData.bookmarks[groupIndex].name = groupNameInput.value.trim() || '未命名组';
-                    return;
-                }
-                
-                const titleInput = e.target.closest('.bookmark-title-input');
-                if (titleInput) {
-                    const groupIndex = parseInt(titleInput.dataset.groupIndex);
-                    const bookmarkIndex = parseInt(titleInput.dataset.bookmarkIndex);
-                    appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].title = titleInput.value.trim();
-                    return;
-                }
-                
-                const urlInput = e.target.closest('.bookmark-url-input');
-                if (urlInput) {
-                    const groupIndex = parseInt(urlInput.dataset.groupIndex);
-                    const bookmarkIndex = parseInt(urlInput.dataset.bookmarkIndex);
-                    appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].url = urlInput.value.trim();
-                    // 更新favicon
-                    fetchFavicon(groupIndex, bookmarkIndex);
-                    return;
-                }
-            });
         }
         
         // 创建书签元素
-        function createBookmarkElement(bookmark) {
+        function createBookmarkElement(bookmark, groupId, bookmarkIndex) {
             let favicon = '';
             if (bookmark.favicon) {
                 favicon = `<img src="${escapeHTML(bookmark.favicon)}" alt="${escapeHTML(bookmark.title)}图标" class="w-5 h-5 mr-2 object-contain">`;
@@ -902,7 +822,8 @@
             }
             
             return `
-                <a href="${escapeHTML(bookmark.url)}" target="_blank" class="bookmark-item bg-space-light/30 hover:bg-space-light/50 backdrop-blur-sm rounded-lg p-3 flex items-center transition-all group">
+                <a href="${escapeHTML(bookmark.url)}" target="_blank" class="bookmark-item bg-space-light/30 hover:bg-space-light/50 backdrop-blur-sm rounded-lg p-3 flex items-center transition-all group"
+                   data-group-id="${groupId}" data-bookmark-index="${bookmarkIndex}">
                     <div class="flex-shrink-0">
                         ${favicon}
                     </div>
@@ -913,27 +834,28 @@
             `;
         }
         
-        // 创建编辑页书签元素 - 使用唯一类名避免冲突
-        function createEditorBookmarkElement(bookmark, groupIndex, bookmarkIndex) {
+        // 创建编辑页书签元素 - 使用唯一ID避免冲突
+        function createEditorBookmarkElement(bookmark, groupId, groupIndex, bookmarkIndex) {
             return `
-                <div class="editor-bookmark bg-space-darker/50 rounded-lg p-3 flex justify-between items-center">
+                <div class="editor-bookmark bg-space-darker/50 rounded-lg p-3 flex justify-between items-center"
+                     data-group-id="${groupId}" data-bookmark-index="${bookmarkIndex}">
                     <div class="flex-1 min-w-0 mr-2">
                         <div class="flex items-center mb-1">
                             <input type="text" value="${escapeHTML(bookmark.title)}" 
                                    class="bookmark-title-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-sm text-white w-full" 
-                                   data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
+                                   data-group-id="${groupId}" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
                         </div>
                         <input type="text" value="${escapeHTML(bookmark.url)}" 
                                class="bookmark-url-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-xs text-gray-400 w-full" 
-                               data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
+                               data-group-id="${groupId}" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
                     </div>
                     <div class="flex space-x-1">
                         <button class="edit-bookmark p-1.5 rounded hover:bg-space-light transition-colors" 
-                                data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
+                                data-group-id="${groupId}" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
                             <i class="fa fa-pencil text-sm"></i>
                         </button>
                         <button class="delete-bookmark p-1.5 rounded hover:bg-space-light transition-colors text-red-400" 
-                                data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
+                                data-group-id="${groupId}" data-group-index="${groupIndex}" data-bookmark-index="${bookmarkIndex}">
                             <i class="fa fa-trash text-sm"></i>
                         </button>
                     </div>
@@ -948,6 +870,7 @@
                 bookmarks: []
             });
             renderBookmarks();
+            setupBookmarkEventListeners(); // 重新绑定事件
         }
         
         // 添加新书签
@@ -959,6 +882,7 @@
             });
             renderBookmarks();
             updateBookmarkCount();
+            setupBookmarkEventListeners(); // 重新绑定事件
             
             // 自动获取favicon
             const bookmarkIndex = appData.bookmarks[groupIndex].bookmarks.length - 1;
@@ -985,12 +909,14 @@
                 testImg.onload = () => {
                     bookmark.favicon = faviconUrl;
                     renderBookmarks();
+                    setupBookmarkEventListeners();
                 };
                 testImg.onerror = () => {
                     // 尝试使用第三方服务获取favicon
                     const thirdPartyFavicon = `https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(bookmark.url)}&size=32`;
                     bookmark.favicon = thirdPartyFavicon;
                     renderBookmarks();
+                    setupBookmarkEventListeners();
                 };
                 testImg.src = faviconUrl;
             } catch (e) {
@@ -1085,6 +1011,7 @@
                     });
                     
                     renderBookmarks();
+                    setupBookmarkEventListeners();
                     updateBookmarkCount();
                     showNotification('导入成功', `成功导入 ${countTotalBookmarks(newBookmarks)} 个书签`, 'success');
                 } catch (error) {
@@ -1184,6 +1111,7 @@
                     if (backupData.timezones) appData.timezones = backupData.timezones;
                     
                     renderBookmarks();
+                    setupBookmarkEventListeners();
                     updateBookmarkCount();
                     renderTimezones();
                     setupAdEditor();
@@ -1249,7 +1177,7 @@
             elements.timezonesList.innerHTML = '';
             
             appData.timezones.forEach((timezone, index) => {
-                // 主页面时区显示
+                // 主页面时区显示 - 无任何编辑按钮
                 const timezoneElement = document.createElement('div');
                 timezoneElement.className = 'bg-space-dark/30 rounded-lg p-3';
                 timezoneElement.innerHTML = `
@@ -1438,6 +1366,7 @@
             saveLocalSettings();
         }
         
+        
         // 处理广告图片上传
         function handleAdImageUpload(adIndex) {
             return function(e) {
@@ -1471,9 +1400,112 @@
             };
         }
         
-        // 设置事件监听器
+        // 设置书签编辑事件监听器 - 关键修复
+        function setupBookmarkEventListeners() {
+            // 先移除旧的事件监听器，避免重复绑定
+            const editorContainer = elements.bookmarksEditorContainer;
+            const newContainer = editorContainer.cloneNode(true);
+            editorContainer.parentNode.replaceChild(newContainer, editorContainer);
+            elements.bookmarksEditorContainer = newContainer;
+            
+            // 重新绑定事件
+            elements.bookmarksEditorContainer.addEventListener('click', (e) => {
+                const addBtn = e.target.closest('.add-bookmark');
+                if (addBtn) {
+                    const groupIndex = parseInt(addBtn.dataset.index);
+                    addNewBookmark(groupIndex);
+                    return;
+                }
+                
+                const deleteGroupBtn = e.target.closest('.delete-group');
+                if (deleteGroupBtn) {
+                    const groupIndex = parseInt(deleteGroupBtn.dataset.index);
+                    confirmAction(
+                        '删除书签组',
+                        `您确定要删除"${appData.bookmarks[groupIndex].name}"书签组吗？此操作不可恢复。`,
+                        () => {
+                            appData.bookmarks.splice(groupIndex, 1);
+                            renderBookmarks();
+                            setupBookmarkEventListeners();
+                            updateBookmarkCount();
+                        }
+                    );
+                    return;
+                }
+                
+                const editBtn = e.target.closest('.edit-bookmark');
+                if (editBtn) {
+                    e.stopPropagation();
+                    const groupIndex = parseInt(editBtn.dataset.groupIndex);
+                    const bookmarkIndex = parseInt(editBtn.dataset.bookmarkIndex);
+                    // 聚焦到对应的输入框
+                    const titleInput = document.querySelector(`.bookmark-title-input[data-group-index="${groupIndex}"][data-bookmark-index="${bookmarkIndex}"]`);
+                    if (titleInput) titleInput.focus();
+                    return;
+                }
+                
+                const deleteBtn = e.target.closest('.delete-bookmark');
+                if (deleteBtn) {
+                    e.stopPropagation();
+                    const groupIndex = parseInt(deleteBtn.dataset.groupIndex);
+                    const bookmarkIndex = parseInt(deleteBtn.dataset.bookmarkIndex);
+                    const bookmarkName = appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].title;
+                    
+                    confirmAction(
+                        '删除书签',
+                        `您确定要删除"${bookmarkName}"吗？`,
+                        () => {
+                            appData.bookmarks[groupIndex].bookmarks.splice(bookmarkIndex, 1);
+                            renderBookmarks();
+                            setupBookmarkEventListeners();
+                            updateBookmarkCount();
+                        }
+                    );
+                    return;
+                }
+            });
+            
+            // 处理输入框变化 - 核心修复：确保正确更新数据
+            elements.bookmarksEditorContainer.addEventListener('input', (e) => {
+                // 组名称更新
+                const groupNameInput = e.target.closest('.group-name-input');
+                if (groupNameInput) {
+                    const groupIndex = parseInt(groupNameInput.dataset.index);
+                    const newValue = groupNameInput.value.trim() || '未命名组';
+                    // 直接更新数据模型
+                    appData.bookmarks[groupIndex].name = newValue;
+                    return;
+                }
+                
+                // 书签标题更新
+                const titleInput = e.target.closest('.bookmark-title-input');
+                if (titleInput) {
+                    const groupIndex = parseInt(titleInput.dataset.groupIndex);
+                    const bookmarkIndex = parseInt(titleInput.dataset.bookmarkIndex);
+                    const newValue = titleInput.value.trim();
+                    // 直接更新数据模型
+                    appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].title = newValue;
+                    return;
+                }
+                
+                // 书签URL更新
+                const urlInput = e.target.closest('.bookmark-url-input');
+                if (urlInput) {
+                    const groupIndex = parseInt(urlInput.dataset.groupIndex);
+                    const bookmarkIndex = parseInt(urlInput.dataset.bookmarkIndex);
+                    const newValue = urlInput.value.trim();
+                    // 直接更新数据模型
+                    appData.bookmarks[groupIndex].bookmarks[bookmarkIndex].url = newValue;
+                    // 更新favicon
+                    fetchFavicon(groupIndex, bookmarkIndex);
+                    return;
+                }
+            });
+        }
+        
+        // 设置全局事件监听器
         function setupEventListeners() {
-            // 主题切换 - 修复切换失效问题
+            // 主题切换
             elements.themeToggle.addEventListener('click', () => {
                 if (appData.currentTheme === 'dark') {
                     switchToLightMode();
@@ -1518,17 +1550,6 @@
                 elements.editorModal.classList.add('hidden');
             });
             
-            // 点击编辑时区按钮，直接打开编辑中心
-            elements.editTimezones.addEventListener('click', () => {
-                // 检查是否已认证
-                if (appData.github.repo && appData.github.token) {
-                    elements.editorModal.classList.remove('hidden');
-                } else {
-                    elements.settingsModal.classList.remove('hidden');
-                    showNotification('提示', '请先配置GitHub信息进入编辑模式', 'info');
-                }
-            });
-            
             // 添加书签组
             elements.addBookmarkGroup.addEventListener('click', addNewBookmarkGroup);
             
@@ -1551,7 +1572,6 @@
             // 导出书签
             elements.exportBookmarks.addEventListener('click', exportHTMLBookmarks);
             
-            // 备份JSON
             // 备份JSON
             elements.backupJson.addEventListener('click', backupJSONData);
             
@@ -1577,6 +1597,7 @@
                 const success = await saveDataToGitHub();
                 if (success) {
                     renderBookmarks();
+                    setupBookmarkEventListeners();
                     renderTimezones(); // 保存后更新时区显示
                     elements.editorModal.classList.add('hidden');
                 }
@@ -1641,7 +1662,11 @@
         }
         
         // 初始化应用
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            // 初始化书签事件监听器
+            setTimeout(setupBookmarkEventListeners, 100);
+        });
     </script>
 </body>
 </html>
