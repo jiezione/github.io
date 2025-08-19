@@ -186,11 +186,11 @@
       ]
     },
     {
-      "name": "https://www.baidu.com",
+      "name": "https://baidu.com",
       "bookmarks": [
         {
           "title": "新书签",
-          "url": "https://",
+          "url": "https://baidu.com",
           "favicon": ""
         }
       ]
@@ -224,5 +224,5 @@
       "offset": 1
     }
   ],
-  "updatedAt": "2025-08-19T08:47:51.715Z"
+  "updatedAt": "2025-08-19T08:49:46.854Z"
 }
