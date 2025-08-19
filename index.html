@@ -26,22 +26,6 @@
                     },
                     fontFamily: {
                         space: ['Orbitron', 'sans-serif']
-                    },
-                    animation: {
-                        'twinkle': 'twinkle 3s ease-in-out infinite',
-                        'float': 'float 6s ease-in-out infinite',
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'spin-slow': 'spin 20s linear infinite'
-                    },
-                    keyframes: {
-                        twinkle: {
-                            '0%, 100%': { opacity: 0.6 },
-                            '50%': { opacity: 1 }
-                        },
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' }
-                        }
                     }
                 }
             }
@@ -52,131 +36,95 @@
             .content-auto {
                 content-visibility: auto;
             }
-            .text-shadow {
-                text-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
             }
-            .glow {
-                box-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
             }
             .star {
                 position: absolute;
                 background-color: white;
                 border-radius: 50%;
-                animation: twinkle 3s ease-in-out infinite;
+                animation: twinkle 3s infinite ease-in-out;
             }
-            .gradient-mask-b {
-                mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+            @keyframes twinkle {
+                0%, 100% { opacity: 0.5; }
+                50% { opacity: 1; }
             }
-            .scrollbar-hide::-webkit-scrollbar {
-                display: none;
-            }
-            .scrollbar-hide {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
+            .widget-style {
+                @apply bg-space-darker/80 border border-space-accent/30 rounded-xl p-4 shadow-[0_0_15px_rgba(59,130,246,0.15)] transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.25)];
             }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="font-space bg-gradient-to-br from-space-dark to-space-darker text-gray-100 min-h-screen transition-colors duration-500 relative overflow-x-hidden">
-    <!-- 星空背景 -->
-    <div id="stars" class="fixed inset-0 -z-10"></div>
+<body class="bg-space-dark text-white min-h-screen relative overflow-x-hidden">
+    <div id="stars" class="fixed inset-0 z-0"></div>
     
-    <!-- 浮动星球 -->
-    <div class="fixed -top-20 -right-20 w-64 h-64 bg-gradient-to-r from-purple-700 to-indigo-600 rounded-full opacity-20 blur-3xl animate-float -z-10"></div>
-    <div class="fixed top-1/3 -left-32 w-80 h-80 bg-gradient-to-r from-blue-700 to-cyan-500 rounded-full opacity-10 blur-3xl animate-float -z-10" style="animation-delay: 2s;"></div>
-    
-    <!-- 顶部控制栏 -->
-    <header id="header" class="fixed top-0 left-0 right-0 bg-space-dark/80 backdrop-blur-md z-50 transition-all duration-300">
-        <div class="container mx-auto px-4 py-3 flex flex justify-between items-center">
+    <header id="header" class="fixed top-0 left-0 right-0 z-40 transition-all duration-500 bg-space-dark/60 backdrop-blur-md border-b border-space-accent/20">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2">
-                <div class="w-10 h-10 rounded-full-full bg-gradient-to-r from-space-accent to-space-nebula flex items-center justify-center">
-                    <i class="fa fa-compass text-white"></i>
-                </div>
-                <h1 class="text-xl font-bold text-shadow">星际导航</h1>
+                <svg width="24" height="24" viewBox="0 0 100 100" class="text-space-accent">
+                    <circle cx="50" cy="50" r="45" fill="#1a202c"/>
+                    <circle cx="50" cy="50" r="25" fill="#3b82f6"/>
+                    <circle cx="35" cy="40" r="5" fill="white"/>
+                    <circle cx="65" cy="40" r="3" fill="white"/>
+                    <circle cx="45" cy="60" r="4" fill="white"/>
+                </svg>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-space-accent to-space-nebula bg-clip-text text-transparent">星际导航</h1>
             </div>
             
             <div class="flex items-center space-x-4">
-                <button id="theme-toggle" class="p-2 rounded-full hover:bg-space-light transition-colors">
-                    <i class="fa fa-moon-o"></i>
+                <button id="edit-timezones" class="p-2 rounded-full hover:bg-space-light/30 transition-colors">
+                    <i class="fa fa-clock-o text-space-accent"></i>
                 </button>
-                <button id="settings-btn" class="p-2 rounded-full hover:bg-space-light transition-colors">
-                    <i class="fa fa-cog"></i>
+                <button id="settings-btn" class="p-2 rounded-full hover:bg-space-light/30 transition-colors">
+                    <i class="fa fa-cog text-space-accent"></i>
+                </button>
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-space-light/30 transition-colors">
+                    <i class="fa fa-moon-o text-space-accent"></i>
                 </button>
             </div>
         </div>
     </header>
-
-    <!-- 主内容区 -->
-    <main class="container mx-auto px-4 pt-24 pb-20">
-        <!-- 顶部小组件 -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <!-- 在线时长统计 -->
-            <div class="bg-space-light/50 backdrop-blur-sm rounded-xl p-4 border border-space-accent/30 glow">
-                <h3 class="text-sm text-gray-400 mb-2">在线时长统计</h3>
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-2xl font-bold">3.5 小时</p>
-                        <p class="text-xs text-gray-400">今日累计</p>
-                    </div>
-                    <div class="w-24 h-24">
-                        <canvas id="usageChart"></canvas>
-                    </div>
-                </div>
+    
+    <main class="container mx-auto px-4 pt-24 pb-16 relative z-10">
+        <!-- 时间和搜索 -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div class="widget-style w-full md:w-auto">
+                <div id="time-display" class="text-3xl md:text-4xl font-bold text-space-glow"></div>
+                <div id="date-display" class="text-gray-400 text-sm mt-1"></div>
             </div>
             
-            <!-- 健康提醒 -->
-            <div class="bg-space-light/50 backdrop-blur-sm rounded-xl p-4 border border-space-accent/30 glow">
-                <h3 class="text-sm text-gray-400 mb-2">健康提醒</h3>
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 rounded-full bg-space-nebula/30 flex items-center justify-center">
-                        <i class="fa fa-eye text-space-glow text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="font-medium">休息一下眼睛</p>
-                        <p class="text-xs text-gray-400">已连续使用 45 分钟</p>
-                    </div>
-                </div>
-                <div class="mt-3 h-1.5 bg-space-dark rounded-full overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-space-accent to-space-nebula" style="width: 75%"></div>
-                </div>
-            </div>
-            
-            <!-- 世界时间 -->
-            <div class="bg-space-light/50 backdrop-blur-sm rounded-xl p-4 border border-space-accent/30 glow">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm text-gray-400">世界时间</h3>
-                    <div class="flex space-x-1">
-                        <button id="add-timezone" class="p-1 rounded hover:bg-space-dark transition-colors">
-                            <i class="fa fa-plus text-xs"></i>
-                        </button>
-                        <button id="edit-timezones" class="p-1 rounded hover:bg-space-dark transition-colors">
-                            <i class="fa fa-pencil text-xs"></i>
-                        </button>
-                    </div>
-                </div>
-                <div id="timezones-container" class="space-y-2 max-h-32 overflow-y-auto scrollbar-hide">
-                    <div class="timezone-item flex justify-between items-center">
-                        <span>北京</span>
-                        <span id="beijing-time" class="font-mono"></span>
-                    </div>
-                    <div class="timezone-item flex justify-between items-center">
-                        <span>纽约</span>
-                        <span id="newyork-time" class="font-mono"></span>
-                    </div>
-                    <div class="timezone-item flex justify-between items-center">
-                        <span>伦敦</span>
-                        <span id="london-time" class="font-mono"></span>
-                    </div>
+            <div class="w-full md:w-auto flex-1 md:max-w-md">
+                <div class="relative">
+                    <input type="text" placeholder="搜索..." class="w-full bg-space-light/50 border border-space-accent/30 rounded-full py-3 px-5 pr-12 focus:outline-none focus:ring-2 focus:ring-space-accent/50 transition-all">
+                    <button class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-space-accent">
+                        <i class="fa fa-search"></i>
+                    </button>
                 </div>
             </div>
         </div>
         
+        <!-- 时区显示 -->
+        <div id="timezones-container" class="flex flex-wrap gap-4 mb-8">
+            <!-- 时区将通过JS动态生成 -->
+        </div>
+        
+        <!-- 访问统计 -->
+        <div class="widget-style mb-8">
+            <h2 class="text-lg font-semibold mb-3">本周访问统计</h2>
+            <div class="h-40">
+                <canvas id="usage-chart"></canvas>
+            </div>
+        </div>
+        
         <!-- 广告位 1 -->
-        <div class="mb-8 rounded-xl overflow-hidden border border-space-accent/30 relative group">
+        <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group">
             <div class="ad-container aspect-video bg-space-light/30 flex items-center justify-center overflow-hidden">
                 <img id="ad1-img" src="https://picsum.photos/1200/400?random=1" alt="广告图片1" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                <a id="ad1-link" href="#" class="absolute inset-0"></a>
+                <a id="ad1-link" href="#" class="absolute inset-0" target="_blank"></a>
             </div>
         </div>
         
@@ -187,23 +135,23 @@
         
         <!-- 广告位 2 -->
         <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group">
-            <div class="ad-container aspect-video bg-space-light/30 flex items-center justify-center overflow-hidden">
+            <div class="ad-container aspect-[3/2] bg-space-light/30 flex items-center justify-center overflow-hidden">
                 <img id="ad2-img" src="https://picsum.photos/1200/400?random=2" alt="广告图片2" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                <a id="ad2-link" href="#" class="absolute inset-0"></a>
+                <a id="ad2-link" href="#" class="absolute inset-0" target="_blank"></a>
             </div>
         </div>
         
         <!-- 广告位 3 -->
         <div class="my-8 rounded-xl overflow-hidden border border-space-accent/30 relative group">
-            <div class="ad-container aspect-video bg-space-light/30 flex items-center justify-center overflow-hidden">
+            <div class="ad-container aspect-[3/2] bg-space-light/30 flex items-center justify-center overflow-hidden">
                 <img id="ad3-img" src="https://picsum.photos/1200/400?random=3" alt="广告图片3" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                <a id="ad3-link" href="#" class="absolute inset-0"></a>
+                <a id="ad3-link" href="#" class="absolute inset-0" target="_blank"></a>
             </div>
         </div>
     </main>
     
     <!-- 底部信息 -->
-    <footer class="bg-space-dark/80 backdrop-blur-md py-4 border-t border-space-accent/20">
+    <footer class="bg-space-dark/80 backdrop-blur-md py-4 border-t border-space-accent/20 relative z-10">
         <div class="container mx-auto px-4">
             <div class="dark-white flex flex-col md:flex-row justify-between items-center">
                 <div>共收录<span id="total-bookmarks">0</span>个网站</div>
@@ -368,31 +316,13 @@
         </div>
     </div>
     
-    <!-- 通知提示 -->
-    <div id="notification" class="fixed bottom-4 right-4 bg-space-light border border-space-accent/30 rounded-lg p-4 shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 max-w-sm">
-        <div class="flex items-start">
-            <div id="notification-icon" class="mr-3 mt-0.5">
-                <i class="fa fa-check-circle text-green-500"></i>
-            </div>
-            <div>
-                <h4 id="notification-title" class="font-medium"></h4>
-                <p id="notification-message" class="text-sm text-gray-300 mt-1"></p>
-            </div>
-            <button id="close-notification" class="ml-auto text-gray-400 hover:text-white">
-                <i class="fa fa-times"></i>
-            </button>
-        </div>
-    </div>
-    
     <!-- 时区编辑对话框 -->
     <div id="timezone-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-        <div class="bg-space-light rounded-xl w-full max-w-md p-6 border border-space-accent/30">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold">世界时区管理</h3>
-                <button id="close-timezone-modal" class="text-gray-400 hover:text-white">
-                    <i class="fa fa-times"></i>
-                </button>
-            </div>
+        <div class="bg-space-light rounded-xl w-full max-w-md p-6 border border-space-accent/30 relative">
+            <button id="close-timezone-modal" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa fa-times"></i>
+            </button>
+            <h2 class="text-xl font-bold mb-4">时区管理</h2>
             <div class="mb-4">
                 <div class="flex">
                     <input type="text" id="new-timezone" placeholder="城市名称" class="flex-1 bg-space-dark border border-space-accent/50 rounded-l-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-space-accent">
@@ -405,6 +335,20 @@
                 <!-- 时区列表将通过JS动态生成 -->
             </div>
         </div>
+    </div>
+    
+    <!-- 通知组件 -->
+    <div id="notification" class="fixed bottom-4 right-4 bg-space-light border border-space-accent/30 rounded-lg p-4 shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-start space-x-3 max-w-sm">
+        <div id="notification-icon" class="text-space-accent text-xl mt-0.5">
+            <i class="fa fa-info-circle"></i>
+        </div>
+        <div class="flex-1">
+            <h4 id="notification-title" class="font-medium text-white"></h4>
+            <p id="notification-message" class="text-sm text-gray-300 mt-1"></p>
+        </div>
+        <button id="close-notification" class="text-gray-400 hover:text-white">
+            <i class="fa fa-times"></i>
+        </button>
     </div>
     
     <script>
@@ -474,31 +418,29 @@
             closeTimezoneModal: document.getElementById('close-timezone-modal'),
             newTimezone: document.getElementById('new-timezone'),
             addTimezoneBtn: document.getElementById('add-timezone-btn'),
-            timezonesList: document.getElementById('timezones-list'),
             timezonesContainer: document.getElementById('timezones-container'),
-            beijingTime: document.getElementById('beijing-time'),
-            newyorkTime: document.getElementById('newyork-time'),
-            londonTime: document.getElementById('london-time'),
+            timezonesList: document.getElementById('timezones-list'),
+            timeDisplay: document.getElementById('time-display'),
+            dateDisplay: document.getElementById('date-display'),
             ad1Img: document.getElementById('ad1-img'),
             ad1Link: document.getElementById('ad1-link'),
-            ad2Img: document.getElementById('ad2-img'),
-            ad2Link: document.getElementById('ad2-link'),
-            ad3Img: document.getElementById('ad3-img'),
-            ad3Link: document.getElementById('ad3-link'),
             ad1UrlInput: document.getElementById('ad1-url-input'),
             ad1LinkInput: document.getElementById('ad1-link-input'),
             ad1Upload: document.getElementById('ad1-upload'),
+            ad2Img: document.getElementById('ad2-img'),
+            ad2Link: document.getElementById('ad2-link'),
             ad2UrlInput: document.getElementById('ad2-url-input'),
             ad2LinkInput: document.getElementById('ad2-link-input'),
             ad2Upload: document.getElementById('ad2-upload'),
+            ad3Img: document.getElementById('ad3-img'),
+            ad3Link: document.getElementById('ad3-link'),
             ad3UrlInput: document.getElementById('ad3-url-input'),
             ad3LinkInput: document.getElementById('ad3-link-input'),
             ad3Upload: document.getElementById('ad3-upload')
         };
         
-        // 临时变量
+        // 确认操作回调
         let confirmCallback = null;
-        let scrollTimer = null;
         
         // 初始化函数
         async function init() {
@@ -544,36 +486,59 @@
                 star.style.top = `${y}%`;
                 star.style.animationDelay = `${delay}s`;
                 
+                // 随机亮度
+                const opacity = 0.3 + Math.random() * 0.7;
+                star.style.opacity = opacity;
+                
                 elements.stars.appendChild(star);
             }
         }
         
-        // 初始化使用时长图表
+        // 初始化使用统计图表
         function initUsageChart() {
-            const ctx = document.getElementById('usageChart').getContext('2d');
+            const ctx = document.getElementById('usage-chart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
                     datasets: [{
+                        label: '访问次数',
                         data: appData.usageData,
-                        borderColor: '#60a5fa',
-                        backgroundColor: 'rgba(96, 165, 250, 0.1)',
-                        borderWidth: 2,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         tension: 0.4,
-                        fill: true,
-                        pointRadius: 0
+                        fill: true
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
                     scales: {
-                        x: { display: false },
-                        y: { display: false }
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
                     },
-                    elements: { point: { radius: 0 } }
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    }
                 }
             });
         }
@@ -616,38 +581,31 @@
                 if (data.ads) appData.ads = data.ads;
                 if (data.timezones) appData.timezones = data.timezones;
                 
-                showNotification('成功', '已从GitHub加载数据', 'success');
-                return true;
             } catch (error) {
-                console.error('从GitHub加载数据失败:', error);
-                showNotification('加载失败', '使用本地默认数据', 'error');
-                return false;
+                console.error('加载数据失败:', error);
+                showNotification('数据加载失败', '使用本地默认数据', 'warning');
             }
         }
         
         // 保存数据到GitHub
         async function saveDataToGitHub() {
+            if (!appData.github.repo || !appData.github.token) {
+                showNotification('保存失败', '请先配置GitHub信息', 'error');
+                return false;
+            }
+            
             try {
-                if (!appData.github.repo || !appData.github.token) {
-                    showNotification('保存失败', '请先配置GitHub信息', 'error');
-                    return false;
-                }
-                
                 const [owner, repo] = appData.github.repo.split('/');
                 if (!owner || !repo) {
                     showNotification('保存失败', '仓库格式不正确 (username/repo)', 'error');
                     return false;
                 }
                 
-                // 准备要保存的数据
-                const dataToSave = {
+                const content = JSON.stringify({
                     bookmarks: appData.bookmarks,
                     ads: appData.ads,
-                    timezones: appData.timezones,
-                    updatedAt: new Date().toISOString()
-                };
-                
-                const content = JSON.stringify(dataToSave, null, 2);
+                    timezones: appData.timezones
+                }, null, 2);
                 
                 // 先检查文件是否存在
                 const checkUrl = `https://api.github.com/repos/${owner}/${repo}/contents/bookmarks.json`;
@@ -679,44 +637,49 @@
                     body: JSON.stringify({
                         message: 'Update bookmarks via Space Navigator',
                         content: base64Content,
-                        sha: sha // 仅当文件存在时需要
+                        sha: sha
                     })
                 });
                 
                 if (!saveResponse.ok) {
                     const errorData = await saveResponse.json();
-                    throw new Error(errorData.message || `HTTP error! status: ${saveResponse.status}`);
+                    console.error('保存失败:', errorData);
+                    showNotification('保存失败', errorData.message || '未知错误', 'error');
+                    return false;
                 }
                 
-                showNotification('保存成功', '数据已同步到GitHub', 'success');
+                showNotification('保存成功', '您的更改已同步到GitHub', 'success');
                 return true;
+                
             } catch (error) {
-                console.error('保存数据到GitHub失败:', error);
-                showNotification('保存失败', error.message, 'error');
+                console.error('保存数据失败:', error);
+                showNotification('保存失败', '网络错误或配置不正确', 'error');
                 return false;
             }
         }
         
-        // Token验证核心函数
-        async function verifyGitHubToken(repo, token) {
+        // 验证GitHub Token
+        async function verifyGitHubToken() {
+            if (!appData.github.repo || !appData.github.token) {
+                showNotification('验证失败', '请填写仓库和Token信息', 'error');
+                return false;
+            }
+            
             try {
-                // 解析仓库所有者和名称
-                const [owner, repoName] = repo.split('/');
-                if (!owner || !repoName) return false;
-
-                // 调用GitHub API验证权限
-                const response = await fetch(
-                    `https://api.github.com/repos/${owner}/${repoName}`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        },
-                        timeout: 5000 // 5秒超时保护
+                const [owner, repo] = appData.github.repo.split('/');
+                if (!owner || !repo) {
+                    showNotification('验证失败', '仓库格式不正确 (username/repo)', 'error');
+                    return false;
+                }
+                
+                const url = `https://api.github.com/repos/${owner}/${repo}`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${appData.github.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
                     }
-                );
-
+                });
+                
                 // 200状态码表示验证通过
                 return response.status === 200;
             } catch (error) {
@@ -769,7 +732,7 @@
                     <div class="flex justify-between items-center mb-3">
                         <div class="flex items-center">
                             <i class="fa fa-folder-open-o mr-2 text-space-accent"></i>
-                            <input type="text" value="${group.name}" class="bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-white" data-group-index="${groupIndex}">
+                            <input type="text" value="${group.name}" class="group-name-input bg-transparent border-b border-transparent hover:border-space-accent/50 focus:border-space-accent focus:outline-none text-white" data-group-index="${groupIndex}">
                         </div>
                         <div class="flex space-x-1">
                             <button class="add-bookmark p-1.5 rounded hover:bg-space-light transition-colors" data-group-index="${groupIndex}">
@@ -810,7 +773,7 @@
                 });
             });
             
-            document.querySelectorAll('.editor-bookmark-group input[type="text"]').forEach(input => {
+            document.querySelectorAll('.editor-bookmark-group .group-name-input').forEach(input => {
                 input.addEventListener('change', (e) => {
                     const groupIndex = parseInt(e.currentTarget.dataset.groupIndex);
                     appData.bookmarks[groupIndex].name = e.currentTarget.value.trim() || '未命名组';
@@ -892,7 +855,7 @@
         
         // 添加新书签组
         function addNewBookmarkGroup() {
-            appData.bookmarks.push({
+            appData.bookmarks.unshift({
                 name: '新书签组',
                 bookmarks: []
             });
@@ -1172,6 +1135,7 @@
             if (appData.ads.length >= 1) {
                 elements.ad1Img.src = appData.ads[0].imgUrl;
                 elements.ad1Link.href = appData.ads[0].linkUrl;
+                elements.ad1Link.target = "_blank";
                 elements.ad1UrlInput.value = appData.ads[0].imgUrl;
                 elements.ad1LinkInput.value = appData.ads[0].linkUrl;
             }
@@ -1179,6 +1143,7 @@
             if (appData.ads.length >= 2) {
                 elements.ad2Img.src = appData.ads[1].imgUrl;
                 elements.ad2Link.href = appData.ads[1].linkUrl;
+                elements.ad2Link.target = "_blank";
                 elements.ad2UrlInput.value = appData.ads[1].imgUrl;
                 elements.ad2LinkInput.value = appData.ads[1].linkUrl;
             }
@@ -1186,6 +1151,7 @@
             if (appData.ads.length >= 3) {
                 elements.ad3Img.src = appData.ads[2].imgUrl;
                 elements.ad3Link.href = appData.ads[2].linkUrl;
+                elements.ad3Link.target = "_blank";
                 elements.ad3UrlInput.value = appData.ads[2].imgUrl;
                 elements.ad3LinkInput.value = appData.ads[2].linkUrl;
             }
@@ -1215,107 +1181,88 @@
             
             appData.timezones.forEach((timezone, index) => {
                 // 主页面时区显示
-                const timezoneElement = document.createElement('div');
-                timezoneElement.className = 'timezone-item flex justify-between items-center';
-                timezoneElement.innerHTML = `
-                    <span>${timezone.name}</span>
-                    <span class="timezone-time font-mono" data-offset="${timezone.offset}"></span>
-                `;
-                elements.timezonesContainer.appendChild(timezoneElement);
+                const timezoneEl = document.createElement('div');
+                timezoneEl.className = 'timezone-item widget-style';
                 
-                // 编辑页时区列表
-                const listItem = document.createElement('div');
-                listItem.className = 'flex justify-between items-center p-2 bg-space-dark/50 rounded';
-                listItem.innerHTML = `
-                    <span>${timezone.name} (UTC${timezone.offset >= 0 ? '+' : ''}${timezone.offset})</span>
-                    <button class="delete-timezone text-red-400 hover:text-red-300 p-1" data-index="${index}">
-                        <i class="fa fa-times"></i>
+                // 计算当前时区时间
+                const now = new Date();
+                const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+                const timezoneTime = new Date(utcTime + timezone.offset * 3600000);
+                
+                timezoneEl.innerHTML = `
+                    <div class="font-medium">${timezone.name}</div>
+                    <div class="text-lg font-bold text-space-glow">${timezoneTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    <div class="text-xs text-gray-400">UTC${timezone.offset >= 0 ? '+' : ''}${timezone.offset}</div>
+                `;
+                elements.timezonesContainer.appendChild(timezoneEl);
+                
+                // 编辑页时区显示
+                const editTimezoneEl = document.createElement('div');
+                editTimezoneEl.className = 'flex items-center justify-between bg-space-darker/50 rounded-lg p-2';
+                editTimezoneEl.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fa fa-clock-o mr-2 text-space-accent"></i>
+                        <span>${timezone.name} (UTC${timezone.offset >= 0 ? '+' : ''}${timezone.offset})</span>
+                    </div>
+                    <button class="delete-timezone p-1 rounded hover:bg-space-light transition-colors text-red-400" data-index="${index}">
+                        <i class="fa fa-trash text-sm"></i>
                     </button>
                 `;
-                elements.timezonesList.appendChild(listItem);
+                elements.timezonesList.appendChild(editTimezoneEl);
             });
             
-            // 添加删除时区事件监听
+            // 添加删除时区事件
             document.querySelectorAll('.delete-timezone').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const index = parseInt(e.currentTarget.dataset.index);
-                    appData.timezones.splice(index, 1);
-                    renderTimezones();
+                    const timezoneName = appData.timezones[index].name;
+                    
+                    confirmAction(
+                        '删除时区',
+                        `您确定要删除"${timezoneName}"时区吗？`,
+                        () => {
+                            appData.timezones.splice(index, 1);
+                            renderTimezones();
+                        }
+                    );
                 });
-            });
-        }
-        
-        // 更新时间显示
-        function updateTimeDisplay() {
-            const now = new Date();
-            const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
-            
-            document.querySelectorAll('.timezone-time').forEach(el => {
-                const offset = parseInt(el.dataset.offset);
-                const timezoneTime = new Date(utcTime + offset * 3600000);
-                el.textContent = timezoneTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             });
         }
         
         // 添加新时区
         function addNewTimezone(cityName) {
-            if (!cityName || cityName.trim() === '') return;
+            if (!cityName.trim()) return;
             
-            // 简单的时区偏移猜测
-            const offsetMap = {
-                '伦敦': 1,
-                '巴黎': 2,
-                '柏林': 2,
-                '莫斯科': 3,
-                '北京': 8,
-                '上海': 8,
-                '东京': 9,
-                '悉尼': 10,
-                '纽约': -4,
-                '洛杉矶': -7,
-                '多伦多': -4,
-                '温哥华': -7,
-                '新加坡': 8,
-                '香港': 8
-            };
-            
-            // 尝试获取偏移量，默认使用UTC+0
-            const offset = offsetMap[cityName] !== undefined ? offsetMap[cityName] : 0;
-            
-            // 检查是否已存在同名时区
-            const exists = appData.timezones.some(tz => tz.name === cityName);
-            if (exists) {
-                showNotification('添加失败', '该城市时区已存在', 'error');
-                return;
-            }
+            // 简单的时区偏移猜测（实际应用中可能需要更复杂的地理编码）
+            const offsetGuess = 8; // 默认北京时间偏移
             
             appData.timezones.push({
                 name: cityName,
-                offset: offset
+                offset: offsetGuess
             });
             
-            renderTimezones();
             elements.newTimezone.value = '';
+            renderTimezones();
         }
         
-        // 切换到白天模式
-        function switchToLightMode() {
-            document.documentElement.classList.add('light');
-            document.body.classList.remove('from-space-dark', 'to-space-darker');
-            document.body.classList.add('from-gray-100', 'to-gray-200', 'text-gray-800');
-            elements.themeToggle.innerHTML = '<i class="fa fa-sun-o"></i>';
-            appData.currentTheme = 'light';
-            saveLocalSettings();
-        }
-        
-        // 切换到黑夜模式
-        function switchToDarkMode() {
-            document.documentElement.classList.remove('light');
-            document.body.classList.add('from-space-dark', 'to-space-darker');
-            document.body.classList.remove('from-gray-100', 'to-gray-200', 'text-gray-800');
-            elements.themeToggle.innerHTML = '<i class="fa fa-moon-o"></i>';
-            appData.currentTheme = 'dark';
-            saveLocalSettings();
+        // 更新时间显示
+        function updateTimeDisplay() {
+            const now = new Date();
+            
+            // 时间显示
+            elements.timeDisplay.textContent = now.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            // 日期显示
+            elements.dateDisplay.textContent = now.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            });
         }
         
         // 显示通知
@@ -1323,32 +1270,30 @@
             elements.notificationTitle.textContent = title;
             elements.notificationMessage.textContent = message;
             
-            // 设置通知图标
-            if (type === 'success') {
-                elements.notificationIcon.innerHTML = '<i class="fa fa-check-circle text-green-500"></i>';
-            } else if (type === 'error') {
-                elements.notificationIcon.innerHTML = '<i class="fa fa-exclamation-circle text-red-500"></i>';
-            } else if (type === 'warning') {
-                elements.notificationIcon.innerHTML = '<i class="fa fa-exclamation-triangle text-yellow-500"></i>';
-            } else {
-                elements.notificationIcon.innerHTML = '<i class="fa fa-info-circle text-blue-500"></i>';
-            }
+            // 设置图标
+            let iconClass = 'fa-info-circle';
+            if (type === 'success') iconClass = 'fa-check-circle';
+            if (type === 'error') iconClass = 'fa-exclamation-circle';
+            if (type === 'warning') iconClass = 'fa-exclamation-triangle';
+            
+            elements.notificationIcon.innerHTML = `<i class="fa ${iconClass}"></i>`;
+            elements.notificationIcon.className = `text-${type === 'success' ? 'green-400' : type === 'error' ? 'red-400' : type === 'warning' ? 'yellow-400' : 'space-accent'} text-xl mt-0.5`;
             
             // 显示通知
             elements.notification.classList.remove('translate-y-20', 'opacity-0');
             elements.notification.classList.add('translate-y-0', 'opacity-100');
             
-            // 3秒后自动关闭
-            setTimeout(hideNotification, 3000);
+            // 自动隐藏
+            setTimeout(hideNotification, 5000);
         }
         
         // 隐藏通知
         function hideNotification() {
-            elements.notification.classList.add('translate-y-20', 'opacity-0');
             elements.notification.classList.remove('translate-y-0', 'opacity-100');
+            elements.notification.classList.add('translate-y-20', 'opacity-0');
         }
         
-        // 确认操作
+        // 显示确认对话框
         function confirmAction(title, message, callback) {
             elements.confirmTitle.textContent = title;
             elements.confirmMessage.textContent = message;
@@ -1397,6 +1342,55 @@
                 .replace(/'/g, '&#039;');
         }
         
+        // 切换到浅色模式
+        function switchToLightMode() {
+            document.documentElement.classList.add('light');
+            elements.themeToggle.innerHTML = '<i class="fa fa-sun-o text-yellow-500"></i>';
+            appData.currentTheme = 'light';
+        }
+        
+        // 切换到深色模式
+        function switchToDarkMode() {
+            document.documentElement.classList.remove('light');
+            elements.themeToggle.innerHTML = '<i class="fa fa-moon-o text-space-accent"></i>';
+            appData.currentTheme = 'dark';
+        }
+        
+        // 处理广告图片上传
+        function handleAdImageUpload(adIndex) {
+            return function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // 检查文件大小 (3MB)
+                if (file.size > 3 * 1024 * 1024) {
+                    showNotification('上传失败', '文件大小不能超过3MB', 'error');
+                    return;
+                }
+                
+                // 检查文件类型
+                if (!file.type.startsWith('image/')) {
+                    showNotification('上传失败', '请上传图片文件', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    if (adIndex === 0) {
+                        elements.ad1UrlInput.value = event.target.result;
+                        elements.ad1Img.src = event.target.result;
+                    } else if (adIndex === 1) {
+                        elements.ad2UrlInput.value = event.target.result;
+                        elements.ad2Img.src = event.target.result;
+                    } else if (adIndex === 2) {
+                        elements.ad3UrlInput.value = event.target.result;
+                        elements.ad3Img.src = event.target.result;
+                    }
+                };
+                reader.readAsDataURL(file);
+            };
+        }
+        
         // 设置事件监听器
         function setupEventListeners() {
             // 主题切换
@@ -1406,58 +1400,38 @@
                 } else {
                     switchToDarkMode();
                 }
+                saveLocalSettings();
             });
             
-            // 显示设置对话框
+            // 打开设置面板
             elements.settingsBtn.addEventListener('click', () => {
                 elements.settingsModal.classList.remove('hidden');
             });
             
-            // 关闭设置对话框
+            // 关闭设置面板
             elements.closeSettings.addEventListener('click', () => {
                 elements.settingsModal.classList.add('hidden');
             });
             
-            // 验证GitHub信息并进入编辑模式
+            // 验证GitHub并进入编辑模式
             elements.authenticateBtn.addEventListener('click', async () => {
-                const repo = elements.githubRepo.value.trim();
-                const token = elements.githubToken.value.trim();
-
-                // 验证输入完整性
-                if (!repo) {
-                    showNotification('验证失败', '仓库信息不能为空', 'error');
-                    return;
-                }
-                if (!token) {
-                    showNotification('验证失败', '请输入GitHub Token', 'error');
-                    return;
-                }
-
-                // 显示加载状态
-                elements.authenticateBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i>验证中...';
-                elements.authenticateBtn.disabled = true;
-
-                // 执行Token验证
-                const isTokenValid = await verifyGitHubToken(repo, token);
-
-                // 恢复按钮状态
-                elements.authenticateBtn.innerHTML = '验证并进入编辑模式';
-                elements.authenticateBtn.disabled = false;
-
-                // 根据验证结果处理
-                if (isTokenValid) {
-                    // 验证通过：保存信息并进入编辑页
-                    appData.github.repo = repo;
-                    appData.github.token = token;
+                appData.github.repo = elements.githubRepo.value.trim();
+                appData.github.token = elements.githubToken.value.trim();
+                
+                const isValid = await verifyGitHubToken();
+                if (isValid) {
                     saveLocalSettings();
-
                     elements.settingsModal.classList.add('hidden');
                     elements.editorModal.classList.remove('hidden');
                     showNotification('验证成功', '已进入编辑模式', 'success');
                 } else {
-                    // 验证失败：拒绝进入
-                    showNotification('验证失败', 'Token无效或无仓库访问权限', 'error');
+                    showNotification('验证失败', '仓库或Token不正确', 'error');
                 }
+            });
+            
+            // 打开编辑模式
+            elements.authenticateBtn.addEventListener('click', async () => {
+                // 已在上面实现
             });
             
             // 关闭编辑模式
@@ -1497,6 +1471,7 @@
                 input.accept = '.json';
                 
                 input.onchange = e => {
+                    const file = e.target.files[0];
                     const file = e.target.files[0];
                     if (file) {
                         loadJSONBackup(file);
@@ -1539,18 +1514,12 @@
                 elements.timezoneModal.classList.remove('hidden');
             });
             
-            // 添加时区按钮
-            elements.addTimezone.addEventListener('click', () => {
-                elements.timezoneModal.classList.remove('hidden');
-                elements.newTimezone.focus();
-            });
-            
             // 关闭时区编辑对话框
             elements.closeTimezoneModal.addEventListener('click', () => {
                 elements.timezoneModal.classList.add('hidden');
             });
             
-            // 添加新时区
+            // 添加时区按钮
             elements.addTimezoneBtn.addEventListener('click', () => {
                 const cityName = elements.newTimezone.value.trim();
                 addNewTimezone(cityName);
@@ -1572,9 +1541,16 @@
             // 滚动事件 - 控制顶部导航栏显示/隐藏
             window.addEventListener('scroll', () => {
                 clearTimeout(scrollTimer);
-                elements.header.classList.remove('opacity-0', 'pointer-events-none');
-                elements.header.classList.add('opacity-100', 'pointer-events-auto');
                 
+                if (window.scrollY > 100) {
+                    elements.header.classList.add('opacity-0', 'pointer-events-none');
+                    elements.header.classList.remove('opacity-100', 'pointer-events-auto');
+                } else {
+                    elements.header.classList.remove('opacity-0', 'pointer-events-none');
+                    elements.header.classList.add('opacity-100', 'pointer-events-auto');
+                }
+                
+                let scrollTimer = null;
                 scrollTimer = setTimeout(() => {
                     if (window.scrollY > 100) {
                         elements.header.classList.add('opacity-0', 'pointer-events-none');
@@ -1582,39 +1558,6 @@
                     }
                 }, 3000);
             });
-        }
-        
-        // 处理广告图片上传
-        function handleAdImageUpload(adIndex) {
-            return function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                // 检查文件大小 (3MB)
-                if (file.size > 3 * 1024 * 1024) {
-                    showNotification('上传失败', '文件大小不能超过3MB', 'error');
-                    return;
-                }
-                
-                // 检查文件类型
-                if (!file.type.startsWith('image/')) {
-                    showNotification('上传失败', '请上传图片文件', 'error');
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    if (adIndex === 0) {
-                        elements.ad1UrlInput.value = event.target.result;
-                    } else if (adIndex === 1) {
-                        elements.ad2UrlInput.value = event.target.result;
-                    } else if (adIndex === 2) {
-                        elements.ad3UrlInput.value = event.target.result;
-                    }
-                    showNotification('上传成功', '图片已上传，点击保存更改生效', 'success');
-                };
-                reader.readAsDataURL(file);
-            };
         }
         
         // 初始化应用
