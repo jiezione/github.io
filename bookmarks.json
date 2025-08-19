@@ -2,7 +2,13 @@
   "bookmarks": [
     {
       "name": "书签栏",
-      "bookmarks": []
+      "bookmarks": [
+        {
+          "title": "新书签",
+          "url": "https://",
+          "favicon": ""
+        }
+      ]
     },
     {
       "name": "My files",
@@ -817,6 +823,10 @@
           "favicon": ""
         }
       ]
+    },
+    {
+      "name": "新书签组",
+      "bookmarks": []
     }
   ],
   "ads": [
@@ -847,5 +857,5 @@
       "offset": 1
     }
   ],
-  "updatedAt": "2025-08-19T07:42:12.050Z"
+  "updatedAt": "2025-08-19T07:43:32.997Z"
 }
