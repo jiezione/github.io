@@ -186,7 +186,7 @@
       ]
     },
     {
-      "name": "bd",
+      "name": "https://123.com",
       "bookmarks": [
         {
           "title": "新书签",
@@ -229,5 +229,5 @@
       "offset": 1
     }
   ],
-  "updatedAt": "2025-08-19T09:05:36.521Z"
+  "updatedAt": "2025-08-19T09:08:04.495Z"
 }
