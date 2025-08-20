@@ -28,7 +28,8 @@
                     animation: {
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'float': 'float 6s ease-in-out infinite',
-                        'twinkle': 'twinkle 3s ease-in-out infinite'
+                        'twinkle': 'twinkle 3s ease-in-out infinite',
+                        'spin-slow': 'spin 2s linear infinite'
                     },
                     keyframes: {
                         float: {
@@ -72,6 +73,16 @@
                 border-radius: 50%;
                 animation: orbit var(--orbit-duration, 20s) linear infinite;
             }
+            .rotate-icon {
+                transition: transform 0.3s ease;
+            }
+            .rotate-180 {
+                transform: rotate(180deg);
+            }
+            .loading-overlay {
+                background-color: rgba(10, 14, 23, 0.8);
+                backdrop-filter: blur(4px);
+            }
             @keyframes orbit {
                 from { transform: rotate(0deg); }
                 to { transform: rotate(360deg); }
@@ -80,7 +91,7 @@
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-space-black text-gray-100 min-h-screen font-sans relative overflow-x-hidden">
+<body class="bg-space-black text-gray-100 min-h-screen font-sans relative overflow-x-hidden transition-colors duration-300">
     <!-- 星空背景 -->
     <div id="stars" class="fixed inset-0 z-0 pointer-events-none"></div>
     
@@ -273,6 +284,9 @@
                                 <div>
                                     <label class="block text-sm text-gray-300 mb-1">广告图片</label>
                                     <input type="file" id="ad1-image" accept="image/*" class="w-full text-sm text-gray-300">
+                                    <div id="ad1-image-preview" class="mt-2 text-xs text-gray-400 hidden">
+                                        <i class="fa fa-check-circle text-green-500 mr-1"></i> 已选择文件
+                                    </div>
                                     <p class="text-xs text-gray-500 mt-1">最大 3MB</p>
                                 </div>
                                 <div>
@@ -289,6 +303,9 @@
                                 <div>
                                     <label class="block text-sm text-gray-300 mb-1">广告图片</label>
                                     <input type="file" id="ad2-image" accept="image/*" class="w-full text-sm text-gray-300">
+                                    <div id="ad2-image-preview" class="mt-2 text-xs text-gray-400 hidden">
+                                        <i class="fa fa-check-circle text-green-500 mr-1"></i> 已选择文件
+                                    </div>
                                     <p class="text-xs text-gray-500 mt-1">最大 3MB</p>
                                 </div>
                                 <div>
@@ -305,6 +322,9 @@
                                 <div>
                                     <label class="block text-sm text-gray-300 mb-1">广告图片</label>
                                     <input type="file" id="ad3-image" accept="image/*" class="w-full text-sm text-gray-300">
+                                    <div id="ad3-image-preview" class="mt-2 text-xs text-gray-400 hidden">
+                                        <i class="fa fa-check-circle text-green-500 mr-1"></i> 已选择文件
+                                    </div>
                                     <p class="text-xs text-gray-500 mt-1">最大 3MB</p>
                                 </div>
                                 <div>
@@ -334,7 +354,10 @@
                     取消
                 </button>
                 <button id="save-changes" class="px-6 py-2 bg-space-blue hover:bg-space-light text-white rounded-lg transition-colors">
-                    保存更改
+                    <span id="save-text">保存更改</span>
+                    <span id="save-loading" class="hidden">
+                        <i class="fa fa-spinner fa-spin mr-1"></i> 保存中...
+                    </span>
                 </button>
             </div>
         </div>
@@ -447,6 +470,14 @@
         </div>
     </div>
 
+    <!-- 加载动画覆盖层 -->
+    <div id="loading-overlay" class="loading-overlay fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="text-center">
+            <div class="inline-block w-12 h-12 border-4 border-space-neon border-t-transparent rounded-full animate-spin-slow mb-4"></div>
+            <p class="text-space-neon font-space" id="loading-text">加载中...</p>
+        </div>
+    </div>
+
     <script>
         // 全局数据
         let appData = {
@@ -472,6 +503,9 @@
             defaultRepo: {
                 username: 'default-user',
                 repo: 'default-repo'
+            },
+            ui: {
+                darkMode: true
             }
         };
 
@@ -491,6 +525,8 @@
             closeEdit: document.getElementById('close-edit'),
             cancelEdit: document.getElementById('cancel-edit'),
             saveChanges: document.getElementById('save-changes'),
+            saveText: document.getElementById('save-text'),
+            saveLoading: document.getElementById('save-loading'),
             importBookmarks: document.getElementById('import-bookmarks'),
             exportBookmarks: document.getElementById('export-bookmarks'),
             bookmarkFile: document.getElementById('bookmark-file'),
@@ -506,6 +542,7 @@
             nextReminder: document.getElementById('next-reminder'),
             worldClocks: document.getElementById('world-clocks'),
             addCityBtn: document.getElementById('add-city-btn'),
+            addClockCity: document.getElementById('add-clock-city'),
             citiesList: document.getElementById('cities-list'),
             addCityModal: document.getElementById('add-city-modal'),
             closeCityModals: document.querySelectorAll('.close-city-modal'),
@@ -534,21 +571,29 @@
             notificationMessage: document.getElementById('notification-message'),
             ad1Image: document.getElementById('ad1-image'),
             ad1Url: document.getElementById('ad1-url'),
+            ad1ImagePreview: document.getElementById('ad1-image-preview'),
             ad2Image: document.getElementById('ad2-image'),
             ad2Url: document.getElementById('ad2-url'),
+            ad2ImagePreview: document.getElementById('ad2-image-preview'),
             ad3Image: document.getElementById('ad3-image'),
             ad3Url: document.getElementById('ad3-url'),
+            ad3ImagePreview: document.getElementById('ad3-image-preview'),
             ad1: document.getElementById('ad-1'),
             ad2: document.getElementById('ad-2'),
             ad3: document.getElementById('ad-3'),
             controls: document.getElementById('controls'),
-            stars: document.getElementById('stars')
+            stars: document.getElementById('stars'),
+            loadingOverlay: document.getElementById('loading-overlay'),
+            loadingText: document.getElementById('loading-text')
         };
 
         // 初始化
         async function init() {
             createStars();
             loadSettings();
+            
+            // 应用保存的主题模式
+            applyThemeMode();
             
             // 尝试从部署注入的信息加载仓库配置
             if (window.defaultRepoConfig) {
@@ -559,7 +604,10 @@
                 }
             }
             
+            showLoading('加载数据中...');
             await loadDataFromGitHub();
+            hideLoading();
+            
             setupEventListeners();
             updateUptime();
             setInterval(updateUptime, 1000);
@@ -622,6 +670,12 @@
                     console.error('Failed to load settings', e);
                 }
             }
+            
+            // 加载主题设置
+            const themeSaved = localStorage.getItem('themeMode');
+            if (themeSaved) {
+                appData.ui.darkMode = themeSaved === 'dark';
+            }
         }
 
         // 保存GitHub设置
@@ -633,6 +687,45 @@
                 token: elements.githubToken.value.trim()
             };
             localStorage.setItem('githubSettings', JSON.stringify(appData.github));
+            
+            // 保存主题设置
+            localStorage.setItem('themeMode', appData.ui.darkMode ? 'dark' : 'light');
+        }
+
+        // 应用主题模式
+        function applyThemeMode() {
+            const body = document.body;
+            const icon = elements.themeToggle.querySelector('i');
+            
+            if (appData.ui.darkMode) {
+                body.classList.remove('bg-gray-100', 'text-gray-900');
+                body.classList.add('bg-space-black', 'text-gray-100');
+                icon.classList.remove('fa-sun-o');
+                icon.classList.add('fa-moon-o');
+            } else {
+                body.classList.remove('bg-space-black', 'text-gray-100');
+                body.classList.add('bg-gray-100', 'text-gray-900');
+                icon.classList.remove('fa-moon-o');
+                icon.classList.add('fa-sun-o');
+            }
+        }
+
+        // 切换主题模式
+        function toggleThemeMode() {
+            appData.ui.darkMode = !appData.ui.darkMode;
+            applyThemeMode();
+            saveSettings();
+        }
+
+        // 显示加载动画
+        function showLoading(text = '加载中...') {
+            elements.loadingText.textContent = text;
+            elements.loadingOverlay.classList.remove('hidden');
+        }
+
+        // 隐藏加载动画
+        function hideLoading() {
+            elements.loadingOverlay.classList.add('hidden');
         }
 
         // 验证GitHub Token
@@ -786,7 +879,6 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                showNotification('成功', '数据已同步到GitHub', 'success');
                 return true;
             } catch (e) {
                 console.error('Failed to save data to GitHub', e);
@@ -815,7 +907,7 @@
                 groupEl.className = 'bookmark-group';
                 
                 const collapsedClass = group.collapsed ? 'hidden' : '';
-                const iconClass = group.collapsed ? 'fa-chevron-down' : 'fa-chevron-up';
+                const rotateClass = group.collapsed ? '' : 'rotate-180';
                 
                 groupEl.innerHTML = `
                     <div class="flex justify-between items-center mb-3">
@@ -824,10 +916,10 @@
                             <span class="ml-2 text-xs bg-space-blue/20 px-2 py-0.5 rounded-full">${group.bookmarks.length}</span>
                         </h3>
                         <button class="toggle-group p-1 text-gray-400 hover:text-white" data-index="${groupIndex}">
-                            <i class="fa ${iconClass}"></i>
+                            <i class="fa fa-chevron-down rotate-icon ${rotateClass} transition-transform duration-300"></i>
                         </button>
                     </div>
-                    <div class="bookmark-items grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 ${collapsedClass}">
+                    <div class="bookmark-items grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 ${collapsedClass} transition-all duration-300 ease-in-out">
                         ${group.bookmarks.map((bookmark, bookmarkIndex) => `
                             <a href="${bookmark.url}" target="_blank" class="bg-space-dark/60 hover:bg-space-blue/30 backdrop-blur-sm rounded-lg p-3 flex items-center gap-2 border border-space-blue/20 card-hover">
                                 ${bookmark.favicon ? `<img src="${bookmark.favicon}" alt="${bookmark.title}" class="w-6 h-6 rounded">` : `<div class="w-6 h-6 rounded bg-space-purple flex items-center justify-center text-xs">${bookmark.title.charAt(0).toUpperCase()}</div>`}
@@ -909,6 +1001,7 @@
                 // 添加分组名称编辑事件
                 groupEl.querySelector('.edit-group-name').addEventListener('change', (e) => {
                     appData.bookmarks[groupIndex].name = e.target.value.trim() || '未命名分组';
+                    renderBookmarks();
                 });
                 
                 // 添加书签按钮事件
@@ -933,6 +1026,7 @@
                         const groupIdx = parseInt(e.target.dataset.group);
                         const bookmarkIdx = parseInt(e.target.dataset.index);
                         appData.bookmarks[groupIdx].bookmarks[bookmarkIdx].title = e.target.value.trim() || '未命名网站';
+                        renderBookmarks();
                     });
                 });
                 
@@ -955,6 +1049,7 @@
                                 appData.bookmarks[groupIdx].bookmarks[bookmarkIdx].favicon = '';
                             }
                         }
+                        renderBookmarks();
                     });
                 });
                 
@@ -1054,6 +1149,11 @@
             elements.ad2Url.value = appData.ads[1].url || '';
             elements.ad3Url.value = appData.ads[2].url || '';
             
+            // 显示已选择的图片提示
+            elements.ad1ImagePreview.classList.toggle('hidden', !appData.ads[0].image);
+            elements.ad2ImagePreview.classList.toggle('hidden', !appData.ads[1].image);
+            elements.ad3ImagePreview.classList.toggle('hidden', !appData.ads[2].image);
+            
             // 更新广告预览
             function updateAdPreview(adEl, adData) {
                 if (adData.image && adData.url) {
@@ -1130,56 +1230,61 @@
             
             // 控制添加城市按钮
             elements.addCityBtn.disabled = !isAuthenticated;
+            elements.addClockCity.disabled = !isAuthenticated;
+            
             if (isAuthenticated) {
                 elements.addCityBtn.removeAttribute('disabled');
+                elements.addClockCity.removeAttribute('disabled');
             } else {
                 elements.addCityBtn.setAttribute('disabled', 'true');
+                elements.addClockCity.setAttribute('disabled', 'true');
             }
         }
 
-        // 导入书签HTML文件
-        function importBookmarksFromHtml(html) {
-            try {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const bookmarks = doc.querySelectorAll('a');
-                const folders = doc.querySelectorAll('h3');
+        // 递归解析书签HTML中的文件夹和书签
+        function parseBookmarkNodes(nodes, parentGroup) {
+            for (let i = 0; i < nodes.length; i++) {
+                const node = nodes[i];
+                if (node.nodeType !== 1) continue; // 只处理元素节点
                 
-                if (bookmarks.length === 0) {
-                    showNotification('错误', '未找到书签数据', 'error');
-                    return false;
-                }
-                
-                let currentGroupIndex = -1;
-                
-                // 处理文件夹
-                folders.forEach(folder => {
-                    const folderName = folder.textContent.trim() || '未命名文件夹';
-                    appData.bookmarks.push({
+                if (node.tagName === 'H3') {
+                    // 创建新的书签分组
+                    const folderName = node.textContent.trim() || '未命名文件夹';
+                    const newGroup = {
                         name: folderName,
                         collapsed: false,
                         bookmarks: []
-                    });
-                    currentGroupIndex++;
-                });
-                
-                // 如果没有文件夹，创建一个默认分组
-                if (currentGroupIndex === -1) {
-                    appData.bookmarks.push({
-                        name: '导入的书签',
-                        collapsed: false,
-                        bookmarks: []
-                    });
-                    currentGroupIndex = 0;
-                }
-                
-                // 处理书签
-                bookmarks.forEach(bookmark => {
-                    const title = bookmark.textContent.trim() || '未命名网站';
-                    let url = bookmark.href;
+                    };
+                    
+                    // 添加到父分组或根列表
+                    if (parentGroup) {
+                        parentGroup.bookmarks.push({
+                            title: folderName,
+                            url: '#folder',
+                            isFolder: true,
+                            children: newGroup.bookmarks
+                        });
+                    } else {
+                        appData.bookmarks.push(newGroup);
+                    }
+                    
+                    // 查找下一个DL元素，里面包含该文件夹的内容
+                    let nextNode = node.nextSibling;
+                    while (nextNode) {
+                        if (nextNode.tagName === 'DL') {
+                            // 递归解析子节点
+                            parseBookmarkNodes(nextNode.childNodes, newGroup);
+                            break;
+                        }
+                        nextNode = nextNode.nextSibling;
+                    }
+                } else if (node.tagName === 'A') {
+                    // 处理书签
+                    const title = node.textContent.trim() || '未命名网站';
+                    let url = node.getAttribute('href');
                     
                     // 过滤无效链接
-                    if (!url || url.startsWith('javascript:')) return;
+                    if (!url || url.startsWith('javascript:')) continue;
                     
                     // 尝试获取favicon
                     let favicon = '';
@@ -1192,21 +1297,59 @@
                     
                     // 去重检查
                     const isDuplicate = appData.bookmarks.some(group => 
-                        group.bookmarks.some(b => b.url === url)
+                        group.bookmarks.some(b => !b.isFolder && b.url === url)
                     );
                     
-                    if (!isDuplicate) {
-                        appData.bookmarks[currentGroupIndex].bookmarks.push({
+                    if (!isDuplicate && parentGroup) {
+                        parentGroup.bookmarks.push({
+                            title,
+                            url,
+                            favicon
+                        });
+                    } else if (!isDuplicate) {
+                        // 如果没有父分组，添加到默认分组
+                        if (appData.bookmarks.length === 0) {
+                            appData.bookmarks.push({
+                                name: '导入的书签',
+                                collapsed: false,
+                                bookmarks: []
+                            });
+                        }
+                        appData.bookmarks[0].bookmarks.push({
                             title,
                             url,
                             favicon
                         });
                     }
-                });
+                } else if (node.tagName === 'DL' || node.tagName === 'DIV') {
+                    // 递归处理容器元素
+                    parseBookmarkNodes(node.childNodes, parentGroup);
+                }
+            }
+        }
+
+        // 导入书签HTML文件
+        function importBookmarksFromHtml(html) {
+            try {
+                // 保存当前书签数量用于统计
+                const initialCount = appData.bookmarks.reduce((total, group) => total + group.bookmarks.length, 0);
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // 查找所有书签相关节点
+                const rootNodes = doc.body.childNodes;
+                
+                // 递归解析书签结构
+                parseBookmarkNodes(rootNodes, null);
+                
+                // 计算新增书签数量
+                const finalCount = appData.bookmarks.reduce((total, group) => total + group.bookmarks.length, 0);
+                const importedCount = finalCount - initialCount;
                 
                 renderBookmarks();
                 renderEditBookmarks();
-                showNotification('成功', `成功导入 ${bookmarks.length} 个书签（已去重）`, 'success');
+                showNotification('成功', `成功导入 ${importedCount} 个书签（已去重）`, 'success');
                 return true;
             } catch (e) {
                 console.error('Failed to import bookmarks', e);
@@ -1215,38 +1358,67 @@
             }
         }
 
-        // 导出书签为HTML
-        function exportBookmarksToHtml() {
-            let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-<TITLE>书签导出</TITLE>
-<H1>书签</H1>
-<DL><p>`;
-            
-            appData.bookmarks.forEach(group => {
+        // 递归构建导出的书签HTML结构
+        function buildBookmarkHtml(groups) {
+            let html = '';
+            groups.forEach(group => {
                 html += `<DT><H3>${group.name}</H3>
 <DL><p>`;
                 
-                group.bookmarks.forEach(bookmark => {
-                    html += `<DT><A HREF="${bookmark.url}">${bookmark.title}</A>`;
+                group.bookmarks.forEach(item => {
+                    if (item.isFolder && item.children) {
+                        // 处理子文件夹
+                        html += buildBookmarkHtml([{
+                            name: item.title,
+                            bookmarks: item.children
+                        }]);
+                    } else {
+                        // 处理普通书签
+                        html += `<DT><A HREF="${item.url}">${item.title}</A>`;
+                    }
                 });
                 
                 html += `</DL><p>`;
             });
+            return html;
+        }
+
+        // 导出书签为HTML
+        function exportBookmarksToHtml() {
+            showLoading('正在准备导出文件...');
             
-            html += `</DL><p>`;
-            
-            const blob = new Blob([html], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `space-bookmarks-${new Date().toISOString().slice(0, 10)}.html`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showNotification('成功', '书签已导出', 'success');
+            setTimeout(() => {
+                try {
+                    let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>书签导出</TITLE>
+<H1>星际导航书签</H1>
+<DL><p>`;
+                    
+                    html += buildBookmarkHtml(appData.bookmarks);
+                    html += `</DL><p>`;
+                    
+                    const blob = new Blob([html], { type: 'text/html; charset=UTF-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `space-bookmarks-${new Date().toISOString().slice(0, 10)}.html`;
+                    document.body.appendChild(a);
+                    
+                    // 模拟文件准备完成，然后触发下载
+                    setTimeout(() => {
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        hideLoading();
+                        showNotification('成功', '书签已导出', 'success');
+                    }, 500);
+                } catch (e) {
+                    hideLoading();
+                    console.error('Failed to export bookmarks', e);
+                    showNotification('错误', '导出书签失败: ' + e.message, 'error');
+                }
+            }, 800); // 短暂延迟以显示加载状态
         }
 
         // 显示通知
@@ -1284,17 +1456,7 @@
         // 设置事件监听器
         function setupEventListeners() {
             // 主题切换
-            elements.themeToggle.addEventListener('click', () => {
-                document.documentElement.classList.toggle('light');
-                const icon = elements.themeToggle.querySelector('i');
-                if (document.documentElement.classList.contains('light')) {
-                    icon.classList.remove('fa-moon-o');
-                    icon.classList.add('fa-sun-o');
-                } else {
-                    icon.classList.remove('fa-sun-o');
-                    icon.classList.add('fa-moon-o');
-                }
-            });
+            elements.themeToggle.addEventListener('click', toggleThemeMode);
             
             // 设置按钮
             elements.settingsBtn.addEventListener('click', () => {
@@ -1321,8 +1483,11 @@
                 elements.settingsStatus.classList.add('text-yellow-500');
                 elements.editCenterBtn.classList.add('hidden');
                 
+                showLoading('正在验证仓库信息...');
+                
                 // 验证token
                 const isValid = await validateGitHubToken();
+                hideLoading();
                 
                 if (isValid) {
                     appData.github.validated = true;
@@ -1332,12 +1497,14 @@
                     elements.editCenterBtn.classList.remove('hidden');
                     
                     // 加载数据
+                    showLoading('正在加载数据...');
                     await loadDataFromGitHub();
                     renderBookmarks();
                     renderEditBookmarks();
                     renderCities();
                     updateAdPreviews();
                     updateEditFeaturesStatus();
+                    hideLoading();
                 } else {
                     appData.github.validated = false;
                     elements.settingsStatus.textContent = '验证失败，请检查你的仓库信息和访问令牌';
@@ -1368,13 +1535,26 @@
             
             // 保存更改
             elements.saveChanges.addEventListener('click', async () => {
+                // 显示保存中状态
+                elements.saveText.classList.add('hidden');
+                elements.saveLoading.classList.remove('hidden');
+                elements.saveChanges.disabled = true;
+                
                 // 保存广告设置
                 appData.ads[0].url = elements.ad1Url.value.trim();
                 appData.ads[1].url = elements.ad2Url.value.trim();
                 appData.ads[2].url = elements.ad3Url.value.trim();
                 
                 // 保存更改到GitHub
+                showLoading('正在保存更改...');
                 const success = await saveDataToGitHub();
+                hideLoading();
+                
+                // 恢复按钮状态
+                elements.saveText.classList.remove('hidden');
+                elements.saveLoading.classList.add('hidden');
+                elements.saveChanges.disabled = false;
+                
                 if (success) {
                     // 更新UI
                     renderBookmarks();
@@ -1382,6 +1562,7 @@
                     renderCities();
                     updateAdPreviews();
                     elements.editCenter.classList.add('hidden');
+                    showNotification('成功', '所有更改已保存', 'success');
                 }
             });
             
@@ -1394,9 +1575,12 @@
                 const file = e.target.files[0];
                 if (!file) return;
                 
+                showLoading('正在导入书签...');
+                
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     importBookmarksFromHtml(event.target.result);
+                    hideLoading();
                 };
                 reader.readAsText(file);
                 
@@ -1435,11 +1619,26 @@
                 elements.addGroupModal.classList.add('hidden');
             });
             
-            // 打开添加城市对话框
+            // 打开添加城市对话框（从主界面）
             elements.addCityBtn.addEventListener('click', () => {
-                elements.cityName.value = '';
-                elements.cityTimezone.value = '';
-                elements.addCityModal.classList.remove('hidden');
+                if (appData.github.validated) {
+                    elements.cityName.value = '';
+                    elements.cityTimezone.value = '';
+                    elements.addCityModal.classList.remove('hidden');
+                } else {
+                    showNotification('错误', '请先验证仓库信息', 'error');
+                }
+            });
+            
+            // 打开添加城市对话框（从编辑中心）
+            elements.addClockCity.addEventListener('click', () => {
+                if (appData.github.validated) {
+                    elements.cityName.value = '';
+                    elements.cityTimezone.value = '';
+                    elements.addCityModal.classList.remove('hidden');
+                } else {
+                    showNotification('错误', '请先验证仓库信息', 'error');
+                }
             });
             
             // 关闭添加城市对话框
@@ -1552,7 +1751,7 @@
             });
             
             // 广告图片上传
-            function handleAdImageUpload(input, index) {
+            function handleAdImageUpload(input, previewEl, index) {
                 input.addEventListener('change', (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
@@ -1566,6 +1765,7 @@
                     const reader = new FileReader();
                     reader.onload = (event) => {
                         appData.ads[index].image = event.target.result;
+                        previewEl.classList.remove('hidden');
                         updateAdPreviews();
                     };
                     reader.readAsDataURL(file);
@@ -1575,9 +1775,9 @@
                 });
             }
             
-            handleAdImageUpload(elements.ad1Image, 0);
-            handleAdImageUpload(elements.ad2Image, 1);
-            handleAdImageUpload(elements.ad3Image, 2);
+            handleAdImageUpload(elements.ad1Image, elements.ad1ImagePreview, 0);
+            handleAdImageUpload(elements.ad2Image, elements.ad2ImagePreview, 1);
+            handleAdImageUpload(elements.ad3Image, elements.ad3ImagePreview, 2);
         }
 
         // 初始化默认仓库配置变量（将由deploy.yml注入值）
