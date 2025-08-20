@@ -1,3 +1,4 @@
+# .github/workflows/deploy.yml
 name: Deploy to GitHub Pages
 
 on:
@@ -5,24 +6,19 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Inject repo info into index.html
-      run: |
-        # 获取仓库信息
-        REPO_OWNER="${{ github.repository_owner }}"
-        REPO_NAME="${{ github.event.repository.name }}"
-        
-        # 注入仓库信息到index.html
-        sed -i "s|</body>|  <script>window.defaultRepoInfo = { username: '${REPO_OWNER}', repo: '${REPO_NAME}' };</script>\n</body>|" index.html
-    
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./
-        force_orphan: true
+      - uses: actions/checkout@v4
+
+      - name: Inject Repo Info
+        run: |
+          sed -i "s/<!-- REPO_OWNER -->/${{ github.repository_owner }}/g" index.html
+          REPO_NAME=$(basename ${{ github.repository }})
+          sed -i "s/<!-- REPO_NAME -->/$REPO_NAME/g" index.html
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: .
+          branch: gh-pages
