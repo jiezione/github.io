@@ -1,0 +1,400 @@
+/* 基础样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #0d1117;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(74, 108, 247, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 80% 60%, rgba(123, 97, 255, 0.1) 0%, transparent 30%);
+    background-attachment: fixed;
+    color: #ffffff;
+    line-height: 1.6;
+}
+
+/* 主题样式 */
+.dark {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --text-primary: #ffffff;
+    --text-secondary: #8b949e;
+    --accent: #58a6ff;
+    --border: #30363d;
+}
+
+.light {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f0f6fc;
+    --text-primary: #161b22;
+    --text-secondary: #5e6670;
+    --accent: #0969da;
+    --border: #d0d7de;
+}
+
+.dark body {
+    background-color: #0d1117;
+}
+
+.light body {
+    background-color: #ffffff;
+    color: #161b22;
+}
+
+.light .text-white {
+    color: #161b22 !important;
+}
+
+.light .text-white\/50 {
+    color: #5e6670 !important;
+}
+
+.light .text-white\/60 {
+    color: #484f58 !important;
+}
+
+.light .text-white\/80 {
+    color: #2d333b !important;
+}
+
+.light .bg-white\/5 {
+    background-color: #f0f6fc !important;
+}
+
+.light .bg-white\/10 {
+    background-color: #e9ecef !important;
+}
+
+.light .border-white\/10 {
+    border-color: #d0d7de !important;
+}
+
+.light .border-white\/20 {
+    border-color: #b1bac4 !important;
+}
+
+.light .bookmark-item {
+    background-color: #f6f8fa !important;
+    border-color: #d0d7de !important;
+    color: #161b22 !important;
+}
+
+.light .bookmark-item:hover {
+    background-color: #edeff2 !important;
+}
+
+.light .folder-header {
+    background-color: #f6f8fa !important;
+    border-color: #d0d7de !important;
+    color: #161b22 !important;
+}
+
+.light .dark-white {
+    color: #161b22 !important;
+}
+
+.light .notification-success {
+    background-color: #dafbe1 !important;
+    color: #1a7f37 !important;
+}
+
+.light .notification-error {
+    background-color: #ffdce0 !important;
+    color: #cf222e !important;
+}
+
+.light .notification-info {
+    background-color: #ddf4ff !important;
+    color: #0969da !important;
+}
+
+/* 组件样式 */
+.widget {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.widget:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.city-item {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+.city-name {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.city-time {
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* 书签样式 */
+.bookmark-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.bookmark-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 8px;
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    transition: all 0.2s ease;
+    height: 100px;
+}
+
+.bookmark-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.bookmark-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background-color: rgba(74, 108, 247, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.bookmark-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.bookmark-name {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/* 文件夹样式 */
+.bookmark-folder {
+    margin-bottom: 20px;
+}
+
+.folder-header {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px 8px 0 0;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.folder-icon {
+    margin-right: 8px;
+    color: #f9d076;
+}
+
+.folder-name {
+    flex-grow: 1;
+    font-weight: 500;
+}
+
+.folder-count {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 0 6px;
+    font-size: 12px;
+    margin-right: 12px;
+}
+
+.folder-toggle {
+    transition: transform 0.3s ease;
+}
+
+/* 编辑中心样式 */
+#edit-tabs button {
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#edit-tabs button.active {
+    color: #58a6ff;
+    border-bottom: 2px solid #58a6ff;
+}
+
+.edit-bookmark-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.edit-bookmark-info {
+    display: flex;
+    align-items: center;
+}
+
+.edit-bookmark-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    background-color: rgba(74, 108, 247, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 12px;
+    overflow: hidden;
+}
+
+.edit-bookmark-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.edit-bookmark-actions button {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    margin-left: 8px;
+    transition: color 0.2s ease;
+}
+
+.edit-bookmark-actions button:hover {
+    color: white;
+}
+
+.edit-bookmark-actions .edit-btn:hover {
+    color: #38bdf8;
+}
+
+.edit-bookmark-actions .delete-btn:hover {
+    color: #ef4444;
+}
+
+.edit-city-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+/* 通知样式 */
+.notification-success {
+    background-color: rgba(37, 163, 58, 0.15);
+    color: #a3e635;
+    border: 1px solid rgba(37, 163, 58, 0.3);
+}
+
+.notification-error {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.notification-info {
+    background-color: rgba(56, 189, 248, 0.15);
+    color: #93c5fd;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+/* 底部样式 */
+.dark-white {
+    color: white;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .bookmark-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    
+    .bookmark-item {
+        height: 80px;
+        padding: 8px 4px;
+    }
+    
+    .bookmark-name {
+        font-size: 12px;
+    }
+    
+    .widget {
+        padding: 3px;
+    }
+    
+    .city-time {
+        font-size: 14px;
+    }
+    
+    .ad-container img {
+        height: 20vw;
+        min-height: 100px;
+    }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slideUp {
+    animation: slideUp 0.3s ease forwards;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+    

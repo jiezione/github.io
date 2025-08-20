@@ -1,1 +1,82 @@
-{}
+{
+  "bookmarks": {
+    "folders": {
+      "default": {
+        "name": "默认文件夹",
+        "items": [
+          {
+            "name": "GitHub",
+            "url": "https://github.com"
+          },
+          {
+            "name": "Google",
+            "url": "https://google.com"
+          },
+          {
+            "name": "SpaceX",
+            "url": "https://spacex.com"
+          }
+        ]
+      },
+      "news": {
+        "name": "新闻资讯",
+        "items": [
+          {
+            "name": "NASA",
+            "url": "https://nasa.gov"
+          },
+          {
+            "name": "BBC 科学",
+            "url": "https://bbc.com/science"
+          }
+        ]
+      }
+    },
+    "quickAccess": [
+      {
+        "name": "GitHub",
+        "url": "https://github.com"
+      },
+      {
+        "name": "NASA",
+        "url": "https://nasa.gov"
+      }
+    ]
+  },
+  "cities": [
+    {
+      "name": "北京",
+      "timezone": "Asia/Shanghai"
+    },
+    {
+      "name": "纽约",
+      "timezone": "America/New_York"
+    },
+    {
+      "name": "伦敦",
+      "timezone": "Europe/London"
+    },
+    {
+      "name": "东京",
+      "timezone": "Asia/Tokyo"
+    }
+  ],
+  "ads": {
+    "ad1": {
+      "url": "https://example.com/space-explore",
+      "image": "https://picsum.photos/seed/space1/1200/200",
+      "alt": "探索宇宙奥秘"
+    },
+    "ad2": {
+      "url": "https://example.com/star-travel",
+      "image": "https://picsum.photos/seed/space2/1200/200",
+      "alt": "星际旅行指南"
+    },
+    "ad3": {
+      "url": "https://example.com/space-tech",
+      "image": "https://picsum.photos/seed/space3/1200/200",
+      "alt": "太空探索技术"
+    }
+  }
+}
+    
