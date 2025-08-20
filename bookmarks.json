@@ -1,0 +1,17 @@
+{
+    "bookmarks": {
+        "default": []
+    },
+    "cities": [
+        { "name": "北京", "timezone": "Asia/Shanghai" },
+        { "name": "纽约", "timezone": "America/New_York" },
+        { "name": "伦敦", "timezone": "Europe/London" },
+        { "name": "东京", "timezone": "Asia/Tokyo" }
+    ],
+    "ads": {
+        "ad1": { "image": "", "url": "" },
+        "ad2": { "image": "", "url": "" },
+        "ad3": { "image": "", "url": "" }
+    },
+    "deploymentDate": "2023-01-01T00:00:00.000Z"
+}

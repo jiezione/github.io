@@ -7,41 +7,22 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Inject repo info into index.html
-        run: |
-          # 获取当前仓库信息
-          REPO_INFO="${{ github.repository }}"
-          
-          # 在index.html中注入仓库信息
-          sed -i "s|</head>|<meta name=\"github-repo-info\" content=\"$REPO_INFO\"></head>|" index.html
-          
-          # 如果bookmarks.json不存在，创建它
-          if [ ! -f "bookmarks.json" ]; then
-              echo '{
-                "bookmarks": [],
-                "folders": [],
-                "cities": ["北京", "纽约", "伦敦", "东京"],
-                "cityTimezones": {
-                  "北京": "Asia/Shanghai",
-                  "纽约": "America/New_York",
-                  "伦敦": "Europe/London",
-                  "东京": "Asia/Tokyo"
-                },
-                "ads": [
-                  { "id": 1, "image": "", "url": "" },
-                  { "id": 2, "image": "", "url": "" },
-                  { "id": 3, "image": "", "url": "" }
-                ],
-                "deployDate": "'"$(date -u +"%Y-%m-%dT%H:%M:%SZ")"'"
-              }' > bookmarks.json
-          fi
-      
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
     
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Inject repo info into index.html
+      run: |
+        # 获取仓库信息
+        REPO_OWNER="${{ github.repository_owner }}"
+        REPO_NAME="${{ github.event.repository.name }}"
+        
+        # 注入仓库信息到index.html
+        sed -i "s|</body>|  <script>window.defaultRepoInfo = { username: '${REPO_OWNER}', repo: '${REPO_NAME}' };</script>\n</body>|" index.html
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
+        force_orphan: true
