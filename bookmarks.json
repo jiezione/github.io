@@ -1,5 +1,5 @@
 {
-  "deployDate": "2025-08-20T18:18:41.483Z",
+  "deployDate": "2025-08-20T18:25:56.207Z",
   "bookmarks": [],
   "ads": [
     {
@@ -17,12 +17,12 @@
   ],
   "cities": [
     {
-      "name": "åäº¬",
-      "timezone": "+8"
+      "name": "åæ²",
+      "timezone": "+1"
     },
     {
-      "name": "华沙",
-      "timezone": "+1"
+      "name": "北京",
+      "timezone": "+8"
     }
   ]
 }
