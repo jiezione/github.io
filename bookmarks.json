@@ -20,7 +20,13 @@
     {
       "name": "书签栏",
       "collapsed": false,
-      "bookmarks": []
+      "bookmarks": [
+        {
+          "title": "ABC",
+          "url": "https://abc.com",
+          "favicon": "https://abc.com/favicon.ico"
+        }
+      ]
     },
     {
       "name": "My files",
