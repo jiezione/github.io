@@ -1623,6 +1623,11 @@
       "id": "4",
       "name": "东京",
       "timezone": "Asia/Tokyo"
+    },
+    {
+      "id": "city_1755722381575_778",
+      "name": "华沙",
+      "timezone": "+1"
     }
   ],
   "ads": [
