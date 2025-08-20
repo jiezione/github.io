@@ -892,7 +892,13 @@
                 // 合并数据，新数据覆盖默认数据
                 if (data.bookmarks) appData.bookmarks = data.bookmarks;
                 if (data.ads) appData.ads = data.ads;
-                if (data.cities) appData.cities = data.cities;
+                if (data.cities) {
+                    // 修复城市名称可能的编码问题
+                    appData.cities = data.cities.map(city => ({
+                        name: fixEncoding(city.name),
+                        timezone: city.timezone
+                    }));
+                }
                 // 不更新部署时间，保持首次部署时间
                 
                 showNotification('成功', '数据加载成功', 'success');
@@ -1021,7 +1027,7 @@
                 groupEl.innerHTML = `
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="text-lg font-space text-white flex items-center">
-                            <i class="fa fa-folder text-space-neon mr-2"></i> ${group.name}
+                            <i class="fa fa-folder text-space-neon mr-2"></i> ${fixEncoding(group.name)}
                             <span class="ml-2 text-xs bg-space-blue/20 px-2 py-0.5 rounded-full">${group.bookmarks.length}</span>
                         </h3>
                         <button class="toggle-group p-1 text-gray-400 hover:text-white" data-index="${groupIndex}">
@@ -1031,8 +1037,8 @@
                     <div class="bookmark-items grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 ${collapsedClass} transition-all duration-300 ease-in-out">
                         ${group.bookmarks.map((bookmark, bookmarkIndex) => `
                             <a href="${bookmark.url}" target="_blank" class="bg-space-dark/60 hover:bg-space-blue/30 backdrop-blur-sm rounded-lg p-3 flex items-center gap-2 border border-space-blue/20 card-hover">
-                                ${bookmark.favicon ? `<img src="${bookmark.favicon}" alt="${bookmark.title}" class="w-6 h-6 rounded">` : `<div class="w-6 h-6 rounded bg-space-purple flex items-center justify-center text-xs">${bookmark.title.charAt(0).toUpperCase()}</div>`}
-                                <span class="text-sm truncate">${bookmark.title}</span>
+                                ${bookmark.favicon ? `<img src="${bookmark.favicon}" alt="${fixEncoding(bookmark.title)}" class="w-6 h-6 rounded">` : `<div class="w-6 h-6 rounded bg-space-purple flex items-center justify-center text-xs">${fixEncoding(bookmark.title).charAt(0).toUpperCase()}</div>`}
+                                <span class="text-sm truncate">${fixEncoding(bookmark.title)}</span>
                             </a>
                         `).join('')}
                     </div>
@@ -1073,7 +1079,7 @@
                     <div class="flex justify-between items-center mb-4">
                         <div class="flex items-center">
                             <i class="fa fa-folder text-space-neon mr-2"></i>
-                            <input type="text" value="${group.name}" class="edit-group-name bg-transparent border-b border-transparent hover:border-space-blue/50 focus:border-space-neon focus:outline-none text-white" data-index="${groupIndex}">
+                            <input type="text" value="${fixEncoding(group.name)}" class="edit-group-name bg-transparent border-b border-transparent hover:border-space-blue/50 focus:border-space-neon focus:outline-none text-white" data-index="${groupIndex}">
                             <span class="ml-2 text-xs bg-space-blue/20 px-2 py-0.5 rounded-full">${group.bookmarks.length}</span>
                         </div>
                         <div class="flex gap-2">
@@ -1089,7 +1095,7 @@
                         ${group.bookmarks.map((bookmark, bookmarkIndex) => `
                             <div class="flex items-center gap-3 p-2 hover:bg-space-blue/10 rounded">
                                 <div class="flex-1 grid grid-cols-2 gap-2">
-                                    <input type="text" value="${bookmark.title}" class="edit-bookmark-title bg-transparent border-b border-transparent hover:border-space-blue/50 focus:border-space-neon focus:outline-none text-white text-sm" data-group="${groupIndex}" data-index="${bookmarkIndex}">
+                                    <input type="text" value="${fixEncoding(bookmark.title)}" class="edit-bookmark-title bg-transparent border-b border-transparent hover:border-space-blue/50 focus:border-space-neon focus:outline-none text-white text-sm" data-group="${groupIndex}" data-index="${bookmarkIndex}">
                                     <input type="text" value="${bookmark.url}" class="edit-bookmark-url bg-transparent border-b border-transparent hover:border-space-blue/50 focus:border-space-neon focus:outline-none text-gray-300 text-sm" data-group="${groupIndex}" data-index="${bookmarkIndex}">
                                 </div>
                                 <button class="delete-bookmark-btn text-red-400 hover:text-red-300 p-1" data-group="${groupIndex}" data-index="${bookmarkIndex}" title="删除书签">
@@ -1109,7 +1115,7 @@
                 
                 // 添加分组名称编辑事件
                 groupEl.querySelector('.edit-group-name').addEventListener('change', (e) => {
-                    appData.bookmarks[groupIndex].name = e.target.value.trim() || '未命名分组';
+                    appData.bookmarks[groupIndex].name = sanitizeText(e.target.value.trim()) || '未命名分组';
                     renderBookmarks();
                 });
                 
@@ -1125,7 +1131,7 @@
                 groupEl.querySelector('.delete-group-btn').addEventListener('click', () => {
                     elements.deleteType.value = 'group';
                     elements.deleteId.value = groupIndex;
-                    elements.deleteMessage.textContent = `你确定要删除"${group.name}"分组吗？该分组下的所有书签也将被删除。`;
+                    elements.deleteMessage.textContent = `你确定要删除"${fixEncoding(group.name)}"分组吗？该分组下的所有书签也将被删除。`;
                     elements.confirmDeleteModal.classList.remove('hidden');
                 });
                 
@@ -1134,7 +1140,7 @@
                     input.addEventListener('change', (e) => {
                         const groupIdx = parseInt(e.target.dataset.group);
                         const bookmarkIdx = parseInt(e.target.dataset.index);
-                        appData.bookmarks[groupIdx].bookmarks[bookmarkIdx].title = e.target.value.trim() || '未命名网站';
+                        appData.bookmarks[groupIdx].bookmarks[bookmarkIdx].title = sanitizeText(e.target.value.trim()) || '未命名网站';
                         renderBookmarks();
                     });
                 });
@@ -1171,7 +1177,7 @@
                         
                         elements.deleteType.value = 'bookmark';
                         elements.deleteId.value = JSON.stringify({ group: groupIdx, index: bookmarkIdx });
-                        elements.deleteMessage.textContent = `你确定要删除书签"${bookmarkTitle}"吗？`;
+                        elements.deleteMessage.textContent = `你确定要删除书签"${fixEncoding(bookmarkTitle)}"吗？`;
                         elements.confirmDeleteModal.classList.remove('hidden');
                     });
                 });
@@ -1189,7 +1195,7 @@
                 
                 cityEl.innerHTML = `
                     <div>
-                        <div class="font-medium text-white">${city.name}</div>
+                        <div class="font-medium text-white">${fixEncoding(city.name)}</div>
                         <div class="text-sm text-gray-400">UTC${city.timezone}</div>
                     </div>
                     <button class="delete-city-btn text-red-400 hover:text-red-300 p-1" data-index="${index}">
@@ -1203,7 +1209,7 @@
                 cityEl.querySelector('.delete-city-btn').addEventListener('click', () => {
                     elements.deleteType.value = 'city';
                     elements.deleteId.value = index;
-                    elements.deleteMessage.textContent = `你确定要删除城市"${city.name}"吗？`;
+                    elements.deleteMessage.textContent = `你确定要删除城市"${fixEncoding(city.name)}"吗？`;
                     elements.confirmDeleteModal.classList.remove('hidden');
                 });
             });
@@ -1235,7 +1241,7 @@
                 const clockEl = document.createElement('div');
                 clockEl.className = 'flex justify-between items-center p-2 hover:bg-space-blue/10 rounded';
                 clockEl.innerHTML = `
-                    <span class="font-medium">${city.name}</span>
+                    <span class="font-medium">${fixEncoding(city.name)}</span>
                     <span class="text-space-neon">${timeString}</span>
                 `;
                 
@@ -1358,6 +1364,49 @@
             }
         }
 
+        // 修复可能的编码问题
+        function fixEncoding(str) {
+            if (!str) return '';
+            
+            try {
+                // 尝试修复常见的编码问题
+                // 1. 修复HTML实体编码
+                const doc = new DOMParser().parseFromString(str, 'text/html');
+                let decoded = doc.documentElement.textContent;
+                
+                // 2. 修复可能的双重编码
+                if (decoded.includes('&amp;')) {
+                    decoded = decoded.replace(/&amp;/g, '&');
+                    const doc2 = new DOMParser().parseFromString(decoded, 'text/html');
+                    decoded = doc2.documentElement.textContent;
+                }
+                
+                // 3. 替换不可见字符
+                decoded = decoded.replace(/[\x00-\x1F\x7F]/g, '');
+                
+                return decoded;
+            } catch (e) {
+                console.error('Error fixing encoding:', e);
+                return str;
+            }
+        }
+
+        // 清理文本输入，防止乱码
+        function sanitizeText(str) {
+            if (!str) return '';
+            
+            // 先修复编码
+            let sanitized = fixEncoding(str);
+            
+            // 移除控制字符
+            sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
+            
+            // 修剪空白
+            sanitized = sanitized.trim();
+            
+            return sanitized;
+        }
+
         // 递归解析书签HTML中的文件夹和书签
         function parseBookmarkNodes(nodes, parentGroup, importStats) {
             for (let i = 0; i < nodes.length; i++) {
@@ -1377,6 +1426,9 @@
                     if (!folderName && node.getAttribute('title')) {
                         folderName = node.getAttribute('title').trim() || '未命名文件夹';
                     }
+                    
+                    // 修复文件夹名称的编码问题
+                    folderName = fixEncoding(folderName);
                     
                     const newGroup = {
                         name: folderName,
@@ -1413,13 +1465,23 @@
                     let anchorNode = node.tagName === 'A' ? node : node.querySelector('a');
                     if (!anchorNode) continue;
                     
-                    const title = anchorNode.textContent.trim() || '未命名网站';
+                    // 修复标题的编码问题
+                    let title = anchorNode.textContent.trim() || '未命名网站';
+                    title = fixEncoding(title);
+                    
                     let url = anchorNode.getAttribute('href');
                     
-                    // 过滤无效链接
-                    if (!url || url.startsWith('javascript:') || url.startsWith('data:')) {
+                    // 过滤无效链接，但放宽限制
+                    if (!url) {
                         importStats.skipped++;
-                        importStats.skippedReasons.push(`无效链接: ${url || '空链接'}`);
+                        importStats.skippedReasons.push(`空链接: ${title}`);
+                        return;
+                    }
+                    
+                    // 允许更多类型的链接，包括mailto和ftp
+                    if (url.startsWith('javascript:') || url.startsWith('data:')) {
+                        importStats.skipped++;
+                        importStats.skippedReasons.push(`不支持的链接类型: ${url} (${title})`);
                         return;
                     }
                     
@@ -1432,9 +1494,9 @@
                             url = 'http://' + url;
                             new URL(url); // 再次检查
                         } catch (err) {
-                            console.error('Invalid URL after adding protocol', err);
+                            console.error('Invalid URL', err);
                             importStats.skipped++;
-                            importStats.skippedReasons.push(`无效URL格式: ${url}`);
+                            importStats.skippedReasons.push(`无效URL格式: ${url} (${title})`);
                             return;
                         }
                     }
@@ -1447,11 +1509,11 @@
                     } catch (err) {
                         console.error('Invalid URL', err);
                         importStats.skipped++;
-                        importStats.skippedReasons.push(`URL解析失败: ${url}`);
+                        importStats.skippedReasons.push(`URL解析失败: ${url} (${title})`);
                         return;
                     }
                     
-                    // 改进的去重检查 - 考虑不同协议和www前缀
+                    // 去重检查 - 考虑不同协议和www前缀
                     const normalizedUrl = normalizeUrl(url);
                     const isDuplicate = appData.bookmarks.some(group => 
                         group.bookmarks.some(b => !b.isFolder && normalizeUrl(b.url) === normalizedUrl)
@@ -1459,7 +1521,7 @@
                     
                     if (isDuplicate) {
                         importStats.duplicates++;
-                        importStats.duplicateUrls.push(url);
+                        importStats.duplicateUrls.push(`${title}: ${url}`);
                         return;
                     }
                     
@@ -1621,6 +1683,16 @@
                     </div>
                 </div>
                 ` : ''}
+                
+                ${stats.totalFound > 0 && stats.imported === 0 && stats.duplicates === 0 && stats.skipped === stats.totalFound ? `
+                <div class="bg-yellow-900/30 p-4 rounded-lg">
+                    <h4 class="font-medium text-yellow-400 mb-2">导入提示</h4>
+                    <p class="text-sm text-gray-300">
+                        所有书签都无法导入。这可能是由于文件格式问题或编码问题。
+                        请尝试另一种格式的书签文件，或检查文件是否损坏。
+                    </p>
+                </div>
+                ` : ''}
             `;
             
             elements.importDetailsModal.classList.remove('hidden');
@@ -1630,7 +1702,7 @@
         function buildBookmarkHtml(groups) {
             let html = '';
             groups.forEach(group => {
-                html += `<DT><H3>${group.name}</H3>
+                html += `<DT><H3>${fixEncoding(group.name)}</H3>
 <DL><p>`;
                 
                 group.bookmarks.forEach(item => {
@@ -1642,7 +1714,7 @@
                         }]);
                     } else {
                         // 处理普通书签
-                        html += `<DT><A HREF="${item.url}">${item.title}</A>`;
+                        html += `<DT><A HREF="${item.url}">${fixEncoding(item.title)}</A>`;
                     }
                 });
                 
@@ -1701,7 +1773,6 @@
                     elements.notificationIcon.className = 'fa fa-check-circle text-green-500 mt-0.5 mr-3';
                     break;
                 case 'error':
-                    elements.notificationIcon.className = 'fa fa-exclamation-circle text-red-500 mt-0.5 mr-3';
                     elements.notificationIcon.className = 'fa fa-exclamation-circle text-red-500 mt-0.5 mr-3';
                     break;
                 case 'warning':
@@ -1858,7 +1929,8 @@
                     importBookmarksFromHtml(event.target.result);
                     hideLoading();
                 };
-                reader.readAsText(file);
+                // 明确指定编码为UTF-8，解决中文乱码问题
+                reader.readAsText(file, 'UTF-8');
                 
                 // 重置文件输入，允许重复选择同一个文件
                 elements.bookmarkFile.value = '';
@@ -1890,7 +1962,7 @@
             // 提交添加分组
             elements.addGroupForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const groupName = elements.groupName.value.trim() || '未命名分组';
+                const groupName = sanitizeText(elements.groupName.value.trim()) || '未命名分组';
                 
                 appData.bookmarks.push({
                     name: groupName,
@@ -1934,7 +2006,7 @@
             // 提交添加城市
             elements.addCityForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const cityName = elements.cityName.value.trim();
+                const cityName = sanitizeText(elements.cityName.value.trim());
                 const timezone = elements.cityTimezone.value.trim();
                 
                 if (!cityName || !timezone) {
@@ -1968,7 +2040,7 @@
             elements.addBookmarkForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const groupIndex = parseInt(elements.bookmarkGroupId.value);
-                const title = elements.bookmarkTitle.value.trim() || '未命名网站';
+                const title = sanitizeText(elements.bookmarkTitle.value.trim()) || '未命名网站';
                 const url = elements.bookmarkUrl.value.trim();
                 
                 if (!url) {
