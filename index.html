@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>星际导航 | 外太空书签</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%231a1a2e'/%3E%3Ccircle cx='50' cy='50' r='25' fill='%23e2b13c'/%3E%3Ccircle cx='35' cy='40' r='5' fill='white'/%3E%3Ccircle cx='65' cy='40' r='3' fill='white'/%3E%3Ccircle cx='40' cy='60' r='4' fill='white'/%3E%3Ccircle cx='60' cy='65' r='6' fill='white'/%3E%3C/svg%3E" type="image/svg+xml">
+    <title>星际导航 | Space Bookmarks</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%231a202c'/%3E%3Ccircle cx='50' cy='50' r='25' fill='%233b82f6'/%3E%3Ccircle cx='65' cy='35' r='8' fill='white'/%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment-timezone@0.5.43/moment-timezone-with-data.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -16,37 +14,36 @@
                 extend: {
                     colors: {
                         space: {
-                            dark: '#0d1117',
-                            darker: '#0a0e14',
-                            blue: '#165DFF',
-                            purple: '#7b2cbf',
-                            pink: '#e63946',
-                            accent: '#4cc9f0',
-                            glow: '#48cae4',
-                        },
-                        star: {
-                            white: '#ffffff',
-                            yellow: '#f1faee',
-                            blue: '#a8dadc',
+                            dark: '#0a0f1f',
+                            darker: '#050810',
+                            blue: '#1e3a8a',
+                            purple: '#4c1d95',
+                            pink: '#ec4899',
+                            glow: '#3b82f6',
+                            accent: '#8b5cf6'
                         }
                     },
                     fontFamily: {
-                        space: ['Orbitron', 'sans-serif', 'system-ui'],
+                        space: ['Inter', 'system-ui', 'sans-serif']
                     },
                     animation: {
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'float': 'float 6s ease-in-out infinite',
                         'twinkle': 'twinkle 3s ease-in-out infinite',
-                        'spin-slow': 'spin 20s linear infinite',
+                        'orbit': 'orbit 20s linear infinite'
                     },
                     keyframes: {
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
+                            '50%': { transform: 'translateY(-10px)' }
                         },
                         twinkle: {
                             '0%, 100%': { opacity: 0.6 },
-                            '50%': { opacity: 1 },
+                            '50%': { opacity: 1 }
+                        },
+                        orbit: {
+                            '0%': { transform: 'rotate(0deg) translateX(100px) rotate(0deg)' },
+                            '100%': { transform: 'rotate(360deg) translateX(100px) rotate(-360deg)' }
                         }
                     }
                 }
@@ -59,33 +56,16 @@
                 content-visibility: auto;
             }
             .text-shadow {
-                text-shadow: 0 0 8px rgba(72, 202, 228, 0.8);
-            }
-            .text-shadow-lg {
-                text-shadow: 0 0 12px rgba(72, 202, 228, 0.8);
+                text-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
             }
             .glow {
-                box-shadow: 0 0 10px rgba(72, 202, 228, 0.6);
-            }
-            .glow-lg {
-                box-shadow: 0 0 15px rgba(72, 202, 228, 0.8);
+                box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
             }
             .star {
                 position: absolute;
                 background-color: white;
                 border-radius: 50%;
-                animation: twinkle 2s infinite ease-in-out;
-            }
-            .space-gradient {
-                background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-            }
-            .folder-open {
-                transform: rotate(90deg);
-                transition: transform 0.3s ease;
-            }
-            .folder-closed {
-                transform: rotate(0);
-                transition: transform 0.3s ease;
+                animation: twinkle 3s infinite;
             }
             .scrollbar-hide::-webkit-scrollbar {
                 display: none;
@@ -94,773 +74,836 @@
                 -ms-overflow-style: none;
                 scrollbar-width: none;
             }
-            .button-hover-effect {
-                transition: all 0.2s ease;
+            .folder-content {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
             }
-            .button-hover-effect:hover {
-                transform: translateY(-1px);
+            .folder-open .folder-content {
+                max-height: 2000px;
+                transition: max-height 0.6s ease-in;
             }
-            .button-hover-effect:active {
-                transform: translateY(1px);
+            .folder-icon {
+                transition: transform 0.3s ease;
+            }
+            .folder-open .folder-icon {
+                transform: rotate(90deg);
             }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-space-dark text-gray-200 min-h-screen overflow-x-hidden font-space relative">
+<body class="font-space bg-gray-50 text-gray-900 dark:bg-space-dark dark:text-gray-100 transition-colors duration-300 min-h-screen relative overflow-x-hidden">
     <!-- 星空背景 -->
-    <div id="stars" class="fixed inset-0 z-0 pointer-events-none"></div>
+    <div id="stars" class="fixed inset-0 -z-10 pointer-events-none"></div>
     
-    <!-- 顶部导航栏 -->
-    <header id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-space-dark/80 backdrop-blur-md border-b border-space-accent/20">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <div class="text-space-glow text-2xl">
-                    <i class="fa fa-globe"></i>
-                </div>
-                <h1 class="text-xl md:text-2xl font-bold text-space-glow text-shadow">星际导航</h1>
-            </div>
-            
-            <div class="hidden md:flex items-center space-x-6">
-                <div class="relative">
-                    <input type="text" id="search-input" placeholder="搜索书签..." 
-                        class="bg-space-darker border border-space-accent/30 rounded-full px-4 py-2 pl-10 text-sm focus:outline-none focus:border-space-glow focus:glow w-48 lg:w-64 transition-all">
-                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
-            </div>
-            
-            <div class="flex items-center space-x-4">
-                <button id="theme-toggle" class="p-2 rounded-full hover:bg-space-darker transition-colors button-hover-effect" title="切换主题" aria-label="切换主题">
-                    <i class="fa fa-moon-o text-space-glow"></i>
-                </button>
-                <button id="settings-btn" class="p-2 rounded-full hover:bg-space-darker transition-colors button-hover-effect" title="设置" aria-label="设置">
-                    <i class="fa fa-cog text-space-glow"></i>
-                </button>
-                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-full hover:bg-space-darker transition-colors button-hover-effect" title="菜单" aria-label="菜单">
-                    <i class="fa fa-bars text-space-glow"></i>
-                </button>
-            </div>
-        </div>
-        
-        <!-- 移动端搜索栏 -->
-        <div class="md:hidden px-4 pb-3">
-            <div class="relative">
-                <input type="text" id="mobile-search-input" placeholder="搜索书签..." 
-                    class="bg-space-darker border border-space-accent/30 rounded-full px-4 py-2 pl-10 text-sm focus:outline-none focus:border-space-glow focus:glow w-full transition-all">
-                <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            </div>
-        </div>
-    </header>
+    <!-- 控制按钮 (滚动时显示，停止滚动后隐藏) -->
+    <div id="controls" class="fixed top-4 right-4 z-50 opacity-0 transition-opacity duration-500 flex gap-2">
+        <button id="theme-toggle" class="p-2 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all">
+            <i class="fa fa-moon-o dark:hidden text-gray-800"></i>
+            <i class="fa fa-sun-o hidden dark:block text-yellow-300"></i>
+        </button>
+        <button id="settings-btn" class="p-2 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all" disabled>
+            <i class="fa fa-cog text-gray-800 dark:text-gray-200"></i>
+        </button>
+    </div>
 
-    <!-- 主内容区 -->
-    <main class="container mx-auto px-4 pt-24 pb-16 relative z-10">
+    <!-- 主容器 -->
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- 头部 -->
+        <header class="mb-8 text-center">
+            <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-2 animate-pulse-slow">
+                星际导航
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-[clamp(1rem,2vw,1.2rem)]">
+                探索宇宙中的每一个角落
+            </p>
+        </header>
+
+        <!-- 搜索框 -->
+        <div class="relative mb-8 max-w-2xl mx-auto">
+            <input 
+                type="text" 
+                id="search-input" 
+                placeholder="搜索书签..." 
+                class="w-full py-3 px-5 pr-12 rounded-full bg-white/80 dark:bg-space-darker/80 backdrop-blur-md border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-lg"
+            >
+            <i class="fa fa-search absolute right-5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        </div>
+
         <!-- 顶部小组件 -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <!-- 在线时长统计 -->
-            <div class="bg-space-darker/60 backdrop-blur-sm rounded-xl p-4 border border-space-accent/20 hover:border-space-accent/40 transition-all group">
-                <div class="flex justify-between items-start mb-3">
-                    <h3 class="text-space-glow font-semibold">星际航行时间</h3>
-                    <div class="text-space-glow/70 group-hover:text-space-glow transition-colors">
-                        <i class="fa fa-clock-o"></i>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <!-- 在线时长 -->
+            <div class="bg-white/70 dark:bg-space-darker/70 backdrop-blur-md rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-semibold text-lg text-blue-600 dark:text-blue-400">
+                        <i class="fa fa-clock-o mr-2"></i>太空航行时间
+                    </h3>
+                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fa fa-rocket text-blue-500 dark:text-blue-400"></i>
                     </div>
                 </div>
-                <div class="text-center">
-                    <div id="online-duration" class="text-2xl md:text-3xl font-bold text-white mb-2">00:00:00</div>
-                    <p class="text-sm text-gray-400">自部署以来</p>
-                </div>
+                <div class="text-3xl font-bold" id="online-time">00:00:00</div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">自部署以来</p>
             </div>
-            
+
             <!-- 健康提醒 -->
-            <div class="bg-space-darker/60 backdrop-blur-sm rounded-xl p-4 border border-space-accent/20 hover:border-space-accent/40 transition-all group">
-                <div class="flex justify-between items-start mb-3">
-                    <h3 class="text-space-glow font-semibold">健康提醒</h3>
-                    <div class="text-space-glow/70 group-hover:text-space-glow transition-colors">
-                        <i class="fa fa-heartbeat"></i>
+            <div class="bg-white/70 dark:bg-space-darker/70 backdrop-blur-md rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-semibold text-lg text-purple-600 dark:text-purple-400">
+                        <i class="fa fa-heartbeat mr-2"></i>健康提醒
+                    </h3>
+                    <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fa fa-moon-o text-purple-500 dark:text-purple-400"></i>
                     </div>
                 </div>
-                <div id="health-reminder" class="text-center">
-                    <p class="text-lg text-white mb-2">准备好探索宇宙了吗？</p>
-                    <p class="text-sm text-gray-400">保持健康，探索更远</p>
-                </div>
+                <div class="text-xl font-medium" id="health-reminder">该休息一下了</div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2" id="next-reminder">下次提醒: 30分钟后</p>
             </div>
-            
+
             <!-- 世界时钟 -->
-            <div class="bg-space-darker/60 backdrop-blur-sm rounded-xl p-4 border border-space-accent/20 hover:border-space-accent/40 transition-all group">
-                <div class="flex justify-between items-start mb-3">
-                    <h3 class="text-space-glow font-semibold">星际时间</h3>
-                    <div class="text-space-glow/70 group-hover:text-space-glow transition-colors">
-                        <i class="fa fa-globe"></i>
+            <div class="bg-white/70 dark:bg-space-darker/70 backdrop-blur-md rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-semibold text-lg text-pink-600 dark:text-pink-400">
+                        <i class="fa fa-globe mr-2"></i>世界时钟
+                    </h3>
+                    <div class="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fa fa-clock-o text-pink-500 dark:text-pink-400"></i>
                     </div>
                 </div>
-                <div id="world-clock" class="grid grid-cols-2 gap-2">
-                    <!-- 时钟内容将通过JS动态生成 -->
+                <div id="world-clocks" class="space-y-2">
+                    <!-- 时钟将通过JS动态添加 -->
                 </div>
             </div>
         </div>
-        
+
         <!-- 广告位1 -->
-        <div id="ad-1" class="mb-8 rounded-xl overflow-hidden border border-space-accent/20 hover:border-space-accent/40 transition-all h-40 md:h-52 relative group">
-            <div class="absolute inset-0 flex items-center justify-center bg-space-darker/40">
-                <p class="text-gray-500 text-center px-4">广告位 1</p>
+        <div class="mb-10 rounded-2xl overflow-hidden shadow-lg bg-gray-100 dark:bg-gray-800 h-40 md:h-52 flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-700 relative group" id="ad-1">
+            <div class="text-center p-4">
+                <p class="text-gray-500 dark:text-gray-400 text-sm">广告位</p>
+                <p class="text-gray-400 dark:text-gray-500 text-xs">编辑中心可配置</p>
             </div>
         </div>
-        
+
         <!-- 书签区域 -->
-        <div class="mb-8">
-            <h2 class="text-xl font-bold mb-4 text-space-glow text-shadow">
-                <i class="fa fa-bookmark-o mr-2"></i>星际书签
+        <div class="mb-10">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fa fa-bookmark-o text-blue-500 mr-2"></i>
+                星际站点
+                <span class="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400" id="bookmark-count">(0)</span>
             </h2>
             
-            <!-- 书签文件夹和内容 -->
             <div id="bookmarks-container" class="space-y-6">
-                <!-- 书签内容将通过JS动态生成 -->
-                <div class="text-center py-10 text-gray-500">
-                    <i class="fa fa-folder-open-o text-4xl mb-3"></i>
-                    <p>尚未添加书签</p>
-                    <p class="text-sm mt-1">在编辑中心添加您的第一个书签</p>
+                <!-- 书签文件夹将通过JS动态添加 -->
+                <div class="text-center py-10 text-gray-500 dark:text-gray-400">
+                    <i class="fa fa-folder-open-o text-4xl mb-3 opacity-50"></i>
+                    <p>暂无书签，在编辑中心添加你的第一个站点吧</p>
                 </div>
             </div>
         </div>
-        
+
         <!-- 广告位2 -->
-        <div id="ad-2" class="mb-8 rounded-xl overflow-hidden border border-space-accent/20 hover:border-space-accent/40 transition-all h-40 md:h-52 relative group">
-            <div class="absolute inset-0 flex items-center justify-center bg-space-darker/40">
-                <p class="text-gray-500 text-center px-4">广告位 2</p>
+        <div class="mb-10 rounded-2xl overflow-hidden shadow-lg bg-gray-100 dark:bg-gray-800 h-40 md:h-52 flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-700 relative group" id="ad-2">
+            <div class="text-center p-4">
+                <p class="text-gray-500 dark:text-gray-400 text-sm">广告位</p>
+                <p class="text-gray-400 dark:text-gray-500 text-xs">编辑中心可配置</p>
             </div>
         </div>
-        
+
         <!-- 广告位3 -->
-        <div id="ad-3" class="mb-8 rounded-xl overflow-hidden border border-space-accent/20 hover:border-space-accent/40 transition-all h-40 md:h-52 relative group">
-            <div class="absolute inset-0 flex items-center justify-center bg-space-darker/40">
-                <p class="text-gray-500 text-center px-4">广告位 3</p>
+        <div class="mb-10 rounded-2xl overflow-hidden shadow-lg bg-gray-100 dark:bg-gray-800 h-40 md:h-52 flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-700 relative group" id="ad-3">
+            <div class="text-center p-4">
+                <p class="text-gray-500 dark:text-gray-400 text-sm">广告位</p>
+                <p class="text-gray-400 dark:text-gray-500 text-xs">编辑中心可配置</p>
             </div>
         </div>
-    </main>
 
-    <!-- 页脚 -->
-    <footer class="bg-space-darker/80 backdrop-blur-md border-t border-space-accent/20 py-6 relative z-10">
-        <div class="container mx-auto px-4">
-            <div class="dark-white text-center space-y-2">
-                <div id="total-bookmarks">共收录 0 个网站</div>
-                <div id="copyright">Copyright © 2018-2025 example.com, All Rights Reserved</div>
+        <!-- 底部信息 -->
+        <footer class="mt-auto py-6 border-t border-gray-200 dark:border-gray-800">
+            <div class="dark-white flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>共收录<span id="total-sites">0</span>个网站</div>
+                <div>Copyright © 2018-<span id="current-year">2023</span> <span id="hostname">space-navigator</span>, All Rights Reserved</div>
             </div>
-        </div>
-    </footer>
-
-    <!-- 设置模态框 -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-        <div class="bg-space-dark border border-space-accent/30 rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto scrollbar-hide">
-            <div class="p-5 border-b border-space-accent/20 flex justify-between items-center">
-                <h3 class="text-xl font-bold text-space-glow">设置</h3>
-                <button id="close-settings" class="p-2 hover:bg-space-darker rounded-full transition-colors button-hover-effect" title="关闭" aria-label="关闭设置">
-                    <i class="fa fa-times text-gray-400 hover:text-white"></i>
-                </button>
-            </div>
-            
-            <div class="p-5 space-y-6">
-                <!-- GitHub 配置 -->
-                <div class="space-y-4">
-                    <h4 class="font-semibold text-white flex items-center">
-                        <i class="fa fa-github mr-2 text-space-glow"></i> GitHub 配置
-                    </h4>
-                    
-                    <div class="space-y-3">
-                        <div>
-                            <label class="block text-sm text-gray-400 mb-1" for="github-username">用户名</label>
-                            <input type="text" id="github-username" class="w-full bg-space-darker border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-space-glow focus:glow transition-all text-sm" placeholder="GitHub 用户名">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm text-gray-400 mb-1" for="github-repo">仓库名</label>
-                            <input type="text" id="github-repo" class="w-full bg-space-darker border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-space-glow focus:glow transition-all text-sm" placeholder="仓库名称">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm text-gray-400 mb-1" for="github-token">个人访问令牌</label>
-                            <div class="relative">
-                                <input type="password" id="github-token" class="w-full bg-space-darker border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-space-glow focus:glow transition-all text-sm" placeholder="ghp_...">
-                                <button id="toggle-token-visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white button-hover-effect" title="显示/隐藏令牌" aria-label="显示或隐藏令牌">
-                                    <i class="fa fa-eye"></i>
-                                </button>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">需要 repo 权限，用于同步书签数据</p>
-                        </div>
-                        
-                        <div class="flex space-x-3">
-                            <button id="save-github-settings" class="flex-1 bg-space-blue hover:bg-space-blue/80 text-white rounded-lg py-2 text-sm transition-colors button-hover-effect">
-                                保存设置
-                            </button>
-                            <button id="validate-github-token" class="flex-1 bg-space-purple hover:bg-space-purple/80 text-white rounded-lg py-2 text-sm transition-colors button-hover-effect">
-                                验证令牌
-                            </button>
-                        </div>
-                        
-                        <div id="github-validation-status" class="hidden text-sm p-2 rounded-lg">
-                            <!-- 验证状态将通过JS动态更新 -->
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="border-t border-gray-800 pt-4">
-                    <button id="enter-edit-center" class="w-full bg-space-glow hover:bg-space-glow/80 text-space-dark font-semibold rounded-lg py-3 transition-colors button-hover-effect disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        进入编辑中心
-                    </button>
-                </div>
-            </div>
-        </div>
+        </footer>
     </div>
 
     <!-- 编辑中心模态框 -->
-    <div id="edit-center-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-        <div class="bg-space-dark border border-space-accent/30 rounded-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div class="p-5 border-b border-space-accent/20 flex justify-between items-center">
-                <h3 class="text-xl font-bold text-space-glow">编辑中心</h3>
-                <button id="close-edit-center" class="p-2 hover:bg-space-darker rounded-full transition-colors button-hover-effect" title="关闭" aria-label="关闭编辑中心">
-                    <i class="fa fa-times text-gray-400 hover:text-white"></i>
+    <div id="edit-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-space-dark rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform scale-95 transition-transform duration-300">
+            <!-- 编辑中心头部 -->
+            <div class="p-5 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-blue-600 dark:text-blue-400">
+                    <i class="fa fa-pencil-square-o mr-2"></i>编辑中心
+                </h2>
+                <button id="close-edit-btn" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <i class="fa fa-times"></i>
                 </button>
             </div>
-            
-            <div class="flex flex-1 overflow-hidden">
-                <!-- 编辑中心导航 -->
-                <div class="w-48 border-r border-gray-800 bg-space-darker/50">
-                    <nav class="p-2 space-y-1">
-                        <button class="edit-tab w-full text-left px-3 py-2 rounded-lg hover:bg-space-dark transition-colors active" data-tab="bookmarks">
-                            <i class="fa fa-bookmark-o mr-2"></i>书签管理
-                        </button>
-                        <button class="edit-tab w-full text-left px-3 py-2 rounded-lg hover:bg-space-dark transition-colors" data-tab="cities">
-                            <i class="fa fa-clock-o mr-2"></i>城市时间
-                        </button>
-                        <button class="edit-tab w-full text-left px-3 py-2 rounded-lg hover:bg-space-dark transition-colors" data-tab="ads">
-                            <i class="fa fa-bullhorn mr-2"></i>广告管理
-                        </button>
-                    </nav>
-                </div>
-                
-                <!-- 编辑中心内容 -->
-                <div class="flex-1 overflow-y-auto p-5 space-y-6">
-                    <!-- 加载动画 -->
-                    <div id="edit-loading" class="hidden absolute inset-0 bg-space-dark/80 flex items-center justify-center z-10">
-                        <div class="text-center">
-                            <div class="inline-block w-10 h-10 border-2 border-space-glow border-t-transparent rounded-full animate-spin mb-3"></div>
-                            <p class="text-space-glow">处理中...</p>
-                        </div>
-                    </div>
-                    
-                    <!-- 书签管理标签页 -->
-                    <div id="bookmarks-tab" class="edit-content space-y-6">
-                        <div class="flex justify-between items-center">
-                            <h4 class="font-semibold text-white text-lg">书签管理</h4>
-                            <div class="flex space-x-2">
-                                <button id="import-bookmarks" class="px-3 py-1.5 bg-space-blue hover:bg-space-blue/80 text-white rounded-lg text-sm transition-colors button-hover-effect disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <i class="fa fa-upload mr-1"></i>导入
-                                </button>
-                                <button id="export-bookmarks" class="px-3 py-1.5 bg-space-purple hover:bg-space-purple/80 text-white rounded-lg text-sm transition-colors button-hover-effect disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <i class="fa fa-download mr-1"></i>导出
-                                </button>
-                                <input type="file" id="bookmarks-file-input" accept=".html" class="hidden">
-                            </div>
-                        </div>
-                        
-                        <!-- 添加新书签 -->
-                        <div class="bg-space-darker/50 p-4 rounded-xl border border-gray-800">
-                            <h5 class="font-medium text-white mb-3">添加新书签</h5>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <div>
-                                    <label class="block text-sm text-gray-400 mb-1" for="new-bookmark-folder">文件夹</label>
-                                    <select id="new-bookmark-folder" class="w-full bg-space-dark border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-space-glow focus:glow transition-all text-sm">
-                                        <option value="">无文件夹</option>
-                                        <!-- 文件夹选项将通过JS动态生成 -->
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm text-gray-400 mb-1" for="new-bookmark-title">标题</label>
-                                    <input type="text" id="new-bookmark-title" class="w-full bg-space-dark border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-space-glow focus:glow transition-all text-sm" placeholder="网站标题">
-                                </div>
-                                <div>
-                                    <label class="block text-sm text-gray-400 mb-1" for="new-bookmark-url">URL</label>
-                                    <input type="url" id="new-bookmark-url" class="w-full bg-space-dark border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-space-glow focus:glow transition-all text-sm" placeholder="https://example.com">
-                                </div>
-                            </div>
-                            <div class="mt-3 text-right">
-                                <button id="add-bookmark" class="px-4 py-1.5 bg-space-glow hover:bg-space-glow/80 text-space-dark rounded-lg text-sm transition-colors button-hover-effect disabled:opacity-50 disabled:cursor-not-allowed">
-                                    添加书签
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- 添加新文件夹 -->
-                        <div class="bg-space-darker/50 p-4 rounded-xl border border-gray-800">
-                            <h5 class="font-medium text-white mb-3">添加新文件夹</h5>
-                            <div class="flex space-x-3">
-                                <input type="text" id="new-folder-name" class="flex-1 bg-space-dark border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-space-glow focus:glow transition-all text-sm" placeholder="文件夹名称">
-                                <button id="add-folder" class="px-4 py-1.5 bg-space-purple hover:bg-space-purple/80 text-white rounded-lg text-sm transition-colors button-hover-effect disabled:opacity-50 disabled:cursor-not-allowed">
-                                    添加文件夹
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- 书签列表 -->
-                        <div>
-                            <h5 class="font-medium text-white mb-3">书签列表</h5>
-                            <div id="bookmarks-list" class="space-y-4">
-                                <!-- 书签列表将通过JS动态生成 -->
-                                <div class="text-center py-8 text-gray-500">
-                                    <p>暂无书签</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 城市时间标签页 -->
-                    <div id="cities-tab" class="edit-content space-y-6 hidden">
-                        <div class="flex justify-between items-center">
-                            <h4 class="font-semibold text-white text-lg">城市时间管理</h4>
-                        </div>
-                        
-                        <!-- 添加新城市 -->
-                        <div class="bg-space-darker/50 p-4 rounded-xl border border-gray-800">
-                            <h5 class="font-medium text-white mb-3">添加新城市</h5>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-sm text-gray-400 mb-1" for="new-city-name">城市名称</label>
-                                    <input type="text" id="new-city-name" class="w-full bg-space-dark border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-space-glow focus:glow transition-all text-sm" placeholder="例如：巴黎">
-                                </div>
-                                <div>
-                                    <label class="block text-sm text-gray-400 mb-1" for="new-city-timezone">时区</label>
-                                    <input type="text" id="new-city-timezone" class="w-full bg-space-dark border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-space-glow focus:glow transition-all text-sm" placeholder="例如：Europe/Paris">
-                                    <p class="text-xs text-gray-500 mt-1">时区列表参考：<a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" target="_blank" class="text-space-glow hover:underline">tz database 时区列表</a></p>
-                                </div>
-                            </div>
-                            <div class="mt-3 text-right">
-                                <button id="add-city" class="px-4 py-1.5 bg-space-glow hover:bg-space-glow/80 text-space-dark rounded-lg text-sm transition-colors button-hover-effect disabled:opacity-50 disabled:cursor-not-allowed">
-                                    添加城市
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- 城市列表 -->
-                        <div>
-                            <h5 class="font-medium text-white mb-3">城市列表</h5>
-                            <div id="cities-list" class="space-y-3">
-                                <!-- 城市列表将通过JS动态生成 -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 广告管理标签页 -->
-                    <div id="ads-tab" class="edit-content space-y-6 hidden">
-                        <div class="flex justify-between items-center">
-                            <h4 class="font-semibold text-white text-lg">广告管理</h4>
-                            <p class="text-sm text-gray-500">支持JPG、PNG格式，最大3MB</p>
-                        </div>
-                        
-                        <!-- 广告位1 -->
-                        <div class="bg-space-darker/50 p-4 rounded-xl border border-gray-800">
-                            <h5 class="font-medium text-white mb-3">广告位 1</h5>
-                            <div class="space-y-3">
-                                <div class="border-2 border-dashed border-gray-700 rounded-lg p-4 text-center hover:border-space-glow transition-colors cursor-pointer" id="ad-1-upload">
-                                    <input type="file" id="ad-1-file" accept="image/jpeg,image/png" class="hidden">
-                                    <i class="fa fa-upload text-2xl text-gray-500 mb-2"></i>
-                                    <p class="text-sm text-gray-500">点击上传图片</p>
-                                </div>
-                                <div id="ad-1-preview" class="hidden">
-                                    <img src="" alt="广告预览" class="max-h-40 mx-auto rounded-lg mb-2">
-                                    <button class="text-sm text-red-500 hover:text-red-400 transition-colors button-hover-effect" data-ad="1" id="remove-ad-1">
-                                        <i class="fa fa-trash-o mr-1"></i>移除图片
-                                    </button>
-                                </div>
-                                <div>
-                                    <label class="block text-sm text-gray-400 mb-1" for="ad-1-url">链接地址</label>
-                                    <input type="url" id="ad-1-url" class="w-full bg-space-dark border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-space-glow focus:glow transition-all text-sm" placeholder="https://example.com">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 广告位2 -->
-                        <div class="bg-space-darker/50 p-4 rounded-xl border border-gray-800">
-                            <h5 class="font-medium text-white mb-3">广告位 2</h5>
-                            <div class="space-y-3">
-                                <div class="border-2 border-dashed border-gray-700 rounded-lg p-4 text-center hover:border-space-glow transition-colors cursor-pointer" id="ad-2-upload">
-                                    <input type="file" id="ad-2-file" accept="image/jpeg,image/png" class="hidden">
-                                    <i class="fa fa-upload text-2xl text-gray-500 mb-2"></i>
-                                    <p class="text-sm text-gray-500">点击上传图片</p>
-                                </div>
-                                <div id="ad-2-preview" class="hidden">
-                                    <img src="" alt="广告预览" class="max-h-40 mx-auto rounded-lg mb-2">
-                                    <button class="text-sm text-red-500 hover:text-red-400 transition-colors button-hover-effect" data-ad="2" id="remove-ad-2">
-                                        <i class="fa fa-trash-o mr-1"></i>移除图片
-                                    </button>
-                                </div>
-                                <div>
-                                    <label class="block text-sm text-gray-400 mb-1" for="ad-2-url">链接地址</label>
-                                    <input type="url" id="ad-2-url" class="w-full bg-space-dark border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-space-glow focus:glow transition-all text-sm" placeholder="https://example.com">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 广告位3 -->
-                        <div class="bg-space-darker/50 p-4 rounded-xl border border-gray-800">
-                            <h5 class="font-medium text-white mb-3">广告位 3</h5>
-                            <div class="space-y-3">
-                                <div class="border-2 border-dashed border-gray-700 rounded-lg p-4 text-center hover:border-space-glow transition-colors cursor-pointer" id="ad-3-upload">
-                                    <input type="file" id="ad-3-file" accept="image/jpeg,image/png" class="hidden">
-                                    <i class="fa fa-upload text-2xl text-gray-500 mb-2"></i>
-                                    <p class="text-sm text-gray-500">点击上传图片</p>
-                                </div>
-                                <div id="ad-3-preview" class="hidden">
-                                    <img src="" alt="广告预览" class="max-h-40 mx-auto rounded-lg mb-2">
-                                    <button class="text-sm text-red-500 hover:text-red-400 transition-colors button-hover-effect" data-ad="3" id="remove-ad-3">
-                                        <i class="fa fa-trash-o mr-1"></i>移除图片
-                                    </button>
-                                </div>
-                                <div>
-                                    <label class="block text-sm text-gray-400 mb-1" for="ad-3-url">链接地址</label>
-                                    <input type="url" id="ad-3-url" class="w-full bg-space-dark border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-space-glow focus:glow transition-all text-sm" placeholder="https://example.com">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="p-4 border-t border-space-accent/20 flex justify-end">
-                <button id="save-changes" class="px-6 py-2 bg-space-glow hover:bg-space-glow/80 text-space-dark font-medium rounded-lg transition-colors button-hover-effect disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                    保存更改
-                </button>
-            </div>
-        </div>
-    </div>
 
-    <!-- 确认对话框 -->
-    <div id="confirm-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-        <div class="bg-space-dark border border-space-accent/30 rounded-xl w-full max-w-md p-5">
-            <h3 class="text-lg font-bold text-white mb-3" id="confirm-title">确认操作</h3>
-            <p class="text-gray-300 mb-5" id="confirm-message">您确定要执行此操作吗？</p>
-            <div class="flex space-x-3">
-                <button id="confirm-cancel" class="flex-1 bg-gray-800 hover:bg-gray-700 text-white rounded-lg py-2 transition-colors button-hover-effect">
+            <!-- 编辑中心内容 -->
+            <div class="flex-1 overflow-y-auto p-5">
+                <!-- GitHub 验证区域 -->
+                <div class="mb-8 p-5 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-github text-gray-700 dark:text-gray-300 mr-2"></i>
+                        GitHub 验证
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1" for="github-username">用户名</label>
+                                <input type="text" id="github-username" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1" for="github-repo">仓库名</label>
+                                <input type="text" id="github-repo" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-1" for="github-token">
+                                访问令牌 
+                                <span class="text-xs text-gray-500 dark:text-gray-400">(需要 repo 权限)</span>
+                            </label>
+                            <input type="password" id="github-token" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                没有令牌? <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank" class="text-blue-500 hover:underline">创建一个</a>
+                            </p>
+                        </div>
+                        
+                        <div class="flex gap-3">
+                            <button id="save-github-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                保存设置
+                            </button>
+                            <button id="validate-github-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center">
+                                <i class="fa fa-check mr-2"></i>验证并进入编辑中心
+                            </button>
+                        </div>
+                        
+                        <div id="github-validation-status" class="hidden p-3 rounded-lg text-sm"></div>
+                    </div>
+                </div>
+
+                <!-- 书签管理 -->
+                <div class="mb-8" id="bookmark-management">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-bookmark-o mr-2"></i>
+                        书签管理
+                    </h3>
+                    
+                    <div class="mb-4 flex flex-wrap gap-3">
+                        <button id="import-bookmarks-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center" disabled>
+                            <i class="fa fa-upload mr-2"></i>导入书签
+                        </button>
+                        <input type="file" id="bookmark-file-input" accept=".html" class="hidden">
+                        
+                        <button id="export-bookmarks-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center" disabled>
+                            <i class="fa fa-download mr-2"></i>导出书签
+                        </button>
+                        
+                        <button id="add-bookmark-btn" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors flex items-center" disabled>
+                            <i class="fa fa-plus mr-2"></i>添加书签
+                        </button>
+                    </div>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 max-h-96 overflow-y-auto scrollbar-hide">
+                        <div id="edit-bookmarks-container" class="space-y-4">
+                            <!-- 编辑模式的书签将通过JS动态添加 -->
+                            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                <p>请先完成GitHub验证以管理书签</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 城市时钟管理 -->
+                <div class="mb-8" id="cities-management">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-globe mr-2"></i>
+                        世界时钟管理
+                    </h3>
+                    
+                    <div class="mb-4">
+                        <button id="add-city-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center" disabled>
+                            <i class="fa fa-plus mr-2"></i>添加城市
+                        </button>
+                    </div>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                        <div id="cities-list" class="space-y-3">
+                            <!-- 城市列表将通过JS动态添加 -->
+                            <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+                                <p>请先完成GitHub验证以管理城市</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 广告管理 -->
+                <div class="mb-8" id="ads-management">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-bullhorn mr-2"></i>
+                        广告管理
+                    </h3>
+                    
+                    <div class="space-y-6">
+                        <!-- 广告位1设置 -->
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                            <h4 class="font-medium mb-3">广告位 1</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1" for="ad1-image">广告图片</label>
+                                    <input type="file" id="ad1-image" accept="image/*" class="w-full text-sm text-gray-500 dark:text-gray-400" disabled>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">最大3MB，支持常见图片格式</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1" for="ad1-url">链接地址</label>
+                                    <input type="url" id="ad1-url" placeholder="https://example.com" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button id="remove-ad1-btn" class="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors" disabled>
+                                    <i class="fa fa-trash mr-1"></i>移除广告
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 广告位2设置 -->
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                            <h4 class="font-medium mb-3">广告位 2</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1" for="ad2-image">广告图片</label>
+                                    <input type="file" id="ad2-image" accept="image/*" class="w-full text-sm text-gray-500 dark:text-gray-400" disabled>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">最大3MB，支持常见图片格式</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1" for="ad2-url">链接地址</label>
+                                    <input type="url" id="ad2-url" placeholder="https://example.com" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button id="remove-ad2-btn" class="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors" disabled>
+                                    <i class="fa fa-trash mr-1"></i>移除广告
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 广告位3设置 -->
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                            <h4 class="font-medium mb-3">广告位 3</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1" for="ad3-image">广告图片</label>
+                                    <input type="file" id="ad3-image" accept="image/*" class="w-full text-sm text-gray-500 dark:text-gray-400" disabled>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">最大3MB，支持常见图片格式</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1" for="ad3-url">链接地址</label>
+                                    <input type="url" id="ad3-url" placeholder="https://example.com" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button id="remove-ad3-btn" class="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors" disabled>
+                                    <i class="fa fa-trash mr-1"></i>移除广告
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 编辑中心底部 -->
+            <div class="p-5 border-t border-gray-200 dark:border-gray-800 flex justify-end gap-3">
+                <button id="cancel-edit-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                     取消
                 </button>
-                <button id="confirm-ok" class="flex-1 bg-red-600 hover:bg-red-500 text-white rounded-lg py-2 transition-colors button-hover-effect">
-                    确认
+                <button id="save-changes-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center" disabled>
+                    <i class="fa fa-save mr-2"></i>保存更改
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- 通知提示 -->
-    <div id="notification" class="fixed bottom-5 right-5 bg-space-dark border border-space-accent/30 rounded-lg p-4 max-w-sm transform translate-y-20 opacity-0 transition-all duration-300 z-50 hidden">
-        <div class="flex items-start">
-            <div id="notification-icon" class="mr-3 text-xl">
-                <i class="fa fa-check-circle text-green-500"></i>
+    <!-- 添加/编辑书签模态框 -->
+    <div id="bookmark-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-space-dark rounded-2xl w-full max-w-md p-6 shadow-2xl transform scale-95 transition-transform duration-300">
+            <h3 class="text-xl font-bold mb-4" id="bookmark-modal-title">添加书签</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1" for="bookmark-folder">文件夹</label>
+                    <select id="bookmark-folder" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="default">默认文件夹</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-1" for="bookmark-name">名称</label>
+                    <input type="text" id="bookmark-name" placeholder="网站名称" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-1" for="bookmark-url">网址</label>
+                    <input type="url" id="bookmark-url" placeholder="https://example.com" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
             </div>
-            <div class="flex-1">
-                <h4 id="notification-title" class="font-semibold text-white"></h4>
-                <p id="notification-message" class="text-sm text-gray-400 mt-1"></p>
+            
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="cancel-bookmark-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    取消
+                </button>
+                <button id="save-bookmark-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                    保存
+                </button>
             </div>
-            <button id="close-notification" class="ml-2 text-gray-500 hover:text-gray-300 button-hover-effect" title="关闭通知" aria-label="关闭通知">
-                <i class="fa fa-times"></i>
-            </button>
+        </div>
+    </div>
+
+    <!-- 添加城市模态框 -->
+    <div id="city-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-space-dark rounded-2xl w-full max-w-md p-6 shadow-2xl transform scale-95 transition-transform duration-300">
+            <h3 class="text-xl font-bold mb-4">添加城市</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1" for="city-name">城市名称</label>
+                    <input type="text" id="city-name" placeholder="例如：北京" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-1" for="city-timezone">时区</label>
+                    <select id="city-timezone" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <!-- 时区选项将通过JS动态添加 -->
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="cancel-city-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    取消
+                </button>
+                <button id="save-city-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                    保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示消息组件 -->
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg z-50 opacity-0 transition-opacity duration-300 flex items-center">
+        <i id="toast-icon" class="fa fa-info-circle mr-2"></i>
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- 加载动画 -->
+    <div id="loader" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-space-dark p-6 rounded-full">
+            <div class="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 border-t-blue-500 rounded-full animate-spin"></div>
         </div>
     </div>
 
     <script>
-        // 应用数据存储
+        // 应用数据结构
         const appData = {
-            bookmarks: [],
-            folders: [],
-            cities: ["北京", "纽约", "伦敦", "东京"],
-            cityTimezones: {
-                "北京": "Asia/Shanghai",
-                "纽约": "America/New_York",
-                "伦敦": "Europe/London",
-                "东京": "Asia/Tokyo"
+            deploymentDate: new Date(), // 部署日期，实际使用时会从存储中加载
+            bookmarks: {
+                default: [] // 默认文件夹
             },
-            ads: [
-                { id: 1, image: "", url: "" },
-                { id: 2, image: "", url: "" },
-                { id: 3, image: "", url: "" }
+            cities: [
+                { name: "北京", timezone: "Asia/Shanghai" },
+                { name: "纽约", timezone: "America/New_York" },
+                { name: "伦敦", timezone: "Europe/London" },
+                { name: "东京", timezone: "Asia/Tokyo" }
             ],
-            deployDate: new Date().toISOString(),
+            ads: {
+                ad1: { image: "", url: "" },
+                ad2: { image: "", url: "" },
+                ad3: { image: "", url: "" }
+            },
             github: {
                 username: "",
                 repo: "",
                 token: "",
-                validated: false
+                validated: false,
+                defaultUsername: "",
+                defaultRepo: ""
             },
-            settings: {
-                darkMode: true
-            }
+            healthReminders: [
+                "该休息一下了",
+                "记得多喝水",
+                "远眺放松眼睛",
+                "起来活动活动",
+                "深呼吸，保持专注"
+            ]
+        };
+
+        // 当前编辑的书签ID和类型
+        let currentEditing = {
+            type: null, // 'bookmark' 或 'folder'
+            id: null,
+            folder: null
+        };
+
+        // 初始化时间戳（用于在线时长计算）
+        let initTimestamp = Date.now();
+
+        // 定时器ID
+        let scrollTimer = null;
+        let onlineTimeTimer = null;
+        let clockTimer = null;
+        let reminderTimer = null;
+
+        // DOM元素
+        const elements = {
+            themeToggle: document.getElementById('theme-toggle'),
+            settingsBtn: document.getElementById('settings-btn'),
+            controls: document.getElementById('controls'),
+            editModal: document.getElementById('edit-modal'),
+            closeEditBtn: document.getElementById('close-edit-btn'),
+            cancelEditBtn: document.getElementById('cancel-edit-btn'),
+            saveChangesBtn: document.getElementById('save-changes-btn'),
+            bookmarksContainer: document.getElementById('bookmarks-container'),
+            editBookmarksContainer: document.getElementById('edit-bookmarks-container'),
+            importBookmarksBtn: document.getElementById('import-bookmarks-btn'),
+            exportBookmarksBtn: document.getElementById('export-bookmarks-btn'),
+            addBookmarkBtn: document.getElementById('add-bookmark-btn'),
+            bookmarkFileInput: document.getElementById('bookmark-file-input'),
+            githubUsername: document.getElementById('github-username'),
+            githubRepo: document.getElementById('github-repo'),
+            githubToken: document.getElementById('github-token'),
+            saveGithubBtn: document.getElementById('save-github-btn'),
+            validateGithubBtn: document.getElementById('validate-github-btn'),
+            githubValidationStatus: document.getElementById('github-validation-status'),
+            bookmarkModal: document.getElementById('bookmark-modal'),
+            bookmarkModalTitle: document.getElementById('bookmark-modal-title'),
+            bookmarkFolder: document.getElementById('bookmark-folder'),
+            bookmarkName: document.getElementById('bookmark-name'),
+            bookmarkUrl: document.getElementById('bookmark-url'),
+            cancelBookmarkBtn: document.getElementById('cancel-bookmark-btn'),
+            saveBookmarkBtn: document.getElementById('save-bookmark-btn'),
+            addCityBtn: document.getElementById('add-city-btn'),
+            citiesList: document.getElementById('cities-list'),
+            worldClocks: document.getElementById('world-clocks'),
+            cityModal: document.getElementById('city-modal'),
+            cityName: document.getElementById('city-name'),
+            cityTimezone: document.getElementById('city-timezone'),
+            cancelCityBtn: document.getElementById('cancel-city-btn'),
+            saveCityBtn: document.getElementById('save-city-btn'),
+            ad1Image: document.getElementById('ad1-image'),
+            ad1Url: document.getElementById('ad1-url'),
+            removeAd1Btn: document.getElementById('remove-ad1-btn'),
+            ad2Image: document.getElementById('ad2-image'),
+            ad2Url: document.getElementById('ad2-url'),
+            removeAd2Btn: document.getElementById('remove-ad2-btn'),
+            ad3Image: document.getElementById('ad3-image'),
+            ad3Url: document.getElementById('ad3-url'),
+            removeAd3Btn: document.getElementById('remove-ad3-btn'),
+            ad1: document.getElementById('ad-1'),
+            ad2: document.getElementById('ad-2'),
+            ad3: document.getElementById('ad-3'),
+            searchInput: document.getElementById('search-input'),
+            onlineTime: document.getElementById('online-time'),
+            healthReminder: document.getElementById('health-reminder'),
+            nextReminder: document.getElementById('next-reminder'),
+            totalSites: document.getElementById('total-sites'),
+            currentYear: document.getElementById('current-year'),
+            hostname: document.getElementById('hostname'),
+            bookmarkCount: document.getElementById('bookmark-count'),
+            toast: document.getElementById('toast'),
+            toastIcon: document.getElementById('toast-icon'),
+            toastMessage: document.getElementById('toast-message'),
+            loader: document.getElementById('loader')
         };
 
         // 初始化函数
         async function init() {
-            try {
-                // 创建星空背景
-                createStars();
-                
-                // 加载本地存储的设置
-                loadLocalSettings();
-                
-                // 从meta标签获取仓库信息
-                const repoMeta = document.querySelector('meta[name="github-repo-info"]');
-                if (repoMeta && repoMeta.content) {
-                    const [username, repo] = repoMeta.content.split('/');
-                    if (username && repo) {
-                        appData.github.username = username;
-                        appData.github.repo = repo;
-                        document.getElementById('github-username').value = username;
-                        document.getElementById('github-repo').value = repo;
-                    }
-                }
-                
-                // 从GitHub加载数据
-                await loadDataFromGitHub();
-                
-                // 渲染页面内容
-                renderWorldClock();
-                renderBookmarks();
-                renderAds();
-                updateOnlineDuration();
-                updateHealthReminder();
-                updateFooter();
-                
-                // 初始化编辑中心
-                initEditCenter();
-                
-                // 设置事件监听 - 确保DOM元素加载完成后绑定
-                setupEventListeners();
-                
-                // 启动定时任务
-                startTimers();
-                
-                console.log("初始化完成，所有按钮事件已绑定");
-            } catch (error) {
-                console.error("初始化失败:", error);
-                showNotification('初始化错误', '页面加载过程中出现错误', 'error');
-            }
+            // 设置当前年份
+            elements.currentYear.textContent = new Date().getFullYear();
+            
+            // 生成星空背景
+            createStars();
+            
+            // 加载本地存储数据
+            loadLocalStorageData();
+            
+            // 从GitHub加载数据
+            await loadDataFromGitHub();
+            
+            // 初始化主题
+            initTheme();
+            
+            // 初始化事件监听
+            initEventListeners();
+            
+            // 渲染书签
+            renderBookmarks();
+            
+            // 渲染编辑中心的书签
+            renderEditBookmarks();
+            
+            // 初始化城市和时钟
+            initTimezones();
+            renderCities();
+            updateClocks();
+            
+            // 启动在线时长计时器
+            startOnlineTimeTimer();
+            
+            // 启动健康提醒
+            startHealthReminders();
+            
+            // 渲染广告
+            renderAds();
+            
+            // 更新书签计数
+            updateBookmarkCount();
         }
 
         // 创建星空背景
         function createStars() {
             const starsContainer = document.getElementById('stars');
-            const starCount = window.innerWidth < 768 ? 100 : 200;
+            const starsCount = 150;
             
-            for (let i = 0; i < starCount; i++) {
+            for (let i = 0; i < starsCount; i++) {
                 const star = document.createElement('div');
                 star.classList.add('star');
                 
+                // 随机位置
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                
                 // 随机大小
                 const size = Math.random() * 2 + 1;
+                
+                // 随机亮度和闪烁动画延迟
+                const opacity = Math.random() * 0.8 + 0.2;
+                const delay = Math.random() * 3;
+                
+                star.style.left = `${x}%`;
+                star.style.top = `${y}%`;
                 star.style.width = `${size}px`;
                 star.style.height = `${size}px`;
-                
-                // 随机位置
-                star.style.left = `${Math.random() * 100}%`;
-                star.style.top = `${Math.random() * 100}%`;
-                
-                // 随机亮度和闪烁动画
-                const opacity = Math.random() * 0.8 + 0.2;
                 star.style.opacity = opacity;
-                star.style.animationDelay = `${Math.random() * 3}s`;
-                
-                // 随机颜色
-                const colors = ['#ffffff', '#f1faee', '#a8dadc'];
-                star.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                star.style.animationDelay = `${delay}s`;
                 
                 starsContainer.appendChild(star);
             }
         }
 
-        // 加载本地设置
-        function loadLocalSettings() {
-            const savedSettings = localStorage.getItem('spaceBookmarkSettings');
-            if (savedSettings) {
-                try {
-                    const parsed = JSON.parse(savedSettings);
-                    appData.settings = { ...appData.settings, ...parsed.settings };
-                    appData.github = { ...appData.github, ...parsed.github };
-                    
-                    // 更新表单
-                    document.getElementById('github-username').value = appData.github.username || '';
-                    document.getElementById('github-repo').value = appData.github.repo || '';
-                    document.getElementById('github-token').value = appData.github.token || '';
-                    
-                    // 应用主题
-                    if (!appData.settings.darkMode) {
-                        document.documentElement.classList.remove('dark');
-                        document.getElementById('theme-toggle').innerHTML = '<i class="fa fa-sun-o text-space-glow"></i>';
-                    }
-                } catch (e) {
-                    console.error('加载本地设置失败:', e);
+        // 初始化主题
+        function initTheme() {
+            // 检查用户偏好
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        // 切换主题
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+
+        // 显示控制按钮
+        function showControls() {
+            elements.controls.classList.remove('opacity-0');
+            elements.controls.classList.add('opacity-100');
+            
+            // 清除之前的计时器
+            if (scrollTimer) clearTimeout(scrollTimer);
+            
+            // 3秒后隐藏控制按钮
+            scrollTimer = setTimeout(() => {
+                elements.controls.classList.remove('opacity-100');
+                elements.controls.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        // 加载本地存储数据
+        function loadLocalStorageData() {
+            const savedData = localStorage.getItem('spaceBookmarksData');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                Object.assign(appData, parsedData);
+                
+                // 恢复GitHub设置
+                elements.githubUsername.value = appData.github.username;
+                elements.githubRepo.value = appData.github.repo;
+                elements.githubToken.value = appData.github.token;
+            }
+            
+            // 检查是否有默认仓库信息（由deploy.yml注入）
+            if (window.defaultRepoInfo) {
+                appData.github.defaultUsername = window.defaultRepoInfo.username;
+                appData.github.defaultRepo = window.defaultRepoInfo.repo;
+                
+                // 如果没有设置过仓库信息，使用默认值
+                if (!appData.github.username && !appData.github.repo) {
+                    elements.githubUsername.value = appData.github.defaultUsername;
+                    elements.githubRepo.value = appData.github.defaultRepo;
                 }
             }
             
-            // 更新编辑功能状态
-            updateEditFeaturesStatus();
+            // 更新主机名显示
+            elements.hostname.textContent = appData.github.username || appData.github.defaultUsername || 'space-navigator';
         }
 
-        // 保存本地设置
-        function saveLocalSettings() {
-            try {
-                localStorage.setItem('spaceBookmarkSettings', JSON.stringify({
-                    settings: appData.settings,
-                    github: {
-                        username: appData.github.username,
-                        repo: appData.github.repo,
-                        token: appData.github.token,
-                        validated: appData.github.validated
-                    }
-                }));
-            } catch (e) {
-                console.error('保存本地设置失败:', e);
-            }
+        // 保存数据到本地存储
+        function saveLocalStorageData() {
+            localStorage.setItem('spaceBookmarksData', JSON.stringify(appData));
         }
 
         // 从GitHub加载数据
         async function loadDataFromGitHub() {
-            showLoading();
+            showLoader();
             
             try {
                 let url;
-                const { username, repo, token } = appData.github;
+                const username = appData.github.username || appData.github.defaultUsername;
+                const repo = appData.github.repo || appData.github.defaultRepo;
                 
-                // 检查是否有仓库信息
                 if (!username || !repo) {
-                    // 使用默认仓库（从meta标签获取）
-                    const repoMeta = document.querySelector('meta[name="github-repo-info"]');
-                    if (repoMeta && repoMeta.content) {
-                        const [defaultUser, defaultRepo] = repoMeta.content.split('/');
-                        if (defaultUser && defaultRepo) {
-                            url = `https://raw.githubusercontent.com/${defaultUser}/${defaultRepo}/gh-pages/bookmarks.json`;
-                        }
-                    }
-                } else if (token) {
-                    // 有token，使用API
-                    url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
-                } else {
-                    // 无token，使用raw地址
-                    url = `https://raw.githubusercontent.com/${username}/${repo}/gh-pages/bookmarks.json`;
-                }
-                
-                if (!url) {
-                    hideLoading();
-                    showNotification('警告', '无法确定数据来源，使用默认数据', 'warning');
+                    hideLoader();
+                    showToast('信息', '未配置GitHub仓库信息，使用本地数据', 'info');
                     return;
                 }
                 
+                // 无token时使用公开地址
+                if (!appData.github.token) {
+                    url = `https://raw.githubusercontent.com/${username}/${repo}/main/bookmarks.json`;
+                } else {
+                    url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
+                }
+                
                 const headers = {};
-                if (token) {
-                    headers['Authorization'] = `token ${token}`;
+                if (appData.github.token) {
+                    headers['Authorization'] = `token ${appData.github.token}`;
                 }
                 
                 const response = await fetch(url, { headers });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP错误: ${response.status}`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 let data;
-                if (token) {
-                    // 处理API响应
+                if (appData.github.token) {
                     const apiData = await response.json();
                     data = JSON.parse(atob(apiData.content));
                 } else {
-                    // 处理raw响应
                     data = await response.json();
                 }
                 
-                // 更新应用数据
+                // 合并数据（新数据覆盖旧数据）
                 if (data.bookmarks) appData.bookmarks = data.bookmarks;
-                if (data.folders) appData.folders = data.folders;
                 if (data.cities) appData.cities = data.cities;
-                if (data.cityTimezones) appData.cityTimezones = data.cityTimezones;
                 if (data.ads) appData.ads = data.ads;
-                if (data.deployDate) appData.deployDate = data.deployDate;
+                if (data.deploymentDate) appData.deploymentDate = new Date(data.deploymentDate);
                 
-                showNotification('成功', '数据加载成功', 'success');
+                showToast('成功', '从GitHub加载数据成功', 'success');
             } catch (error) {
                 console.error('从GitHub加载数据失败:', error);
-                showNotification('错误', '加载数据失败，使用本地数据', 'error');
+                showToast('错误', '从GitHub加载数据失败，使用本地数据', 'error');
             } finally {
-                hideLoading();
+                hideLoader();
             }
         }
 
         // 保存数据到GitHub
         async function saveDataToGitHub() {
-            showLoading();
+            showLoader();
             
             try {
-                const { username, repo, token } = appData.github;
+                const username = appData.github.username || appData.github.defaultUsername;
+                const repo = appData.github.repo || appData.github.defaultRepo;
                 
-                if (!username || !repo || !token) {
-                    throw new Error('GitHub信息不完整');
+                if (!username || !repo) {
+                    throw new Error('未配置GitHub仓库信息');
                 }
                 
-                // 先获取当前文件的SHA
+                if (!appData.github.token) {
+                    throw new Error('需要GitHub令牌才能保存更改');
+                }
+                
+                // 准备要保存的数据
+                const dataToSave = {
+                    bookmarks: appData.bookmarks,
+                    cities: appData.cities,
+                    ads: appData.ads,
+                    deploymentDate: appData.deploymentDate.toISOString()
+                };
+                
+                // 字符串化并编码
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSave, null, 2))));
+                
+                // 先获取文件的SHA（用于更新）
                 const getUrl = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
                 const getResponse = await fetch(getUrl, {
                     headers: {
-                        'Authorization': `token ${token}`,
+                        'Authorization': `token ${appData.github.token}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
                 
                 let sha = '';
                 if (getResponse.ok) {
-                    const data = await getResponse.json();
-                    sha = data.sha;
+                    const fileData = await getResponse.json();
+                    sha = fileData.sha;
                 }
                 
-                // 准备要保存的数据
-                const dataToSave = {
-                    bookmarks: appData.bookmarks,
-                    folders: appData.folders,
-                    cities: appData.cities,
-                    cityTimezones: appData.cityTimezones,
-                    ads: appData.ads,
-                    deployDate: appData.deployDate
-                };
-                
-                // 处理特殊字符，避免btoa错误
-                const content = JSON.stringify(dataToSave, null, 2);
-                const base64Content = btoa(unescape(encodeURIComponent(content)));
-                
                 // 保存数据
-                const putUrl = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
-                const putResponse = await fetch(putUrl, {
+                const url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
+                const response = await fetch(url, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `token ${token}`,
+                        'Authorization': `token ${appData.github.token}`,
                         'Content-Type': 'application/json',
                         'Accept': 'application/vnd.github.v3+json'
                     },
                     body: JSON.stringify({
-                        message: '更新书签数据',
-                        content: base64Content,
-                        sha: sha // 仅当文件已存在时需要
+                        message: 'Update bookmarks via Space Navigator',
+                        content: content,
+                        sha: sha // 只有更新时需要
                     })
                 });
                 
-                if (!putResponse.ok) {
-                    const errorData = await putResponse.json();
-                    throw new Error(errorData.message || `HTTP错误: ${putResponse.status}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
                 }
                 
-                showNotification('成功', '数据已保存到GitHub', 'success');
+                // 保存到本地存储
+                saveLocalStorageData();
+                
+                hideLoader();
+                showToast('成功', '数据已成功保存到GitHub', 'success');
                 return true;
             } catch (error) {
                 console.error('保存数据到GitHub失败:', error);
-                showNotification('错误', `保存失败: ${error.message}`, 'error');
+                hideLoader();
+                showToast('错误', `保存数据失败: ${error.message}`, 'error');
                 return false;
-            } finally {
-                hideLoading();
             }
         }
 
         // 验证GitHub令牌
-        async function validateGitHubToken(token) {
-            showLoading();
+        async function validateGitHubToken() {
+            showLoader();
+            
+            const token = elements.githubToken.value.trim();
+            if (!token) {
+                hideLoader();
+                showValidationMessage('请输入GitHub令牌', 'error');
+                return false;
+            }
             
             try {
                 const response = await fetch('https://api.github.com/user', {
@@ -870,630 +913,417 @@
                     }
                 });
                 
-                if (response.ok) {
-                    const userData = await response.json();
-                    return { valid: true, message: `验证成功，欢迎 ${userData.login}` };
-                } else {
-                    return { valid: false, message: `验证失败: ${response.statusText}` };
+                if (!response.ok) {
+                    throw new Error('无效的令牌或权限不足');
                 }
+                
+                // 验证成功
+                appData.github.token = token;
+                appData.github.username = elements.githubUsername.value.trim();
+                appData.github.repo = elements.githubRepo.value.trim();
+                appData.github.validated = true;
+                
+                // 保存到本地
+                saveLocalStorageData();
+                
+                hideLoader();
+                showValidationMessage('验证成功！现在可以使用编辑功能了', 'success');
+                updateEditFeaturesStatus(true);
+                
+                return true;
             } catch (error) {
-                console.error('验证GitHub令牌失败:', error);
-                return { valid: false, message: `验证出错: ${error.message}` };
-            } finally {
-                hideLoading();
+                console.error('GitHub令牌验证失败:', error);
+                hideLoader();
+                showValidationMessage(`验证失败: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // 显示验证消息
+        function showValidationMessage(message, type) {
+            const statusEl = elements.githubValidationStatus;
+            statusEl.textContent = message;
+            statusEl.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+            
+            if (type === 'success') {
+                statusEl.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900/30', 'dark:text-green-400');
+            } else {
+                statusEl.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900/30', 'dark:text-red-400');
             }
         }
 
         // 更新编辑功能状态
-        function updateEditFeaturesStatus() {
-            const isEnabled = appData.github.validated;
+        function updateEditFeaturesStatus(enabled) {
+            const buttons = [
+                elements.importBookmarksBtn,
+                elements.exportBookmarksBtn,
+                elements.addBookmarkBtn,
+                elements.saveChangesBtn,
+                elements.addCityBtn,
+                elements.ad1Image,
+                elements.ad1Url,
+                elements.removeAd1Btn,
+                elements.ad2Image,
+                elements.ad2Url,
+                elements.removeAd2Btn,
+                elements.ad3Image,
+                elements.ad3Url,
+                elements.removeAd3Btn
+            ];
             
-            // 更新按钮状态并确保事件可触发
-            const updateButtonState = (id, enabled) => {
-                const btn = document.getElementById(id);
-                if (btn) {
-                    btn.disabled = !enabled;
-                    // 移除disabled类以确保视觉反馈
-                    if (enabled) {
-                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    } else {
-                        btn.classList.add('opacity-50', 'cursor-not-allowed');
-                    }
-                }
-            };
-            
-            updateButtonState('enter-edit-center', isEnabled);
-            updateButtonState('import-bookmarks', isEnabled);
-            updateButtonState('export-bookmarks', isEnabled);
-            updateButtonState('add-bookmark', isEnabled);
-            updateButtonState('add-folder', isEnabled);
-            updateButtonState('add-city', isEnabled);
-            updateButtonState('save-changes', isEnabled);
-            
-            // 更新编辑中心的所有输入元素
-            const editInputs = document.querySelectorAll('#edit-center-modal input, #edit-center-modal select, #edit-center-modal textarea');
-            editInputs.forEach(input => {
-                if (input.id !== 'github-username' && input.id !== 'github-repo' && input.id !== 'github-token') {
-                    input.disabled = !isEnabled;
-                }
+            buttons.forEach(btn => {
+                btn.disabled = !enabled;
             });
             
-            // 更新上传区域
-            const uploadAreas = document.querySelectorAll('[id$="-upload"]');
-            uploadAreas.forEach(area => {
-                if (!isEnabled) {
-                    area.classList.add('opacity-50', 'cursor-not-allowed');
-                    area.removeEventListener('click', handleAdUploadClick);
-                } else {
-                    area.classList.remove('opacity-50', 'cursor-not-allowed');
-                    area.addEventListener('click', handleAdUploadClick);
-                }
-            });
-        }
-
-        // 渲染世界时钟
-        function renderWorldClock() {
-            const clockContainer = document.getElementById('world-clock');
-            clockContainer.innerHTML = '';
+            // 如果启用了编辑功能，重新渲染编辑中心的内容
+            if (enabled) {
+                renderEditBookmarks();
+                renderCitiesList();
+            }
             
-            appData.cities.forEach(city => {
-                const timezone = appData.cityTimezones[city] || 'UTC';
-                const time = moment().tz(timezone).format('HH:mm:ss');
-                const date = moment().tz(timezone).format('MM-DD');
-                
-                const cityElement = document.createElement('div');
-                cityElement.className = 'bg-space-dark/50 rounded-lg p-3 text-center';
-                cityElement.innerHTML = `
-                    <div class="font-medium text-white">${city}</div>
-                    <div class="text-lg font-bold text-space-glow mt-1">${time}</div>
-                    <div class="text-xs text-gray-500 mt-1">${date}</div>
-                `;
-                
-                // 添加数据属性以便更新
-                cityElement.setAttribute('data-city', city);
-                cityElement.setAttribute('data-timezone', timezone);
-                
-                clockContainer.appendChild(cityElement);
-            });
+            // 更新设置按钮状态
+            elements.settingsBtn.disabled = !enabled;
         }
 
         // 渲染书签
-        function renderBookmarks() {
-            const container = document.getElementById('bookmarks-container');
+        function renderBookmarks(filter = '') {
+            const container = elements.bookmarksContainer;
             container.innerHTML = '';
             
-            // 统计书签总数
-            const totalBookmarks = appData.bookmarks.length;
-            document.getElementById('total-bookmarks').textContent = `共收录 ${totalBookmarks} 个网站`;
-            
-            if (totalBookmarks === 0) {
+            // 如果没有书签
+            const hasBookmarks = Object.values(appData.bookmarks).some(folder => folder.length > 0);
+            if (!hasBookmarks) {
                 container.innerHTML = `
-                    <div class="text-center py-10 text-gray-500">
-                        <i class="fa fa-folder-open-o text-4xl mb-3"></i>
-                        <p>尚未添加书签</p>
-                        <p class="text-sm mt-1">在编辑中心添加您的第一个书签</p>
+                    <div class="text-center py-10 text-gray-500 dark:text-gray-400">
+                        <i class="fa fa-folder-open-o text-4xl mb-3 opacity-50"></i>
+                        <p>暂无书签，在编辑中心添加你的第一个站点吧</p>
                     </div>
                 `;
                 return;
             }
             
-            // 按文件夹分组
-            const bookmarksByFolder = {};
-            
-            // 添加无文件夹的书签
-            bookmarksByFolder[''] = appData.bookmarks.filter(bookmark => !bookmark.folder);
-            
-            // 添加有文件夹的书签
-            appData.folders.forEach(folder => {
-                bookmarksByFolder[folder.id] = appData.bookmarks.filter(bookmark => bookmark.folder === folder.id);
+            // 渲染每个文件夹
+            Object.entries(appData.bookmarks).forEach(([folderName, bookmarks]) => {
+                // 过滤书签
+                let filteredBookmarks = bookmarks;
+                if (filter) {
+                    const lowerFilter = filter.toLowerCase();
+                    filteredBookmarks = bookmarks.filter(bm => 
+                        bm.name.toLowerCase().includes(lowerFilter) || 
+                        bm.url.toLowerCase().includes(lowerFilter)
+                    );
+                }
+                
+                // 如果过滤后没有书签，跳过该文件夹
+                if (filteredBookmarks.length === 0) return;
+                
+                // 创建文件夹元素
+                const folderEl = document.createElement('div');
+                folderEl.className = 'folder bg-white/70 dark:bg-space-darker/70 backdrop-blur-md rounded-xl p-4 shadow-md border border-gray-200 dark:border-gray-800';
+                
+                // 文件夹标题
+                const folderHeader = document.createElement('div');
+                folderHeader.className = 'folder-header flex items-center justify-between mb-4 cursor-pointer';
+                folderHeader.innerHTML = `
+                    <h3 class="font-semibold text-lg flex items-center">
+                        <i class="fa fa-folder folder-icon mr-2 text-yellow-500"></i>
+                        ${folderName === 'default' ? '默认文件夹' : folderName}
+                        <span class="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">(${filteredBookmarks.length})</span>
+                    </h3>
+                `;
+                
+                // 文件夹内容
+                const folderContent = document.createElement('div');
+                folderContent.className = 'folder-content';
+                
+                // 书签网格
+                const bookmarksGrid = document.createElement('div');
+                bookmarksGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3';
+                
+                // 添加书签
+                filteredBookmarks.forEach(bookmark => {
+                    // 获取域名用于favicon
+                    let domain = '';
+                    try {
+                        const url = new URL(bookmark.url);
+                        domain = url.hostname;
+                    } catch (e) {
+                        domain = bookmark.url;
+                    }
+                    
+                    // 生成favicon或使用首字母
+                    let faviconHtml = '';
+                    if (domain) {
+                        faviconHtml = `<img src="https://picsum.photos/seed/${domain}/32/32" alt="${domain}" class="w-6 h-6 rounded mr-2">`;
+                    } else {
+                        const firstChar = bookmark.name.charAt(0).toUpperCase();
+                        faviconHtml = `<div class="w-6 h-6 rounded bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs mr-2">${firstChar}</div>`;
+                    }
+                    
+                    const bookmarkEl = document.createElement('a');
+                    bookmarkEl.href = bookmark.url;
+                    bookmarkEl.target = '_blank';
+                    bookmarkEl.className = 'flex items-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm truncate group';
+                    bookmarkEl.innerHTML = `
+                        ${faviconHtml}
+                        <span class="truncate">${bookmark.name}</span>
+                    `;
+                    
+                    bookmarksGrid.appendChild(bookmarkEl);
+                });
+                
+                folderContent.appendChild(bookmarksGrid);
+                folderEl.appendChild(folderHeader);
+                folderEl.appendChild(folderContent);
+                
+                // 添加文件夹点击事件（展开/折叠）
+                folderHeader.addEventListener('click', () => {
+                    folderEl.classList.toggle('folder-open');
+                });
+                
+                // 默认展开第一个文件夹
+                if (container.children.length === 0) {
+                    folderEl.classList.add('folder-open');
+                }
+                
+                container.appendChild(folderEl);
             });
+        }
+
+        // 渲染编辑中心的书签
+        function renderEditBookmarks() {
+            const container = elements.editBookmarksContainer;
+            container.innerHTML = '';
             
-            // 先渲染无文件夹的书签
-            if (bookmarksByFolder[''].length > 0) {
-                const folderSection = createBookmarkSection('', '未分类', bookmarksByFolder['']);
-                container.appendChild(folderSection);
+            // 如果未验证，显示提示
+            if (!appData.github.validated) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <p>请先完成GitHub验证以管理书签</p>
+                    </div>
+                `;
+                return;
             }
             
-            // 渲染各个文件夹
-            appData.folders.forEach(folder => {
-                if (bookmarksByFolder[folder.id] && bookmarksByFolder[folder.id].length > 0) {
-                    const folderSection = createBookmarkSection(folder.id, folder.name, bookmarksByFolder[folder.id]);
-                    container.appendChild(folderSection);
-                }
-            });
+            // 如果没有书签
+            const hasBookmarks = Object.values(appData.bookmarks).some(folder => folder.length > 0);
+            if (!hasBookmarks) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <p>暂无书签，点击"添加书签"按钮开始添加</p>
+                    </div>
+                `;
+                return;
+            }
             
-            // 更新编辑中心的书签列表
-            renderEditBookmarksList();
-            // 更新文件夹下拉菜单
+            // 更新文件夹下拉列表
             updateFolderSelect();
-        }
-
-        // 创建书签分组
-        function createBookmarkSection(folderId, folderName, bookmarks) {
-            const section = document.createElement('div');
-            section.className = 'space-y-3';
             
-            // 文件夹标题
-            const header = document.createElement('div');
-            header.className = 'flex items-center justify-between';
-            header.innerHTML = `
-                <h3 class="text-lg font-semibold text-white flex items-center">
-                    <i class="fa fa-folder-o mr-2 text-space-glow"></i>${folderName}
-                    <span class="ml-2 text-sm bg-space-dark px-2 py-0.5 rounded-full text-gray-400">${bookmarks.length}</span>
-                </h3>
-                <button class="folder-toggle p-1.5 rounded-full hover:bg-space-darker transition-colors button-hover-effect" data-folder="${folderId}">
-                    <i class="fa fa-chevron-right text-gray-500 folder-closed"></i>
-                </button>
-            `;
-            
-            // 书签网格
-            const bookmarksGrid = document.createElement('div');
-            bookmarksGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 folder-content';
-            bookmarksGrid.setAttribute('data-folder', folderId);
-            
-            bookmarks.forEach(bookmark => {
-                const bookmarkElement = createBookmarkElement(bookmark);
-                bookmarksGrid.appendChild(bookmarkElement);
-            });
-            
-            section.appendChild(header);
-            section.appendChild(bookmarksGrid);
-            
-            return section;
-        }
-
-        // 创建单个书签元素
-        function createBookmarkElement(bookmark) {
-            const bookmarkElement = document.createElement('a');
-            bookmarkElement.href = bookmark.url;
-            bookmarkElement.target = '_blank';
-            bookmarkElement.className = 'bg-space-darker/60 backdrop-blur-sm rounded-lg p-3 border border-gray-800 hover:border-space-glow hover:glow transition-all flex flex-col items-center justify-center text-center h-24 group button-hover-effect';
-            
-            // 获取favicon或使用首字母
-            let faviconHtml = '';
-            try {
-                const url = new URL(bookmark.url);
-                const faviconUrl = `${url.protocol}//${url.hostname}/favicon.ico`;
-                faviconHtml = `<img src="${faviconUrl}" alt="${bookmark.title}图标" class="w-8 h-8 mb-2 object-contain favicon-placeholder">`;
-            } catch (e) {
-                // URL无效，使用首字母
-                const firstChar = bookmark.title.charAt(0).toUpperCase();
-                faviconHtml = `<div class="w-8 h-8 mb-2 rounded-full bg-space-blue flex items-center justify-center font-bold">${firstChar}</div>`;
-            }
-            
-            bookmarkElement.innerHTML = `
-                ${faviconHtml}
-                <span class="text-sm font-medium truncate w-full">${bookmark.title}</span>
-            `;
-            
-            // 处理favicon加载失败
-            const img = bookmarkElement.querySelector('img');
-            if (img) {
-                img.addEventListener('error', function() {
-                    const firstChar = bookmark.title.charAt(0).toUpperCase();
-                    this.outerHTML = `<div class="w-8 h-8 mb-2 rounded-full bg-space-blue flex items-center justify-center font-bold">${firstChar}</div>`;
-                });
-            }
-            
-            return bookmarkElement;
-        }
-
-        // 渲染编辑中心的书签列表
-        function renderEditBookmarksList() {
-            const container = document.getElementById('bookmarks-list');
-            container.innerHTML = '';
-            
-            if (appData.bookmarks.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <p>暂无书签</p>
-                    </div>
+            // 渲染每个文件夹
+            Object.entries(appData.bookmarks).forEach(([folderName, bookmarks]) => {
+                // 文件夹容器
+                const folderEl = document.createElement('div');
+                folderEl.className = 'mb-6';
+                
+                // 文件夹标题
+                const folderHeader = document.createElement('div');
+                folderHeader.className = 'flex items-center justify-between mb-3';
+                folderHeader.innerHTML = `
+                    <h4 class="font-medium text-gray-800 dark:text-gray-200 flex items-center">
+                        <i class="fa fa-folder mr-2 text-yellow-500"></i>
+                        ${folderName === 'default' ? '默认文件夹' : folderName}
+                        <span class="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">(${bookmarks.length})</span>
+                    </h4>
+                    <button class="rename-folder-btn text-sm text-blue-500 hover:text-blue-600" data-folder="${folderName}">
+                        <i class="fa fa-pencil mr-1"></i>重命名
+                    </button>
                 `;
-                return;
-            }
-            
-            // 按文件夹分组显示
-            const bookmarksByFolder = {};
-            bookmarksByFolder[''] = [];
-            
-            appData.folders.forEach(folder => {
-                bookmarksByFolder[folder.id] = [];
-            });
-            
-            appData.bookmarks.forEach(bookmark => {
-                const folderId = bookmark.folder || '';
-                if (bookmarksByFolder[folderId] !== undefined) {
-                    bookmarksByFolder[folderId].push(bookmark);
-                } else {
-                    bookmarksByFolder[''].push(bookmark);
-                }
-            });
-            
-            // 先显示无文件夹的书签
-            if (bookmarksByFolder[''].length > 0) {
-                const section = document.createElement('div');
-                section.className = 'mb-6';
-                section.innerHTML = `<h6 class="text-gray-400 text-sm mb-3">未分类</h6>`;
                 
-                bookmarksByFolder[''].forEach(bookmark => {
-                    const item = createEditBookmarkItem(bookmark);
-                    section.appendChild(item);
-                });
+                // 书签列表
+                const bookmarksList = document.createElement('div');
+                bookmarksList.className = 'space-y-2 pl-6';
                 
-                container.appendChild(section);
-            }
-            
-            // 显示各个文件夹的书签
-            appData.folders.forEach(folder => {
-                if (bookmarksByFolder[folder.id].length > 0) {
-                    const section = document.createElement('div');
-                    section.className = 'mb-6';
-                    section.innerHTML = `<h6 class="text-gray-400 text-sm mb-3">${folder.name}</h6>`;
-                    
-                    bookmarksByFolder[folder.id].forEach(bookmark => {
-                        const item = createEditBookmarkItem(bookmark);
-                        section.appendChild(item);
-                    });
-                    
-                    container.appendChild(section);
-                }
-            });
-        }
-
-        // 创建编辑中心的书签项
-        function createEditBookmarkItem(bookmark) {
-            const folderName = bookmark.folder 
-                ? appData.folders.find(f => f.id === bookmark.folder)?.name || ''
-                : '未分类';
-            
-            const item = document.createElement('div');
-            item.className = 'bg-space-dark border border-gray-800 rounded-lg p-3 flex items-center justify-between hover:border-gray-700 transition-colors';
-            item.innerHTML = `
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center">
-                        <div class="text-sm text-gray-400 mr-2 px-2 py-0.5 bg-gray-800 rounded">${folderName}</div>
-                        <div class="font-medium text-white truncate">${bookmark.title}</div>
-                    </div>
-                    <div class="text-xs text-gray-500 mt-1 truncate">${bookmark.url}</div>
-                </div>
-                <div class="flex items-center space-x-2 ml-4">
-                    <button class="edit-bookmark p-1.5 rounded hover:bg-gray-800 transition-colors button-hover-effect" data-id="${bookmark.id}" title="编辑">
-                        <i class="fa fa-pencil text-gray-400 hover:text-white"></i>
-                    </button>
-                    <button class="delete-bookmark p-1.5 rounded hover:bg-gray-800 transition-colors button-hover-effect" data-id="${bookmark.id}" title="删除">
-                        <i class="fa fa-trash-o text-gray-400 hover:text-red-500"></i>
-                    </button>
-                </div>
-            `;
-            
-            return item;
-        }
-
-        // 更新文件夹下拉菜单
-        function updateFolderSelect() {
-            const select = document.getElementById('new-bookmark-folder');
-            const currentValue = select.value;
-            
-            // 保留第一个"无文件夹"选项
-            const firstOption = select.options[0];
-            select.innerHTML = '';
-            select.appendChild(firstOption);
-            
-            // 添加所有文件夹
-            appData.folders.forEach(folder => {
-                const option = document.createElement('option');
-                option.value = folder.id;
-                option.textContent = folder.name;
-                select.appendChild(option);
-            });
-            
-            // 恢复之前的值（如果存在）
-            if (currentValue && [...select.options].some(o => o.value === currentValue)) {
-                select.value = currentValue;
-            }
-        }
-
-        // 渲染广告
-        function renderAds() {
-            appData.ads.forEach(ad => {
-                const container = document.getElementById(`ad-${ad.id}`);
-                container.innerHTML = '';
-                
-                if (ad.image && ad.url) {
-                    container.innerHTML = `
-                        <a href="${ad.url}" target="_blank" class="block h-full">
-                            <img src="${ad.image}" alt="广告图片 ${ad.id}" class="w-full h-full object-cover">
-                        </a>
-                    `;
-                } else if (ad.image) {
-                    container.innerHTML = `
-                        <img src="${ad.image}" alt="广告图片 ${ad.id}" class="w-full h-full object-cover">
-                    `;
-                } else {
-                    container.innerHTML = `
-                        <div class="absolute inset-0 flex items-center justify-center bg-space-darker/40">
-                            <p class="text-gray-500 text-center px-4">广告位 ${ad.id}</p>
+                // 添加书签
+                bookmarks.forEach((bookmark, index) => {
+                    const bookmarkEl = document.createElement('div');
+                    bookmarkEl.className = 'flex items-center justify-between p-2 bg-gray-100 dark:bg-gray-800/70 rounded-lg';
+                    bookmarkEl.innerHTML = `
+                        <div class="flex items-center flex-1 min-w-0">
+                            <div class="mr-3 truncate">
+                                <div class="font-medium truncate">${bookmark.name}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 truncate">${bookmark.url}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 ml-3">
+                            <button class="edit-bookmark-btn p-1 text-blue-500 hover:text-blue-600" data-folder="${folderName}" data-index="${index}">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="delete-bookmark-btn p-1 text-red-500 hover:text-red-600" data-folder="${folderName}" data-index="${index}">
+                                <i class="fa fa-trash"></i>
+                            </button>
                         </div>
                     `;
-                }
-                
-                // 更新编辑中心的广告预览
-                const previewContainer = document.getElementById(`ad-${ad.id}-preview`);
-                const previewImg = previewContainer ? previewContainer.querySelector('img') : null;
-                const urlInput = document.getElementById(`ad-${ad.id}-url`);
-                
-                if (previewImg && urlInput) {
-                    urlInput.value = ad.url || '';
                     
-                    if (ad.image) {
-                        previewImg.src = ad.image;
-                        previewContainer.classList.remove('hidden');
-                        document.getElementById(`ad-${ad.id}-upload`).classList.add('hidden');
-                    } else {
-                        previewContainer.classList.add('hidden');
-                        document.getElementById(`ad-${ad.id}-upload`).classList.remove('hidden');
-                    }
-                }
-            });
-        }
-
-        // 渲染城市列表（编辑中心）
-        function renderCitiesList() {
-            const container = document.getElementById('cities-list');
-            container.innerHTML = '';
-            
-            appData.cities.forEach(city => {
-                const timezone = appData.cityTimezones[city] || 'UTC';
-                const item = document.createElement('div');
-                item.className = 'bg-space-dark border border-gray-800 rounded-lg p-3 flex items-center justify-between hover:border-gray-700 transition-colors';
-                item.innerHTML = `
-                    <div class="flex-1">
-                        <div class="font-medium text-white">${city}</div>
-                        <div class="text-xs text-gray-500">${timezone}</div>
-                    </div>
-                    <button class="delete-city p-1.5 rounded hover:bg-gray-800 transition-colors button-hover-effect" data-city="${city}" title="删除">
-                        <i class="fa fa-trash-o text-gray-400 hover:text-red-500"></i>
-                    </button>
-                `;
+                    bookmarksList.appendChild(bookmarkEl);
+                });
                 
-                container.appendChild(item);
+                folderEl.appendChild(folderHeader);
+                folderEl.appendChild(bookmarksList);
+                container.appendChild(folderEl);
+                
+                // 添加重命名文件夹事件
+                folderEl.querySelector('.rename-folder-btn').addEventListener('click', (e) => {
+                    const folder = e.currentTarget.dataset.folder;
+                    renameFolder(folder);
+                });
+            });
+            
+            // 添加编辑和删除书签事件监听
+            document.querySelectorAll('.edit-bookmark-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const folder = e.currentTarget.dataset.folder;
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    editBookmark(folder, index);
+                });
+            });
+            
+            document.querySelectorAll('.delete-bookmark-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const folder = e.currentTarget.dataset.folder;
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    deleteBookmark(folder, index);
+                });
             });
         }
 
-        // 更新在线时长
-        function updateOnlineDuration() {
-            const deployDate = new Date(appData.deployDate);
-            const now = new Date();
-            const diff = now - deployDate;
+        // 更新文件夹下拉列表
+        function updateFolderSelect() {
+            const select = elements.bookmarkFolder;
+            select.innerHTML = '';
             
-            // 计算天、时、分、秒
-            const seconds = Math.floor((diff / 1000) % 60);
-            const minutes = Math.floor((diff / (1000 * 60)) % 60);
-            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            
-            let durationText = '';
-            if (days > 0) {
-                durationText = `${days}天 ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            } else {
-                durationText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
-            
-            document.getElementById('online-duration').textContent = durationText;
-        }
-
-        // 更新健康提醒
-        function updateHealthReminder() {
-            const hour = new Date().getHours();
-            let reminder = '';
-            
-            if (hour >= 6 && hour < 9) {
-                reminder = '早上好！开始新的一天探索吧';
-            } else if (hour >= 9 && hour < 12) {
-                reminder = '上午好！记得定时休息眼睛';
-            } else if (hour >= 12 && hour < 14) {
-                reminder = '午餐时间，补充能量继续探索';
-            } else if (hour >= 14 && hour < 17) {
-                reminder = '下午好！站起来活动一下吧';
-            } else if (hour >= 17 && hour < 19) {
-                reminder = '傍晚了，整理一下今天的发现';
-            } else if (hour >= 19 && hour < 22) {
-                reminder = '晚上好！享受轻松的浏览时光';
-            } else {
-                reminder = '夜深了，注意休息，明天再继续探索';
-            }
-            
-            document.querySelector('#health-reminder p:first-child').textContent = reminder;
-        }
-
-        // 更新页脚信息
-        function updateFooter() {
-            const year = new Date().getFullYear();
-            const hostname = window.location.hostname;
-            document.getElementById('copyright').textContent = `Copyright © 2018-${year} ${hostname}, All Rights Reserved`;
-        }
-
-        // 初始化编辑中心
-        function initEditCenter() {
-            // 渲染城市列表
-            renderCitiesList();
-            
-            // 渲染广告预览
-            appData.ads.forEach(ad => {
-                if (ad.image) {
-                    const previewContainer = document.getElementById(`ad-${ad.id}-preview`);
-                    const previewImg = previewContainer.querySelector('img');
-                    if (previewImg) {
-                        previewImg.src = ad.image;
-                        previewContainer.classList.remove('hidden');
-                        document.getElementById(`ad-${ad.id}-upload`).classList.add('hidden');
-                    }
-                }
+            Object.keys(appData.bookmarks).forEach(folderName => {
+                const option = document.createElement('option');
+                option.value = folderName;
+                option.textContent = folderName === 'default' ? '默认文件夹' : folderName;
+                select.appendChild(option);
             });
         }
 
-        // 显示通知
-        function showNotification(title, message, type = 'info') {
-            const notification = document.getElementById('notification');
-            const titleElement = document.getElementById('notification-title');
-            const messageElement = document.getElementById('notification-message');
-            const iconElement = document.getElementById('notification-icon');
+        // 重命名文件夹
+        function renameFolder(oldName) {
+            const newName = prompt(`重命名文件夹"${oldName === 'default' ? '默认文件夹' : oldName}"`, oldName);
             
-            titleElement.textContent = title;
-            messageElement.textContent = message;
-            
-            // 设置图标
-            let icon = '';
-            switch (type) {
-                case 'success':
-                    icon = '<i class="fa fa-check-circle text-green-500"></i>';
-                    break;
-                case 'error':
-                    icon = '<i class="fa fa-exclamation-circle text-red-500"></i>';
-                    break;
-                case 'warning':
-                    icon = '<i class="fa fa-exclamation-triangle text-yellow-500"></i>';
-                    break;
-                default:
-                    icon = '<i class="fa fa-info-circle text-blue-500"></i>';
-            }
-            iconElement.innerHTML = icon;
-            
-            // 显示通知
-            notification.classList.remove('hidden', 'translate-y-20', 'opacity-0');
-            notification.classList.add('translate-y-0', 'opacity-100');
-            
-            // 3秒后自动关闭
-            setTimeout(() => {
-                closeNotification();
-            }, 3000);
-        }
-
-        // 关闭通知
-        function closeNotification() {
-            const notification = document.getElementById('notification');
-            notification.classList.remove('translate-y-0', 'opacity-100');
-            notification.classList.add('translate-y-20', 'opacity-0');
-            
-            setTimeout(() => {
-                notification.classList.add('hidden');
-            }, 300);
-        }
-
-        // 显示加载动画
-        function showLoading() {
-            const loading = document.getElementById('edit-loading');
-            if (loading) {
-                loading.classList.remove('hidden');
-            }
-        }
-
-        // 隐藏加载动画
-        function hideLoading() {
-            const loading = document.getElementById('edit-loading');
-            if (loading) {
-                loading.classList.add('hidden');
-            }
-        }
-
-        // 显示确认对话框
-        function showConfirmDialog(title, message, confirmCallback) {
-            document.getElementById('confirm-title').textContent = title;
-            document.getElementById('confirm-message').textContent = message;
-            document.getElementById('confirm-modal').classList.remove('hidden');
-            
-            // 设置确认回调
-            const okButton = document.getElementById('confirm-ok');
-            // 移除之前的事件监听，防止多次触发
-            okButton.removeEventListener('click', okButton._clickHandler);
-            okButton._clickHandler = async function() {
-                document.getElementById('confirm-modal').classList.add('hidden');
-                if (confirmCallback) {
-                    try {
-                        await confirmCallback();
-                    } catch (error) {
-                        console.error("确认操作失败:", error);
-                        showNotification('操作失败', error.message, 'error');
-                    }
-                }
-            };
-            okButton.addEventListener('click', okButton._clickHandler);
-        }
-
-        // 处理广告上传点击
-        function handleAdUploadClick(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const adId = this.id.split('-')[1];
-            const fileInput = document.getElementById(`ad-${adId}-file`);
-            if (fileInput) {
-                fileInput.click();
-            }
-        }
-
-        // 处理广告文件选择
-        function handleAdFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            // 检查文件大小
-            if (file.size > 3 * 1024 * 1024) {
-                showNotification('错误', '文件大小不能超过3MB', 'error');
+            if (!newName || newName.trim() === '' || newName === oldName) {
                 return;
             }
             
-            // 检查文件类型
-            if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
-                showNotification('错误', '只支持JPG和PNG格式', 'error');
+            // 检查文件夹名是否已存在
+            if (appData.bookmarks.hasOwnProperty(newName)) {
+                showToast('错误', '文件夹名已存在', 'error');
                 return;
             }
             
-            const adId = e.target.id.split('-')[1];
-            const reader = new FileReader();
+            // 创建新文件夹并复制内容
+            appData.bookmarks[newName] = appData.bookmarks[oldName];
             
-            reader.onload = function(event) {
-                // 更新广告数据
-                const adIndex = appData.ads.findIndex(a => a.id === parseInt(adId));
-                if (adIndex !== -1) {
-                    appData.ads[adIndex].image = event.target.result;
-                    
-                    // 更新预览
-                    const previewContainer = document.getElementById(`ad-${adId}-preview`);
-                    const previewImg = previewContainer.querySelector('img');
-                    previewImg.src = event.target.result;
-                    previewContainer.classList.remove('hidden');
-                    document.getElementById(`ad-${adId}-upload`).classList.add('hidden');
-                    
-                    // 更新主页面广告
-                    renderAds();
-                }
-            };
+            // 删除旧文件夹
+            delete appData.bookmarks[oldName];
             
-            reader.readAsDataURL(file);
-            
-            // 重置输入，允许重复选择同一文件
-            e.target.value = '';
+            // 重新渲染
+            renderEditBookmarks();
+            showToast('成功', '文件夹已重命名', 'success');
         }
 
-        // 处理移除广告图片
-        function handleRemoveAd(e) {
-            e.preventDefault();
-            const adId = parseInt(this.getAttribute('data-ad'));
+        // 添加书签
+        function addBookmark() {
+            currentEditing = { type: 'bookmark', id: null, folder: null };
             
-            // 更新广告数据
-            const adIndex = appData.ads.findIndex(a => a.id === adId);
-            if (adIndex !== -1) {
-                appData.ads[adIndex].image = '';
+            elements.bookmarkModalTitle.textContent = '添加书签';
+            elements.bookmarkName.value = '';
+            elements.bookmarkUrl.value = '';
+            
+            openModal(elements.bookmarkModal);
+        }
+
+        // 编辑书签
+        function editBookmark(folder, index) {
+            const bookmark = appData.bookmarks[folder][index];
+            
+            currentEditing = { type: 'bookmark', id: index, folder: folder };
+            
+            elements.bookmarkModalTitle.textContent = '编辑书签';
+            elements.bookmarkFolder.value = folder;
+            elements.bookmarkName.value = bookmark.name;
+            elements.bookmarkUrl.value = bookmark.url;
+            
+            openModal(elements.bookmarkModal);
+        }
+
+        // 保存书签
+        function saveBookmark() {
+            const folder = elements.bookmarkFolder.value;
+            const name = elements.bookmarkName.value.trim();
+            const url = elements.bookmarkUrl.value.trim();
+            
+            if (!name || !url) {
+                showToast('错误', '名称和网址不能为空', 'error');
+                return;
+            }
+            
+            // 确保URL格式正确
+            let formattedUrl = url;
+            if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+                formattedUrl = 'https://' + formattedUrl;
+            }
+            
+            if (currentEditing.type === 'bookmark' && currentEditing.id !== null && currentEditing.folder) {
+                // 更新现有书签
+                // 如果文件夹变了，先删除再添加
+                if (currentEditing.folder !== folder) {
+                    appData.bookmarks[currentEditing.folder].splice(currentEditing.id, 1);
+                    appData.bookmarks[folder].push({ name, url: formattedUrl });
+                } else {
+                    // 同一文件夹内更新
+                    appData.bookmarks[folder][currentEditing.id] = { name, url: formattedUrl };
+                }
+                showToast('成功', '书签已更新', 'success');
+            } else {
+                // 添加新书签
+                // 检查是否已存在（去重）
+                const exists = appData.bookmarks[folder].some(bm => 
+                    bm.url.toLowerCase() === formattedUrl.toLowerCase()
+                );
                 
-                // 更新预览
-                const previewContainer = document.getElementById(`ad-${adId}-preview`);
-                previewContainer.classList.add('hidden');
-                document.getElementById(`ad-${adId}-upload`).classList.remove('hidden');
+                if (exists) {
+                    showToast('提示', '该书签已存在', 'info');
+                    closeModal(elements.bookmarkModal);
+                    return;
+                }
                 
-                // 更新主页面广告
-                renderAds();
+                appData.bookmarks[folder].push({ name, url: formattedUrl });
+                showToast('成功', '书签已添加', 'success');
+            }
+            
+            // 重新渲染
+            renderEditBookmarks();
+            closeModal(elements.bookmarkModal);
+        }
+
+        // 删除书签
+        function deleteBookmark(folder, index) {
+            const bookmark = appData.bookmarks[folder][index];
+            
+            if (confirm(`确定要删除书签"${bookmark.name}"吗？`)) {
+                appData.bookmarks[folder].splice(index, 1);
                 
-                showNotification('成功', '广告图片已移除', 'success');
+                // 如果文件夹为空，删除文件夹
+                if (appData.bookmarks[folder].length === 0 && folder !== 'default') {
+                    delete appData.bookmarks[folder];
+                }
+                
+                // 重新渲染
+                renderEditBookmarks();
+                showToast('成功', '书签已删除', 'success');
             }
         }
 
@@ -1501,90 +1331,60 @@
         function importBookmarks(file) {
             const reader = new FileReader();
             
-            reader.onload = function(event) {
+            reader.onload = function(e) {
                 try {
+                    const content = e.target.result;
+                    
+                    // 简单解析书签HTML文件
                     const parser = new DOMParser();
-                    const doc = parser.parseFromString(event.target.result, 'text/html');
-                    const bookmarkElements = doc.querySelectorAll('a');
+                    const doc = parser.parseFromString(content, 'text/html');
                     
-                    if (bookmarkElements.length === 0) {
-                        showNotification('警告', '未找到书签数据', 'warning');
-                        return;
-                    }
+                    // 查找所有A标签
+                    const bookmarks = doc.querySelectorAll('a');
+                    const importedCount = { total: 0, new: 0 };
                     
-                    // 提取文件夹结构
-                    const folders = {};
-                    let currentFolder = null;
-                    
-                    // 先处理所有DT和H3元素来识别文件夹
-                    const allElements = doc.querySelectorAll('dt, h3');
-                    allElements.forEach(el => {
-                        if (el.tagName === 'H3') {
-                            // 这是一个文件夹
-                            const folderName = el.textContent.trim();
-                            const folderId = 'folder_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                            currentFolder = { id: folderId, name: folderName };
-                            folders[folderId] = currentFolder;
-                        } else if (el.tagName === 'DT' && el.firstElementChild && el.firstElementChild.tagName === 'A') {
-                            // 这是一个书签，但我们暂时只关心文件夹结构
-                        } else if (el.tagName === 'DT' && el.firstElementChild && el.firstElementChild.tagName === 'DL') {
-                            // 文件夹结束
-                            currentFolder = null;
+                    bookmarks.forEach(link => {
+                        importedCount.total++;
+                        
+                        const name = link.textContent.trim();
+                        let url = link.getAttribute('href');
+                        
+                        if (!url || !name) return;
+                        
+                        // 确保URL格式正确
+                        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                            url = 'https://' + url;
                         }
-                    });
-                    
-                    // 将新文件夹添加到应用数据（去重）
-                    Object.values(folders).forEach(folder => {
-                        if (!appData.folders.some(f => f.name === folder.name)) {
-                            appData.folders.push(folder);
-                        }
-                    });
-                    
-                    // 提取书签
-                    const newBookmarks = [];
-                    allElements.forEach(el => {
-                        if (el.tagName === 'DT' && el.firstElementChild && el.firstElementChild.tagName === 'A') {
-                            const aTag = el.firstElementChild;
-                            const title = aTag.textContent.trim() || '无标题';
-                            const url = aTag.getAttribute('href') || '';
+                        
+                        // 获取文件夹（从父节点H3获取）
+                        let folder = 'default';
+                        const parentH3 = link.closest('dl').previousElementSibling;
+                        if (parentH3 && parentH3.tagName === 'H3') {
+                            folder = parentH3.textContent.trim().replace(/\s+/g, '_');
                             
-                            if (url) {
-                                // 查找对应的文件夹
-                                let folderId = '';
-                                if (currentFolder) {
-                                    // 检查是否已存在同名文件夹
-                                    const existingFolder = appData.folders.find(f => f.name === currentFolder.name);
-                                    folderId = existingFolder ? existingFolder.id : currentFolder.id;
-                                }
-                                
-                                // 去重检查
-                                const isDuplicate = appData.bookmarks.some(b => 
-                                    b.url.toLowerCase() === url.toLowerCase()
-                                );
-                                
-                                if (!isDuplicate) {
-                                    newBookmarks.push({
-                                        id: 'bookmark_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                                        title: title,
-                                        url: url,
-                                        folder: folderId
-                                    });
-                                }
+                            // 如果文件夹不存在，创建它
+                            if (!appData.bookmarks[folder]) {
+                                appData.bookmarks[folder] = [];
                             }
                         }
+                        
+                        // 检查是否已存在（去重）
+                        const exists = appData.bookmarks[folder].some(bm => 
+                            bm.url.toLowerCase() === url.toLowerCase()
+                        );
+                        
+                        if (!exists) {
+                            appData.bookmarks[folder].push({ name, url });
+                            importedCount.new++;
+                        }
                     });
                     
-                    // 添加新书签
-                    appData.bookmarks = [...appData.bookmarks, ...newBookmarks];
-                    
-                    // 更新界面
-                    renderBookmarks();
-                    updateFolderSelect();
-                    
-                    showNotification('成功', `已导入 ${newBookmarks.length} 个新书签`, 'success');
+                    // 重新渲染
+                    renderEditBookmarks();
+                    showToast('成功', `共导入 ${importedCount.total} 个书签，新增 ${importedCount.new} 个（已去重）`, 'success');
                 } catch (error) {
                     console.error('导入书签失败:', error);
-                    showNotification('错误', '导入书签失败，请检查文件格式', 'error');
+                    showToast('错误', '导入书签失败，请确保文件格式正确', 'error');
                 }
             };
             
@@ -1593,513 +1393,596 @@
 
         // 导出书签
         function exportBookmarks() {
-            if (appData.bookmarks.length === 0) {
-                showNotification('警告', '没有书签可导出', 'warning');
-                return;
-            }
-            
-            // 创建HTML书签文件内容
+            // 创建HTML格式的书签
             let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
 <TITLE>书签导出</TITLE>
-<H1>书签</H1>
+<H1>星际导航书签</H1>
 <DL><p>`;
             
-            // 先处理有文件夹的书签
-            appData.folders.forEach(folder => {
-                const folderBookmarks = appData.bookmarks.filter(b => b.folder === folder.id);
-                if (folderBookmarks.length > 0) {
-                    html += `<DT><H3>${folder.name}</H3>
-<DL><p>`;
-                    
-                    folderBookmarks.forEach(bookmark => {
-                        html += `<DT><A HREF="${bookmark.url}">${bookmark.title}</A>`;
-                    });
-                    
-                    html += `</DL><p>`;
-                }
-            });
-            
-            // 处理无文件夹的书签
-            const uncategorizedBookmarks = appData.bookmarks.filter(b => !b.folder);
-            if (uncategorizedBookmarks.length > 0) {
-                html += `<DT><H3>未分类</H3>
-<DL><p>`;
+            // 添加每个文件夹
+            Object.entries(appData.bookmarks).forEach(([folderName, bookmarks]) => {
+                if (bookmarks.length === 0) return;
                 
-                uncategorizedBookmarks.forEach(bookmark => {
-                    html += `<DT><A HREF="${bookmark.url}">${bookmark.title}</A>`;
+                const displayName = folderName === 'default' ? '默认文件夹' : folderName;
+                
+                html += `
+    <DT><H3>${displayName}</H3>
+    <DL><p>`;
+                
+                // 添加每个书签
+                bookmarks.forEach(bookmark => {
+                    html += `
+        <DT><A HREF="${bookmark.url}">${bookmark.name}</A>`;
                 });
                 
-                html += `</DL><p>`;
-            }
+                html += `
+    </DL><p>`;
+            });
             
-            html += `</DL>`;
+            html += `
+</DL><p>`;
             
-            // 创建下载链接
-            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            // 创建下载
+            const blob = new Blob([html], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `星际书签_${new Date().toLocaleDateString()}.html`;
+            a.download = `space-bookmarks-${new Date().toISOString().slice(0, 10)}.html`;
             document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
             
-            // 清理
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 0);
-            
-            showNotification('成功', `已导出 ${appData.bookmarks.length} 个书签`, 'success');
+            showToast('成功', '书签已导出', 'success');
         }
 
-        // 设置事件监听 - 确保所有DOM元素加载完成后再绑定
-        function setupEventListeners() {
-            // 检查关键元素是否存在
-            const criticalElements = [
-                'theme-toggle', 'settings-btn', 'close-settings', 
-                'enter-edit-center', 'close-edit-center', 'save-github-settings',
-                'validate-github-token', 'toggle-token-visibility', 'save-changes'
+        // 初始化时区列表
+        function initTimezones() {
+            const timezones = [
+                'Asia/Shanghai', 'Asia/Tokyo', 'Asia/Seoul', 'Asia/Hong_Kong', 
+                'Asia/Singapore', 'Europe/London', 'Europe/Paris', 'Europe/Berlin',
+                'America/New_York', 'America/Los_Angeles', 'America/Chicago',
+                'Australia/Sydney', 'Australia/Melbourne', 'Africa/Cairo',
+                'Pacific/Midway', 'Pacific/Honolulu', 'America/Anchorage',
+                'America/Tijuana', 'America/Phoenix', 'America/Chihuahua',
+                'America/Denver', 'America/Chicago', 'America/Mexico_City',
+                'America/Regina', 'America/Bogota', 'America/New_York',
+                'America/Caracas', 'America/Santiago', 'America/Saopaulo',
+                'America/Buenos_Aires', 'Atlantic/Azores', 'Africa/Lagos',
+                'Europe/London', 'Europe/Amsterdam', 'Europe/Istanbul',
+                'Africa/Johannesburg', 'Asia/Dubai', 'Asia/Kolkata',
+                'Asia/Dhaka', 'Asia/Bangkok', 'Asia/Shanghai',
+                'Asia/Tokyo', 'Australia/Perth', 'Australia/Sydney',
+                'Pacific/Fiji', 'Pacific/Auckland'
             ];
             
-            criticalElements.forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) {
-                    console.warn(`元素 ${id} 未找到，可能导致功能异常`);
-                }
+            const select = elements.cityTimezone;
+            select.innerHTML = '';
+            
+            timezones.forEach(tz => {
+                const option = document.createElement('option');
+                option.value = tz;
+                option.textContent = tz.replace('_', ' ');
+                select.appendChild(option);
             });
+        }
 
-            // 主题切换
-            document.getElementById('theme-toggle')?.addEventListener('click', function() {
-                appData.settings.darkMode = !appData.settings.darkMode;
-                saveLocalSettings();
+        // 渲染城市列表（编辑中心）
+        function renderCitiesList() {
+            const container = elements.citiesList;
+            container.innerHTML = '';
+            
+            // 如果未验证，显示提示
+            if (!appData.github.validated) {
+                container.innerHTML = `
+                    <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+                        <p>请先完成GitHub验证以管理城市</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 如果没有城市
+            if (appData.cities.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+                        <p>暂无城市，点击"添加城市"按钮开始添加</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 渲染每个城市
+            appData.cities.forEach((city, index) => {
+                const cityEl = document.createElement('div');
+                cityEl.className = 'flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-800/70 rounded-lg';
+                cityEl.innerHTML = `
+                    <div>
+                        <div class="font-medium">${city.name}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">${city.timezone.replace('_', ' ')}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="edit-city-btn p-1 text-blue-500 hover:text-blue-600" data-index="${index}">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="delete-city-btn p-1 text-red-500 hover:text-red-600" data-index="${index}">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                `;
                 
-                if (appData.settings.darkMode) {
-                    document.documentElement.classList.add('dark');
-                    this.innerHTML = '<i class="fa fa-moon-o text-space-glow"></i>';
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    this.innerHTML = '<i class="fa fa-sun-o text-space-glow"></i>';
-                }
+                container.appendChild(cityEl);
             });
             
-            // 设置按钮
-            document.getElementById('settings-btn')?.addEventListener('click', function() {
-                document.getElementById('settings-modal').classList.remove('hidden');
-            });
-            
-            // 关闭设置
-            document.getElementById('close-settings')?.addEventListener('click', function() {
-                document.getElementById('settings-modal').classList.add('hidden');
-            });
-            
-            // 进入编辑中心
-            document.getElementById('enter-edit-center')?.addEventListener('click', function() {
-                document.getElementById('settings-modal').classList.add('hidden');
-                document.getElementById('edit-center-modal').classList.remove('hidden');
-            });
-            
-            // 关闭编辑中心
-            document.getElementById('close-edit-center')?.addEventListener('click', function() {
-                document.getElementById('edit-center-modal').classList.add('hidden');
-            });
-            
-            // 编辑中心标签切换
-            document.querySelectorAll('.edit-tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    // 移除所有标签的活动状态
-                    document.querySelectorAll('.edit-tab').forEach(t => t.classList.remove('active', 'bg-space-dark', 'text-space-glow'));
-                    
-                    // 添加当前标签的活动状态
-                    this.classList.add('active', 'bg-space-dark', 'text-space-glow');
-                    
-                    // 隐藏所有内容
-                    document.querySelectorAll('.edit-content').forEach(content => content.classList.add('hidden'));
-                    
-                    // 显示当前内容
-                    const tabId = this.getAttribute('data-tab');
-                    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+            // 添加编辑和删除城市事件监听
+            document.querySelectorAll('.edit-city-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    editCity(index);
                 });
             });
             
-            // 保存GitHub设置
-            document.getElementById('save-github-settings')?.addEventListener('click', function() {
-                appData.github.username = document.getElementById('github-username').value.trim();
-                appData.github.repo = document.getElementById('github-repo').value.trim();
-                
-                // 只在有变化时更新token
-                const newToken = document.getElementById('github-token').value;
-                if (newToken) {
-                    appData.github.token = newToken;
-                }
-                
-                saveLocalSettings();
-                showNotification('成功', 'GitHub设置已保存', 'success');
-            });
-            
-            // 验证GitHub令牌
-            document.getElementById('validate-github-token')?.addEventListener('click', async function() {
-                const token = document.getElementById('github-token').value;
-                
-                if (!token) {
-                    showNotification('错误', '请输入GitHub令牌', 'error');
-                    return;
-                }
-                
-                const result = await validateGitHubToken(token);
-                const statusElement = document.getElementById('github-validation-status');
-                
-                statusElement.classList.remove('hidden', 'bg-green-900/30', 'text-green-400', 'bg-red-900/30', 'text-red-400');
-                
-                if (result.valid) {
-                    appData.github.validated = true;
-                    appData.github.token = token;
-                    saveLocalSettings();
-                    updateEditFeaturesStatus();
-                    
-                    statusElement.classList.add('bg-green-900/30', 'text-green-400');
-                    statusElement.innerHTML = `<i class="fa fa-check-circle mr-1"></i>${result.message}`;
-                } else {
-                    appData.github.validated = false;
-                    saveLocalSettings();
-                    updateEditFeaturesStatus();
-                    
-                    statusElement.classList.add('bg-red-900/30', 'text-red-400');
-                    statusElement.innerHTML = `<i class="fa fa-times-circle mr-1"></i>${result.message}`;
-                }
-            });
-            
-            // 切换令牌可见性
-            document.getElementById('toggle-token-visibility')?.addEventListener('click', function() {
-                const tokenInput = document.getElementById('github-token');
-                if (tokenInput) {
-                    const type = tokenInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                    tokenInput.setAttribute('type', type);
-                    this.innerHTML = type === 'password' ? '<i class="fa fa-eye"></i>' : '<i class="fa fa-eye-slash"></i>';
-                }
-            });
-            
-            // 关闭通知
-            document.getElementById('close-notification')?.addEventListener('click', closeNotification);
-            
-            // 确认对话框取消
-            document.getElementById('confirm-cancel')?.addEventListener('click', function() {
-                document.getElementById('confirm-modal').classList.add('hidden');
-            });
-            
-            // 保存更改
-            document.getElementById('save-changes')?.addEventListener('click', async function() {
-                showConfirmDialog('保存更改', '确定要保存所有更改并同步到GitHub吗？', async () => {
-                    // 更新广告链接
-                    appData.ads.forEach(ad => {
-                        const urlInput = document.getElementById(`ad-${ad.id}-url`);
-                        if (urlInput) {
-                            ad.url = urlInput.value.trim();
-                        }
-                    });
-                    
-                    // 保存到GitHub
-                    const success = await saveDataToGitHub();
-                    if (success) {
-                        // 更新主页面
-                        renderBookmarks();
-                        renderWorldClock();
-                        renderAds();
-                    }
+            document.querySelectorAll('.delete-city-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    deleteCity(index);
                 });
             });
+        }
+
+        // 渲染世界时钟（主页）
+        function renderCities() {
+            renderCitiesList();
+            updateClocks();
+        }
+
+        // 更新时钟显示
+        function updateClocks() {
+            const container = elements.worldClocks;
+            container.innerHTML = '';
             
-            // 添加书签
-            document.getElementById('add-bookmark')?.addEventListener('click', function() {
-                const folder = document.getElementById('new-bookmark-folder').value;
-                const title = document.getElementById('new-bookmark-title').value.trim();
-                const url = document.getElementById('new-bookmark-url').value.trim();
+            appData.cities.forEach(city => {
+                // 获取城市当前时间
+                const options = { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit',
+                    hour12: false
+                };
                 
-                if (!title || !url) {
-                    showNotification('错误', '标题和URL不能为空', 'error');
-                    return;
-                }
-                
-                // 检查URL格式
-                try {
-                    new URL(url);
-                } catch (e) {
-                    // 尝试添加http://前缀
-                    try {
-                        new URL('http://' + url);
-                        url = 'http://' + url;
-                    } catch (e2) {
-                        showNotification('错误', 'URL格式无效', 'error');
-                        return;
-                    }
-                }
-                
-                // 检查重复
-                const isDuplicate = appData.bookmarks.some(b => 
-                    b.url.toLowerCase() === url.toLowerCase()
-                );
-                
-                if (isDuplicate) {
-                    showNotification('警告', '该URL已存在', 'warning');
-                    return;
-                }
-                
-                // 添加新书签
-                appData.bookmarks.push({
-                    id: 'bookmark_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                    title: title,
-                    url: url,
-                    folder: folder
+                const date = new Date();
+                const formatter = new Intl.DateTimeFormat('zh-CN', {
+                    ...options,
+                    timeZone: city.timezone
                 });
                 
-                // 清空表单
-                document.getElementById('new-bookmark-title').value = '';
-                document.getElementById('new-bookmark-url').value = '';
+                const timeString = formatter.format(date);
                 
-                // 更新界面
-                renderBookmarks();
+                const cityClock = document.createElement('div');
+                cityClock.className = 'flex justify-between items-center';
+                cityClock.innerHTML = `
+                    <span>${city.name}</span>
+                    <span class="font-mono font-medium">${timeString}</span>
+                `;
                 
-                showNotification('成功', '书签已添加', 'success');
+                container.appendChild(cityClock);
             });
+        }
+
+        // 添加城市
+        function addCity() {
+            currentEditing = { type: 'city', id: null };
             
-            // 添加文件夹
-            document.getElementById('add-folder')?.addEventListener('click', function() {
-                const name = document.getElementById('new-folder-name').value.trim();
-                
-                if (!name) {
-                    showNotification('错误', '文件夹名称不能为空', 'error');
-                    return;
-                }
-                
-                // 检查重复
-                if (appData.folders.some(f => f.name === name)) {
-                    showNotification('警告', '该文件夹已存在', 'warning');
-                    return;
-                }
-                
-                // 添加新文件夹
-                appData.folders.push({
-                    id: 'folder_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                    name: name
-                });
-                
-                // 清空表单
-                document.getElementById('new-folder-name').value = '';
-                
-                // 更新界面
-                updateFolderSelect();
-                renderBookmarks();
-                
-                showNotification('成功', '文件夹已添加', 'success');
-            });
+            elements.cityName.value = '';
+            elements.cityTimezone.value = 'Asia/Shanghai';
             
-            // 导入书签
-            document.getElementById('import-bookmarks')?.addEventListener('click', function() {
-                const fileInput = document.getElementById('bookmarks-file-input');
-                if (fileInput) {
-                if (fileInput) {
-                    fileInput.click();
-                }
-            });
+            openModal(elements.cityModal);
+        }
+
+        // 编辑城市
+        function editCity(index) {
+            const city = appData.cities[index];
             
-            // 处理书签文件选择
-            document.getElementById('bookmarks-file-input')?.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    importBookmarks(file);
-                }
-                
-                // 重置输入，允许重复选择同一文件
-                this.value = '';
-            });
+            currentEditing = { type: 'city', id: index };
             
-            // 导出书签
-            document.getElementById('export-bookmarks')?.addEventListener('click', exportBookmarks);
+            elements.cityName.value = city.name;
+            elements.cityTimezone.value = city.timezone;
             
-            // 添加城市
-            document.getElementById('add-city')?.addEventListener('click', function() {
-                const name = document.getElementById('new-city-name').value.trim();
-                const timezone = document.getElementById('new-city-timezone').value.trim();
-                
-                if (!name || !timezone) {
-                    showNotification('错误', '城市名称和时区不能为空', 'error');
-                    return;
-                }
-                
-                // 检查重复
-                if (appData.cities.includes(name)) {
-                    showNotification('警告', '该城市已存在', 'warning');
-                    return;
-                }
-                
+            openModal(elements.cityModal);
+        }
+
+        // 保存城市
+        function saveCity() {
+            const name = elements.cityName.value.trim();
+            const timezone = elements.cityTimezone.value;
+            
+            if (!name) {
+                showToast('错误', '城市名称不能为空', 'error');
+                return;
+            }
+            
+            if (currentEditing.type === 'city' && currentEditing.id !== null) {
+                // 更新现有城市
+                appData.cities[currentEditing.id] = { name, timezone };
+                showToast('成功', '城市已更新', 'success');
+            } else {
                 // 添加新城市
-                appData.cities.push(name);
-                appData.cityTimezones[name] = timezone;
+                appData.cities.push({ name, timezone });
+                showToast('成功', '城市已添加', 'success');
+            }
+            
+            // 重新渲染
+            renderCities();
+            closeModal(elements.cityModal);
+        }
+
+        // 删除城市
+        function deleteCity(index) {
+            const city = appData.cities[index];
+            
+            if (appData.cities.length <= 1) {
+                showToast('错误', '至少保留一个城市', 'error');
+                return;
+            }
+            
+            if (confirm(`确定要删除城市"${city.name}"吗？`)) {
+                appData.cities.splice(index, 1);
                 
-                // 清空表单
-                document.getElementById('new-city-name').value = '';
-                document.getElementById('new-city-timezone').value = '';
-                
-                // 更新界面
-                renderCitiesList();
-                renderWorldClock();
-                
-                showNotification('成功', '城市已添加', 'success');
-            });
-            
-            // 广告上传区域点击
-            document.querySelectorAll('[id$="-upload"]').forEach(area => {
-                area.addEventListener('click', handleAdUploadClick);
-            });
-            
-            // 广告文件选择
-            document.querySelectorAll('[id^="ad-"][id$="-file"]').forEach(input => {
-                input.addEventListener('change', handleAdFileSelect);
-            });
-            
-            // 移除广告图片
-            document.querySelectorAll('[id^="remove-ad-"]').forEach(button => {
-                button.addEventListener('click', handleRemoveAd);
-            });
-            
-            // 搜索书签
-            const searchInputs = [
-                document.getElementById('search-input'),
-                document.getElementById('mobile-search-input')
-            ];
-            
-            searchInputs.forEach(input => {
-                if (input) {
-                    input.addEventListener('input', function() {
-                        const searchTerm = this.value.toLowerCase().trim();
-                        const bookmarkElements = document.querySelectorAll('#bookmarks-container a');
-                        
-                        bookmarkElements.forEach(el => {
-                            const title = el.querySelector('span').textContent.toLowerCase();
-                            const url = el.href.toLowerCase();
-                            
-                            if (title.includes(searchTerm) || url.includes(searchTerm)) {
-                                el.style.display = '';
-                                el.closest('.folder-content').style.display = '';
-                                el.closest('.folder-content').previousElementSibling.style.display = '';
-                            } else {
-                                el.style.display = 'none';
-                                
-                                // 检查文件夹是否还有可见书签
-                                const folderContent = el.closest('.folder-content');
-                                const visibleBookmarks = folderContent.querySelectorAll('a:not([style*="display: none"])');
-                                
-                                if (visibleBookmarks.length === 0) {
-                                    folderContent.style.display = 'none';
-                                    folderContent.previousElementSibling.style.display = 'none';
-                                }
-                            }
-                        });
-                    });
-                }
-            });
-            
-            // 文件夹折叠/展开
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.folder-toggle')) {
-                    const toggle = e.target.closest('.folder-toggle');
-                    const folderId = toggle.getAttribute('data-folder');
-                    const content = document.querySelector(`.folder-content[data-folder="${folderId}"]`);
-                    const icon = toggle.querySelector('i');
-                    
-                    if (content.style.display === 'none') {
-                        content.style.display = '';
-                        icon.classList.remove('folder-closed');
-                        icon.classList.add('folder-open');
-                    } else {
-                        content.style.display = 'none';
-                        icon.classList.remove('folder-open');
-                        icon.classList.add('folder-closed');
-                    }
-                }
-            });
-            
-            // 删除书签
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.delete-bookmark')) {
-                    const button = e.target.closest('.delete-bookmark');
-                    const bookmarkId = button.getAttribute('data-id');
-                    const bookmark = appData.bookmarks.find(b => b.id === bookmarkId);
-                    
-                    if (bookmark) {
-                        showConfirmDialog('删除书签', `确定要删除书签"${bookmark.title}"吗？`, () => {
-                            // 从数组中移除书签
-                            appData.bookmarks = appData.bookmarks.filter(b => b.id !== bookmarkId);
-                            
-                            // 更新界面
-                            renderBookmarks();
-                            
-                            showNotification('成功', '书签已删除', 'success');
-                        });
-                    }
-                }
-            });
-            
-            // 删除城市
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.delete-city')) {
-                    const button = e.target.closest('.delete-city');
-                    const city = button.getAttribute('data-city');
-                    
-                    if (city) {
-                        showConfirmDialog('删除城市', `确定要删除城市"${city}"吗？`, () => {
-                            // 从数组中移除城市
-                            appData.cities = appData.cities.filter(c => c !== city);
-                            delete appData.cityTimezones[city];
-                            
-                            // 更新界面
-                            renderCitiesList();
-                            renderWorldClock();
-                            
-                            showNotification('成功', '城市已删除', 'success');
-                        });
-                    }
-                }
-            });
-            
-            // 导航栏自动隐藏
-            let lastScrollTop = 0;
-            let scrollTimer;
-            const navbar = document.getElementById('navbar');
-            
-            if (navbar) {
-                window.addEventListener('scroll', function() {
-                    // 显示导航栏
-                    navbar.classList.remove('translate-y-[-100%]');
-                    
-                    // 清除之前的定时器
-                    clearTimeout(scrollTimer);
-                    
-                    // 设置新的定时器，3秒后隐藏导航栏
-                    scrollTimer = setTimeout(() => {
-                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                        
-                        // 只在页面顶部以下时隐藏
-                        if (scrollTop > 100) {
-                            navbar.classList.add('translate-y-[-100%]');
-                        }
-                        
-                        lastScrollTop = scrollTop;
-                    }, 3000);
-                });
+                // 重新渲染
+                renderCities();
+                showToast('成功', '城市已删除', 'success');
             }
         }
 
-        // 启动定时任务
-        function startTimers() {
-            // 每秒更新时钟和在线时长
-            setInterval(() => {
-                renderWorldClock();
-                updateOnlineDuration();
-            }, 1000);
+        // 渲染广告
+        function renderAds() {
+            // 广告位1
+            if (appData.ads.ad1.image && appData.ads.ad1.url) {
+                elements.ad1.innerHTML = `
+                    <a href="${appData.ads.ad1.url}" target="_blank" class="block w-full h-full">
+                        <img src="${appData.ads.ad1.image}" alt="广告图片" class="w-full h-full object-cover">
+                    </a>
+                `;
+                elements.ad1Url.value = appData.ads.ad1.url;
+            } else {
+                elements.ad1.innerHTML = `
+                    <div class="text-center p-4">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">广告位</p>
+                        <p class="text-gray-400 dark:text-gray-500 text-xs">编辑中心可配置</p>
+                    </div>
+                `;
+                elements.ad1Url.value = '';
+            }
             
-            // 每小时更新健康提醒
-            setInterval(updateHealthReminder, 3600000);
+            // 广告位2
+            if (appData.ads.ad2.image && appData.ads.ad2.url) {
+                elements.ad2.innerHTML = `
+                    <a href="${appData.ads.ad2.url}" target="_blank" class="block w-full h-full">
+                        <img src="${appData.ads.ad2.image}" alt="广告图片" class="w-full h-full object-cover">
+                    </a>
+                `;
+                elements.ad2Url.value = appData.ads.ad2.url;
+            } else {
+                elements.ad2.innerHTML = `
+                    <div class="text-center p-4">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">广告位</p>
+                        <p class="text-gray-400 dark:text-gray-500 text-xs">编辑中心可配置</p>
+                    </div>
+                `;
+                elements.ad2Url.value = '';
+            }
+            
+            // 广告位3
+            if (appData.ads.ad3.image && appData.ads.ad3.url) {
+                elements.ad3.innerHTML = `
+                    <a href="${appData.ads.ad3.url}" target="_blank" class="block w-full h-full">
+                        <img src="${appData.ads.ad3.image}" alt="广告图片" class="w-full h-full object-cover">
+                    </a>
+                `;
+                elements.ad3Url.value = appData.ads.ad3.url;
+            } else {
+                elements.ad3.innerHTML = `
+                    <div class="text-center p-4">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">广告位</p>
+                        <p class="text-gray-400 dark:text-gray-500 text-xs">编辑中心可配置</p>
+                    </div>
+                `;
+                elements.ad3Url.value = '';
+            }
+        }
+
+        // 处理广告图片上传
+        function handleAdImageUpload(event, adKey) {
+            const file = event.target.files[0];
+            
+            if (!file) return;
+            
+            // 检查文件大小（3MB）
+            if (file.size > 3 * 1024 * 1024) {
+                showToast('错误', '图片大小不能超过3MB', 'error');
+                event.target.value = '';
+                return;
+            }
+            
+            // 检查文件类型
+            if (!file.type.startsWith('image/')) {
+                showToast('错误', '请上传图片文件', 'error');
+                event.target.value = '';
+                return;
+            }
+            
+            // 读取图片并显示
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                appData.ads[adKey].image = e.target.result;
+                renderAds();
+                showToast('成功', '广告图片已更新', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 更新广告链接
+        function updateAdUrl(adKey, url) {
+            appData.ads[adKey].url = url;
+            showToast('提示', '广告链接已更新（保存后生效）', 'info');
+        }
+
+        // 移除广告
+        function removeAd(adKey) {
+            appData.ads[adKey] = { image: '', url: '' };
+            renderAds();
+            showToast('成功', '广告已移除', 'success');
+        }
+
+        // 启动在线时长计时器
+        function startOnlineTimeTimer() {
+            // 计算部署日期（如果没有，使用当前日期）
+            if (!(appData.deploymentDate instanceof Date) || isNaN(appData.deploymentDate.getTime())) {
+                appData.deploymentDate = new Date();
+            }
+            
+            // 更新在线时长
+            function updateOnlineTime() {
+                const now = new Date();
+                const diff = now - appData.deploymentDate;
+                
+                const seconds = Math.floor((diff / 1000) % 60);
+                const minutes = Math.floor((diff / (1000 * 60)) % 60);
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                
+                elements.onlineTime.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // 立即更新一次
+            updateOnlineTime();
+            
+            // 每秒更新一次
+            onlineTimeTimer = setInterval(updateOnlineTime, 1000);
+        }
+
+        // 启动健康提醒
+        function startHealthReminders() {
+            // 随机选择一个提醒
+            function setRandomReminder() {
+                const randomIndex = Math.floor(Math.random() * appData.healthReminders.length);
+                elements.healthReminder.textContent = appData.healthReminders[randomIndex];
+            }
+            
+            // 立即设置一个提醒
+            setRandomReminder();
+            
+            // 每30分钟更新一次提醒
+            reminderTimer = setInterval(setRandomReminder, 30 * 60 * 1000);
+            
+            // 启动时钟定时器（每秒更新）
+            clockTimer = setInterval(updateClocks, 1000);
+        }
+
+        // 更新书签计数
+        function updateBookmarkCount() {
+            let total = 0;
+            Object.values(appData.bookmarks).forEach(folder => {
+                total += folder.length;
+            });
+            
+            elements.totalSites.textContent = total;
+            elements.bookmarkCount.textContent = `(${total})`;
+        }
+
+        // 搜索书签
+        function searchBookmarks(query) {
+            renderBookmarks(query);
+        }
+
+        // 打开模态框
+        function openModal(modal) {
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100', 'pointer-events-auto');
+            modal.querySelector('div').classList.remove('scale-95');
+            modal.querySelector('div').classList.add('scale-100');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭模态框
+        function closeModal(modal) {
+            modal.classList.remove('opacity-100', 'pointer-events-auto');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95');
+            document.body.style.overflow = '';
+        }
+
+        // 显示提示消息
+        function showToast(title, message, type = 'info') {
+            const toast = elements.toast;
+            const icon = elements.toastIcon;
+            const text = elements.toastMessage;
+            
+            // 设置图标
+            icon.className = '';
+            if (type === 'success') {
+                icon.className = 'fa fa-check-circle mr-2 text-green-400';
+            } else if (type === 'error') {
+                icon.className = 'fa fa-exclamation-circle mr-2 text-red-400';
+            } else if (type === 'warning') {
+                icon.className = 'fa fa-exclamation-triangle mr-2 text-yellow-400';
+            } else {
+                icon.className = 'fa fa-info-circle mr-2 text-blue-400';
+            }
+            
+            // 设置消息
+            text.textContent = `${title}: ${message}`;
+            
+            // 显示提示
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            
+            // 3秒后隐藏
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        // 显示加载动画
+        function showLoader() {
+            elements.loader.classList.remove('opacity-0', 'pointer-events-none');
+            elements.loader.classList.add('opacity-100', 'pointer-events-auto');
+        }
+
+        // 隐藏加载动画
+        function hideLoader() {
+            elements.loader.classList.remove('opacity-100', 'pointer-events-auto');
+            elements.loader.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // 初始化事件监听
+        function initEventListeners() {
+            // 主题切换
+            elements.themeToggle.addEventListener('click', toggleTheme);
+            
+            // 显示控制按钮（滚动时）
+            window.addEventListener('scroll', showControls);
+            
+            // 打开设置/编辑中心
+            elements.settingsBtn.addEventListener('click', () => {
+                openModal(elements.editModal);
+            });
+            
+            // 关闭编辑中心
+            elements.closeEditBtn.addEventListener('click', () => {
+                closeModal(elements.editModal);
+            });
+            
+            elements.cancelEditBtn.addEventListener('click', () => {
+                closeModal(elements.editModal);
+            });
+            
+            // 保存更改
+            elements.saveChangesBtn.addEventListener('click', async () => {
+                const success = await saveDataToGitHub();
+                if (success) {
+                    renderBookmarks();
+                    renderAds();
+                    updateBookmarkCount();
+                    closeModal(elements.editModal);
+                }
+            });
+            
+            // 导入书签
+            elements.importBookmarksBtn.addEventListener('click', () => {
+                elements.bookmarkFileInput.click();
+            });
+            
+            elements.bookmarkFileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    importBookmarks(e.target.files[0]);
+                    e.target.value = ''; // 重置输入，允许重复选择同一文件
+                }
+            });
+            
+            // 导出书签
+            elements.exportBookmarksBtn.addEventListener('click', exportBookmarks);
+            
+            // 添加书签
+            elements.addBookmarkBtn.addEventListener('click', addBookmark);
+            
+            // 取消书签操作
+            elements.cancelBookmarkBtn.addEventListener('click', () => {
+                closeModal(elements.bookmarkModal);
+            });
+            
+            // 保存书签
+            elements.saveBookmarkBtn.addEventListener('click', saveBookmark);
+            
+            // 保存GitHub设置
+            elements.saveGithubBtn.addEventListener('click', () => {
+                appData.github.username = elements.githubUsername.value.trim();
+                appData.github.repo = elements.githubRepo.value.trim();
+                appData.github.token = elements.githubToken.value.trim();
+                
+                saveLocalStorageData();
+                showValidationMessage('GitHub设置已保存', 'success');
+            });
+            
+            // 验证GitHub令牌
+            elements.validateGithubBtn.addEventListener('click', validateGitHubToken);
+            
+            // 添加城市
+            elements.addCityBtn.addEventListener('click', addCity);
+            
+            // 取消城市操作
+            elements.cancelCityBtn.addEventListener('click', () => {
+                closeModal(elements.cityModal);
+            });
+            
+            // 保存城市
+            elements.saveCityBtn.addEventListener('click', saveCity);
+            
+            // 广告图片上传
+            elements.ad1Image.addEventListener('change', (e) => {
+                handleAdImageUpload(e, 'ad1');
+            });
+            
+            elements.ad2Image.addEventListener('change', (e) => {
+                handleAdImageUpload(e, 'ad2');
+            });
+            
+            elements.ad3Image.addEventListener('change', (e) => {
+                handleAdImageUpload(e, 'ad3');
+            });
+            
+            // 广告链接更新
+            elements.ad1Url.addEventListener('change', (e) => {
+                updateAdUrl('ad1', e.target.value);
+            });
+            
+            elements.ad2Url.addEventListener('change', (e) => {
+                updateAdUrl('ad2', e.target.value);
+            });
+            
+            elements.ad3Url.addEventListener('change', (e) => {
+                updateAdUrl('ad3', e.target.value);
+            });
+            
+            // 移除广告
+            elements.removeAd1Btn.addEventListener('click', () => {
+                removeAd('ad1');
+            });
+            
+            elements.removeAd2Btn.addEventListener('click', () => {
+                removeAd('ad2');
+            });
+            
+            elements.removeAd3Btn.addEventListener('click', () => {
+                removeAd('ad3');
+            });
+            
+            // 搜索书签
+            elements.searchInput.addEventListener('input', (e) => {
+                searchBookmarks(e.target.value);
+            });
         }
 
         // 页面加载完成后初始化
@@ -2107,4 +1990,3 @@
     </script>
 </body>
 </html>
-    
