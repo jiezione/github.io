@@ -34,7 +34,8 @@ jobs:
                   { "id": 1, "image": "", "url": "" },
                   { "id": 2, "image": "", "url": "" },
                   { "id": 3, "image": "", "url": "" }
-                ]
+                ],
+                "deployDate": "'"$(date -u +"%Y-%m-%dT%H:%M:%SZ")"'"
               }' > bookmarks.json
           fi
       
@@ -43,3 +44,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
+    
