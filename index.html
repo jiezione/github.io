@@ -459,6 +459,26 @@
         </div>
     </div>
 
+    <!-- 导入结果详情对话框 -->
+    <div id="import-details-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-space-dark border border-space-blue/50 rounded-xl p-6 w-full max-w-2xl max-h-[80vh] shadow-2xl overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-space text-white">导入详情</h3>
+                <button class="close-import-details text-gray-400 hover:text-white">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div id="import-details-content" class="space-y-4">
+                <!-- 导入详情将通过JS动态添加 -->
+            </div>
+            <div class="mt-6 text-center">
+                <button class="close-import-details px-6 py-2 bg-space-blue hover:bg-space-light text-white rounded-lg transition-colors">
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 通知提示 -->
     <div id="notification" class="fixed bottom-4 right-4 bg-space-dark border border-space-blue/50 rounded-lg p-4 shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 max-w-xs">
         <div class="flex items-start">
@@ -584,7 +604,10 @@
             controls: document.getElementById('controls'),
             stars: document.getElementById('stars'),
             loadingOverlay: document.getElementById('loading-overlay'),
-            loadingText: document.getElementById('loading-text')
+            loadingText: document.getElementById('loading-text'),
+            importDetailsModal: document.getElementById('import-details-modal'),
+            closeImportDetails: document.querySelectorAll('.close-import-details'),
+            importDetailsContent: document.getElementById('import-details-content')
         };
 
         // 初始化
@@ -820,9 +843,50 @@
                 let data;
                 if (appData.github.token) {
                     const json = await response.json();
-                    data = JSON.parse(atob(json.content));
+                    try {
+                        // 尝试解析Base64内容
+                        data = JSON.parse(atob(json.content));
+                    } catch (e) {
+                        console.error('Failed to parse JSON from GitHub content', e);
+                        // 尝试修复JSON（处理可能的截断）
+                        try {
+                            const content = atob(json.content);
+                            // 尝试找到最后一个有效的JSON闭合括号
+                            const lastBraceIndex = content.lastIndexOf('}');
+                            if (lastBraceIndex > 0) {
+                                const fixedContent = content.substring(0, lastBraceIndex + 1);
+                                data = JSON.parse(fixedContent);
+                                console.log('Successfully fixed truncated JSON');
+                            } else {
+                                throw new Error('无法修复损坏的JSON数据');
+                            }
+                        } catch (fixError) {
+                            console.error('Failed to fix JSON', fixError);
+                            throw new Error(`数据格式错误: 无法解析JSON - ${fixError.message}`);
+                        }
+                    }
                 } else {
-                    data = await response.json();
+                    try {
+                        data = await response.json();
+                    } catch (e) {
+                        console.error('Failed to parse JSON from GitHub', e);
+                        // 尝试获取文本内容并进行修复
+                        const text = await response.text();
+                        try {
+                            // 尝试找到最后一个有效的JSON闭合括号
+                            const lastBraceIndex = text.lastIndexOf('}');
+                            if (lastBraceIndex > 0) {
+                                const fixedText = text.substring(0, lastBraceIndex + 1);
+                                data = JSON.parse(fixedText);
+                                console.log('Successfully fixed truncated JSON');
+                            } else {
+                                throw new Error('无法修复损坏的JSON数据');
+                            }
+                        } catch (fixError) {
+                            console.error('Failed to fix JSON', fixError);
+                            throw new Error(`数据格式错误: 无法解析JSON - ${fixError.message}`);
+                        }
+                    }
                 }
                 
                 // 合并数据，新数据覆盖默认数据
@@ -834,7 +898,12 @@
                 showNotification('成功', '数据加载成功', 'success');
             } catch (e) {
                 console.error('Failed to load data from GitHub', e);
-                showNotification('错误', `无法加载远程数据: ${e.message}`, 'error');
+                // 提供更具体的错误信息
+                let errorMsg = `无法加载远程数据: ${e.message}`;
+                if (e.message.includes('Unexpected end of JSON input')) {
+                    errorMsg += '。这通常是由于数据文件损坏或不完整导致的。';
+                }
+                showNotification('错误', errorMsg, 'error');
             }
         }
 
@@ -1295,9 +1364,20 @@
                 const node = nodes[i];
                 if (node.nodeType !== 1) continue; // 只处理元素节点
                 
-                if (node.tagName === 'H3') {
+                // 忽略所有脚本和样式标签
+                if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') continue;
+                
+                // 处理常见的书签文件夹标签
+                if (node.tagName === 'H3' || 
+                    (node.tagName === 'DIV' && node.getAttribute('class') && node.getAttribute('class').includes('folder'))) {
+                    
                     // 创建新的书签分组
-                    const folderName = node.textContent.trim() || '未命名文件夹';
+                    let folderName = node.textContent.trim() || '未命名文件夹';
+                    // 尝试从其他属性获取文件夹名称
+                    if (!folderName && node.getAttribute('title')) {
+                        folderName = node.getAttribute('title').trim() || '未命名文件夹';
+                    }
+                    
                     const newGroup = {
                         name: folderName,
                         collapsed: false,
@@ -1316,26 +1396,47 @@
                         appData.bookmarks.push(newGroup);
                     }
                     
-                    // 查找下一个DL元素，里面包含该文件夹的内容
+                    // 查找下一个可能包含内容的元素
                     let nextNode = node.nextSibling;
                     while (nextNode) {
-                        if (nextNode.tagName === 'DL') {
+                        if (nextNode.tagName === 'DL' || nextNode.tagName === 'UL' || nextNode.tagName === 'OL') {
                             // 递归解析子节点
                             parseBookmarkNodes(nextNode.childNodes, newGroup, importStats);
                             break;
                         }
                         nextNode = nextNode.nextSibling;
                     }
-                } else if (node.tagName === 'A') {
-                    // 处理书签
-                    const title = node.textContent.trim() || '未命名网站';
-                    let url = node.getAttribute('href');
+                } else if (node.tagName === 'A' || 
+                          (node.tagName === 'DIV' && node.querySelector && node.querySelector('a'))) {
+                    
+                    // 处理书签 - 支持直接的A标签或包含A标签的DIV
+                    let anchorNode = node.tagName === 'A' ? node : node.querySelector('a');
+                    if (!anchorNode) continue;
+                    
+                    const title = anchorNode.textContent.trim() || '未命名网站';
+                    let url = anchorNode.getAttribute('href');
                     
                     // 过滤无效链接
-                    if (!url || url.startsWith('javascript:')) {
+                    if (!url || url.startsWith('javascript:') || url.startsWith('data:')) {
                         importStats.skipped++;
-                        importStats.skippedReasons.push(`无效链接: ${url}`);
+                        importStats.skippedReasons.push(`无效链接: ${url || '空链接'}`);
                         return;
+                    }
+                    
+                    // 标准化URL（添加http://如果缺少协议）
+                    try {
+                        new URL(url); // 检查URL是否有效
+                    } catch {
+                        // 尝试添加http://前缀
+                        try {
+                            url = 'http://' + url;
+                            new URL(url); // 再次检查
+                        } catch (err) {
+                            console.error('Invalid URL after adding protocol', err);
+                            importStats.skipped++;
+                            importStats.skippedReasons.push(`无效URL格式: ${url}`);
+                            return;
+                        }
                     }
                     
                     // 尝试获取favicon
@@ -1350,13 +1451,15 @@
                         return;
                     }
                     
-                    // 去重检查
+                    // 改进的去重检查 - 考虑不同协议和www前缀
+                    const normalizedUrl = normalizeUrl(url);
                     const isDuplicate = appData.bookmarks.some(group => 
-                        group.bookmarks.some(b => !b.isFolder && b.url === url)
+                        group.bookmarks.some(b => !b.isFolder && normalizeUrl(b.url) === normalizedUrl)
                     );
                     
                     if (isDuplicate) {
                         importStats.duplicates++;
+                        importStats.duplicateUrls.push(url);
                         return;
                     }
                     
@@ -1383,10 +1486,24 @@
                     }
                     
                     importStats.imported++;
-                } else if (node.tagName === 'DL' || node.tagName === 'DIV' || node.tagName === 'UL' || node.tagName === 'OL') {
+                    importStats.importedUrls.push({title, url});
+                } else if (['DL', 'UL', 'OL', 'DIV', 'LI'].includes(node.tagName)) {
                     // 处理更多可能的容器元素
                     parseBookmarkNodes(node.childNodes, parentGroup, importStats);
                 }
+            }
+        }
+
+        // 标准化URL用于去重检查
+        function normalizeUrl(url) {
+            try {
+                const parsedUrl = new URL(url);
+                // 移除协议、www前缀和尾部斜杠
+                let host = parsedUrl.hostname.replace(/^www\./, '');
+                let path = parsedUrl.pathname.replace(/\/$/, '');
+                return `${host}${path}${parsedUrl.search}`;
+            } catch {
+                return url.toLowerCase();
             }
         }
 
@@ -1395,10 +1512,13 @@
             try {
                 // 初始化导入统计
                 const importStats = {
+                    totalFound: 0,
                     imported: 0,
                     duplicates: 0,
                     skipped: 0,
-                    skippedReasons: []
+                    skippedReasons: [],
+                    duplicateUrls: [],
+                    importedUrls: []
                 };
                 
                 // 保存当前书签数量用于统计
@@ -1407,11 +1527,27 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 
-                // 查找所有书签相关节点
-                const rootNodes = doc.body.childNodes;
+                // 查找所有可能包含书签的节点
+                const potentialRoots = [
+                    doc.querySelector('dl'),
+                    doc.querySelector('ul'),
+                    doc.querySelector('ol'),
+                    doc.body
+                ].filter(Boolean);
+                
+                if (potentialRoots.length === 0) {
+                    showNotification('错误', '未找到有效的书签数据', 'error');
+                    return false;
+                }
+                
+                // 计算总书签数（在去重和过滤前）
+                const allAnchors = doc.querySelectorAll('a');
+                importStats.totalFound = allAnchors.length;
                 
                 // 递归解析书签结构
-                parseBookmarkNodes(rootNodes, null, importStats);
+                potentialRoots.forEach(root => {
+                    parseBookmarkNodes(root.childNodes, null, importStats);
+                });
                 
                 // 计算新增书签数量
                 const finalCount = appData.bookmarks.reduce((total, group) => total + group.bookmarks.length, 0);
@@ -1420,23 +1556,74 @@
                 renderBookmarks();
                 renderEditBookmarks();
                 
-                // 显示详细的导入结果
-                let message = `成功导入 ${importedCount} 个书签`;
-                if (importStats.duplicates > 0) {
-                    message += `，跳过 ${importStats.duplicates} 个重复书签`;
-                }
-                if (importStats.skipped > 0) {
-                    message += `，跳过 ${importStats.skipped} 个无效书签`;
-                    console.log('导入失败原因:', importStats.skippedReasons);
-                }
+                // 显示导入详情
+                showImportDetails(importStats);
                 
-                showNotification('成功', message, 'success');
                 return true;
             } catch (e) {
                 console.error('Failed to import bookmarks', e);
                 showNotification('错误', `导入书签失败: ${e.message}`, 'error');
                 return false;
             }
+        }
+
+        // 显示导入详情
+        function showImportDetails(stats) {
+            elements.importDetailsContent.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-space-blue/10 p-3 rounded-lg">
+                        <div class="text-sm text-gray-400">总发现书签</div>
+                        <div class="text-xl font-space text-white">${stats.totalFound}</div>
+                    </div>
+                    <div class="bg-green-600/20 p-3 rounded-lg">
+                        <div class="text-sm text-gray-400">成功导入</div>
+                        <div class="text-xl font-space text-green-400">${stats.imported}</div>
+                    </div>
+                    <div class="bg-yellow-600/20 p-3 rounded-lg">
+                        <div class="text-sm text-gray-400">重复项</div>
+                        <div class="text-xl font-space text-yellow-400">${stats.duplicates}</div>
+                    </div>
+                    <div class="bg-red-600/20 p-3 rounded-lg">
+                        <div class="text-sm text-gray-400">无法导入</div>
+                        <div class="text-xl font-space text-red-400">${stats.skipped}</div>
+                    </div>
+                </div>
+                
+                ${stats.imported > 0 ? `
+                <div>
+                    <h4 class="font-medium text-white mb-2">成功导入的书签:</h4>
+                    <div class="bg-space-black/50 p-3 rounded-lg max-h-32 overflow-y-auto text-sm">
+                        <ul class="list-disc list-inside space-y-1 text-gray-300">
+                            ${stats.importedUrls.map(item => `<li><a href="${item.url}" target="_blank" class="text-space-neon hover:underline">${item.title}</a></li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${stats.duplicates > 0 ? `
+                <div>
+                    <h4 class="font-medium text-white mb-2">重复的书签 (已跳过):</h4>
+                    <div class="bg-space-black/50 p-3 rounded-lg max-h-32 overflow-y-auto text-sm">
+                        <ul class="list-disc list-inside space-y-1 text-yellow-400">
+                            ${stats.duplicateUrls.map(url => `<li>${url}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${stats.skipped > 0 ? `
+                <div>
+                    <h4 class="font-medium text-white mb-2">无法导入的书签:</h4>
+                    <div class="bg-space-black/50 p-3 rounded-lg max-h-32 overflow-y-auto text-sm">
+                        <ul class="list-disc list-inside space-y-1 text-red-400">
+                            ${stats.skippedReasons.map(reason => `<li>${reason}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+            
+            elements.importDetailsModal.classList.remove('hidden');
         }
 
         // 递归构建导出的书签HTML结构
@@ -1514,6 +1701,7 @@
                     elements.notificationIcon.className = 'fa fa-check-circle text-green-500 mt-0.5 mr-3';
                     break;
                 case 'error':
+                    elements.notificationIcon.className = 'fa fa-exclamation-circle text-red-500 mt-0.5 mr-3';
                     elements.notificationIcon.className = 'fa fa-exclamation-circle text-red-500 mt-0.5 mr-3';
                     break;
                 case 'warning':
@@ -1676,6 +1864,13 @@
                 elements.bookmarkFile.value = '';
             });
             
+            // 关闭导入详情对话框
+            elements.closeImportDetails.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    elements.importDetailsModal.classList.add('hidden');
+                });
+            });
+            
             // 导出书签
             elements.exportBookmarks.addEventListener('click', exportBookmarksToHtml);
             
@@ -1794,7 +1989,7 @@
                 
                 // 去重检查
                 const isDuplicate = appData.bookmarks.some(group => 
-                    group.bookmarks.some(b => b.url === url)
+                    group.bookmarks.some(b => normalizeUrl(b.url) === normalizeUrl(url))
                 );
                 
                 if (isDuplicate) {
