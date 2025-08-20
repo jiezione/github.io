@@ -671,6 +671,22 @@
                 }
             }
             
+            // 加载部署时间（永存）
+            const savedDeployDate = localStorage.getItem('deployDate');
+            if (savedDeployDate) {
+                try {
+                    appData.deployDate = new Date(savedDeployDate);
+                } catch (e) {
+                    console.error('Failed to load deploy date', e);
+                    // 如果加载失败，使用当前时间并保存
+                    appData.deployDate = new Date();
+                    localStorage.setItem('deployDate', appData.deployDate.toISOString());
+                }
+            } else {
+                // 首次使用，保存当前时间作为部署时间
+                localStorage.setItem('deployDate', appData.deployDate.toISOString());
+            }
+            
             // 加载主题设置
             const themeSaved = localStorage.getItem('themeMode');
             if (themeSaved) {
@@ -690,6 +706,11 @@
             
             // 保存主题设置
             localStorage.setItem('themeMode', appData.ui.darkMode ? 'dark' : 'light');
+            
+            // 确保部署时间被保存（首次部署后）
+            if (!localStorage.getItem('deployDate')) {
+                localStorage.setItem('deployDate', appData.deployDate.toISOString());
+            }
         }
 
         // 应用主题模式
@@ -745,7 +766,12 @@
                     }
                 });
                 
-                return response.ok;
+                if (!response.ok) {
+                    console.error(`GitHub API error: ${response.status} - ${response.statusText}`);
+                    return false;
+                }
+                
+                return true;
             } catch (e) {
                 console.error('Failed to validate token', e);
                 return false;
@@ -779,6 +805,7 @@
                     url = `https://raw.githubusercontent.com/${username}/${repo}/main/bookmarks.json`;
                 }
                 
+                console.log(`Loading data from: ${url}`);
                 const response = await fetch(url, options);
                 
                 if (!response.ok) {
@@ -787,7 +814,7 @@
                         showNotification('信息', '首次使用，初始化数据', 'info');
                         return;
                     }
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
                 }
                 
                 let data;
@@ -802,12 +829,12 @@
                 if (data.bookmarks) appData.bookmarks = data.bookmarks;
                 if (data.ads) appData.ads = data.ads;
                 if (data.cities) appData.cities = data.cities;
-                if (data.deployDate) appData.deployDate = new Date(data.deployDate);
+                // 不更新部署时间，保持首次部署时间
                 
                 showNotification('成功', '数据加载成功', 'success');
             } catch (e) {
                 console.error('Failed to load data from GitHub', e);
-                showNotification('错误', '无法加载远程数据，使用本地数据', 'error');
+                showNotification('错误', `无法加载远程数据: ${e.message}`, 'error');
             }
         }
 
@@ -857,6 +884,9 @@
                     if (response.ok) {
                         const file = await response.json();
                         sha = file.sha;
+                    } else if (response.status !== 404) {
+                        // 如果不是404错误，抛出异常
+                        throw new Error(`Failed to check file existence: ${response.status} - ${response.statusText}`);
                     }
                 } catch (e) {
                     console.log('File does not exist yet, will create new one');
@@ -873,16 +903,26 @@
                     ...(sha && { sha })
                 });
                 
+                console.log(`Saving data to: ${url}`);
                 const response = await fetch(url, { method, headers, body });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorDetails = await response.text();
+                    console.error(`GitHub API error: ${response.status} - ${response.statusText}`, errorDetails);
+                    
+                    if (response.status === 404) {
+                        throw new Error(`仓库或文件不存在，请检查用户名和仓库名是否正确。状态码: ${response.status}`);
+                    } else if (response.status === 403) {
+                        throw new Error(`权限不足，请确保访问令牌拥有正确的权限。状态码: ${response.status}`);
+                    } else {
+                        throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                    }
                 }
                 
                 return true;
             } catch (e) {
                 console.error('Failed to save data to GitHub', e);
-                showNotification('错误', '保存数据到GitHub失败: ' + e.message, 'error');
+                showNotification('错误', `保存数据到GitHub失败: ${e.message}`, 'error');
                 return false;
             }
         }
@@ -1179,16 +1219,24 @@
             updateAdPreview(elements.ad3, appData.ads[2]);
         }
 
-        // 更新在线时长
+        // 更新在线时长（持久化）
         function updateUptime() {
             const now = new Date();
             const diff = now - appData.deployDate;
             
             const seconds = Math.floor((diff / 1000) % 60);
             const minutes = Math.floor((diff / (1000 * 60)) % 60);
-            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             
-            elements.uptime.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            // 格式化显示，包含天数
+            let uptimeString = '';
+            if (days > 0) {
+                uptimeString += `${days}天 `;
+            }
+            uptimeString += `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            elements.uptime.textContent = uptimeString;
         }
 
         // 更新健康提醒
@@ -1242,7 +1290,7 @@
         }
 
         // 递归解析书签HTML中的文件夹和书签
-        function parseBookmarkNodes(nodes, parentGroup) {
+        function parseBookmarkNodes(nodes, parentGroup, importStats) {
             for (let i = 0; i < nodes.length; i++) {
                 const node = nodes[i];
                 if (node.nodeType !== 1) continue; // 只处理元素节点
@@ -1273,7 +1321,7 @@
                     while (nextNode) {
                         if (nextNode.tagName === 'DL') {
                             // 递归解析子节点
-                            parseBookmarkNodes(nextNode.childNodes, newGroup);
+                            parseBookmarkNodes(nextNode.childNodes, newGroup, importStats);
                             break;
                         }
                         nextNode = nextNode.nextSibling;
@@ -1284,7 +1332,11 @@
                     let url = node.getAttribute('href');
                     
                     // 过滤无效链接
-                    if (!url || url.startsWith('javascript:')) continue;
+                    if (!url || url.startsWith('javascript:')) {
+                        importStats.skipped++;
+                        importStats.skippedReasons.push(`无效链接: ${url}`);
+                        return;
+                    }
                     
                     // 尝试获取favicon
                     let favicon = '';
@@ -1293,6 +1345,9 @@
                         favicon = `${parsedUrl.protocol}//${parsedUrl.hostname}/favicon.ico`;
                     } catch (err) {
                         console.error('Invalid URL', err);
+                        importStats.skipped++;
+                        importStats.skippedReasons.push(`URL解析失败: ${url}`);
+                        return;
                     }
                     
                     // 去重检查
@@ -1300,13 +1355,18 @@
                         group.bookmarks.some(b => !b.isFolder && b.url === url)
                     );
                     
-                    if (!isDuplicate && parentGroup) {
+                    if (isDuplicate) {
+                        importStats.duplicates++;
+                        return;
+                    }
+                    
+                    if (parentGroup) {
                         parentGroup.bookmarks.push({
                             title,
                             url,
                             favicon
                         });
-                    } else if (!isDuplicate) {
+                    } else {
                         // 如果没有父分组，添加到默认分组
                         if (appData.bookmarks.length === 0) {
                             appData.bookmarks.push({
@@ -1321,9 +1381,11 @@
                             favicon
                         });
                     }
-                } else if (node.tagName === 'DL' || node.tagName === 'DIV') {
-                    // 递归处理容器元素
-                    parseBookmarkNodes(node.childNodes, parentGroup);
+                    
+                    importStats.imported++;
+                } else if (node.tagName === 'DL' || node.tagName === 'DIV' || node.tagName === 'UL' || node.tagName === 'OL') {
+                    // 处理更多可能的容器元素
+                    parseBookmarkNodes(node.childNodes, parentGroup, importStats);
                 }
             }
         }
@@ -1331,6 +1393,14 @@
         // 导入书签HTML文件
         function importBookmarksFromHtml(html) {
             try {
+                // 初始化导入统计
+                const importStats = {
+                    imported: 0,
+                    duplicates: 0,
+                    skipped: 0,
+                    skippedReasons: []
+                };
+                
                 // 保存当前书签数量用于统计
                 const initialCount = appData.bookmarks.reduce((total, group) => total + group.bookmarks.length, 0);
                 
@@ -1341,7 +1411,7 @@
                 const rootNodes = doc.body.childNodes;
                 
                 // 递归解析书签结构
-                parseBookmarkNodes(rootNodes, null);
+                parseBookmarkNodes(rootNodes, null, importStats);
                 
                 // 计算新增书签数量
                 const finalCount = appData.bookmarks.reduce((total, group) => total + group.bookmarks.length, 0);
@@ -1349,11 +1419,22 @@
                 
                 renderBookmarks();
                 renderEditBookmarks();
-                showNotification('成功', `成功导入 ${importedCount} 个书签（已去重）`, 'success');
+                
+                // 显示详细的导入结果
+                let message = `成功导入 ${importedCount} 个书签`;
+                if (importStats.duplicates > 0) {
+                    message += `，跳过 ${importStats.duplicates} 个重复书签`;
+                }
+                if (importStats.skipped > 0) {
+                    message += `，跳过 ${importStats.skipped} 个无效书签`;
+                    console.log('导入失败原因:', importStats.skippedReasons);
+                }
+                
+                showNotification('成功', message, 'success');
                 return true;
             } catch (e) {
                 console.error('Failed to import bookmarks', e);
-                showNotification('错误', '导入书签失败: ' + e.message, 'error');
+                showNotification('错误', `导入书签失败: ${e.message}`, 'error');
                 return false;
             }
         }
@@ -1416,7 +1497,7 @@
                 } catch (e) {
                     hideLoading();
                     console.error('Failed to export bookmarks', e);
-                    showNotification('错误', '导出书签失败: ' + e.message, 'error');
+                    showNotification('错误', `导出书签失败: ${e.message}`, 'error');
                 }
             }, 800); // 短暂延迟以显示加载状态
         }
@@ -1446,11 +1527,12 @@
             elements.notification.classList.remove('translate-y-20', 'opacity-0');
             elements.notification.classList.add('translate-y-0', 'opacity-100');
             
-            // 3秒后隐藏
+            // 5秒后隐藏（错误信息保留更长时间）
+            const timeout = type === 'error' ? 8000 : 5000;
             setTimeout(() => {
                 elements.notification.classList.remove('translate-y-0', 'opacity-100');
                 elements.notification.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+            }, timeout);
         }
 
         // 设置事件监听器
@@ -1574,6 +1656,12 @@
             elements.bookmarkFile.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
+                
+                // 检查文件类型
+                if (!file.name.endsWith('.html') && !file.name.endsWith('.htm')) {
+                    showNotification('错误', '请选择HTML格式的书签文件', 'error');
+                    return;
+                }
                 
                 showLoading('正在导入书签...');
                 
@@ -1700,6 +1788,8 @@
                     favicon = `${parsedUrl.protocol}//${parsedUrl.hostname}/favicon.ico`;
                 } catch (err) {
                     console.error('Invalid URL', err);
+                    showNotification('错误', '请输入有效的网址', 'error');
+                    return;
                 }
                 
                 // 去重检查
