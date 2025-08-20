@@ -1,15 +1,36 @@
 {
-    "deployDate": "2025-08-20T00:00:00.000Z",
-    "bookmarks": [],
-    "ads": [
-        { "image": "", "url": "" },
-        { "image": "", "url": "" },
-        { "image": "", "url": "" }
-    ],
-    "cities": [
-        { "name": "北京", "timezone": "+8" },
-        { "name": "伦敦", "timezone": "0" },
-        { "name": "纽约", "timezone": "-5" },
-        { "name": "东京", "timezone": "+9" }
-    ]
+  "deployDate": "2025-08-20T17:59:03.482Z",
+  "bookmarks": [],
+  "ads": [
+    {
+      "image": "",
+      "url": ""
+    },
+    {
+      "image": "",
+      "url": ""
+    },
+    {
+      "image": "",
+      "url": ""
+    }
+  ],
+  "cities": [
+    {
+      "name": "åäº¬",
+      "timezone": "+8"
+    },
+    {
+      "name": "ä¼¦æ¦",
+      "timezone": "0"
+    },
+    {
+      "name": "çº½çº¦",
+      "timezone": "-5"
+    },
+    {
+      "name": "ä¸äº¬",
+      "timezone": "+9"
+    }
+  ]
 }
