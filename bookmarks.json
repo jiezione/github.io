@@ -17,8 +17,12 @@
   ],
   "cities": [
     {
-      "name": "北京",
+      "name": "åäº¬",
       "timezone": "+8"
+    },
+    {
+      "name": "华沙",
+      "timezone": "+1"
     }
   ]
 }
