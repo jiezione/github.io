@@ -1,0 +1,51 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]  # 当推送到main分支时触发
+
+permissions:
+  contents: write  # 允许读写仓库内容
+  pages: write     # 允许操作GitHub Pages
+  id-token: write  # 用于Pages部署的身份验证
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Inject default repo information
+        run: |
+          # 获取当前仓库信息 (owner/repo)
+          REPO_FULL_NAME="${{ github.repository }}"
+          
+          # 替换HTML文件中的默认仓库占位符
+          sed -i "s|const DEFAULT_REPO = \".*\";|const DEFAULT_REPO = \"$REPO_FULL_NAME\";|g" index.html
+          sed -i "s|const DEFAULT_RAW_URL = \".*\";|const DEFAULT_RAW_URL = \"https://raw.githubusercontent.com/$REPO_FULL_NAME/main/bookmarks.json\";|g" index.html
+      
+      - name: Set up Git config
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+      
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        with:
+          branch: gh-pages          # 部署到gh-pages分支
+          folder: .                 # 部署当前目录文件
+          clean: true               # 清理旧文件
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Initialize default bookmarks file
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # 检查bookmarks.json是否存在，不存在则创建
+          if [ ! -f "bookmarks.json" ]; then
+            echo '{"bookmarks": [], "ads": [], "timezones": []}' > bookmarks.json
+            git add bookmarks.json
+            git commit -m "Initialize default bookmarks.json"
+            git push origin main
+          fi
