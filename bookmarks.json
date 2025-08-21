@@ -3,13 +3,7 @@
     "folders": {
       "default": {
         "name": "默认文件夹",
-        "items": [
-          {
-            "id": "bookmark_1755810814533",
-            "title": "abc",
-            "url": "https://abc.com"
-          }
-        ]
+        "items": []
       },
       "folder_1755800353190_945": {
         "name": "APK related",
@@ -21,7 +15,13 @@
       },
       "folder_import_1755805196166_989": {
         "name": "书签栏",
-        "items": []
+        "items": [
+          {
+            "id": "bookmark_1755810814533",
+            "title": "abc",
+            "url": "https://abc.com"
+          }
+        ]
       },
       "folder_import_1755805196166_478": {
         "name": "书签栏",
