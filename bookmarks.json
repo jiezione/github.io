@@ -1,41 +1,15 @@
 {
-  "bookmarks": {
-    "常用网站": [
-      { "title": "GitHub", "url": "https://github.com" },
-      { "title": "Google", "url": "https://google.com" },
-      { "title": "YouTube", "url": "https://youtube.com" },
-      { "title": "StackOverflow", "url": "https://stackoverflow.com" }
-    ],
-    "开发资源": [
-      { "title": "MDN", "url": "https://developer.mozilla.org" },
-      { "title": "Tailwind CSS", "url": "https://tailwindcss.com" },
-      { "title": "Font Awesome", "url": "https://fontawesome.com" }
-    ],
-    "学习平台": [
-      { "title": "Coursera", "url": "https://coursera.org" },
-      { "title": "edX", "url": "https://edx.org" },
-      { "title": "Khan Academy", "url": "https://khanacademy.org" }
-    ]
-  },
-  "ads": {
-    "ad1": {
-      "image": "",
-      "url": ""
-    },
-    "ad2": {
-      "image": "",
-      "url": ""
-    },
-    "ad3": {
-      "image": "",
-      "url": ""
-    }
-  },
+  "bookmarks": [],
+  "folders": [],
   "cities": [
-    { "name": "北京", "timezone": "Asia/Shanghai" },
-    { "name": "纽约", "timezone": "America/New_York" },
-    { "name": "伦敦", "timezone": "Europe/London" },
-    { "name": "东京", "timezone": "Asia/Tokyo" }
+    {"name": "New York", "timezone": "America/New_York"},
+    {"name": "London", "timezone": "Europe/London"},
+    {"name": "Tokyo", "timezone": "Asia/Tokyo"},
+    {"name": "Sydney", "timezone": "Australia/Sydney"}
   ],
-  "updatedAt": "2023-09-01T00:00:00.000Z"
+  "ads": [],
+  "settings": {
+    "theme": "dark",
+    "healthReminders": true
+  }
 }

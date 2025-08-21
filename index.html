@@ -1,391 +1,2496 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>星际导航 | 外太空主题书签管理</title>
+    <title>Cosmic Bookmarks</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%231a202c'/%3E%3Ccircle cx='50' cy='50' r='35' fill='%232d3748'/%3E%3Ccircle cx='50' cy='50' r='25' fill='%234a5568'/%3E%3Ccircle cx='50' cy='50' r='15' fill='%23805ad5'/%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <!-- 部署时会自动替换以下数据属性 -->
-    <data id="deploy-info" 
-          data-username="REPO_USERNAME" 
-          data-repo="REPO_NAME" 
-          data-deploy-time="DEPLOY_TIMESTAMP">
-    </data>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment-timezone@0.5.43/moment-timezone-with-data.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        space: {
+                            dark: '#0a0e17',
+                            darker: '#05070a',
+                            blue: '#1e3a8a',
+                            purple: '#4c1d95',
+                            pink: '#ec4899',
+                            glow: '#60a5fa'
+                        }
+                    },
+                    fontFamily: {
+                        space: ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'twinkle': 'twinkle 3s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        twinkle: {
+                            '0%, 100%': { opacity: 0.6 },
+                            '50%': { opacity: 1 }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .star {
+                position: absolute;
+                background-color: white;
+                border-radius: 50%;
+                animation: twinkle 2s infinite;
+            }
+            .planet {
+                border-radius: 50%;
+                position: absolute;
+                filter: blur(0.5px);
+            }
+            .glass {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.18);
+            }
+            .glass-dark {
+                background: rgba(10, 14, 23, 0.8);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+            }
+            .text-shadow {
+                text-shadow: 0 0 10px rgba(96, 165, 250, 0.7);
+            }
+            .folder-content {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
+            }
+            .folder-open .folder-content {
+                max-height: 1000px;
+                transition: max-height 0.6s ease-in;
+            }
+            .rotate-icon {
+                transition: transform 0.3s ease;
+            }
+            .folder-open .rotate-icon {
+                transform: rotate(90deg);
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
 </head>
-<body>
-    <!-- 顶部导航栏 -->
-    <header id="top-nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-opacity-80 backdrop-blur-md">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <div class="text-white text-xl font-bold tracking-wider">
-                    <i class="fa fa-globe mr-2"></i>星际导航
-                </div>
-            </div>
-            <div class="flex items-center space-x-3">
-                <!-- 模式切换按钮 -->
-                <button id="theme-toggle" class="w-12 h-12 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/50">
-                    <i class="fa fa-sun-o text-xl"></i>
-                </button>
-                
-                <!-- 设置按钮 -->
-                <button id="settings-btn" class="w-12 h-12 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/50">
-                    <i class="fa fa-cog text-xl"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <main class="container mx-auto px-4 pt-24 pb-16">
-        <!-- 主页内容 -->
-        <section id="home-page" class="space-y-8">
-            <!-- 顶部三大组件 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- 在线时长统计 -->
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5 shadow-lg border border-white/20 transform transition-all hover:scale-[1.02]">
-                    <h3 class="text-white/80 text-sm mb-2 flex items-center">
-                        <i class="fa fa-clock-o mr-2"></i>在线时长
-                    </h3>
-                    <div id="online-duration" class="text-white text-2xl font-bold">
-                        已在线 0天0时0分
-                    </div>
-                </div>
-
-                <!-- 健康提醒 -->
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5 shadow-lg border border-white/20 transform transition-all hover:scale-[1.02]">
-                    <h3 class="text-white/80 text-sm mb-2 flex items-center">
-                        <i class="fa fa-heartbeat mr-2"></i>健康提醒
-                    </h3>
-                    <div id="health-reminder" class="text-white text-xl font-medium">
-                        保持专注，探索宇宙
-                    </div>
-                </div>
-
-                <!-- 世界时钟 -->
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5 shadow-lg border border-white/20 transform transition-all hover:scale-[1.02]">
-                    <h3 class="text-white/80 text-sm mb-2 flex items-center">
-                        <i class="fa fa-globe mr-2"></i>世界时钟
-                    </h3>
-                    <div id="world-clocks" class="grid grid-cols-2 gap-2 text-white">
-                        <div class="text-sm"><span class="block">北京</span><span class="text-lg font-medium">00:00:00</span></div>
-                        <div class="text-sm"><span class="block">纽约</span><span class="text-lg font-medium">00:00:00</span></div>
-                        <div class="text-sm"><span class="block">伦敦</span><span class="text-lg font-medium">00:00:00</span></div>
-                        <div class="text-sm"><span class="block">东京</span><span class="text-lg font-medium">00:00:00</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 第一个广告位 -->
-            <div id="ad-1" class="ad-slot w-4/5 mx-auto h-25 bg-white/10 rounded-xl flex items-center justify-center border border-dashed border-white/30">
-                <p class="text-white/60">未设置广告</p>
-            </div>
-
-            <!-- 书签展示区域 -->
-            <div class="space-y-6">
-                <h2 class="text-white text-2xl font-bold flex items-center">
-                    <i class="fa fa-bookmark mr-2"></i>星际书签
-                </h2>
-                
-                <div id="bookmarks-container" class="space-y-6">
-                    <!-- 书签文件夹将通过JS动态生成 -->
-                </div>
-            </div>
-
-            <!-- 第二个广告位 -->
-            <div id="ad-2" class="ad-slot w-4/5 mx-auto h-25 bg-white/10 rounded-xl flex items-center justify-center border border-dashed border-white/30">
-                <p class="text-white/60">未设置广告</p>
-            </div>
-
-            <!-- 第三个广告位 -->
-            <div id="ad-3" class="ad-slot w-4/5 mx-auto h-25 bg-white/10 rounded-xl flex items-center justify-center border border-dashed border-white/30">
-                <p class="text-white/60">未设置广告</p>
-            </div>
-        </section>
-
-        <!-- 编辑中心 (默认隐藏) -->
-        <section id="edit-center" class="space-y-8 hidden">
-            <div class="flex justify-between items-center">
-                <h2 class="text-white text-2xl font-bold flex items-center">
-                    <i class="fa fa-pencil mr-2"></i>编辑中心
-                </h2>
-                <button id="back-to-home" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all flex items-center">
-                    <i class="fa fa-arrow-left mr-2"></i>返回主页
-                </button>
-            </div>
-
-            <!-- 验证状态提示 -->
-            <div id="validation-status" class="bg-amber-500/20 border border-amber-500/40 text-amber-300 p-4 rounded-lg flex items-center">
-                <i class="fa fa-info-circle mr-2 text-xl"></i>
-                <span>请先在设置中完成GitHub验证以启用编辑功能</span>
-            </div>
-
-            <!-- 书签编辑 -->
-            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
-                <h3 class="text-white text-xl font-bold mb-4 flex items-center">
-                    <i class="fa fa-bookmark mr-2"></i>书签管理
-                </h3>
-                
-                <div class="mb-6">
-                    <h4 class="text-white/80 text-lg mb-3">添加新书签</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-white/70 mb-1 text-sm" for="bookmark-folder">文件夹</label>
-                            <input type="text" id="bookmark-folder" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入文件夹名称">
-                        </div>
-                        <div>
-                            <label class="block text-white/70 mb-1 text-sm" for="bookmark-title">标题</label>
-                            <input type="text" id="bookmark-title" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入网站标题">
-                        </div>
-                        <div>
-                            <label class="block text-white/70 mb-1 text-sm" for="bookmark-url">网址</label>
-                            <input type="url" id="bookmark-url" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入网站URL">
-                        </div>
-                    </div>
-                    <div class="mt-4 flex justify-end">
-                        <button id="add-bookmark" class="bg-blue-500/70 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <i class="fa fa-plus mr-2"></i>添加书签
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="mb-6">
-                    <h4 class="text-white/80 text-lg mb-3">导入/导出书签</h4>
-                    <div class="flex flex-wrap gap-4">
-                        <label class="bg-green-500/70 hover:bg-green-500 text-white px-4 py-2 rounded-lg transition-all cursor-pointer flex items-center">
-                            <i class="fa fa-upload mr-2"></i>导入书签
-                            <input type="file" id="import-bookmarks" accept=".html" class="hidden" disabled>
-                        </label>
-                        <button id="export-bookmarks" class="bg-purple-500/70 hover:bg-purple-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <i class="fa fa-download mr-2"></i>导出书签
-                        </button>
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 class="text-white/80 text-lg mb-3">书签列表</h4>
-                    <div id="editable-bookmarks" class="space-y-4">
-                        <!-- 可编辑的书签将通过JS动态生成 -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- 广告编辑 -->
-            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
-                <h3 class="text-white text-xl font-bold mb-4 flex items-center">
-                    <i class="fa fa-bullhorn mr-2"></i>广告管理
-                </h3>
-                
-                <div class="space-y-6">
-                    <!-- 广告位1编辑 -->
-                    <div class="space-y-3">
-                        <h4 class="text-white/80">广告位 1</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="md:col-span-1">
-                                <label class="block text-white/70 mb-1 text-sm">广告图片</label>
-                                <label class="block border-2 border-dashed border-white/30 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 transition-all">
-                                    <i class="fa fa-picture-o text-2xl text-white/50 mb-2"></i>
-                                    <span class="text-white/70 text-sm">点击上传图片</span>
-                                    <input type="file" id="ad1-image" accept="image/jpeg,image/png" class="hidden" disabled>
-                                </label>
-                                <p class="text-white/50 text-xs mt-2">支持JPG、PNG格式，最大3MB</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-white/70 mb-1 text-sm" for="ad1-url">广告链接</label>
-                                <input type="url" id="ad1-url" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入广告链接" disabled>
-                                <div class="mt-4">
-                                    <button id="save-ad1" class="bg-blue-500/70 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                        <i class="fa fa-save mr-2"></i>保存广告
-                                    </button>
-                                    <button id="delete-ad1" class="ml-2 bg-red-500/70 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                        <i class="fa fa-trash mr-2"></i>删除广告
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 广告位2编辑 -->
-                    <div class="space-y-3">
-                        <h4 class="text-white/80">广告位 2</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="md:col-span-1">
-                                <label class="block text-white/70 mb-1 text-sm">广告图片</label>
-                                <label class="block border-2 border-dashed border-white/30 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 transition-all">
-                                    <i class="fa fa-picture-o text-2xl text-white/50 mb-2"></i>
-                                    <span class="text-white/70 text-sm">点击上传图片</span>
-                                    <input type="file" id="ad2-image" accept="image/jpeg,image/png" class="hidden" disabled>
-                                </label>
-                                <p class="text-white/50 text-xs mt-2">支持JPG、PNG格式，最大3MB</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-white/70 mb-1 text-sm" for="ad2-url">广告链接</label>
-                                <input type="url" id="ad2-url" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入广告链接" disabled>
-                                <div class="mt-4">
-                                    <button id="save-ad2" class="bg-blue-500/70 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                        <i class="fa fa-save mr-2"></i>保存广告
-                                    </button>
-                                    <button id="delete-ad2" class="ml-2 bg-red-500/70 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                        <i class="fa fa-trash mr-2"></i>删除广告
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 广告位3编辑 -->
-                    <div class="space-y-3">
-                        <h4 class="text-white/80">广告位 3</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="md:col-span-1">
-                                <label class="block text-white/70 mb-1 text-sm">广告图片</label>
-                                <label class="block border-2 border-dashed border-white/30 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 transition-all">
-                                    <i class="fa fa-picture-o text-2xl text-white/50 mb-2"></i>
-                                    <span class="text-white/70 text-sm">点击上传图片</span>
-                                    <input type="file" id="ad3-image" accept="image/jpeg,image/png" class="hidden" disabled>
-                                </label>
-                                <p class="text-white/50 text-xs mt-2">支持JPG、PNG格式，最大3MB</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-white/70 mb-1 text-sm" for="ad3-url">广告链接</label>
-                                <input type="url" id="ad3-url" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入广告链接" disabled>
-                                <div class="mt-4">
-                                    <button id="save-ad3" class="bg-blue-500/70 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                        <i class="fa fa-save mr-2"></i>保存广告
-                                    </button>
-                                    <button id="delete-ad3" class="ml-2 bg-red-500/70 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                        <i class="fa fa-trash mr-2"></i>删除广告
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 世界时钟编辑 -->
-            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
-                <h3 class="text-white text-xl font-bold mb-4 flex items-center">
-                    <i class="fa fa-clock-o mr-2"></i>世界时钟管理
-                </h3>
-                
-                <div class="mb-6">
-                    <h4 class="text-white/80 text-lg mb-3">添加城市</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-white/70 mb-1 text-sm" for="city-name">城市名称</label>
-                            <input type="text" id="city-name" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入城市名称" disabled>
-                        </div>
-                        <div>
-                            <label class="block text-white/70 mb-1 text-sm" for="city-timezone">时区</label>
-                            <select id="city-timezone" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400" disabled>
-                                <option value="Asia/Shanghai">Asia/Shanghai (北京)</option>
-                                <option value="America/New_York">America/New_York (纽约)</option>
-                                <option value="Europe/London">Europe/London (伦敦)</option>
-                                <option value="Asia/Tokyo">Asia/Tokyo (东京)</option>
-                                <option value="Australia/Sydney">Australia/Sydney (悉尼)</option>
-                                <option value="Europe/Paris">Europe/Paris (巴黎)</option>
-                                <option value="Asia/Dubai">Asia/Dubai (迪拜)</option>
-                                <option value="Pacific/Honolulu">Pacific/Honolulu (檀香山)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mt-4 flex justify-end">
-                        <button id="add-city" class="bg-blue-500/70 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <i class="fa fa-plus mr-2"></i>添加城市
-                        </button>
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 class="text-white/80 text-lg mb-3">城市列表</h4>
-                    <div id="cities-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        <!-- 城市列表将通过JS动态生成 -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- 保存更改按钮 -->
-            <div class="flex justify-end">
-                <button id="save-changes" class="bg-green-500/70 hover:bg-green-500 text-white px-6 py-3 rounded-lg transition-all text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center" disabled>
-                    <i class="fa fa-save mr-2"></i>保存所有更改
-                    <span id="save-loading" class="ml-2 hidden">
-                        <i class="fa fa-spinner fa-spin"></i>
-                    </span>
-                </button>
-            </div>
-        </section>
-    </main>
-
-    <!-- 底部区域 -->
-    <footer class="dark-white text-center py-5 mt-10 border-t border-white/10">
-        <div id="total-bookmarks" class="mb-2">共收录 0 个网站</div>
-        <div id="copyright-info">Copyright © 2018-2023 REPO_NAME, All Rights Reserved</div>
-    </footer>
-
-    <!-- 设置对话框 (默认隐藏) -->
-    <div id="settings-dialog" class="fixed inset-0 z-50 flex items-center justify-center hidden">
-        <!-- 遮罩层 -->
-        <div id="dialog-overlay" class="absolute inset-0 bg-black/70 backdrop-blur-[2px]"></div>
-        
-        <!-- 对话框内容 -->
-        <div class="relative bg-gray-900 border border-white/20 rounded-xl w-full max-w-md mx-4 shadow-2xl transform transition-all">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-white text-xl font-bold">设置</h3>
-                    <button id="close-settings" class="text-white/60 hover:text-white transition-colors">
-                        <i class="fa fa-times text-xl"></i>
-                    </button>
-                </div>
-                
-                <div class="space-y-5">
-                    <!-- GitHub设置 -->
-                    <div>
-                        <h4 class="text-white/80 mb-3 font-medium">GitHub 同步设置</h4>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-white/70 mb-1 text-sm" for="github-username">用户名</label>
-                                <input type="text" id="github-username" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                            </div>
-                            <div>
-                                <label class="block text-white/70 mb-1 text-sm" for="github-repo">仓库名</label>
-                                <input type="text" id="github-repo" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                            </div>
-                            <div>
-                                <label class="block text-white/70 mb-1 text-sm" for="github-token">个人访问令牌 (Token)</label>
-                                <input type="password" id="github-token" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="需要repo权限">
-                                <p class="text-white/50 text-xs mt-1">如何获取: <a href="https://github.com/settings/tokens" target="_blank" class="text-blue-400 hover:underline">GitHub Token设置</a></p>
-                            </div>
-                            <div class="flex justify-end">
-                                <button id="validate-token" class="bg-blue-500/70 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all flex items-center">
-                                    <i class="fa fa-check mr-2"></i>验证Token
-                                </button>
-                            </div>
-                            <div id="token-validation-result" class="hidden"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="pt-2 flex justify-end">
-                        <button id="enter-edit-center" class="bg-purple-500/70 hover:bg-purple-500 text-white px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            进入编辑中心
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 健康提醒弹窗 (默认隐藏) -->
-    <div id="health-popup" class="fixed top-0 left-0 right-0 bg-blue-500/30 backdrop-blur-sm border-b border-blue-400/50 text-white p-4 transform -translate-y-full transition-transform duration-500 z-40 flex justify-between items-center">
-        <p><i class="fa fa-heartbeat mr-2"></i>建议休息5分钟，保护视力</p>
-        <button id="close-health-popup" class="text-white hover:text-white/80">
-            <i class="fa fa-times"></i>
+<body class="font-space bg-space-dark text-gray-100 min-h-screen relative overflow-x-hidden transition-colors duration-500">
+    <!-- Star background -->
+    <div id="stars" class="fixed inset-0 z-0"></div>
+    
+    <!-- Floating planets -->
+    <div class="planet bg-space-blue/30 w-32 h-32 top-20 left-[10%] animate-float"></div>
+    <div class="planet bg-space-purple/20 w-48 h-48 top-40 right-[15%] animate-float" style="animation-delay: 2s;"></div>
+    <div class="planet bg-space-pink/20 w-24 h-24 bottom-20 left-[20%] animate-float" style="animation-delay: 1s;"></div>
+    
+    <!-- Header Controls -->
+    <div id="header-controls" class="fixed top-4 right-4 z-50 flex gap-2 transition-opacity duration-500">
+        <button id="theme-toggle" class="p-2 rounded-full glass hover:bg-white/20 transition-all">
+            <i class="fa fa-moon-o"></i>
+        </button>
+        <button id="settings-btn" class="p-2 rounded-full glass hover:bg-white/20 transition-all">
+            <i class="fa fa-cog"></i>
+        </button>
+        <button id="edit-btn" class="p-2 rounded-full glass hover:bg-white/20 transition-all" disabled>
+            <i class="fa fa-pencil"></i>
         </button>
     </div>
 
-    <!-- 通知提示 (默认隐藏) -->
-    <div id="notification" class="fixed bottom-5 right-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-4 shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 max-w-sm"></div>
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 pt-20 pb-16 relative z-10">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold text-space-glow text-shadow mb-2">Cosmic Bookmarks</h1>
+            <p class="text-gray-300 max-w-2xl mx-auto">Navigate the universe of your favorite websites</p>
+        </header>
+        
+        <!-- Search Bar -->
+        <div class="max-w-2xl mx-auto mb-10">
+            <div class="relative">
+                <input type="text" id="search-input" placeholder="Search bookmarks..." 
+                    class="w-full py-3 px-5 pr-12 rounded-full glass focus:outline-none focus:ring-2 focus:ring-space-glow transition-all">
+                <i class="fa fa-search absolute right-5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+        
+        <!-- Top Widgets -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <!-- Online Time Widget -->
+            <div class="glass rounded-xl p-5 hover:shadow-lg hover:shadow-space-glow/10 transition-all">
+                <h3 class="text-space-glow mb-3 flex items-center">
+                    <i class="fa fa-clock-o mr-2"></i> Space Time
+                </h3>
+                <div class="text-2xl font-bold" id="online-time">00:00:00</div>
+                <p class="text-sm text-gray-400 mt-2">Since launch</p>
+            </div>
+            
+            <!-- Health Reminder Widget -->
+            <div class="glass rounded-xl p-5 hover:shadow-lg hover:shadow-space-glow/10 transition-all">
+                <h3 class="text-space-glow mb-3 flex items-center">
+                    <i class="fa fa-heartbeat mr-2"></i> Health Alert
+                </h3>
+                <div id="health-reminder" class="text-lg">Take a break soon</div>
+                <p class="text-sm text-gray-400 mt-2" id="next-reminder">Next: 25 minutes</p>
+            </div>
+            
+            <!-- World Clock Widget -->
+            <div class="glass rounded-xl p-5 hover:shadow-lg hover:shadow-space-glow/10 transition-all">
+                <h3 class="text-space-glow mb-3 flex items-center">
+                    <i class="fa fa-globe mr-2"></i> World Clocks
+                </h3>
+                <div id="world-clocks" class="space-y-2">
+                    <!-- Clocks will be inserted here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ad Spaces -->
+        <div class="mb-10">
+            <div id="ad-space-1" class="glass rounded-xl p-4 h-40 mb-6 flex items-center justify-center">
+                <p class="text-gray-400">Ad space available</p>
+            </div>
+        </div>
+        
+        <!-- Bookmarks Section -->
+        <div class="mb-10">
+            <h2 class="text-2xl font-bold mb-6 text-space-glow">Your Cosmic Bookmarks</h2>
+            <div id="bookmarks-container" class="space-y-6">
+                <!-- Bookmarks and folders will be inserted here -->
+                <div class="text-center text-gray-400 py-10">
+                    <i class="fa fa-folder-open-o text-4xl mb-4"></i>
+                    <p>No bookmarks yet. Import or add some to get started!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Second Ad Space -->
+        <div class="mb-10">
+            <div id="ad-space-2" class="glass rounded-xl p-4 h-40 mb-6 flex items-center justify-center">
+                <p class="text-gray-400">Ad space available</p>
+            </div>
+        </div>
+        
+        <!-- Third Ad Space -->
+        <div class="mb-10">
+            <div id="ad-space-3" class="glass rounded-xl p-4 h-40 mb-6 flex items-center justify-center">
+                <p class="text-gray-400">Ad space available</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="glass-dark py-6 relative z-10">
+        <div class="container mx-auto px-4">
+            <div class="dark-white flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>共收录<span id="total-bookmarks">0</span>个网站</div>
+                <div>Copyright © 2018-<span id="current-year"></span> <span id="hostname">Cosmic Bookmarks</span>, All Rights Reserved</div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass rounded-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto scrollbar-hide">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-space-glow">Settings</h2>
+                    <button id="close-settings" class="p-2 hover:bg-white/10 rounded-full transition-all">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- GitHub Integration -->
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-semibold">GitHub Integration</h3>
+                        <p class="text-gray-400 text-sm">Connect to sync your bookmarks with a GitHub repository</p>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm mb-1">GitHub Username</label>
+                                <input type="text" id="github-username" class="w-full px-4 py-2 rounded-lg glass-dark focus:outline-none focus:ring-2 focus:ring-space-glow" placeholder="Your username">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm mb-1">Repository Name</label>
+                                <input type="text" id="github-repo" class="w-full px-4 py-2 rounded-lg glass-dark focus:outline-none focus:ring-2 focus:ring-space-glow" placeholder="Your repository name">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm mb-1">Personal Access Token</label>
+                                <div class="relative">
+                                    <input type="password" id="github-token" class="w-full px-4 py-2 rounded-lg glass-dark focus:outline-none focus:ring-2 focus:ring-space-glow" placeholder="Your PAT with repo access">
+                                    <button id="toggle-token-visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                        <i class="fa fa-eye-slash"></i>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Token needs repo scope access. Never share this token with others.</p>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button id="validate-github" class="flex-1 bg-space-blue hover:bg-space-blue/80 text-white py-2 px-4 rounded-lg transition-all">
+                                    Validate
+                                </button>
+                                <button id="save-github" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-all">
+                                    Save
+                                </button>
+                            </div>
+                            
+                            <div id="github-validation-status" class="hidden p-3 rounded-lg text-sm">
+                                <!-- Status messages will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Theme Settings -->
+                    <div class="space-y-3">
+                        <h3 class="text-xl font-semibold">Theme</h3>
+                        <div class="flex items-center gap-3">
+                            <label for="theme-dark">Dark</label>
+                            <input type="radio" id="theme-dark" name="theme" value="dark" checked>
+                            <label for="theme-light" class="ml-4">Light</label>
+                            <input type="radio" id="theme-light" name="theme" value="light">
+                        </div>
+                    </div>
+                    
+                    <!-- Health Reminders -->
+                    <div class="space-y-3">
+                        <h3 class="text-xl font-semibold">Health Reminders</h3>
+                        <div class="flex items-center justify-between">
+                            <label for="health-reminders-toggle">Enable periodic reminders</label>
+                            <div class="relative inline-block w-12 h-6">
+                                <input type="checkbox" id="health-reminders-toggle" class="opacity-0 w-0 h-0 peer">
+                                <span class="absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-700 rounded-full peer peer-checked:bg-space-glow transition-all"></span>
+                                <span class="absolute left-1 bottom-1 w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-6"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Center Modal -->
+    <div id="edit-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-space-glow">Edit Center</h2>
+                    <button id="close-edit" class="p-2 hover:bg-white/10 rounded-full transition-all">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex overflow-hidden flex-1">
+                <!-- Edit Tabs -->
+                <div class="w-48 border-r border-gray-700 flex-shrink-0">
+                    <div class="edit-tab active p-4 cursor-pointer hover:bg-white/10 transition-all" data-tab="bookmarks">
+                        <i class="fa fa-bookmark mr-2"></i> Bookmarks
+                    </div>
+                    <div class="edit-tab p-4 cursor-pointer hover:bg-white/10 transition-all" data-tab="folders">
+                        <i class="fa fa-folder mr-2"></i> Folders
+                    </div>
+                    <div class="edit-tab p-4 cursor-pointer hover:bg-white/10 transition-all" data-tab="clocks">
+                        <i class="fa fa-clock-o mr-2"></i> Clocks
+                    </div>
+                    <div class="edit-tab p-4 cursor-pointer hover:bg-white/10 transition-all" data-tab="ads">
+                        <i class="fa fa-bullhorn mr-2"></i> Ads
+                    </div>
+                </div>
+                
+                <!-- Edit Content Areas -->
+                <div class="flex-1 overflow-y-auto p-6 scrollbar-hide">
+                    <!-- Bookmarks Edit Tab -->
+                    <div class="edit-content active" id="bookmarks-edit">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-semibold">Manage Bookmarks</h3>
+                            <div class="flex gap-2">
+                                <button id="import-bookmarks" class="bg-space-blue hover:bg-space-blue/80 text-white py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                    <i class="fa fa-upload mr-1"></i> Import
+                                </button>
+                                <button id="export-bookmarks" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                    <i class="fa fa-download mr-1"></i> Export
+                                </button>
+                                <button id="add-bookmark" class="bg-green-600 hover:bg-green-500 text-white py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                    <i class="fa fa-plus mr-1"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="bookmarks-edit-list" class="space-y-4 max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide">
+                            <!-- Bookmarks will be inserted here -->
+                            <div class="text-center text-gray-400 py-10">
+                                <p>No bookmarks to display</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <button id="save-bookmarks" class="bg-space-glow hover:bg-space-glow/80 text-space-dark font-bold py-2 px-6 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Folders Edit Tab -->
+                    <div class="edit-content hidden" id="folders-edit">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-semibold">Manage Folders</h3>
+                            <button id="add-folder" class="bg-green-600 hover:bg-green-500 text-white py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fa fa-plus mr-1"></i> Add Folder
+                            </button>
+                        </div>
+                        
+                        <div id="folders-edit-list" class="space-y-4 max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide">
+                            <!-- Folders will be inserted here -->
+                            <div class="text-center text-gray-400 py-10">
+                                <p>No folders to display</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <button id="save-folders" class="bg-space-glow hover:bg-space-glow/80 text-space-dark font-bold py-2 px-6 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Clocks Edit Tab -->
+                    <div class="edit-content hidden" id="clocks-edit">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-semibold">Manage World Clocks</h3>
+                            <button id="add-city" class="bg-green-600 hover:bg-green-500 text-white py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fa fa-plus mr-1"></i> Add City
+                            </button>
+                        </div>
+                        
+                        <div id="cities-edit-list" class="space-y-4 max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide">
+                            <!-- Cities will be inserted here -->
+                        </div>
+                        
+                        <div class="mt-6">
+                            <button id="save-cities" class="bg-space-glow hover:bg-space-glow/80 text-space-dark font-bold py-2 px-6 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Ads Edit Tab -->
+                    <div class="edit-content hidden" id="ads-edit">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-semibold">Manage Advertisements</h3>
+                            <button id="add-ad" class="bg-green-600 hover:bg-green-500 text-white py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fa fa-plus mr-1"></i> Add Ad
+                            </button>
+                        </div>
+                        
+                        <div class="text-sm text-gray-400 mb-4">
+                            <p>You can add up to 3 advertisements with a maximum size of 3MB each.</p>
+                        </div>
+                        
+                        <div id="ads-edit-list" class="space-y-6 max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide">
+                            <!-- Ads will be inserted here -->
+                        </div>
+                        
+                        <div class="mt-6">
+                            <button id="save-ads" class="bg-space-glow hover:bg-space-glow/80 text-space-dark font-bold py-2 px-6 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Bookmark Modal -->
+    <div id="bookmark-form-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass rounded-xl max-w-md w-full mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-space-glow" id="bookmark-form-title">Add New Bookmark</h2>
+                    <button id="close-bookmark-form" class="p-2 hover:bg-white/10 rounded-full transition-all">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="bookmark-form" class="space-y-4">
+                    <input type="hidden" id="bookmark-id">
+                    <input type="hidden" id="bookmark-folder-id">
+                    
+                    <div>
+                        <label class="block text-sm mb-1" for="bookmark-name">Name</label>
+                        <input type="text" id="bookmark-name" class="w-full px-4 py-2 rounded-lg glass-dark focus:outline-none focus:ring-2 focus:ring-space-glow" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm mb-1" for="bookmark-url">URL</label>
+                        <input type="url" id="bookmark-url" class="w-full px-4 py-2 rounded-lg glass-dark focus:outline-none focus:ring-2 focus:ring-space-glow" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm mb-1" for="bookmark-folder">Folder</label>
+                        <select id="bookmark-folder" class="w-full px-4 py-2 rounded-lg glass-dark focus:outline-none focus:ring-2 focus:ring-space-glow">
+                            <option value="">No Folder</option>
+                            <!-- Folders will be inserted here -->
+                        </select>
+                    </div>
+                    
+                    <div class="pt-4 flex gap-2">
+                        <button type="button" id="cancel-bookmark" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 bg-space-glow hover:bg-space-glow/80 text-space-dark font-bold py-2 px-4 rounded-lg transition-all">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Folder Modal -->
+    <div id="folder-form-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass rounded-xl max-w-md w-full mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-space-glow" id="folder-form-title">Add New Folder</h2>
+                    <button id="close-folder-form" class="p-2 hover:bg-white/10 rounded-full transition-all">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="folder-form" class="space-y-4">
+                    <input type="hidden" id="folder-id">
+                    
+                    <div>
+                        <label class="block text-sm mb-1" for="folder-name">Folder Name</label>
+                        <input type="text" id="folder-name" class="w-full px-4 py-2 rounded-lg glass-dark focus:outline-none focus:ring-2 focus:ring-space-glow" required>
+                    </div>
+                    
+                    <div class="pt-4 flex gap-2">
+                        <button type="button" id="cancel-folder" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 bg-space-glow hover:bg-space-glow/80 text-space-dark font-bold py-2 px-4 rounded-lg transition-all">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit City Modal -->
+    <div id="city-form-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass rounded-xl max-w-md w-full mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-space-glow" id="city-form-title">Add New City</h2>
+                    <button id="close-city-form" class="p-2 hover:bg-white/10 rounded-full transition-all">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="city-form" class="space-y-4">
+                    <input type="hidden" id="city-id">
+                    
+                    <div>
+                        <label class="block text-sm mb-1" for="city-name">City Name</label>
+                        <input type="text" id="city-name" class="w-full px-4 py-2 rounded-lg glass-dark focus:outline-none focus:ring-2 focus:ring-space-glow" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm mb-1" for="city-timezone">Timezone</label>
+                        <select id="city-timezone" class="w-full px-4 py-2 rounded-lg glass-dark focus:outline-none focus:ring-2 focus:ring-space-glow" required>
+                            <!-- Timezones will be inserted here -->
+                        </select>
+                    </div>
+                    
+                    <div class="pt-4 flex gap-2">
+                        <button type="button" id="cancel-city" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 bg-space-glow hover:bg-space-glow/80 text-space-dark font-bold py-2 px-4 rounded-lg transition-all">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Ad Modal -->
+    <div id="ad-form-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass rounded-xl max-w-md w-full mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-space-glow" id="ad-form-title">Add New Advertisement</h2>
+                    <button id="close-ad-form" class="p-2 hover:bg-white/10 rounded-full transition-all">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="ad-form" class="space-y-4">
+                    <input type="hidden" id="ad-id">
+                    <input type="hidden" id="ad-image-data">
+                    
+                    <div>
+                        <label class="block text-sm mb-1" for="ad-url">Destination URL</label>
+                        <input type="url" id="ad-url" class="w-full px-4 py-2 rounded-lg glass-dark focus:outline-none focus:ring-2 focus:ring-space-glow" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm mb-1" for="ad-image">Ad Image (max 3MB)</label>
+                        <input type="file" id="ad-image" accept="image/*" class="w-full px-4 py-2 rounded-lg glass-dark focus:outline-none focus:ring-2 focus:ring-space-glow" required>
+                        <div id="ad-image-preview" class="mt-2 hidden">
+                            <img src="" alt="Ad preview" class="max-w-full max-h-40 object-contain rounded">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm mb-1" for="ad-position">Position</label>
+                        <select id="ad-position" class="w-full px-4 py-2 rounded-lg glass-dark focus:outline-none focus:ring-2 focus:ring-space-glow" required>
+                            <option value="1">Position 1 (Top)</option>
+                            <option value="2">Position 2 (Middle)</option>
+                            <option value="3">Position 3 (Bottom)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="pt-4 flex gap-2">
+                        <button type="button" id="cancel-ad" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 bg-space-glow hover:bg-space-glow/80 text-space-dark font-bold py-2 px-4 rounded-lg transition-all">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass rounded-xl max-w-md w-full mx-4">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-space-glow mb-4">Confirm Action</h2>
+                <p id="confirm-message" class="mb-6">Are you sure you want to do this?</p>
+                
+                <div class="flex gap-2">
+                    <button id="confirm-cancel" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-all">
+                        Cancel
+                    </button>
+                    <button id="confirm-ok" class="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded-lg transition-all">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification Toast -->
+    <div id="notification" class="fixed bottom-4 right-4 glass rounded-lg p-4 max-w-xs transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <div class="flex items-start">
+            <i id="notification-icon" class="fa fa-info-circle text-space-glow mt-0.5 mr-3"></i>
+            <div>
+                <h3 id="notification-title" class="font-bold text-white"></h3>
+                <p id="notification-message" class="text-sm text-gray-300"></p>
+            </div>
+            <button id="close-notification" class="ml-auto text-gray-400 hover:text-white">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div id="loading" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass rounded-xl p-8 flex flex-col items-center">
+            <div class="w-16 h-16 border-4 border-space-glow border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p id="loading-message" class="text-lg">Loading...</p>
+        </div>
+    </div>
 
-    <script src="script.js"></script>
-</body>
+    <script>
+        // App data storage
+        const appData = {
+            bookmarks: [],
+            folders: [],
+            cities: [],
+            ads: [],
+            settings: {
+                theme: 'dark',
+                healthReminders: true
+            },
+            github: {
+                username: '',
+                repo: '',
+                token: '',
+                validated: false,
+                defaultUsername: '',
+                defaultRepo: ''
+            },
+            startTime: new Date(),
+            lastActivityTime: new Date(),
+            searchQuery: ''
+        };
+
+        // DOM Elements
+        const elements = {
+            stars: document.getElementById('stars'),
+            themeToggle: document.getElementById('theme-toggle'),
+            settingsBtn: document.getElementById('settings-btn'),
+            editBtn: document.getElementById('edit-btn'),
+            headerControls: document.getElementById('header-controls'),
+            onlineTime: document.getElementById('online-time'),
+            healthReminder: document.getElementById('health-reminder'),
+            nextReminder: document.getElementById('next-reminder'),
+            worldClocks: document.getElementById('world-clocks'),
+            searchInput: document.getElementById('search-input'),
+            bookmarksContainer: document.getElementById('bookmarks-container'),
+            totalBookmarks: document.getElementById('total-bookmarks'),
+            currentYear: document.getElementById('current-year'),
+            hostname: document.getElementById('hostname'),
+            adSpaces: [
+                document.getElementById('ad-space-1'),
+                document.getElementById('ad-space-2'),
+                document.getElementById('ad-space-3')
+            ],
+            
+            // Settings Modal
+            settingsModal: document.getElementById('settings-modal'),
+            closeSettings: document.getElementById('close-settings'),
+            githubUsername: document.getElementById('github-username'),
+            githubRepo: document.getElementById('github-repo'),
+            githubToken: document.getElementById('github-token'),
+            toggleTokenVisibility: document.getElementById('toggle-token-visibility'),
+            validateGithub: document.getElementById('validate-github'),
+            saveGithub: document.getElementById('save-github'),
+            githubValidationStatus: document.getElementById('github-validation-status'),
+            themeDark: document.getElementById('theme-dark'),
+            themeLight: document.getElementById('theme-light'),
+            healthRemindersToggle: document.getElementById('health-reminders-toggle'),
+            
+            // Edit Modal
+            editModal: document.getElementById('edit-modal'),
+            closeEdit: document.getElementById('close-edit'),
+            editTabs: document.querySelectorAll('.edit-tab'),
+            editContents: document.querySelectorAll('.edit-content'),
+            
+            // Bookmarks Edit
+            bookmarksEditList: document.getElementById('bookmarks-edit-list'),
+            importBookmarks: document.getElementById('import-bookmarks'),
+            exportBookmarks: document.getElementById('export-bookmarks'),
+            addBookmark: document.getElementById('add-bookmark'),
+            saveBookmarks: document.getElementById('save-bookmarks'),
+            
+            // Folders Edit
+            foldersEditList: document.getElementById('folders-edit-list'),
+            addFolder: document.getElementById('add-folder'),
+            saveFolders: document.getElementById('save-folders'),
+            
+            // Clocks Edit
+            citiesEditList: document.getElementById('cities-edit-list'),
+            addCity: document.getElementById('add-city'),
+            saveCities: document.getElementById('save-cities'),
+            
+            // Ads Edit
+            adsEditList: document.getElementById('ads-edit-list'),
+            addAd: document.getElementById('add-ad'),
+            saveAds: document.getElementById('save-ads'),
+            
+            // Bookmark Form
+            bookmarkFormModal: document.getElementById('bookmark-form-modal'),
+            closeBookmarkForm: document.getElementById('close-bookmark-form'),
+            bookmarkForm: document.getElementById('bookmark-form'),
+            bookmarkFormTitle: document.getElementById('bookmark-form-title'),
+            bookmarkId: document.getElementById('bookmark-id'),
+            bookmarkFolderId: document.getElementById('bookmark-folder-id'),
+            bookmarkName: document.getElementById('bookmark-name'),
+            bookmarkUrl: document.getElementById('bookmark-url'),
+            bookmarkFolder: document.getElementById('bookmark-folder'),
+            cancelBookmark: document.getElementById('cancel-bookmark'),
+            
+            // Folder Form
+            folderFormModal: document.getElementById('folder-form-modal'),
+            closeFolderForm: document.getElementById('close-folder-form'),
+            folderForm: document.getElementById('folder-form'),
+            folderFormTitle: document.getElementById('folder-form-title'),
+            folderId: document.getElementById('folder-id'),
+            folderName: document.getElementById('folder-name'),
+            cancelFolder: document.getElementById('cancel-folder'),
+            
+            // City Form
+            cityFormModal: document.getElementById('city-form-modal'),
+            closeCityForm: document.getElementById('close-city-form'),
+            cityForm: document.getElementById('city-form'),
+            cityFormTitle: document.getElementById('city-form-title'),
+            cityId: document.getElementById('city-id'),
+            cityName: document.getElementById('city-name'),
+            cityTimezone: document.getElementById('city-timezone'),
+            cancelCity: document.getElementById('cancel-city'),
+            
+            // Ad Form
+            adFormModal: document.getElementById('ad-form-modal'),
+            closeAdForm: document.getElementById('close-ad-form'),
+            adForm: document.getElementById('ad-form'),
+            adFormTitle: document.getElementById('ad-form-title'),
+            adId: document.getElementById('ad-id'),
+            adUrl: document.getElementById('ad-url'),
+            adImage: document.getElementById('ad-image'),
+            adImagePreview: document.getElementById('ad-image-preview'),
+            adImageData: document.getElementById('ad-image-data'),
+            adPosition: document.getElementById('ad-position'),
+            cancelAd: document.getElementById('cancel-ad'),
+            
+            // Confirm Modal
+            confirmModal: document.getElementById('confirm-modal'),
+            confirmMessage: document.getElementById('confirm-message'),
+            confirmCancel: document.getElementById('confirm-cancel'),
+            confirmOk: document.getElementById('confirm-ok'),
+            
+            // Notification
+            notification: document.getElementById('notification'),
+            notificationIcon: document.getElementById('notification-icon'),
+            notificationTitle: document.getElementById('notification-title'),
+            notificationMessage: document.getElementById('notification-message'),
+            closeNotification: document.getElementById('close-notification'),
+            
+            // Loading
+            loading: document.getElementById('loading'),
+            loadingMessage: document.getElementById('loading-message')
+        };
+
+        // Generate star background
+        function generateStars() {
+            const starsCount = 200;
+            for (let i = 0; i < starsCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Random position
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                
+                // Random size
+                const size = Math.random() * 2;
+                
+                // Random opacity
+                const opacity = Math.random() * 0.8 + 0.2;
+                
+                // Random animation delay
+                const delay = Math.random() * 3;
+                
+                star.style.left = `${x}%`;
+                star.style.top = `${y}%`;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.opacity = opacity;
+                star.style.animationDelay = `${delay}s`;
+                
+                elements.stars.appendChild(star);
+            }
+        }
+
+        // Format time for online timer
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            return [
+                hours.toString().padStart(2, '0'),
+                minutes.toString().padStart(2, '0'),
+                secs.toString().padStart(2, '0')
+            ].join(':');
+        }
+
+        // Update online time display
+        function updateOnlineTime() {
+            const now = new Date();
+            const elapsedSeconds = Math.floor((now - appData.startTime) / 1000);
+            elements.onlineTime.textContent = formatTime(elapsedSeconds);
+        }
+
+        // Update world clocks
+        function updateWorldClocks() {
+            elements.worldClocks.innerHTML = '';
+            
+            appData.cities.forEach(city => {
+                const time = moment().tz(city.timezone).format('HH:mm:ss');
+                const date = moment().tz(city.timezone).format('MMM D');
+                
+                const clockEl = document.createElement('div');
+                clockEl.className = 'flex justify-between items-center';
+                clockEl.innerHTML = `
+                    <div>
+                        <div class="font-semibold">${city.name}</div>
+                        <div class="text-sm text-gray-400">${date}</div>
+                    </div>
+                    <div class="text-xl font-mono">${time}</div>
+                `;
+                
+                elements.worldClocks.appendChild(clockEl);
+            });
+        }
+
+        // Update health reminders
+        function updateHealthReminders() {
+            if (!appData.settings.healthReminders) {
+                elements.healthReminder.textContent = 'Reminders disabled';
+                elements.nextReminder.textContent = 'Enable in settings';
+                return;
+            }
+            
+            const now = new Date();
+            const minutes = now.getMinutes();
+            const remainder = 30 - (minutes % 30);
+            const next = remainder === 30 ? 0 : remainder;
+            
+            elements.nextReminder.textContent = `Next: ${next} minutes`;
+            
+            if (minutes % 30 === 0 && now.getSeconds() < 10) {
+                showNotification('Health Reminder', 'Take a break and stretch your legs!', 'fa-coffee');
+            }
+            
+            if (minutes % 30 < 5) {
+                elements.healthReminder.textContent = 'Time for a break soon';
+            } else if (minutes % 30 < 25) {
+                elements.healthReminder.textContent = 'Keep exploring';
+            } else {
+                elements.healthReminder.textContent = 'Break coming up!';
+            }
+        }
+
+        // Filter bookmarks based on search query
+        function filterBookmarks() {
+            const query = appData.searchQuery.toLowerCase();
+            
+            if (!query) {
+                return {
+                    filteredBookmarks: [...appData.bookmarks],
+                    filteredFolders: [...appData.folders]
+                };
+            }
+            
+            const filteredBookmarks = appData.bookmarks.filter(bookmark => 
+                bookmark.name.toLowerCase().includes(query) || 
+                bookmark.url.toLowerCase().includes(query)
+            );
+            
+            const filteredFolders = appData.folders.filter(folder => {
+                // Check if folder name matches
+                if (folder.name.toLowerCase().includes(query)) {
+                    return true;
+                }
+                
+                // Check if any bookmark in the folder matches
+                return appData.bookmarks.some(bookmark => 
+                    bookmark.folderId === folder.id && 
+                    (bookmark.name.toLowerCase().includes(query) || 
+                     bookmark.url.toLowerCase().includes(query))
+                );
+            });
+            
+            return { filteredBookmarks, filteredFolders };
+        }
+
+        // Render bookmarks to the main page
+        function renderBookmarks() {
+            const { filteredBookmarks, filteredFolders } = filterBookmarks();
+            
+            // Update total count
+            elements.totalBookmarks.textContent = appData.bookmarks.length;
+            
+            // Clear container
+            elements.bookmarksContainer.innerHTML = '';
+            
+            // If no bookmarks or folders and no search query
+            if (appData.bookmarks.length === 0 && appData.folders.length === 0 && !appData.searchQuery) {
+                elements.bookmarksContainer.innerHTML = `
+                    <div class="text-center text-gray-400 py-10">
+                        <i class="fa fa-folder-open-o text-4xl mb-4"></i>
+                        <p>No bookmarks yet. Import or add some to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // If search returned no results
+            if (filteredBookmarks.length === 0 && filteredFolders.length === 0) {
+                elements.bookmarksContainer.innerHTML = `
+                    <div class="text-center text-gray-400 py-10">
+                        <i class="fa fa-search text-4xl mb-4"></i>
+                        <p>No bookmarks found matching your search.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Create a folder map for quick lookup
+            const folderMap = {};
+            appData.folders.forEach(folder => {
+                folderMap[folder.id] = folder;
+            });
+            
+            // Render folders first
+            filteredFolders.forEach(folder => {
+                const folderBookmarks = appData.bookmarks.filter(
+                    bookmark => bookmark.folderId === folder.id && 
+                               (bookmark.name.toLowerCase().includes(appData.searchQuery.toLowerCase()) || 
+                                bookmark.url.toLowerCase().includes(appData.searchQuery.toLowerCase()))
+                );
+                
+                if (folderBookmarks.length === 0) return;
+                
+                const folderEl = document.createElement('div');
+                folderEl.className = 'folder glass rounded-xl p-4';
+                
+                const folderHeader = document.createElement('div');
+                folderHeader.className = 'folder-header flex justify-between items-center mb-4 cursor-pointer';
+                folderHeader.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fa fa-folder-open text-space-glow mr-2 rotate-icon"></i>
+                        <h3 class="text-lg font-semibold">${folder.name}</h3>
+                        <span class="ml-2 text-sm text-gray-400">(${folderBookmarks.length})</span>
+                    </div>
+                `;
+                
+                folderHeader.addEventListener('click', () => {
+                    folderEl.classList.toggle('folder-open');
+                });
+                
+                const bookmarksGrid = document.createElement('div');
+                bookmarksGrid.className = 'folder-content grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3';
+                
+                folderBookmarks.forEach(bookmark => {
+                    bookmarksGrid.appendChild(createBookmarkElement(bookmark));
+                });
+                
+                folderEl.appendChild(folderHeader);
+                folderEl.appendChild(bookmarksGrid);
+                elements.bookmarksContainer.appendChild(folderEl);
+            });
+            
+            // Render bookmarks not in any folder
+            const unfiledBookmarks = filteredBookmarks.filter(bookmark => !bookmark.folderId);
+            
+            if (unfiledBookmarks.length > 0) {
+                const unfiledHeader = document.createElement('h3');
+                unfiledHeader.className = 'text-lg font-semibold mb-4 text-space-glow';
+                unfiledHeader.textContent = 'Unfiled Bookmarks';
+                elements.bookmarksContainer.appendChild(unfiledHeader);
+                
+                const bookmarksGrid = document.createElement('div');
+                bookmarksGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 mb-6';
+                
+                unfiledBookmarks.forEach(bookmark => {
+                    bookmarksGrid.appendChild(createBookmarkElement(bookmark));
+                });
+                
+                elements.bookmarksContainer.appendChild(bookmarksGrid);
+            }
+        }
+
+        // Create a single bookmark element
+        function createBookmarkElement(bookmark) {
+            const bookmarkEl = document.createElement('a');
+            bookmarkEl.href = bookmark.url;
+            bookmarkEl.target = '_blank';
+            bookmarkEl.className = 'bookmark glass hover:bg-white/20 rounded-lg p-3 flex flex-col items-center justify-center text-center transition-all h-24 group';
+            
+            // Get domain for favicon
+            let domain;
+            try {
+                const url = new URL(bookmark.url);
+                domain = url.hostname;
+            } catch (e) {
+                domain = bookmark.url;
+            }
+            
+            // Create favicon or initial
+            let faviconHtml = '';
+            if (domain) {
+                faviconHtml = `
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2 bg-space-blue/30 group-hover:bg-space-blue/50 transition-all">
+                        <img src="https://icons.duckduckgo.com/ip3/${domain}.ico" 
+                             alt="${bookmark.name} favicon" 
+                             class="w-6 h-6 object-contain"
+                             onerror="this.onerror=null; this.parentElement.innerHTML='${bookmark.name.charAt(0).toUpperCase()}'">
+                    </div>
+                `;
+            } else {
+                faviconHtml = `
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2 bg-space-blue/30 group-hover:bg-space-blue/50 transition-all">
+                        ${bookmark.name.charAt(0).toUpperCase()}
+                    </div>
+                `;
+            }
+            
+            bookmarkEl.innerHTML = `
+                ${faviconHtml}
+                <div class="text-sm font-medium truncate w-full">${bookmark.name}</div>
+                <div class="text-xs text-gray-400 truncate w-full mt-1">${domain}</div>
+            `;
+            
+            return bookmarkEl;
+        }
+
+        // Render bookmarks in edit center
+        function renderBookmarksEdit() {
+            elements.bookmarksEditList.innerHTML = '';
+            
+            if (appData.bookmarks.length === 0) {
+                elements.bookmarksEditList.innerHTML = `
+                    <div class="text-center text-gray-400 py-10">
+                        <p>No bookmarks to display</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Create a folder map for quick lookup
+            const folderMap = {};
+            appData.folders.forEach(folder => {
+                folderMap[folder.id] = folder;
+            });
+            
+            // Group bookmarks by folder
+            const bookmarksByFolder = {};
+            const unfiledBookmarks = [];
+            
+            appData.bookmarks.forEach(bookmark => {
+                if (bookmark.folderId && folderMap[bookmark.folderId]) {
+                    if (!bookmarksByFolder[bookmark.folderId]) {
+                        bookmarksByFolder[bookmark.folderId] = [];
+                    }
+                    bookmarksByFolder[bookmark.folderId].push(bookmark);
+                } else {
+                    unfiledBookmarks.push(bookmark);
+                }
+            });
+            
+            // Add unfiled bookmarks
+            if (unfiledBookmarks.length > 0) {
+                const sectionEl = document.createElement('div');
+                sectionEl.className = 'mb-6';
+                
+                const headerEl = document.createElement('h4');
+                headerEl.className = 'text-space-glow font-medium mb-3';
+                headerEl.textContent = 'Unfiled Bookmarks';
+                sectionEl.appendChild(headerEl);
+                
+                const listEl = document.createElement('div');
+                listEl.className = 'space-y-2';
+                sectionEl.appendChild(listEl);
+                
+                unfiledBookmarks.forEach(bookmark => {
+                    listEl.appendChild(createBookmarkEditElement(bookmark));
+                });
+                
+                elements.bookmarksEditList.appendChild(sectionEl);
+            }
+            
+            // Add folder bookmarks
+            Object.keys(bookmarksByFolder).forEach(folderId => {
+                const folder = folderMap[folderId];
+                const folderBookmarks = bookmarksByFolder[folderId];
+                
+                const sectionEl = document.createElement('div');
+                sectionEl.className = 'mb-6';
+                
+                const headerEl = document.createElement('h4');
+                headerEl.className = 'text-space-glow font-medium mb-3';
+                headerEl.textContent = folder.name;
+                sectionEl.appendChild(headerEl);
+                
+                const listEl = document.createElement('div');
+                listEl.className = 'space-y-2';
+                sectionEl.appendChild(listEl);
+                
+                folderBookmarks.forEach(bookmark => {
+                    listEl.appendChild(createBookmarkEditElement(bookmark));
+                });
+                
+                elements.bookmarksEditList.appendChild(sectionEl);
+            });
+        }
+
+        // Create a bookmark edit element
+        function createBookmarkEditElement(bookmark) {
+            const el = document.createElement('div');
+            el.className = 'glass rounded-lg p-3 flex justify-between items-center';
+            
+            // Get domain
+            let domain = '';
+            try {
+                const url = new URL(bookmark.url);
+                domain = url.hostname;
+            } catch (e) {
+                domain = bookmark.url;
+            }
+            
+            el.innerHTML = `
+                <div>
+                    <div class="font-medium">${bookmark.name}</div>
+                    <div class="text-sm text-gray-400">${domain}</div>
+                </div>
+                <div class="flex gap-2">
+                    <button class="edit-bookmark-btn p-2 hover:bg-white/10 rounded transition-all" data-id="${bookmark.id}">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                    <button class="delete-bookmark-btn p-2 hover:bg-white/10 rounded transition-all text-red-400 hover:text-red-300" data-id="${bookmark.id}">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Add event listeners
+            el.querySelector('.edit-bookmark-btn').addEventListener('click', () => {
+                openBookmarkForm(bookmark);
+            });
+            
+            el.querySelector('.delete-bookmark-btn').addEventListener('click', () => {
+                showConfirm(
+                    'Delete Bookmark',
+                    `Are you sure you want to delete "${bookmark.name}"?`,
+                    () => {
+                        appData.bookmarks = appData.bookmarks.filter(b => b.id !== bookmark.id);
+                        renderBookmarksEdit();
+                        renderBookmarks();
+                        showNotification('Deleted', 'Bookmark has been deleted', 'fa-trash');
+                    }
+                );
+            });
+            
+            return el;
+        }
+
+        // Render folders in edit center
+        function renderFoldersEdit() {
+            elements.foldersEditList.innerHTML = '';
+            
+            if (appData.folders.length === 0) {
+                elements.foldersEditList.innerHTML = `
+                    <div class="text-center text-gray-400 py-10">
+                        <p>No folders to display</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            appData.folders.forEach(folder => {
+                // Count bookmarks in this folder
+                const bookmarkCount = appData.bookmarks.filter(b => b.folderId === folder.id).length;
+                
+                const el = document.createElement('div');
+                el.className = 'glass rounded-lg p-3 flex justify-between items-center';
+                el.innerHTML = `
+                    <div>
+                        <div class="font-medium">${folder.name}</div>
+                        <div class="text-sm text-gray-400">${bookmarkCount} ${bookmarkCount === 1 ? 'bookmark' : 'bookmarks'}</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="edit-folder-btn p-2 hover:bg-white/10 rounded transition-all" data-id="${folder.id}">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="delete-folder-btn p-2 hover:bg-white/10 rounded transition-all text-red-400 hover:text-red-300" data-id="${folder.id}">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listeners
+                el.querySelector('.edit-folder-btn').addEventListener('click', () => {
+                    openFolderForm(folder);
+                });
+                
+                el.querySelector('.delete-folder-btn').addEventListener('click', () => {
+                    const bookmarkCount = appData.bookmarks.filter(b => b.folderId === folder.id).length;
+                    let message = `Are you sure you want to delete the folder "${folder.name}"?`;
+                    
+                    if (bookmarkCount > 0) {
+                        message += ` This will move ${bookmarkCount} ${bookmarkCount === 1 ? 'bookmark' : 'bookmarks'} to unfiled.`;
+                    }
+                    
+                    showConfirm(
+                        'Delete Folder',
+                        message,
+                        () => {
+                            // Remove folder
+                            appData.folders = appData.folders.filter(f => f.id !== folder.id);
+                            
+                            // Update bookmarks in this folder to be unfiled
+                            appData.bookmarks.forEach(bookmark => {
+                                if (bookmark.folderId === folder.id) {
+                                    bookmark.folderId = '';
+                                }
+                            });
+                            
+                            renderFoldersEdit();
+                            renderBookmarksEdit();
+                            renderBookmarks();
+                            populateBookmarkFolderSelect();
+                            showNotification('Deleted', 'Folder has been deleted', 'fa-trash');
+                        }
+                    );
+                });
+                
+                elements.foldersEditList.appendChild(el);
+            });
+        }
+
+        // Render cities in edit center
+        function renderCitiesEdit() {
+            elements.citiesEditList.innerHTML = '';
+            
+            if (appData.cities.length === 0) {
+                elements.citiesEditList.innerHTML = `
+                    <div class="text-center text-gray-400 py-10">
+                        <p>No cities to display</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            appData.cities.forEach(city => {
+                const time = moment().tz(city.timezone).format('HH:mm:ss');
+                
+                const el = document.createElement('div');
+                el.className = 'glass rounded-lg p-3 flex justify-between items-center';
+                el.innerHTML = `
+                    <div>
+                        <div class="font-medium">${city.name}</div>
+                        <div class="text-sm text-gray-400">${city.timezone} · ${time}</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="edit-city-btn p-2 hover:bg-white/10 rounded transition-all" data-id="${city.id}">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="delete-city-btn p-2 hover:bg-white/10 rounded transition-all text-red-400 hover:text-red-300" data-id="${city.id}">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listeners
+                el.querySelector('.edit-city-btn').addEventListener('click', () => {
+                    openCityForm(city);
+                });
+                
+                el.querySelector('.delete-city-btn').addEventListener('click', () => {
+                    showConfirm(
+                        'Delete City',
+                        `Are you sure you want to remove "${city.name}" from world clocks?`,
+                        () => {
+                            appData.cities = appData.cities.filter(c => c.id !== city.id);
+                            renderCitiesEdit();
+                            updateWorldClocks();
+                            showNotification('Deleted', 'City has been removed', 'fa-trash');
+                        }
+                    );
+                });
+                
+                elements.citiesEditList.appendChild(el);
+            });
+        }
+
+        // Render ads in edit center
+        function renderAdsEdit() {
+            elements.adsEditList.innerHTML = '';
+            
+            // Create ad positions
+            for (let i = 1; i <= 3; i++) {
+                const ad = appData.ads.find(a => a.position === i) || null;
+                
+                const el = document.createElement('div');
+                el.className = 'glass rounded-lg p-4';
+                
+                let content = '';
+                if (ad) {
+                    content = `
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="md:w-1/3">
+                                <img src="${ad.imageData}" alt="Ad preview" class="w-full h-32 object-cover rounded">
+                            </div>
+                            <div class="md:w-2/3">
+                                <div class="font-medium mb-1">Position ${i}</div>
+                                <div class="text-sm text-gray-300 mb-2 truncate">${ad.url}</div>
+                                <div class="flex gap-2 mt-2">
+                                    <button class="edit-ad-btn p-2 hover:bg-white/10 rounded transition-all text-sm" data-id="${ad.id}">
+                                        <i class="fa fa-pencil mr-1"></i> Edit
+                                    </button>
+                                    <button class="delete-ad-btn p-2 hover:bg-white/10 rounded transition-all text-sm text-red-400 hover:text-red-300" data-id="${ad.id}">
+                                        <i class="fa fa-trash mr-1"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    content = `
+                        <div class="flex flex-col items-center justify-center py-6 text-center">
+                            <div class="text-gray-400 mb-2">Position ${i}</div>
+                            <p class="text-sm text-gray-500 mb-3">No advertisement set</p>
+                            <button class="add-ad-for-position-btn bg-space-blue hover:bg-space-blue/80 text-white py-1 px-3 rounded-lg text-sm transition-all" data-position="${i}">
+                                <i class="fa fa-plus mr-1"></i> Add Ad
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                el.innerHTML = content;
+                elements.adsEditList.appendChild(el);
+                
+                // Add event listeners if ad exists
+                if (ad) {
+                    el.querySelector('.edit-ad-btn').addEventListener('click', () => {
+                        openAdForm(ad);
+                    });
+                    
+                    el.querySelector('.delete-ad-btn').addEventListener('click', () => {
+                        showConfirm(
+                            'Delete Advertisement',
+                            `Are you sure you want to delete this ad?`,
+                            () => {
+                                appData.ads = appData.ads.filter(a => a.id !== ad.id);
+                                renderAdsEdit();
+                                renderAds();
+                                showNotification('Deleted', 'Advertisement has been removed', 'fa-trash');
+                            }
+                        );
+                    });
+                } else {
+                    el.querySelector('.add-ad-for-position-btn').addEventListener('click', (e) => {
+                        const position = parseInt(e.currentTarget.dataset.position);
+                        openAdForm(null, position);
+                    });
+                }
+            }
+        }
+
+        // Render advertisements
+        function renderAds() {
+            elements.adSpaces.forEach((adSpace, index) => {
+                const position = index + 1;
+                const ad = appData.ads.find(a => a.position === position);
+                
+                if (ad) {
+                    adSpace.innerHTML = `
+                        <a href="${ad.url}" target="_blank" class="block w-full h-full">
+                            <img src="${ad.imageData}" alt="Advertisement" class="w-full h-full object-cover rounded-lg">
+                        </a>
+                    `;
+                } else {
+                    adSpace.innerHTML = `<p class="text-gray-400">Ad space available</p>`;
+                }
+            });
+        }
+
+        // Populate bookmark folder select dropdown
+        function populateBookmarkFolderSelect() {
+            // Clear existing options except the first one
+            while (elements.bookmarkFolder.options.length > 1) {
+                elements.bookmarkFolder.remove(1);
+            }
+            
+            // Add folders
+            appData.folders.forEach(folder => {
+                const option = document.createElement('option');
+                option.value = folder.id;
+                option.textContent = folder.name;
+                elements.bookmarkFolder.appendChild(option);
+            });
+        }
+
+        // Populate timezone select dropdown
+        function populateTimezoneSelect() {
+            // Get all timezones and group by region
+            const timezones = moment.tz.names();
+            const timezoneGroups = {};
+            
+            timezones.forEach(tz => {
+                const parts = tz.split('/');
+                if (parts.length >= 2) {
+                    const region = parts[0];
+                    const city = parts.slice(1).join('/');
+                    
+                    if (!timezoneGroups[region]) {
+                        timezoneGroups[region] = [];
+                    }
+                    
+                    timezoneGroups[region].push({ region, city, tz });
+                }
+            });
+            
+            // Sort regions
+            const sortedRegions = Object.keys(timezoneGroups).sort();
+            
+            // Add options to select
+            sortedRegions.forEach(region => {
+                const group = document.createElement('optgroup');
+                group.label = region;
+                
+                // Sort cities in region
+                timezoneGroups[region].sort((a, b) => a.city.localeCompare(b.city));
+                
+                timezoneGroups[region].forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.tz;
+                    option.textContent = item.city.replace('_', ' ');
+                    group.appendChild(option);
+                });
+                
+                elements.cityTimezone.appendChild(group);
+            });
+        }
+
+        // Open bookmark form (add or edit)
+        function openBookmarkForm(bookmark = null) {
+            if (bookmark) {
+                elements.bookmarkFormTitle.textContent = 'Edit Bookmark';
+                elements.bookmarkId.value = bookmark.id;
+                elements.bookmarkName.value = bookmark.name;
+                elements.bookmarkUrl.value = bookmark.url;
+                elements.bookmarkFolder.value = bookmark.folderId || '';
+            } else {
+                elements.bookmarkFormTitle.textContent = 'Add New Bookmark';
+                elements.bookmarkForm.reset();
+                elements.bookmarkId.value = '';
+            }
+            
+            populateBookmarkFolderSelect();
+            showModal(elements.bookmarkFormModal);
+        }
+
+        // Open folder form (add or edit)
+        function openFolderForm(folder = null) {
+            if (folder) {
+                elements.folderFormTitle.textContent = 'Edit Folder';
+                elements.folderId.value = folder.id;
+                elements.folderName.value = folder.name;
+            } else {
+                elements.folderFormTitle.textContent = 'Add New Folder';
+                elements.folderForm.reset();
+                elements.folderId.value = '';
+            }
+            
+            showModal(elements.folderFormModal);
+        }
+
+        // Open city form (add or edit)
+        function openCityForm(city = null, position = null) {
+            if (city) {
+                elements.cityFormTitle.textContent = 'Edit City';
+                elements.cityId.value = city.id;
+                elements.cityName.value = city.name;
+                elements.cityTimezone.value = city.timezone;
+            } else {
+                elements.cityFormTitle.textContent = 'Add New City';
+                elements.cityForm.reset();
+                elements.cityId.value = '';
+                if (position) {
+                    elements.adPosition.value = position;
+                }
+            }
+            
+            showModal(elements.cityFormModal);
+        }
+
+        // Open ad form (add or edit)
+        function openAdForm(ad = null, position = null) {
+            // Reset preview
+            elements.adImagePreview.classList.add('hidden');
+            elements.adImagePreview.querySelector('img').src = '';
+            elements.adImageData.value = '';
+            
+            if (ad) {
+                elements.adFormTitle.textContent = 'Edit Advertisement';
+                elements.adId.value = ad.id;
+                elements.adUrl.value = ad.url;
+                elements.adPosition.value = ad.position;
+                elements.adImageData.value = ad.imageData;
+                
+                // Show preview
+                elements.adImagePreview.querySelector('img').src = ad.imageData;
+                elements.adImagePreview.classList.remove('hidden');
+            } else {
+                elements.adFormTitle.textContent = 'Add New Advertisement';
+                elements.adForm.reset();
+                elements.adId.value = '';
+                if (position) {
+                    elements.adPosition.value = position;
+                }
+            }
+            
+            showModal(elements.adFormModal);
+        }
+
+        // Show modal
+        function showModal(modal) {
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        // Hide modal
+        function hideModal(modal) {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // Show notification
+        function showNotification(title, message, icon = 'fa-info-circle') {
+            elements.notificationTitle.textContent = title;
+            elements.notificationMessage.textContent = message;
+            elements.notificationIcon.className = `fa ${icon} text-space-glow mt-0.5 mr-3`;
+            
+            elements.notification.classList.remove('translate-y-20', 'opacity-0');
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                hideNotification();
+            }, 5000);
+        }
+
+        // Hide notification
+        function hideNotification() {
+            elements.notification.classList.add('translate-y-20', 'opacity-0');
+        }
+
+        // Show confirmation dialog
+        function showConfirm(title, message, confirmCallback) {
+            elements.confirmMessage.textContent = message;
+            elements.confirmModal.classList.remove('opacity-0', 'pointer-events-none');
+            
+            // Set up confirm action
+            const handleConfirm = () => {
+                confirmCallback();
+                hideConfirm();
+                elements.confirmOk.removeEventListener('click', handleConfirm);
+            };
+            
+            elements.confirmOk.addEventListener('click', handleConfirm);
+        }
+
+        // Hide confirmation dialog
+        function hideConfirm() {
+            elements.confirmModal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // Show loading indicator
+        function showLoading(message = 'Loading...') {
+            elements.loadingMessage.textContent = message;
+            elements.loading.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        // Hide loading indicator
+        function hideLoading() {
+            elements.loading.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // Generate unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        // Validate GitHub token
+        async function validateGitHubToken() {
+            showLoading('Validating GitHub token...');
+            
+            const username = elements.githubUsername.value.trim();
+            const repo = elements.githubRepo.value.trim();
+            const token = elements.githubToken.value.trim();
+            
+            if (!username || !repo || !token) {
+                hideLoading();
+                showGitHubValidationStatus('Please fill in all GitHub fields', 'error');
+                return false;
+            }
+            
+            try {
+                const response = await fetch(`https://api.github.com/repos/${username}/${repo}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    appData.github.validated = true;
+                    hideLoading();
+                    showGitHubValidationStatus('GitHub credentials validated successfully!', 'success');
+                    updateEditFeaturesStatus();
+                    return true;
+                } else {
+                    appData.github.validated = false;
+                    hideLoading();
+                    showGitHubValidationStatus('Invalid credentials or repository not found', 'error');
+                    return false;
+                }
+            } catch (error) {
+                appData.github.validated = false;
+                hideLoading();
+                showGitHubValidationStatus('Error connecting to GitHub: ' + error.message, 'error');
+                return false;
+            }
+        }
+
+        // Show GitHub validation status
+        function showGitHubValidationStatus(message, type) {
+            elements.githubValidationStatus.textContent = message;
+            elements.githubValidationStatus.classList.remove('hidden', 'bg-green-500/20', 'text-green-400', 'bg-red-500/20', 'text-red-400');
+            
+            if (type === 'success') {
+                elements.githubValidationStatus.classList.add('bg-green-500/20', 'text-green-400');
+            } else {
+                elements.githubValidationStatus.classList.add('bg-red-500/20', 'text-red-400');
+            }
+        }
+
+        // Save GitHub settings
+        function saveGitHubSettings() {
+            appData.github.username = elements.githubUsername.value.trim();
+            appData.github.repo = elements.githubRepo.value.trim();
+            appData.github.token = elements.githubToken.value.trim();
+            
+            localStorage.setItem('githubUsername', appData.github.username);
+            localStorage.setItem('githubRepo', appData.github.repo);
+            localStorage.setItem('githubToken', appData.github.token);
+            
+            showNotification('Saved', 'GitHub settings saved', 'fa-check');
+        }
+
+        // Update edit features status based on validation
+        function updateEditFeaturesStatus() {
+            const isEnabled = appData.github.validated;
+            
+            elements.editBtn.disabled = !isEnabled;
+            elements.importBookmarks.disabled = !isEnabled;
+            elements.exportBookmarks.disabled = !isEnabled;
+            elements.addBookmark.disabled = !isEnabled;
+            elements.saveBookmarks.disabled = !isEnabled;
+            elements.addFolder.disabled = !isEnabled;
+            elements.saveFolders.disabled = !isEnabled;
+            elements.addCity.disabled = !isEnabled;
+            elements.saveCities.disabled = !isEnabled;
+            elements.addAd.disabled = !isEnabled;
+            elements.saveAds.disabled = !isEnabled;
+            
+            if (isEnabled) {
+                elements.editBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                elements.editBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // Load data from GitHub
+        async function loadDataFromGitHub() {
+            // Try to get user's GitHub info, fall back to defaults
+            const username = appData.github.username || appData.github.defaultUsername;
+            const repo = appData.github.repo || appData.github.defaultRepo;
+            
+            if (!username || !repo) {
+                return false;
+            }
+            
+            showLoading('Loading your bookmarks...');
+            
+            try {
+                let url, options = {};
+                
+                if (appData.github.token && appData.github.validated) {
+                    // Use API with token for private repos
+                    url = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
+                    options = {
+                        headers: {
+                            'Authorization': `token ${appData.github.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    };
+                } else {
+                    // Use raw URL for public access
+                    url = `https://raw.githubusercontent.com/${username}/${repo}/main/bookmarks.json`;
+                }
+                
+                const response = await fetch(url, options);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        // File doesn't exist, use default data
+                        hideLoading();
+                        return true;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                let data;
+                if (appData.github.token && appData.github.validated) {
+                    // Parse API response
+                    const apiData = await response.json();
+                    const content = atob(apiData.content);
+                    data = JSON.parse(content);
+                } else {
+                    // Parse raw response
+                    data = await response.json();
+                }
+                
+                // Merge loaded data with app data
+                if (data.bookmarks) appData.bookmarks = data.bookmarks;
+                if (data.folders) appData.folders = data.folders;
+                if (data.cities) appData.cities = data.cities;
+                if (data.ads) appData.ads = data.ads;
+                if (data.settings) appData.settings = { ...appData.settings, ...data.settings };
+                
+                hideLoading();
+                return true;
+            } catch (error) {
+                console.error('Error loading data from GitHub:', error);
+                hideLoading();
+                showNotification('Loading Error', 'Could not load data from GitHub. Using local data.', 'fa-exclamation-triangle');
+                return false;
+            }
+        }
+
+        // Save data to GitHub
+        async function saveDataToGitHub() {
+            const username = appData.github.username;
+            const repo = appData.github.repo;
+            const token = appData.github.token;
+            
+            if (!username || !repo || !token || !appData.github.validated) {
+                showNotification('Error', 'GitHub credentials not validated', 'fa-exclamation-circle');
+                return false;
+            }
+            
+            showLoading('Saving your changes...');
+            
+            try {
+                // First, get the current file SHA
+                const getUrl = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
+                const getResponse = await fetch(getUrl, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                let sha = '';
+                if (getResponse.ok) {
+                    const getdata = await getResponse.json();
+                    sha = getdata.sha;
+                }
+                
+                // Prepare data to save
+                const dataToSave = {
+                    bookmarks: appData.bookmarks,
+                    folders: appData.folders,
+                    cities: appData.cities,
+                    ads: appData.ads,
+                    settings: appData.settings
+                };
+                
+                // Convert to base64, ensuring proper encoding
+                const content = JSON.stringify(dataToSave, null, 2);
+                const base64Content = btoa(unescape(encodeURIComponent(content)));
+                
+                // Save the data
+                const putUrl = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
+                const putResponse = await fetch(putUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Update bookmarks via Cosmic Bookmarks',
+                        content: base64Content,
+                        sha: sha // Only required if file exists
+                    })
+                });
+                
+                if (!putResponse.ok) {
+                    throw new Error(`HTTP error! status: ${putResponse.status}`);
+                }
+                
+                hideLoading();
+                showNotification('Saved', 'Your changes have been saved to GitHub', 'fa-check');
+                return true;
+            } catch (error) {
+                console.error('Error saving data to GitHub:', error);
+                hideLoading();
+                showNotification('Saving Error', 'Could not save data to GitHub: ' + error.message, 'fa-exclamation-circle');
+                return false;
+            }
+        }
+
+        // Import bookmarks from HTML file
+        function importBookmarksFromFile(file) {
+            showLoading('Importing bookmarks...');
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(e.target.result, 'text/html');
+                    const bookmarks = doc.querySelectorAll('a');
+                    const folders = {};
+                    
+                    let importedCount = 0;
+                    let duplicateCount = 0;
+                    
+                    // Process folders first
+                    const folderElements = doc.querySelectorAll('h3');
+                    folderElements.forEach(folderEl => {
+                        const folderName = folderEl.textContent.trim();
+                        if (folderName && !folders[folderName]) {
+                            const folderId = generateId();
+                            folders[folderName] = {
+                                id: folderId,
+                                name: folderName
+                            };
+                            
+                            // Add to app data if not exists
+                            if (!appData.folders.some(f => f.name.toLowerCase() === folderName.toLowerCase())) {
+                                appData.folders.push(folders[folderName]);
+                            } else {
+                                // Find existing folder
+                                const existingFolder = appData.folders.find(f => f.name.toLowerCase() === folderName.toLowerCase());
+                                folders[folderName] = existingFolder;
+                            }
+                        }
+                    });
+                    
+                    // Process bookmarks
+                    bookmarks.forEach(bookmarkEl => {
+                        const name = bookmarkEl.textContent.trim();
+                        let url = bookmarkEl.getAttribute('href');
+                        
+                        if (!name || !url) return;
+                        
+                        // Clean up URL
+                        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                            url = 'https://' + url;
+                        }
+                        
+                        // Check for duplicates
+                        const isDuplicate = appData.bookmarks.some(b => 
+                            b.url.toLowerCase() === url.toLowerCase()
+                        );
+                        
+                        if (isDuplicate) {
+                            duplicateCount++;
+                            return;
+                        }
+                        
+                        // Determine folder
+                        let folderId = '';
+                        let parentNode = bookmarkEl.parentNode;
+                        while (parentNode) {
+                            if (parentNode.tagName === 'DL' && parentNode.previousElementSibling && parentNode.previousElementSibling.tagName === 'H3') {
+                                const folderName = parentNode.previousElementSibling.textContent.trim();
+                                if (folderName && folders[folderName]) {
+                                    folderId = folders[folderName].id;
+                                }
+                                break;
+                            }
+                            parentNode = parentNode.parentNode;
+                        }
+                        
+                        // Add bookmark
+                        appData.bookmarks.push({
+                            id: generateId(),
+                            name: name,
+                            url: url,
+                            folderId: folderId
+                        });
+                        
+                        importedCount++;
+                    });
+                    
+                    // Update UI
+                    renderBookmarks();
+                    renderBookmarksEdit();
+                    renderFoldersEdit();
+                    populateBookmarkFolderSelect();
+                    
+                    hideLoading();
+                    showNotification(
+                        'Import Complete', 
+                        `Successfully imported ${importedCount} bookmarks. ${duplicateCount} duplicates skipped.`, 
+                        'fa-check'
+                    );
+                } catch (error) {
+                    console.error('Error importing bookmarks:', error);
+                    hideLoading();
+                    showNotification('Import Error', 'Failed to import bookmarks: ' + error.message, 'fa-exclamation-circle');
+                }
+            };
+            
+            reader.onerror = function() {
+                hideLoading();
+                showNotification('Import Error', 'Failed to read file', 'fa-exclamation-circle');
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Export bookmarks to HTML file
+        function exportBookmarksToFile() {
+            // Create HTML structure
+            let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>Bookmarks</TITLE>
+<H1>Bookmarks</H1>
+<DL><p>`;
+            
+            // Add folders with bookmarks
+            appData.folders.forEach(folder => {
+                const folderBookmarks = appData.bookmarks.filter(b => b.folderId === folder.id);
+                if (folderBookmarks.length === 0) return;
+                
+                html += `\n    <DT><H3>${folder.name}</H3>\n    <DL><p>`;
+                
+                folderBookmarks.forEach(bookmark => {
+                    html += `\n        <DT><A HREF="${bookmark.url}">${bookmark.name}</A>`;
+                });
+                
+                html += `\n    </DL><p>`;
+            });
+            
+            // Add unfiled bookmarks
+            const unfiledBookmarks = appData.bookmarks.filter(b => !b.folderId);
+            if (unfiledBookmarks.length > 0) {
+                html += `\n    <DT><H3>Unfiled Bookmarks</H3>\n    <DL><p>`;
+                
+                unfiledBookmarks.forEach(bookmark => {
+                    html += `\n        <DT><A HREF="${bookmark.url}">${bookmark.name}</A>`;
+                });
+                
+                html += `\n    </DL><p>`;
+            }
+            
+            html += `\n</DL>`;
+            
+            // Create blob and download link
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cosmic-bookmarks-${new Date().toISOString().split('T')[0]}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Exported', 'Bookmarks exported successfully', 'fa-check');
+        }
+
+        // Initialize app
+        async function init() {
+            // Generate star background
+            generateStars();
+            
+            // Set current year
+            elements.currentYear.textContent = new Date().getFullYear();
+            
+            // Load GitHub settings from localStorage
+            appData.github.username = localStorage.getItem('githubUsername') || '';
+            appData.github.repo = localStorage.getItem('githubRepo') || '';
+            appData.github.token = localStorage.getItem('githubToken') || '';
+            
+            // Populate GitHub form fields
+            elements.githubUsername.value = appData.github.username;
+            elements.githubRepo.value = appData.github.repo;
+            elements.githubToken.value = appData.github.token;
+            
+            // Check for injected repo info (from deploy.yml)
+            const metaUsername = document.querySelector('meta[name="github-username"]');
+            const metaRepo = document.querySelector('meta[name="github-repo"]');
+            
+            if (metaUsername && metaRepo) {
+                appData.github.defaultUsername = metaUsername.content;
+                appData.github.defaultRepo = metaRepo.content;
+                
+                // Auto-fill if empty
+                if (!appData.github.username) elements.githubUsername.value = appData.github.defaultUsername;
+                if (!appData.github.repo) elements.githubRepo.value = appData.github.defaultRepo;
+            }
+            
+            // Load theme setting
+            if (localStorage.getItem('theme')) {
+                appData.settings.theme = localStorage.getItem('theme');
+            }
+            
+            document.documentElement.classList.toggle('dark', appData.settings.theme === 'dark');
+            elements.themeDark.checked = appData.settings.theme === 'dark';
+            elements.themeLight.checked = appData.settings.theme === 'light';
+            
+            // Load health reminders setting
+            if (localStorage.getItem('healthReminders') !== null) {
+                appData.settings.healthReminders = localStorage.getItem('healthReminders') === 'true';
+            }
+            
+            elements.healthRemindersToggle.checked = appData.settings.healthReminders;
+            
+            // Load data from GitHub
+            await loadDataFromGitHub();
+            
+            // Initialize data if empty
+            if (!appData.bookmarks || appData.bookmarks.length === 0) {
+                appData.bookmarks = [];
+            }
+            
+            if (!appData.folders || appData.folders.length === 0) {
+                appData.folders = [];
+            }
+            
+            if (!appData.cities || appData.cities.length === 0) {
+                appData.cities = [
+                    { id: generateId(), name: "New York", timezone: "America/New_York" },
+                    { id: generateId(), name: "London", timezone: "Europe/London" },
+                    { id: generateId(), name: "Tokyo", timezone: "Asia/Tokyo" },
+                    { id: generateId(), name: "Sydney", timezone: "Australia/Sydney" }
+                ];
+            } else {
+                // Ensure cities have IDs
+                appData.cities.forEach(city => {
+                    if (!city.id) city.id = generateId();
+                });
+            }
+            
+            if (!appData.ads || appData.ads.length === 0) {
+                appData.ads = [];
+            }
+            
+            // Populate timezone select
+            populateTimezoneSelect();
+            
+            // Render UI
+            renderBookmarks();
+            renderBookmarksEdit();
+            renderFoldersEdit();
+            renderCitiesEdit();
+            renderAdsEdit();
+            renderAds();
+            updateWorldClocks();
+            updateHealthReminders();
+            
+            // Update edit features status
+            updateEditFeaturesStatus();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Start timers
+            setInterval(updateOnlineTime, 1000);
+            setInterval(updateWorldClocks, 1000);
+            setInterval(updateHealthReminders, 60000); // Update every minute
+            
+            // Initial online time update
+            updateOnlineTime();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Theme toggle
+            elements.themeToggle.addEventListener('click', () => {
+                const newTheme = appData.settings.theme === 'dark' ? 'light' : 'dark';
+                appData.settings.theme = newTheme;
+                localStorage.setItem('theme', newTheme);
+                document.documentElement.classList.toggle('dark', newTheme === 'dark');
+                
+                elements.themeDark.checked = newTheme === 'dark';
+                elements.themeLight.checked = newTheme === 'light';
+                
+                elements.themeToggle.querySelector('i').className = newTheme === 'dark' ? 'fa fa-moon-o' : 'fa fa-sun-o';
+            });
+            
+            // Health reminders toggle
+            elements.healthRemindersToggle.addEventListener('change', () => {
+                appData.settings.healthReminders = elements.healthRemindersToggle.checked;
+                localStorage.setItem('healthReminders', appData.settings.healthReminders);
+                updateHealthReminders();
+            });
+            
+            // Settings modal
+            elements.settingsBtn.addEventListener('click', () => {
+                showModal(elements.settingsModal);
+            });
+            
+            elements.closeSettings.addEventListener('click', () => {
+                hideModal(elements.settingsModal);
+            });
+            
+            // Edit modal
+            elements.editBtn.addEventListener('click', () => {
+                showModal(elements.editModal);
+            });
+            
+            elements.closeEdit.addEventListener('click', () => {
+                hideModal(elements.editModal);
+            });
+            
+            // Edit tabs
+            elements.editTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and contents
+                    elements.editTabs.forEach(t => t.classList.remove('active', 'bg-white/10'));
+                    elements.editContents.forEach(c => c.classList.add('hidden'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active', 'bg-white/10');
+                    const tabId = tab.dataset.tab;
+                    document.getElementById(`${tabId}-edit`).classList.remove('hidden');
+                });
+            });
+            
+            // GitHub token visibility toggle
+            elements.toggleTokenVisibility.addEventListener('click', () => {
+                const type = elements.githubToken.getAttribute('type') === 'password' ? 'text' : 'password';
+                elements.githubToken.setAttribute('type', type);
+                elements.toggleTokenVisibility.querySelector('i').className = type === 'password' ? 'fa fa-eye-slash' : 'fa fa-eye';
+            });
+            
+            // GitHub validate and save
+            elements.validateGithub.addEventListener('click', validateGitHubToken);
+            elements.saveGithub.addEventListener('click', saveGitHubSettings);
+            
+            // Search
+            elements.searchInput.addEventListener('input', (e) => {
+                appData.searchQuery = e.target.value;
+                renderBookmarks();
+            });
+            
+            // Bookmark form
+            elements.addBookmark.addEventListener('click', () => openBookmarkForm());
+            
+            elements.bookmarkForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const id = elements.bookmarkId.value || generateId();
+                const name = elements.bookmarkName.value.trim();
+                const url = elements.bookmarkUrl.value.trim();
+                const folderId = elements.bookmarkFolder.value;
+                
+                if (!name || !url) return;
+                
+                // Ensure URL has protocol
+                let formattedUrl = url;
+                if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+                    formattedUrl = 'https://' + formattedUrl;
+                }
+                
+                // Check if editing or adding
+                const existingIndex = appData.bookmarks.findIndex(b => b.id === id);
+                
+                if (existingIndex >= 0) {
+                    // Update existing bookmark
+                    appData.bookmarks[existingIndex] = {
+                        ...appData.bookmarks[existingIndex],
+                        name,
+                        url: formattedUrl,
+                        folderId
+                    };
+                    showNotification('Updated', 'Bookmark updated successfully', 'fa-check');
+                } else {
+                    // Check for duplicates
+                    const isDuplicate = appData.bookmarks.some(b => 
+                        b.url.toLowerCase() === formattedUrl.toLowerCase()
+                    );
+                    
+                    if (isDuplicate) {
+                        showNotification('Duplicate', 'A bookmark with this URL already exists', 'fa-exclamation-circle');
+                        return;
+                    }
+                    
+                    // Add new bookmark
+                    appData.bookmarks.push({
+                        id,
+                        name,
+                        url: formattedUrl,
+                        folderId
+                    });
+                    showNotification('Added', 'New bookmark added successfully', 'fa-check');
+                }
+                
+                // Update UI
+                renderBookmarks();
+                renderBookmarksEdit();
+                hideModal(elements.bookmarkFormModal);
+            });
+            
+            elements.closeBookmarkForm.addEventListener('click', () => {
+                hideModal(elements.bookmarkFormModal);
+            });
+            
+            elements.cancelBookmark.addEventListener('click', () => {
+                hideModal(elements.bookmarkFormModal);
+            });
+            
+            // Folder form
+            elements.addFolder.addEventListener('click', () => openFolderForm());
+            
+            elements.folderForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const id = elements.folderId.value || generateId();
+                const name = elements.folderName.value.trim();
+                
+                if (!name) return;
+                
+                // Check for duplicate folder names
+                const isDuplicate = appData.folders.some(f => 
+                    f.name.toLowerCase() === name.toLowerCase() && f.id !== id
+                );
+                
+                if (isDuplicate) {
+                    showNotification('Duplicate', 'A folder with this name already exists', 'fa-exclamation-circle');
+                    return;
+                }
+                
+                // Check if editing or adding
+                const existingIndex = appData.folders.findIndex(f => f.id === id);
+                
+                if (existingIndex >= 0) {
+                    // Update existing folder
+                    appData.folders[existingIndex].name = name;
+                    showNotification('Updated', 'Folder updated successfully', 'fa-check');
+                } else {
+                    // Add new folder
+                    appData.folders.push({ id, name });
+                    showNotification('Added', 'New folder added successfully', 'fa-check');
+                }
+                
+                // Update UI
+                renderFoldersEdit();
+                renderBookmarksEdit();
+                populateBookmarkFolderSelect();
+                hideModal(elements.folderFormModal);
+            });
+            
+            elements.closeFolderForm.addEventListener('click', () => {
+                hideModal(elements.folderFormModal);
+            });
+            
+            elements.cancelFolder.addEventListener('click', () => {
+                hideModal(elements.folderFormModal);
+            });
+            
+            // City form
+            elements.addCity.addEventListener('click', () => openCityForm());
+            
+            elements.cityForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const id = elements.cityId.value || generateId();
+                const name = elements.cityName.value.trim();
+                const timezone = elements.cityTimezone.value;
+                
+                if (!name || !timezone) return;
+                
+                // Check for duplicates
+                const isDuplicate = appData.cities.some(c => 
+                    c.name.toLowerCase() === name.toLowerCase() && c.id !== id
+                );
+                
+                if (isDuplicate) {
+                    showNotification('Duplicate', 'A city with this name already exists', 'fa-exclamation-circle');
+                    return;
+                }
+                
+                // Check if editing or adding
+                const existingIndex = appData.cities.findIndex(c => c.id === id);
+                
+                if (existingIndex >= 0) {
+                    // Update existing city
+                    appData.cities[existingIndex] = {
+                        ...appData.cities[existingIndex],
+                        name,
+                        timezone
+                    };
+                    showNotification('Updated', 'City updated successfully', 'fa-check');
+                } else {
+                    // Add new city
+                    appData.cities.push({ id, name, timezone });
+                    showNotification('Added', 'New city added successfully', 'fa-check');
+                }
+                
+                // Update UI
+                renderCitiesEdit();
+                updateWorldClocks();
+                hideModal(elements.cityFormModal);
+            });
+            
+            elements.closeCityForm.addEventListener('click', () => {
+                hideModal(elements.cityFormModal);
+            });
+            
+            elements.cancelCity.addEventListener('click', () => {
+                hideModal(elements.cityFormModal);
+            });
+            
+            // Ad form
+            elements.addAd.addEventListener('click', () => openAdForm());
+            
+            elements.adImage.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // Check file size (3MB limit)
+                if (file.size > 3 * 1024 * 1024) {
+                    showNotification('File Too Large', 'Image must be less than 3MB', 'fa-exclamation-circle');
+                    elements.adImage.value = '';
+                    return;
+                }
+                
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    elements.adImagePreview.querySelector('img').src = event.target.result;
+                    elements.adImagePreview.classList.remove('hidden');
+                    elements.adImageData.value = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            elements.adForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const id = elements.adId.value || generateId();
+                const url = elements.adUrl.value.trim();
+                const position = parseInt(elements.adPosition.value);
+                const imageData = elements.adImageData.value;
+                
+                if (!url || !imageData || !position) return;
+                
+                // Remove any existing ad in this position
+                appData.ads = appData.ads.filter(a => a.position !== position);
+                
+                // Check if editing or adding
+                const existingIndex = appData.ads.findIndex(a => a.id === id);
+                
+                if (existingIndex >= 0) {
+                    // Update existing ad
+                    appData.ads[existingIndex] = {
+                        ...appData.ads[existingIndex],
+                        url,
+                        position,
+                        imageData
+                    };
+                    showNotification('Updated', 'Advertisement updated successfully', 'fa-check');
+                } else {
+                    // Add new ad
+                    appData.ads.push({ id, url, position, imageData });
+                    showNotification('Added', 'New advertisement added successfully', 'fa-check');
+                }
+                
+                // Update UI
+                renderAdsEdit();
+                renderAds();
+                hideModal(elements.adFormModal);
+            });
+            
+            elements.closeAdForm.addEventListener('click', () => {
+                hideModal(elements.adFormModal);
+            });
+            
+            elements.cancelAd.addEventListener('click',                 () => {
+                    hideModal(elements.adFormModal);
+                });
+                
+                elements.closeAdForm.addEventListener('click', () => {
+                    hideModal(elements.adFormModal);
+                });
+                
+                // Confirm modal
+                elements.confirmCancel.addEventListener('click', hideConfirm);
+                
+                // Notification close
+                elements.closeNotification.addEventListener('click', hideNotification);
+                
+                // Save buttons
+                elements.saveBookmarks.addEventListener('click', saveDataToGitHub);
+                elements.saveFolders.addEventListener('click', saveDataToGitHub);
+                elements.saveCities.addEventListener('click', saveDataToGitHub);
+                elements.saveAds.addEventListener('click', saveDataToGitHub);
+                
+                // Import bookmarks
+                elements.importBookmarks.addEventListener('click', () => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.html';
+                    
+                    input.onchange = (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            importBookmarksFromFile(file);
+                        }
+                    };
+                    
+                    input.click();
+                });
+                
+                // Export bookmarks
+                elements.exportBookmarks.addEventListener('click', exportBookmarksToFile);
+                
+                // Header controls visibility
+                let hideControlsTimeout;
+                
+                function showHeaderControls() {
+                    clearTimeout(hideControlsTimeout);
+                    elements.headerControls.style.opacity = '1';
+                }
+                
+                function hideHeaderControls() {
+                    hideControlsTimeout = setTimeout(() => {
+                        elements.headerControls.style.opacity = '0';
+                    }, 3000);
+                }
+                
+                // Show controls on user activity
+                document.addEventListener('mousemove', showHeaderControls);
+                document.addEventListener('scroll', showHeaderControls);
+                
+                // Hide controls after inactivity
+                hideHeaderControls();
+                
+                // Update last activity time
+                document.addEventListener('click', () => {
+                    appData.lastActivityTime = new Date();
+                });
+            }
+            
+            // Start the app
+            window.addEventListener('DOMContentLoaded', init);
+        </script>
+    </body>
 </html>
+    
