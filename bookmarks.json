@@ -2,135 +2,7 @@
   "bookmarks": {
     "folders": {
       "default": {
-        "name": "默认文件夹",
-        "items": []
-      },
-      "folder_1755800353190_579": {
-        "name": "书签栏",
-        "items": []
-      },
-      "folder_1755800353190_927": {
-        "name": "My files",
-        "items": []
-      },
-      "folder_1755800353190_214": {
-        "name": "tutorial",
-        "items": []
-      },
-      "folder_1755800353190_134": {
-        "name": "Time tunnel",
-        "items": []
-      },
-      "folder_1755800353190_128": {
-        "name": "PaaS 平台",
-        "items": []
-      },
-      "folder_1755800353190_270": {
-        "name": "在线转换工具",
-        "items": []
-      },
-      "folder_1755800353190_49": {
-        "name": "Internet speed",
-        "items": []
-      },
-      "folder_1755800353190_598": {
-        "name": "IOS Phone",
-        "items": []
-      },
-      "folder_1755800353190_683": {
-        "name": "接码平台",
-        "items": []
-      },
-      "folder_1755800353190_524": {
-        "name": "地址生成",
-        "items": []
-      },
-      "folder_1755800353190_624": {
-        "name": "优选IP和反代IP",
-        "items": []
-      },
-      "folder_1755800353190_444": {
-        "name": "在线优选IP，优选域名网站",
-        "items": []
-      },
-      "folder_1755800353190_574": {
-        "name": "Live streaming",
-        "items": []
-      },
-      "folder_1755800353190_503": {
-        "name": "Airport",
-        "items": []
-      },
-      "folder_1755800353190_980": {
-        "name": "SMSvrelated",
-        "items": []
-      },
-      "folder_1755800353190_150": {
-        "name": "AI",
-        "items": []
-      },
-      "folder_1755800353190_283": {
-        "name": "图像生成AI",
-        "items": []
-      },
-      "folder_1755800353190_754": {
-        "name": "视频生成AI",
-        "items": []
-      },
-      "folder_1755800353190_821": {
-        "name": "编程代码能力最强的AI",
-        "items": []
-      },
-      "folder_1755800353190_159": {
-        "name": "分析代码AI工具",
-        "items": []
-      },
-      "folder_1755800353190_961": {
-        "name": "IP related",
-        "items": []
-      },
-      "folder_1755800353190_521": {
-        "name": "IP查询网站",
-        "items": []
-      },
-      "folder_1755800353190_435": {
-        "name": "DNS",
-        "items": []
-      },
-      "folder_1755800353190_687": {
-        "name": "VPS",
-        "items": []
-      },
-      "folder_1755800353190_147": {
-        "name": "VPS",
-        "items": []
-      },
-      "folder_1755800353190_115": {
-        "name": "myhost",
-        "items": []
-      },
-      "folder_1755800353190_730": {
-        "name": "Navigation Station",
-        "items": []
-      },
-      "folder_1755800353190_345": {
-        "name": "Bypassing",
-        "items": []
-      },
-      "folder_1755800353190_36": {
-        "name": "Development polatform",
-        "items": []
-      },
-      "folder_1755800353190_514": {
-        "name": "cloud storage",
-        "items": []
-      },
-      "folder_1755800353190_367": {
-        "name": "Airport",
-        "items": []
-      },
-      "folder_1755800353190_356": {
-        "name": "my sunpanel",
+        "name": "é»è®¤æä»¶å¤¹",
         "items": []
       },
       "folder_1755800353190_945": {
@@ -147,22 +19,22 @@
   "cities": [
     {
       "id": "1",
-      "name": "北京",
+      "name": "åäº¬",
       "timezone": "Asia/Shanghai"
     },
     {
       "id": "2",
-      "name": "伦敦",
+      "name": "ä¼¦æ¦",
       "timezone": "Europe/London"
     },
     {
       "id": "3",
-      "name": "纽约",
+      "name": "çº½çº¦",
       "timezone": "America/New_York"
     },
     {
       "id": "4",
-      "name": "东京",
+      "name": "ä¸äº¬",
       "timezone": "Asia/Tokyo"
     }
   ],
