@@ -675,9 +675,17 @@
                     deployDate: appData.deployDate
                 };
                 
-                // 处理非Latin1字符的编码问题
+                // 处理非Latin1字符的编码问题 - 使用更可靠的编码方式
                 const content = JSON.stringify(dataToSave, null, 2);
-                const base64Content = btoa(unescape(encodeURIComponent(content)));
+                let base64Content;
+                
+                try {
+                    // 方法1: 处理大部分非Latin1字符
+                    base64Content = btoa(unescape(encodeURIComponent(content)));
+                } catch (e) {
+                    // 方法2: 作为后备，处理特殊字符
+                    base64Content = btoa(Array.from(content).map(c => String.fromCharCode(c.charCodeAt(0) % 256)).join(''));
+                }
                 
                 // 先检查文件是否存在
                 const checkUrl = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
@@ -1921,21 +1929,52 @@
             
             // 广告图片预览
             elements.ad1Image.addEventListener('change', (e) => {
-                previewAdImage(e, elements.ad1Preview);
+                previewAdImage(e, elements.ad1Preview, 0);
             });
             
             elements.ad2Image.addEventListener('change', (e) => {
-                previewAdImage(e, elements.ad2Preview);
+                previewAdImage(e, elements.ad2Preview, 1);
             });
             
             elements.ad3Image.addEventListener('change', (e) => {
-                previewAdImage(e, elements.ad3Preview);
+                previewAdImage(e, elements.ad3Preview, 2);
+            });
+            
+            // 广告链接输入变化时更新数据
+            elements.ad1Url.addEventListener('change', (e) => {
+                appData.ads[0].url = e.target.value.trim();
+            });
+            
+            elements.ad2Url.addEventListener('change', (e) => {
+                appData.ads[1].url = e.target.value.trim();
+            });
+            
+            elements.ad3Url.addEventListener('change', (e) => {
+                appData.ads[2].url = e.target.value.trim();
             });
             
             // 保存广告更改
             elements.saveAdChanges.addEventListener('click', async () => {
+                // 保存广告数据到appData
+                appData.ads[0].url = elements.ad1Url.value.trim();
+                appData.ads[1].url = elements.ad2Url.value.trim();
+                appData.ads[2].url = elements.ad3Url.value.trim();
+                
+                // 保存图片数据
+                if (elements.ad1Preview.src && !elements.ad1Preview.classList.contains('hidden')) {
+                    appData.ads[0].image = elements.ad1Preview.src;
+                }
+                if (elements.ad2Preview.src && !elements.ad2Preview.classList.contains('hidden')) {
+                    appData.ads[1].image = elements.ad2Preview.src;
+                }
+                if (elements.ad3Preview.src && !elements.ad3Preview.classList.contains('hidden')) {
+                    appData.ads[2].image = elements.ad3Preview.src;
+                }
+                
+                // 保存到GitHub并刷新显示
                 const success = await saveDataToGitHub();
                 if (success) {
+                    renderAds(); // 立即更新广告显示
                     showToast('广告设置已保存并同步到GitHub');
                 }
             });
@@ -2054,6 +2093,7 @@
             if (!name) {
                 showToast('请输入城市名称', 'warning');
                 return;
+                return;
             }
             
             if (!timezone) {
@@ -2080,39 +2120,23 @@
                 showToast('城市已添加');
             }
             
-            // 关闭表单
+            // 关闭表单并更新显示
             elements.cityFormModal.classList.add('opacity-0', 'pointer-events-none');
+            renderWorldClocks();
         }
 
-        // 预览广告图片
-        function previewAdImage(event, previewElement) {
+        // 预览广告图片并更新数据
+        function previewAdImage(event, previewElement, adIndex) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     previewElement.src = e.target.result;
                     previewElement.classList.remove('hidden');
+                    // 立即更新数据
+                    appData.ads[adIndex].image = e.target.result;
                 };
                 reader.readAsDataURL(file);
-            }
-        }
-
-        // 保存广告更改
-        function saveAdChanges() {
-            // 更新广告数据
-            appData.ads[0].url = elements.ad1Url.value.trim();
-            appData.ads[1].url = elements.ad2Url.value.trim();
-            appData.ads[2].url = elements.ad3Url.value.trim();
-            
-            // 如果有预览图，保存图片数据
-            if (elements.ad1Preview.src && !elements.ad1Preview.classList.contains('hidden')) {
-                appData.ads[0].image = elements.ad1Preview.src;
-            }
-            if (elements.ad2Preview.src && !elements.ad2Preview.classList.contains('hidden')) {
-                appData.ads[1].image = elements.ad2Preview.src;
-            }
-            if (elements.ad3Preview.src && !elements.ad3Preview.classList.contains('hidden')) {
-                appData.ads[2].image = elements.ad3Preview.src;
             }
         }
 
