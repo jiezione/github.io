@@ -18,7 +18,7 @@ jobs:
       - name: Initialize empty bookmarks.json if not exists
         run: |
           if [ ! -f "bookmarks.json" ]; then
-            echo '{"bookmarks": [],"cities": ["New York", "London", "Tokyo", "Sydney"],"ads": [],"folders": []}' > bookmarks.json
+            echo '{"bookmarks": [],"cities": ["北京", "纽约", "伦敦", "东京"],"ads": [],"folders": []}' > bookmarks.json
           fi
       
       - name: Inject repo info into index.html
@@ -36,3 +36,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
           force_orphan: true
+    
