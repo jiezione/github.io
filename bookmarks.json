@@ -1,82 +1,41 @@
 {
   "bookmarks": {
-    "folders": {
-      "default": {
-        "name": "默认文件夹",
-        "items": [
-          {
-            "name": "GitHub",
-            "url": "https://github.com"
-          },
-          {
-            "name": "Google",
-            "url": "https://google.com"
-          },
-          {
-            "name": "SpaceX",
-            "url": "https://spacex.com"
-          }
-        ]
-      },
-      "news": {
-        "name": "新闻资讯",
-        "items": [
-          {
-            "name": "NASA",
-            "url": "https://nasa.gov"
-          },
-          {
-            "name": "BBC 科学",
-            "url": "https://bbc.com/science"
-          }
-        ]
-      }
-    },
-    "quickAccess": [
-      {
-        "name": "GitHub",
-        "url": "https://github.com"
-      },
-      {
-        "name": "NASA",
-        "url": "https://nasa.gov"
-      }
+    "常用网站": [
+      { "title": "GitHub", "url": "https://github.com" },
+      { "title": "Google", "url": "https://google.com" },
+      { "title": "YouTube", "url": "https://youtube.com" },
+      { "title": "StackOverflow", "url": "https://stackoverflow.com" }
+    ],
+    "开发资源": [
+      { "title": "MDN", "url": "https://developer.mozilla.org" },
+      { "title": "Tailwind CSS", "url": "https://tailwindcss.com" },
+      { "title": "Font Awesome", "url": "https://fontawesome.com" }
+    ],
+    "学习平台": [
+      { "title": "Coursera", "url": "https://coursera.org" },
+      { "title": "edX", "url": "https://edx.org" },
+      { "title": "Khan Academy", "url": "https://khanacademy.org" }
     ]
   },
-  "cities": [
-    {
-      "name": "北京",
-      "timezone": "Asia/Shanghai"
-    },
-    {
-      "name": "纽约",
-      "timezone": "America/New_York"
-    },
-    {
-      "name": "伦敦",
-      "timezone": "Europe/London"
-    },
-    {
-      "name": "东京",
-      "timezone": "Asia/Tokyo"
-    }
-  ],
   "ads": {
     "ad1": {
-      "url": "https://example.com/space-explore",
-      "image": "https://picsum.photos/seed/space1/1200/200",
-      "alt": "探索宇宙奥秘"
+      "image": "",
+      "url": ""
     },
     "ad2": {
-      "url": "https://example.com/star-travel",
-      "image": "https://picsum.photos/seed/space2/1200/200",
-      "alt": "星际旅行指南"
+      "image": "",
+      "url": ""
     },
     "ad3": {
-      "url": "https://example.com/space-tech",
-      "image": "https://picsum.photos/seed/space3/1200/200",
-      "alt": "太空探索技术"
+      "image": "",
+      "url": ""
     }
-  }
+  },
+  "cities": [
+    { "name": "北京", "timezone": "Asia/Shanghai" },
+    { "name": "纽约", "timezone": "America/New_York" },
+    { "name": "伦敦", "timezone": "Europe/London" },
+    { "name": "东京", "timezone": "Asia/Tokyo" }
+  ],
+  "updatedAt": "2023-09-01T00:00:00.000Z"
 }
-    

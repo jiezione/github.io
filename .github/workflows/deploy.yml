@@ -1,6 +1,5 @@
-name: Deploy Navigation Site
+name: Deploy Space Navigation
 
-# 触发条件：推送到 main 分支时执行
 on:
   push:
     branches: [ main ]
@@ -10,38 +9,22 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # 1. 拉取仓库代码
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # 拉取完整历史，用于获取部署时间
-      
-      # 2. 注入仓库信息到 index.html
-      - name: Inject repo info into index.html
-        run: |
-          # 获取仓库用户名和仓库名
-          REPO_USERNAME="${{ github.repository_owner }}"
-          REPO_NAME="${{ github.event.repository.name }}"
-          
-          # 获取初始部署时间（第一个提交时间）
-          DEPLOYED_AT=$(git log --reverse --format=%cd --date=iso-strict | head -1)
-          
-          # 注入到 index.html 中的 repoInfo 变量
-          sed -i "s|username: ''|username: '$REPO_USERNAME'|g" index.html
-          sed -i "s|repoName: ''|repoName: '$REPO_NAME'|g" index.html
-          sed -i "s|deployedAt: ''|deployedAt: '$DEPLOYED_AT'|g" index.html
-          
-          # 输出验证信息
-          echo "注入仓库信息完成："
-          echo "Username: $REPO_USERNAME"
-          echo "RepoName: $REPO_NAME"
-          echo "DeployedAt: $DEPLOYED_AT"
-      
-      # 3. 部署到 GitHub Pages（如果需要）
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./  # 部署当前目录下的所有文件
-          publish_branch: gh-pages  # 部署到 gh-pages 分支
-          force_orphan: true  # 强制创建孤立分支（可选）
+    - uses: actions/checkout@v3
+    
+    - name: Inject repository info
+      run: |
+        # 获取仓库信息
+        REPO_USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)
+        REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2)
+        DEPLOY_TIMESTAMP=$(date +%s000)  # 毫秒级时间戳
+        
+        # 替换index.html中的占位符
+        sed -i "s/REPO_USERNAME/$REPO_USERNAME/g" index.html
+        sed -i "s/REPO_NAME/$REPO_NAME/g" index.html
+        sed -i "s/DEPLOY_TIMESTAMP/$DEPLOY_TIMESTAMP/g" index.html
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./

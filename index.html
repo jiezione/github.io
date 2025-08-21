@@ -3,283 +3,388 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>星际导航 | 探索网络宇宙</title>
+    <title>星际导航 | 外太空主题书签管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%231a1a2e'/%3E%3Ccircle cx='50' cy='50' r='25' fill='%23e2b13c'/%3E%3C/svg%3E" type="image/svg+xml">
-    <script>
-        // 由deploy.yml自动注入的仓库信息
-        const repoInfo = {
-            username: '', // 部署时自动填充
-            repoName: '', // 部署时自动填充
-            deployedAt: '' // 初始部署时间
-        };
-    </script>
+    <!-- 部署时会自动替换以下数据属性 -->
+    <data id="deploy-info" 
+          data-username="REPO_USERNAME" 
+          data-repo="REPO_NAME" 
+          data-deploy-time="DEPLOY_TIMESTAMP">
+    </data>
 </head>
-<body class="dark-mode">
-    <!-- 星空背景容器 -->
-    <div class="stars"></div>
-    <div class="twinkling"></div>
-    
-    <!-- 导航栏 -->
-    <nav id="navbar">
-        <div class="nav-container">
-            <button id="theme-toggle" title="切换模式">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="5"></circle>
-                    <line x1="12" y1="1" x2="12" y2="3"></line>
-                    <line x1="12" y1="21" x2="12" y2="23"></line>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                    <line x1="1" y1="12" x2="3" y2="12"></line>
-                    <line x1="21" y1="12" x2="23" y2="12"></line>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </svg>
-            </button>
-            <button id="settings-btn" title="设置">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
-            </button>
-            <button id="switch-view" class="view-btn active" data-view="home">主页</button>
-            <button id="edit-btn" class="view-btn" data-view="edit">编辑中心</button>
+<body>
+    <!-- 顶部导航栏 -->
+    <header id="top-nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-opacity-80 backdrop-blur-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="text-white text-xl font-bold tracking-wider">
+                    <i class="fa fa-globe mr-2"></i>星际导航
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <!-- 模式切换按钮 -->
+                <button id="theme-toggle" class="w-12 h-12 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/50">
+                    <i class="fa fa-sun-o text-xl"></i>
+                </button>
+                
+                <!-- 设置按钮 -->
+                <button id="settings-btn" class="w-12 h-12 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/50">
+                    <i class="fa fa-cog text-xl"></i>
+                </button>
+            </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- 主内容区域 -->
-    <main>
-        <!-- 主页视图 -->
-        <section id="home-view" class="view active">
-            <!-- 顶部横向组件 -->
-            <div class="top-widgets">
-                <div class="widget" id="uptime-widget">
-                    <h3>探索时长</h3>
-                    <div id="uptime-display">0天0时0分</div>
+    <main class="container mx-auto px-4 pt-24 pb-16">
+        <!-- 主页内容 -->
+        <section id="home-page" class="space-y-8">
+            <!-- 顶部三大组件 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 在线时长统计 -->
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5 shadow-lg border border-white/20 transform transition-all hover:scale-[1.02]">
+                    <h3 class="text-white/80 text-sm mb-2 flex items-center">
+                        <i class="fa fa-clock-o mr-2"></i>在线时长
+                    </h3>
+                    <div id="online-duration" class="text-white text-2xl font-bold">
+                        已在线 0天0时0分
+                    </div>
                 </div>
-                <div class="widget" id="health-widget">
-                    <h3>健康提醒</h3>
-                    <div id="health-reminder">准备就绪</div>
+
+                <!-- 健康提醒 -->
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5 shadow-lg border border-white/20 transform transition-all hover:scale-[1.02]">
+                    <h3 class="text-white/80 text-sm mb-2 flex items-center">
+                        <i class="fa fa-heartbeat mr-2"></i>健康提醒
+                    </h3>
+                    <div id="health-reminder" class="text-white text-xl font-medium">
+                        保持专注，探索宇宙
+                    </div>
                 </div>
-                <div class="widget" id="clock-widget">
-                    <h3>星际时钟</h3>
-                    <div id="world-clocks" class="clock-container">
-                        <!-- 时钟将通过JS动态添加 -->
+
+                <!-- 世界时钟 -->
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5 shadow-lg border border-white/20 transform transition-all hover:scale-[1.02]">
+                    <h3 class="text-white/80 text-sm mb-2 flex items-center">
+                        <i class="fa fa-globe mr-2"></i>世界时钟
+                    </h3>
+                    <div id="world-clocks" class="grid grid-cols-2 gap-2 text-white">
+                        <div class="text-sm"><span class="block">北京</span><span class="text-lg font-medium">00:00:00</span></div>
+                        <div class="text-sm"><span class="block">纽约</span><span class="text-lg font-medium">00:00:00</span></div>
+                        <div class="text-sm"><span class="block">伦敦</span><span class="text-lg font-medium">00:00:00</span></div>
+                        <div class="text-sm"><span class="block">东京</span><span class="text-lg font-medium">00:00:00</span></div>
                     </div>
                 </div>
             </div>
 
-            <!-- 搜索框 -->
-            <div class="search-container">
-                <input type="text" id="search-input" placeholder="搜索书签...">
+            <!-- 第一个广告位 -->
+            <div id="ad-1" class="ad-slot w-4/5 mx-auto h-25 bg-white/10 rounded-xl flex items-center justify-center border border-dashed border-white/30">
+                <p class="text-white/60">未设置广告</p>
             </div>
 
-            <!-- 广告位 1 -->
-            <div class="ad-slot ad-top">
-                <div class="ad-placeholder" id="ad-1">广告位 1</div>
-            </div>
-
-            <!-- 书签展示区 -->
-            <div class="bookmarks-container">
-                <h2>星际书签</h2>
-                <div id="bookmarks-folder" class="folder-root">
-                    <!-- 书签将通过JS动态加载 -->
-                    <div class="empty-state">暂无书签，前往编辑中心添加</div>
+            <!-- 书签展示区域 -->
+            <div class="space-y-6">
+                <h2 class="text-white text-2xl font-bold flex items-center">
+                    <i class="fa fa-bookmark mr-2"></i>星际书签
+                </h2>
+                
+                <div id="bookmarks-container" class="space-y-6">
+                    <!-- 书签文件夹将通过JS动态生成 -->
                 </div>
             </div>
 
-            <!-- 广告位 2 和 3 -->
-            <div class="ad-slot ad-middle">
-                <div class="ad-placeholder" id="ad-2">广告位 2</div>
+            <!-- 第二个广告位 -->
+            <div id="ad-2" class="ad-slot w-4/5 mx-auto h-25 bg-white/10 rounded-xl flex items-center justify-center border border-dashed border-white/30">
+                <p class="text-white/60">未设置广告</p>
             </div>
-            <div class="ad-slot ad-bottom">
-                <div class="ad-placeholder" id="ad-3">广告位 3</div>
+
+            <!-- 第三个广告位 -->
+            <div id="ad-3" class="ad-slot w-4/5 mx-auto h-25 bg-white/10 rounded-xl flex items-center justify-center border border-dashed border-white/30">
+                <p class="text-white/60">未设置广告</p>
             </div>
         </section>
 
-        <!-- 编辑中心视图 -->
-        <section id="edit-view" class="view">
-            <div class="edit-container">
-                <h2>编辑中心</h2>
-                
-                <!-- 未验证提示 -->
-                <div id="unverified-alert" class="alert info">
-                    <p>需完成 GitHub 验证才能使用编辑功能</p>
-                    <button id="go-to-settings">前往设置</button>
-                </div>
+        <!-- 编辑中心 (默认隐藏) -->
+        <section id="edit-center" class="space-y-8 hidden">
+            <div class="flex justify-between items-center">
+                <h2 class="text-white text-2xl font-bold flex items-center">
+                    <i class="fa fa-pencil mr-2"></i>编辑中心
+                </h2>
+                <button id="back-to-home" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all flex items-center">
+                    <i class="fa fa-arrow-left mr-2"></i>返回主页
+                </button>
+            </div>
 
-                <!-- 书签编辑区 -->
-                <div class="edit-section" id="bookmarks-edit">
-                    <h3>书签管理</h3>
-                    <div class="edit-controls">
-                        <button id="add-bookmark-btn" class="btn primary" disabled>添加书签</button>
-                        <button id="import-bookmarks-btn" class="btn secondary" disabled>导入书签</button>
-                        <button id="export-bookmarks-btn" class="btn secondary" disabled>导出书签</button>
-                        <input type="file" id="bookmark-import-file" accept=".html" style="display: none;">
+            <!-- 验证状态提示 -->
+            <div id="validation-status" class="bg-amber-500/20 border border-amber-500/40 text-amber-300 p-4 rounded-lg flex items-center">
+                <i class="fa fa-info-circle mr-2 text-xl"></i>
+                <span>请先在设置中完成GitHub验证以启用编辑功能</span>
+            </div>
+
+            <!-- 书签编辑 -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
+                <h3 class="text-white text-xl font-bold mb-4 flex items-center">
+                    <i class="fa fa-bookmark mr-2"></i>书签管理
+                </h3>
+                
+                <div class="mb-6">
+                    <h4 class="text-white/80 text-lg mb-3">添加新书签</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-white/70 mb-1 text-sm" for="bookmark-folder">文件夹</label>
+                            <input type="text" id="bookmark-folder" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入文件夹名称">
+                        </div>
+                        <div>
+                            <label class="block text-white/70 mb-1 text-sm" for="bookmark-title">标题</label>
+                            <input type="text" id="bookmark-title" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入网站标题">
+                        </div>
+                        <div>
+                            <label class="block text-white/70 mb-1 text-sm" for="bookmark-url">网址</label>
+                            <input type="url" id="bookmark-url" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入网站URL">
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button id="add-bookmark" class="bg-blue-500/70 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fa fa-plus mr-2"></i>添加书签
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="text-white/80 text-lg mb-3">导入/导出书签</h4>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="bg-green-500/70 hover:bg-green-500 text-white px-4 py-2 rounded-lg transition-all cursor-pointer flex items-center">
+                            <i class="fa fa-upload mr-2"></i>导入书签
+                            <input type="file" id="import-bookmarks" accept=".html" class="hidden" disabled>
+                        </label>
+                        <button id="export-bookmarks" class="bg-purple-500/70 hover:bg-purple-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fa fa-download mr-2"></i>导出书签
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-white/80 text-lg mb-3">书签列表</h4>
+                    <div id="editable-bookmarks" class="space-y-4">
+                        <!-- 可编辑的书签将通过JS动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 广告编辑 -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
+                <h3 class="text-white text-xl font-bold mb-4 flex items-center">
+                    <i class="fa fa-bullhorn mr-2"></i>广告管理
+                </h3>
+                
+                <div class="space-y-6">
+                    <!-- 广告位1编辑 -->
+                    <div class="space-y-3">
+                        <h4 class="text-white/80">广告位 1</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-1">
+                                <label class="block text-white/70 mb-1 text-sm">广告图片</label>
+                                <label class="block border-2 border-dashed border-white/30 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 transition-all">
+                                    <i class="fa fa-picture-o text-2xl text-white/50 mb-2"></i>
+                                    <span class="text-white/70 text-sm">点击上传图片</span>
+                                    <input type="file" id="ad1-image" accept="image/jpeg,image/png" class="hidden" disabled>
+                                </label>
+                                <p class="text-white/50 text-xs mt-2">支持JPG、PNG格式，最大3MB</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-white/70 mb-1 text-sm" for="ad1-url">广告链接</label>
+                                <input type="url" id="ad1-url" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入广告链接" disabled>
+                                <div class="mt-4">
+                                    <button id="save-ad1" class="bg-blue-500/70 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                        <i class="fa fa-save mr-2"></i>保存广告
+                                    </button>
+                                    <button id="delete-ad1" class="ml-2 bg-red-500/70 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                        <i class="fa fa-trash mr-2"></i>删除广告
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="bookmark-edit-container">
-                        <!-- 书签编辑树形结构 -->
-                        <div id="bookmark-edit-tree">
-                            <div class="empty-state">验证后加载书签...</div>
+                    <!-- 广告位2编辑 -->
+                    <div class="space-y-3">
+                        <h4 class="text-white/80">广告位 2</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-1">
+                                <label class="block text-white/70 mb-1 text-sm">广告图片</label>
+                                <label class="block border-2 border-dashed border-white/30 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 transition-all">
+                                    <i class="fa fa-picture-o text-2xl text-white/50 mb-2"></i>
+                                    <span class="text-white/70 text-sm">点击上传图片</span>
+                                    <input type="file" id="ad2-image" accept="image/jpeg,image/png" class="hidden" disabled>
+                                </label>
+                                <p class="text-white/50 text-xs mt-2">支持JPG、PNG格式，最大3MB</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-white/70 mb-1 text-sm" for="ad2-url">广告链接</label>
+                                <input type="url" id="ad2-url" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入广告链接" disabled>
+                                <div class="mt-4">
+                                    <button id="save-ad2" class="bg-blue-500/70 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                        <i class="fa fa-save mr-2"></i>保存广告
+                                    </button>
+                                    <button id="delete-ad2" class="ml-2 bg-red-500/70 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                        <i class="fa fa-trash mr-2"></i>删除广告
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 广告位3编辑 -->
+                    <div class="space-y-3">
+                        <h4 class="text-white/80">广告位 3</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-1">
+                                <label class="block text-white/70 mb-1 text-sm">广告图片</label>
+                                <label class="block border-2 border-dashed border-white/30 rounded-lg p-4 text-center cursor-pointer hover:bg-white/10 transition-all">
+                                    <i class="fa fa-picture-o text-2xl text-white/50 mb-2"></i>
+                                    <span class="text-white/70 text-sm">点击上传图片</span>
+                                    <input type="file" id="ad3-image" accept="image/jpeg,image/png" class="hidden" disabled>
+                                </label>
+                                <p class="text-white/50 text-xs mt-2">支持JPG、PNG格式，最大3MB</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-white/70 mb-1 text-sm" for="ad3-url">广告链接</label>
+                                <input type="url" id="ad3-url" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入广告链接" disabled>
+                                <div class="mt-4">
+                                    <button id="save-ad3" class="bg-blue-500/70 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                        <i class="fa fa-save mr-2"></i>保存广告
+                                    </button>
+                                    <button id="delete-ad3" class="ml-2 bg-red-500/70 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                        <i class="fa fa-trash mr-2"></i>删除广告
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- 广告编辑区 -->
-                <div class="edit-section" id="ads-edit">
-                    <h3>广告管理</h3>
-                    <div class="ad-edit-container">
-                        <div class="ad-edit-item">
-                            <h4>广告位 1</h4>
-                            <input type="text" class="ad-url" placeholder="广告链接" disabled>
-                            <input type="file" class="ad-image" accept="image/*" disabled>
-                            <img class="ad-preview" src="" alt="预览">
+            <!-- 世界时钟编辑 -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
+                <h3 class="text-white text-xl font-bold mb-4 flex items-center">
+                    <i class="fa fa-clock-o mr-2"></i>世界时钟管理
+                </h3>
+                
+                <div class="mb-6">
+                    <h4 class="text-white/80 text-lg mb-3">添加城市</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-white/70 mb-1 text-sm" for="city-name">城市名称</label>
+                            <input type="text" id="city-name" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="输入城市名称" disabled>
                         </div>
-                        <div class="ad-edit-item">
-                            <h4>广告位 2</h4>
-                            <input type="text" class="ad-url" placeholder="广告链接" disabled>
-                            <input type="file" class="ad-image" accept="image/*" disabled>
-                            <img class="ad-preview" src="" alt="预览">
-                        </div>
-                        <div class="ad-edit-item">
-                            <h4>广告位 3</h4>
-                            <input type="text" class="ad-url" placeholder="广告链接" disabled>
-                            <input type="file" class="ad-image" accept="image/*" disabled>
-                            <img class="ad-preview" src="" alt="预览">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 时钟编辑区 -->
-                <div class="edit-section" id="clocks-edit">
-                    <h3>世界时钟管理</h3>
-                    <div class="clock-edit-container">
-                        <div id="cities-list">
-                            <!-- 城市列表将通过JS动态添加 -->
-                        </div>
-                        <div class="add-city-form">
-                            <input type="text" id="city-name" placeholder="城市名称" disabled>
-                            <select id="city-timezone" disabled>
-                                <option value="UTC">UTC</option>
+                        <div>
+                            <label class="block text-white/70 mb-1 text-sm" for="city-timezone">时区</label>
+                            <select id="city-timezone" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400" disabled>
                                 <option value="Asia/Shanghai">Asia/Shanghai (北京)</option>
                                 <option value="America/New_York">America/New_York (纽约)</option>
                                 <option value="Europe/London">Europe/London (伦敦)</option>
                                 <option value="Asia/Tokyo">Asia/Tokyo (东京)</option>
-                                <!-- 更多时区选项 -->
+                                <option value="Australia/Sydney">Australia/Sydney (悉尼)</option>
+                                <option value="Europe/Paris">Europe/Paris (巴黎)</option>
+                                <option value="Asia/Dubai">Asia/Dubai (迪拜)</option>
+                                <option value="Pacific/Honolulu">Pacific/Honolulu (檀香山)</option>
                             </select>
-                            <button id="add-city-btn" class="btn primary" disabled>添加城市</button>
                         </div>
                     </div>
+                    <div class="mt-4 flex justify-end">
+                        <button id="add-city" class="bg-blue-500/70 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fa fa-plus mr-2"></i>添加城市
+                        </button>
+                    </div>
                 </div>
+                
+                <div>
+                    <h4 class="text-white/80 text-lg mb-3">城市列表</h4>
+                    <div id="cities-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        <!-- 城市列表将通过JS动态生成 -->
+                    </div>
+                </div>
+            </div>
 
-                <!-- 保存按钮 -->
-                <div class="save-section">
-                    <button id="save-changes" class="btn primary large" disabled>
-                        <span>保存更改</span>
-                        <span class="loading-spinner" style="display: none;">⟳</span>
-                    </button>
-                </div>
+            <!-- 保存更改按钮 -->
+            <div class="flex justify-end">
+                <button id="save-changes" class="bg-green-500/70 hover:bg-green-500 text-white px-6 py-3 rounded-lg transition-all text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center" disabled>
+                    <i class="fa fa-save mr-2"></i>保存所有更改
+                    <span id="save-loading" class="ml-2 hidden">
+                        <i class="fa fa-spinner fa-spin"></i>
+                    </span>
+                </button>
             </div>
         </section>
     </main>
 
-    <!-- 底部固定区域 -->
-    <div class="dark-white bottom-bar">
-        <div>共收录<span id="total-bookmarks">0</span>个网站</div>
-        <div>Copyright © 2018-<span id="current-year">2025</span> <span id="site-hostname">星际导航</span>, All Rights Reserved</div>
-    </div>
+    <!-- 底部区域 -->
+    <footer class="dark-white text-center py-5 mt-10 border-t border-white/10">
+        <div id="total-bookmarks" class="mb-2">共收录 0 个网站</div>
+        <div id="copyright-info">Copyright © 2018-2023 REPO_NAME, All Rights Reserved</div>
+    </footer>
 
-    <!-- 设置对话框 -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>GitHub 同步设置</h2>
-            <div class="settings-form">
-                <div class="form-group">
-                    <label for="github-username">仓库用户名</label>
-                    <input type="text" id="github-username" readonly>
+    <!-- 设置对话框 (默认隐藏) -->
+    <div id="settings-dialog" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <!-- 遮罩层 -->
+        <div id="dialog-overlay" class="absolute inset-0 bg-black/70 backdrop-blur-[2px]"></div>
+        
+        <!-- 对话框内容 -->
+        <div class="relative bg-gray-900 border border-white/20 rounded-xl w-full max-w-md mx-4 shadow-2xl transform transition-all">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-white text-xl font-bold">设置</h3>
+                    <button id="close-settings" class="text-white/60 hover:text-white transition-colors">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="github-repo">仓库名称</label>
-                    <input type="text" id="github-repo" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="github-token">GitHub Token</label>
-                    <input type="password" id="github-token" placeholder="输入你的 GitHub Token">
-                    <small>Token 需要有 repo 权限以访问仓库</small>
-                </div>
-                <div class="form-status">
-                    <span id="validation-status" class="status pending">未验证</span>
-                </div>
-                <div class="form-buttons">
-                    <button id="validate-token" class="btn primary">验证 Token</button>
-                    <button id="save-settings" class="btn secondary">保存设置</button>
+                
+                <div class="space-y-5">
+                    <!-- GitHub设置 -->
+                    <div>
+                        <h4 class="text-white/80 mb-3 font-medium">GitHub 同步设置</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-white/70 mb-1 text-sm" for="github-username">用户名</label>
+                                <input type="text" id="github-username" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            </div>
+                            <div>
+                                <label class="block text-white/70 mb-1 text-sm" for="github-repo">仓库名</label>
+                                <input type="text" id="github-repo" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            </div>
+                            <div>
+                                <label class="block text-white/70 mb-1 text-sm" for="github-token">个人访问令牌 (Token)</label>
+                                <input type="password" id="github-token" class="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="需要repo权限">
+                                <p class="text-white/50 text-xs mt-1">如何获取: <a href="https://github.com/settings/tokens" target="_blank" class="text-blue-400 hover:underline">GitHub Token设置</a></p>
+                            </div>
+                            <div class="flex justify-end">
+                                <button id="validate-token" class="bg-blue-500/70 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all flex items-center">
+                                    <i class="fa fa-check mr-2"></i>验证Token
+                                </button>
+                            </div>
+                            <div id="token-validation-result" class="hidden"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-2 flex justify-end">
+                        <button id="enter-edit-center" class="bg-purple-500/70 hover:bg-purple-500 text-white px-6 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            进入编辑中心
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 添加/编辑书签对话框 -->
-    <div id="bookmark-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2 id="bookmark-modal-title">添加书签</h2>
-            <div class="bookmark-form">
-                <div class="form-group">
-                    <label for="bookmark-folder">文件夹</label>
-                    <select id="bookmark-folder"></select>
-                    <button id="add-folder-btn" class="btn tiny">+ 新建</button>
-                </div>
-                <div class="form-group">
-                    <label for="bookmark-title">标题</label>
-                    <input type="text" id="bookmark-title" placeholder="网站标题">
-                </div>
-                <div class="form-group">
-                    <label for="bookmark-url">链接</label>
-                    <input type="url" id="bookmark-url" placeholder="https://example.com">
-                </div>
-                <input type="hidden" id="bookmark-id">
-                <div class="form-buttons">
-                    <button id="cancel-bookmark" class="btn secondary">取消</button>
-                    <button id="save-bookmark" class="btn primary">保存</button>
-                </div>
-            </div>
-        </div>
+    <!-- 健康提醒弹窗 (默认隐藏) -->
+    <div id="health-popup" class="fixed top-0 left-0 right-0 bg-blue-500/30 backdrop-blur-sm border-b border-blue-400/50 text-white p-4 transform -translate-y-full transition-transform duration-500 z-40 flex justify-between items-center">
+        <p><i class="fa fa-heartbeat mr-2"></i>建议休息5分钟，保护视力</p>
+        <button id="close-health-popup" class="text-white hover:text-white/80">
+            <i class="fa fa-times"></i>
+        </button>
     </div>
 
-    <!-- 新建文件夹对话框 -->
-    <div id="folder-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>新建文件夹</h2>
-            <div class="folder-form">
-                <div class="form-group">
-                    <label for="folder-name">文件夹名称</label>
-                    <input type="text" id="folder-name" placeholder="输入文件夹名称">
-                </div>
-                <div class="form-buttons">
-                    <button id="cancel-folder" class="btn secondary">取消</button>
-                    <button id="save-folder" class="btn primary">保存</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 确认对话框 -->
-    <div id="confirm-modal" class="modal">
-        <div class="modal-content">
-            <h2 id="confirm-title">确认操作</h2>
-            <p id="confirm-message">你确定要执行此操作吗？</p>
-            <div class="form-buttons">
-                <button id="cancel-confirm" class="btn secondary">取消</button>
-                <button id="confirm-action" class="btn danger">确认</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 通知提示 -->
-    <div id="notification" class="notification"></div>
+    <!-- 通知提示 (默认隐藏) -->
+    <div id="notification" class="fixed bottom-5 right-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-4 shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 max-w-sm"></div>
 
     <script src="script.js"></script>
 </body>
