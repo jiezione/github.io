@@ -77,6 +77,18 @@
             .bg-gradient-space-light {
                 background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
             }
+            .folder-indent-1 {
+                margin-left: 1rem;
+            }
+            .folder-indent-2 {
+                margin-left: 2rem;
+            }
+            .folder-indent-3 {
+                margin-left: 3rem;
+            }
+            .folder-indent-4 {
+                margin-left: 4rem;
+            }
         }
     </style>
 </head>
@@ -287,6 +299,19 @@
                     <button id="add-bookmark" class="bg-green-600 hover:bg-green-500 text-white py-1 px-4 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         <i class="fa fa-plus mr-1"></i>添加书签
                     </button>
+                    <div id="batch-actions" class="hidden gap-2">
+                        <button id="batch-delete" class="bg-red-600 hover:bg-red-500 text-white py-1 px-4 rounded-lg transition-colors text-sm">
+                            <i class="fa fa-trash mr-1"></i>批量删除
+                        </button>
+                        <div class="relative">
+                            <button id="batch-move-btn" class="bg-blue-600 hover:bg-blue-500 text-white py-1 px-4 rounded-lg transition-colors text-sm">
+                                <i class="fa fa-folder mr-1"></i>批量移动
+                            </button>
+                            <select id="batch-move-folder" class="hidden absolute top-full left-0 mt-1 bg-space-dark border border-gray-700 rounded-lg py-1 px-2 text-sm z-10">
+                                <!-- 选项将动态生成 -->
+                            </select>
+                        </div>
+                    </div>
                     <input type="file" id="bookmark-file" accept=".html" class="hidden">
                 </div>
 
@@ -485,7 +510,9 @@
                 folders: {
                     default: {
                         name: "默认文件夹",
-                        items: []
+                        items: [],
+                        parent: null, // 新增：父文件夹ID，用于层级结构
+                        level: 0 // 新增：层级深度，用于显示缩进
                     }
                 },
                 quickAccess: []
@@ -572,7 +599,12 @@
             ad2Url: document.getElementById('ad2-url'),
             ad3Image: document.getElementById('ad3-image'),
             ad3Preview: document.getElementById('ad3-preview'),
-            ad3Url: document.getElementById('ad3-url')
+            ad3Url: document.getElementById('ad3-url'),
+            // 新增：多选相关元素
+            batchActions: document.getElementById('batch-actions'),
+            batchDelete: document.getElementById('batch-delete'),
+            batchMoveBtn: document.getElementById('batch-move-btn'),
+            batchMoveFolder: document.getElementById('batch-move-folder')
         };
 
         // 初始化函数
@@ -654,6 +686,16 @@
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
                 Object.assign(appData, parsedData);
+                
+                // 确保文件夹有parent和level属性
+                Object.keys(appData.bookmarks.folders).forEach(folderId => {
+                    if (appData.bookmarks.folders[folderId].parent === undefined) {
+                        appData.bookmarks.folders[folderId].parent = folderId === 'default' ? null : 'default';
+                    }
+                    if (appData.bookmarks.folders[folderId].level === undefined) {
+                        appData.bookmarks.folders[folderId].level = 0;
+                    }
+                });
             }
         }
 
@@ -787,7 +829,18 @@
                 }
                 
                 // 新数据覆盖现有数据
-                if (data.bookmarks) appData.bookmarks = data.bookmarks;
+                if (data.bookmarks) {
+                    appData.bookmarks = data.bookmarks;
+                    // 确保文件夹有parent和level属性
+                    Object.keys(appData.bookmarks.folders).forEach(folderId => {
+                        if (appData.bookmarks.folders[folderId].parent === undefined) {
+                            appData.bookmarks.folders[folderId].parent = folderId === 'default' ? null : 'default';
+                        }
+                        if (appData.bookmarks.folders[folderId].level === undefined) {
+                            appData.bookmarks.folders[folderId].level = 0;
+                        }
+                    });
+                }
                 if (data.cities) appData.cities = data.cities;
                 if (data.ads) appData.ads = data.ads;
                 if (data.deployDate) appData.deployDate = data.deployDate;
@@ -863,6 +916,18 @@
             localStorage.setItem('spaceBookmarksData', JSON.stringify(appData));
         }
 
+        // 获取网站的favicon
+        function getFavicon(url) {
+            try {
+                const parsedUrl = new URL(url);
+                // 使用域名获取favicon
+                return `https://${parsedUrl.hostname}/favicon.ico`;
+            } catch (e) {
+                // 处理无效URL
+                return 'https://via.placeholder.com/16?text=?';
+            }
+        }
+
         // 渲染书签
         function renderBookmarks(searchQuery = '') {
             // 清空容器
@@ -899,11 +964,23 @@
                 filteredQuickAccess.push(...appData.bookmarks.quickAccess);
             }
             
+            // 按层级排序文件夹
+            const sortedFolderIds = getSortedFoldersByHierarchy(Object.keys(filteredFolders));
+            
             // 渲染文件夹书签
-            Object.keys(filteredFolders).forEach(folderId => {
+            sortedFolderIds.forEach(folderId => {
                 const folder = filteredFolders[folderId];
                 const folderElement = document.createElement('div');
-                folderElement.className = 'bg-space-light/20 backdrop-blur-md rounded-xl p-4 border border-space-accent/20';
+                
+                // 根据层级添加缩进样式
+                let indentClass = '';
+                if (folder.level > 0 && folder.level <= 4) {
+                    indentClass = `folder-indent-${folder.level}`;
+                } else if (folder.level > 4) {
+                    indentClass = 'folder-indent-4';
+                }
+                
+                folderElement.className = `bg-space-light/20 backdrop-blur-md rounded-xl p-4 border border-space-accent/20 ${indentClass}`;
                 
                 folderElement.innerHTML = `
                     <h3 class="text-lg font-semibold mb-3 text-space-glow flex items-center">
@@ -925,18 +1002,12 @@
                 quickItem.target = '_blank';
                 quickItem.className = 'bg-space-light/30 backdrop-blur-md rounded-lg p-3 text-center card-hover flex flex-col items-center justify-center h-full';
                 
-                // 获取域名作为图标文本
-                let domain = '';
-                try {
-                    const url = new URL(item.url);
-                    domain = url.hostname.replace('www.', '').split('.')[0];
-                } catch (e) {
-                    domain = '?';
-                }
+                // 获取favicon
+                const favicon = getFavicon(item.url);
                 
                 quickItem.innerHTML = `
-                    <div class="w-10 h-10 rounded-full bg-space-accent/20 flex items-center justify-center mb-2 text-space-glow font-bold">
-                        ${domain.charAt(0).toUpperCase()}
+                    <div class="w-10 h-10 rounded-full bg-space-accent/20 flex items-center justify-center mb-2">
+                        <img src="${favicon}" alt="${item.title}的图标" class="w-6 h-6 object-contain" onerror="this.src='https://via.placeholder.com/24?text=?'">
                     </div>
                     <span class="text-sm truncate w-full">${item.title}</span>
                 `;
@@ -949,13 +1020,17 @@
             
             // 更新文件夹下拉选项
             updateBookmarkFolderSelect();
+            updateBatchMoveFolderSelect();
         }
 
         // 创建书签元素
         function createBookmarkElement(item) {
+            // 获取favicon
+            const favicon = getFavicon(item.url);
+            
             return `
                 <a href="${item.url}" target="_blank" class="flex items-center p-2 rounded-lg hover:bg-space-light/50 transition-colors">
-                    <i class="fa fa-external-link text-space-glow mr-2"></i>
+                    <img src="${favicon}" alt="${item.title}的图标" class="w-5 h-5 mr-2 object-contain" onerror="this.src='https://via.placeholder.com/20?text=?'">
                     <span class="truncate">${item.title}</span>
                 </a>
             `;
@@ -968,6 +1043,46 @@
                 bookmark.title.toLowerCase().includes(lowerQuery) || 
                 bookmark.url.toLowerCase().includes(lowerQuery)
             );
+        }
+
+        // 按层级排序文件夹ID
+        function getSortedFoldersByHierarchy(folderIds) {
+            // 过滤出顶级文件夹（没有父文件夹或父文件夹不存在）
+            const topLevelFolders = folderIds.filter(id => 
+                !appData.bookmarks.folders[id].parent || 
+                !folderIds.includes(appData.bookmarks.folders[id].parent)
+            );
+            
+            // 递归构建排序后的文件夹列表
+            const sortedFolders = [];
+            
+            function addFolderAndChildren(folderId) {
+                sortedFolders.push(folderId);
+                
+                // 找出所有直接子文件夹
+                const children = folderIds.filter(id => 
+                    id !== folderId && 
+                    appData.bookmarks.folders[id].parent === folderId
+                );
+                
+                // 按名称排序子文件夹
+                children.sort((a, b) => 
+                    appData.bookmarks.folders[a].name.localeCompare(appData.bookmarks.folders[b].name)
+                );
+                
+                // 递归添加子文件夹
+                children.forEach(childId => addFolderAndChildren(childId));
+            }
+            
+            // 按名称排序顶级文件夹
+            topLevelFolders.sort((a, b) => 
+                appData.bookmarks.folders[a].name.localeCompare(appData.bookmarks.folders[b].name)
+            );
+            
+            // 添加顶级文件夹及其子文件夹
+            topLevelFolders.forEach(folderId => addFolderAndChildren(folderId));
+            
+            return sortedFolders;
         }
 
         // 处理搜索
@@ -1144,11 +1259,23 @@
         function renderBookmarkEditList() {
             elements.bookmarkEditContainer.innerHTML = '';
             
-            // 先添加文件夹管理
-            Object.keys(appData.bookmarks.folders).forEach(folderId => {
+            // 获取按层级排序的文件夹ID
+            const sortedFolderIds = getSortedFoldersByHierarchy(Object.keys(appData.bookmarks.folders));
+            
+            // 添加文件夹管理
+            sortedFolderIds.forEach(folderId => {
                 const folder = appData.bookmarks.folders[folderId];
                 const folderElement = document.createElement('div');
-                folderElement.className = 'bg-space-dark p-4 rounded-xl';
+                
+                // 根据层级添加缩进样式
+                let indentClass = '';
+                if (folder.level > 0 && folder.level <= 4) {
+                    indentClass = `folder-indent-${folder.level}`;
+                } else if (folder.level > 4) {
+                    indentClass = 'folder-indent-4';
+                }
+                
+                folderElement.className = `bg-space-dark p-4 rounded-xl ${indentClass}`;
                 
                 folderElement.innerHTML = `
                     <div class="flex justify-between items-center mb-3">
@@ -1157,6 +1284,9 @@
                             <input type="text" value="${folder.name}" class="bg-transparent border-b border-gray-700 focus:border-space-glow focus:outline-none folder-name" data-folder-id="${folderId}">
                         </div>
                         <div class="flex gap-1">
+                            <button class="move-folder-btn p-1 text-gray-400 hover:text-blue-400" data-folder-id="${folderId}" ${folderId === 'default' ? 'disabled title="默认文件夹不能移动"' : ''}>
+                                <i class="fa fa-arrows"></i>
+                            </button>
                             <button class="delete-folder p-1 text-gray-400 hover:text-red-400" data-folder-id="${folderId}" ${folderId === 'default' ? 'disabled title="默认文件夹不能删除"' : ''}>
                                 <i class="fa fa-trash"></i>
                             </button>
@@ -1173,9 +1303,10 @@
                     
                     itemElement.innerHTML = `
                         <div class="flex justify-between items-center">
-                            <div class="flex-1 min-w-0">
+                            <div class="flex items-center flex-1 min-w-0">
+                                <input type="checkbox" class="bookmark-select mr-2 rounded text-space-glow focus:ring-space-glow" data-id="${item.id}" data-folder="${folderId}">
+                                <img src="${getFavicon(item.url)}" alt="${item.title}的图标" class="w-4 h-4 mr-2 object-contain" onerror="this.src='https://via.placeholder.com/16?text=?'">
                                 <input type="text" value="${item.title}" class="bg-transparent border-b border-gray-700 focus:border-space-glow focus:outline-none w-full bookmark-title" data-id="${item.id}" data-folder="${folderId}">
-                                <input type="url" value="${item.url}" class="bg-transparent border-b border-gray-700 focus:border-space-glow focus:outline-none w-full text-sm text-gray-400 bookmark-url" data-id="${item.id}" data-folder="${folderId}">
                             </div>
                             <div class="flex gap-1 ml-2">
                                 <button class="edit-bookmark-btn p-1 text-gray-400 hover:text-space-glow" data-id="${item.id}" data-folder="${folderId}">
@@ -1186,6 +1317,7 @@
                                 </button>
                             </div>
                         </div>
+                        <input type="url" value="${item.url}" class="bg-transparent border-b border-gray-700 focus:border-space-glow focus:outline-none w-full text-sm text-gray-400 bookmark-url ml-6" data-id="${item.id}" data-folder="${folderId}">
                     `;
                     
                     elements.bookmarkEditContainer.appendChild(itemElement);
@@ -1216,12 +1348,30 @@
             // 绑定添加文件夹事件
             document.getElementById('add-folder-btn').addEventListener('click', addNewFolder);
             
+            // 绑定移动文件夹事件
+            document.querySelectorAll('.move-folder-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const folderId = e.target.closest('.move-folder-btn').getAttribute('data-folder-id');
+                    if (folderId !== 'default') {
+                        openMoveFolderDialog(folderId);
+                    }
+                });
+            });
+            
             // 绑定删除文件夹事件
             document.querySelectorAll('.delete-folder').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const folderId = e.target.closest('.delete-folder').getAttribute('data-folder-id');
                     if (folderId !== 'default' && confirm(`确定要删除"${appData.bookmarks.folders[folderId].name}"吗？文件夹内的书签也会被删除。`)) {
+                        // 删除子文件夹
+                        const childFolders = Object.keys(appData.bookmarks.folders).filter(
+                            id => appData.bookmarks.folders[id].parent === folderId
+                        );
+                        childFolders.forEach(childId => delete appData.bookmarks.folders[childId]);
+                        
+                        // 删除文件夹本身
                         delete appData.bookmarks.folders[folderId];
+                        
                         renderBookmarks();
                         showToast('文件夹已删除');
                     }
@@ -1251,6 +1401,11 @@
                         renderBookmarks();
                     }
                 });
+            });
+            
+            // 绑定书签选择事件
+            document.querySelectorAll('.bookmark-select').forEach(checkbox => {
+                checkbox.addEventListener('change', updateBatchActionsVisibility);
             });
             
             // 绑定编辑书签事件
@@ -1284,24 +1439,162 @@
                     }
                 });
             });
+            
+            // 更新批量操作按钮可见性
+            updateBatchActionsVisibility();
+        }
+
+        // 更新批量操作按钮可见性
+        function updateBatchActionsVisibility() {
+            const selectedCount = document.querySelectorAll('.bookmark-select:checked').length;
+            
+            if (selectedCount > 0) {
+                elements.batchActions.classList.remove('hidden');
+                elements.batchActions.classList.add('flex');
+            } else {
+                elements.batchActions.classList.add('hidden');
+                elements.batchActions.classList.remove('flex');
+            }
         }
 
         // 添加新文件夹
-        function addNewFolder() {
+        function addNewFolder(parentId = null) {
             // 生成唯一ID
             const folderId = 'folder_' + Date.now();
             // 默认名称
             const folderName = `新文件夹${Object.keys(appData.bookmarks.folders).length}`;
             
+            // 确定父文件夹和层级
+            let level = 0;
+            if (parentId && appData.bookmarks.folders[parentId]) {
+                level = appData.bookmarks.folders[parentId].level + 1;
+            }
+            
             // 添加到数据中
             appData.bookmarks.folders[folderId] = {
                 name: folderName,
-                items: []
+                items: [],
+                parent: parentId || null,
+                level: level
             };
             
             // 重新渲染
             renderBookmarks();
             showToast('新文件夹已创建');
+        }
+
+        // 打开移动文件夹对话框
+        function openMoveFolderDialog(folderId) {
+            const folder = appData.bookmarks.folders[folderId];
+            if (!folder) return;
+            
+            // 创建一个临时的选择框
+            const selectContainer = document.createElement('div');
+            selectContainer.className = 'fixed z-50 bg-space-light p-4 rounded-lg shadow-lg border border-space-accent/30';
+            selectContainer.style.top = '50%';
+            selectContainer.style.left = '50%';
+            selectContainer.style.transform = 'translate(-50%, -50%)';
+            
+            // 生成可选的父文件夹
+            let options = '<option value="">-- 移动到 --</option>';
+            options += '<option value="null">顶级文件夹</option>';
+            
+            Object.keys(appData.bookmarks.folders).forEach(id => {
+                // 不能移动到自身或子文件夹
+                if (id !== folderId && !isChildFolder(id, folderId)) {
+                    options += `<option value="${id}" ${folder.parent === id ? 'selected' : ''}>${getFolderPath(id)}</option>`;
+                }
+            });
+            
+            selectContainer.innerHTML = `
+                <p class="mb-2">移动文件夹: ${folder.name}</p>
+                <select id="move-folder-select" class="w-full px-3 py-2 rounded-lg bg-space-dark border border-gray-700 focus:border-space-glow focus:outline-none mb-3">
+                    ${options}
+                </select>
+                <div class="flex gap-2">
+                    <button id="confirm-move-folder" class="flex-1 bg-space-accent hover:bg-space-glow text-white py-1 rounded-lg transition-colors">
+                        确认
+                    </button>
+                    <button id="cancel-move-folder" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-1 rounded-lg transition-colors">
+                        取消
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(selectContainer);
+            
+            // 确认移动
+            document.getElementById('confirm-move-folder').addEventListener('click', () => {
+                const newParentId = document.getElementById('move-folder-select').value || null;
+                
+                // 更新父文件夹
+                folder.parent = newParentId;
+                
+                // 更新层级
+                if (newParentId && appData.bookmarks.folders[newParentId]) {
+                    folder.level = appData.bookmarks.folders[newParentId].level + 1;
+                } else {
+                    folder.level = 0;
+                }
+                
+                // 更新所有子文件夹的层级
+                updateChildFoldersLevel(folderId);
+                
+                renderBookmarks();
+                showToast('文件夹已移动');
+                document.body.removeChild(selectContainer);
+            });
+            
+            // 取消移动
+            document.getElementById('cancel-move-folder').addEventListener('click', () => {
+                document.body.removeChild(selectContainer);
+            });
+        }
+
+        // 检查是否是子文件夹
+        function isChildFolder(folderId, parentId) {
+            const folder = appData.bookmarks.folders[folderId];
+            if (!folder) return false;
+            
+            if (folder.parent === parentId) return true;
+            if (folder.parent && appData.bookmarks.folders[folder.parent]) {
+                return isChildFolder(folder.parent, parentId);
+            }
+            
+            return false;
+        }
+
+        // 获取文件夹路径
+        function getFolderPath(folderId, includeSelf = true) {
+            const folder = appData.bookmarks.folders[folderId];
+            if (!folder) return '';
+            
+            let path = '';
+            if (folder.parent && appData.bookmarks.folders[folder.parent]) {
+                path = getFolderPath(folder.parent) + ' / ';
+            }
+            
+            return includeSelf ? path + folder.name : path;
+        }
+
+        // 更新子文件夹的层级
+        function updateChildFoldersLevel(parentId) {
+            const parentFolder = appData.bookmarks.folders[parentId];
+            if (!parentFolder) return;
+            
+            // 找出所有直接子文件夹
+            const childFolders = Object.keys(appData.bookmarks.folders).filter(
+                id => appData.bookmarks.folders[id].parent === parentId
+            );
+            
+            // 更新子文件夹的层级
+            childFolders.forEach(childId => {
+                const childFolder = appData.bookmarks.folders[childId];
+                childFolder.level = parentFolder.level + 1;
+                
+                // 递归更新孙子文件夹
+                updateChildFoldersLevel(childId);
+            });
         }
 
         // 更新书签文件夹下拉选项
@@ -1316,11 +1609,19 @@
             select.innerHTML = '';
             
             // 添加所有文件夹选项
-            Object.keys(appData.bookmarks.folders).forEach(folderId => {
+            const sortedFolderIds = getSortedFoldersByHierarchy(Object.keys(appData.bookmarks.folders));
+            sortedFolderIds.forEach(folderId => {
                 const folder = appData.bookmarks.folders[folderId];
                 const option = document.createElement('option');
                 option.value = folderId;
-                option.textContent = folder.name;
+                
+                // 根据层级添加缩进
+                let indent = '';
+                for (let i = 0; i < folder.level; i++) {
+                    indent += '  ';
+                }
+                
+                option.textContent = `${indent}${folder.name}`;
                 select.appendChild(option);
             });
             
@@ -1330,6 +1631,31 @@
             } else if (Object.keys(appData.bookmarks.folders).length > 0) {
                 select.value = Object.keys(appData.bookmarks.folders)[0];
             }
+        }
+
+        // 更新批量移动文件夹下拉选项
+        function updateBatchMoveFolderSelect() {
+            const select = elements.batchMoveFolder;
+            
+            // 清空现有选项
+            select.innerHTML = '';
+            
+            // 添加所有文件夹选项
+            const sortedFolderIds = getSortedFoldersByHierarchy(Object.keys(appData.bookmarks.folders));
+            sortedFolderIds.forEach(folderId => {
+                const folder = appData.bookmarks.folders[folderId];
+                const option = document.createElement('option');
+                option.value = folderId;
+                
+                // 根据层级添加缩进
+                let indent = '';
+                for (let i = 0; i < folder.level; i++) {
+                    indent += '  ';
+                }
+                
+                option.textContent = `${indent}${folder.name}`;
+                select.appendChild(option);
+            });
         }
 
         // 打开书签表单（添加或编辑）
@@ -1502,18 +1828,25 @@
                         return;
                     }
                     
-                    // 使用栈来跟踪文件夹层次结构
-                    const folderStack = [];
-                    let currentFolderId = 'default';
-                    let importedCount = 0;
-                    let duplicateCount = 0;
+                    // 收集现有文件夹名称和URL用于去重检查
+                    const existingFolderNames = new Map(); // 名称 -> ID
+                    Object.keys(appData.bookmarks.folders).forEach(id => {
+                        existingFolderNames.set(appData.bookmarks.folders[id].name.toLowerCase(), id);
+                    });
                     
-                    // 收集现有URL用于去重检查
                     const existingUrls = new Set();
                     Object.values(appData.bookmarks.folders).forEach(folder => {
                         folder.items.forEach(item => existingUrls.add(normalizeUrl(item.url)));
                     });
                     appData.bookmarks.quickAccess.forEach(item => existingUrls.add(normalizeUrl(item.url)));
+                    
+                    // 使用栈来跟踪文件夹层次结构
+                    const folderStack = [];
+                    let currentFolderId = 'default';
+                    let importedCount = 0;
+                    let duplicateBookmarkCount = 0;
+                    let existingFolderCount = 0;
+                    let newFolderCount = 0;
                     
                     // 处理每个条目
                     allEntries.forEach(entry => {
@@ -1522,14 +1855,30 @@
                             const folderNameEl = entry.tagName === 'H3' ? entry : entry.querySelector('h3');
                             if (!folderNameEl) return;
                             
-                            const folderName = folderNameEl.textContent.trim() || `导入文件夹${Object.keys(appData.bookmarks.folders).length}`;
-                            const folderId = 'folder_import_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+                            let folderName = folderNameEl.textContent.trim() || `导入文件夹${Object.keys(appData.bookmarks.folders).length + newFolderCount}`;
+                            const folderNameLower = folderName.toLowerCase();
                             
-                            // 创建新文件夹
-                            appData.bookmarks.folders[folderId] = {
-                                name: folderName,
-                                items: []
-                            };
+                            // 检查是否已存在同名文件夹
+                            let folderId;
+                            if (existingFolderNames.has(folderNameLower)) {
+                                folderId = existingFolderNames.get(folderNameLower);
+                                existingFolderCount++;
+                            } else {
+                                // 创建新文件夹
+                                folderId = 'folder_import_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+                                const parentFolderId = folderStack.length > 0 ? folderStack[folderStack.length - 1] : null;
+                                const level = parentFolderId ? appData.bookmarks.folders[parentFolderId].level + 1 : 0;
+                                
+                                appData.bookmarks.folders[folderId] = {
+                                    name: folderName,
+                                    items: [],
+                                    parent: parentFolderId,
+                                    level: level
+                                };
+                                
+                                existingFolderNames.set(folderNameLower, folderId);
+                                newFolderCount++;
+                            }
                             
                             // 处理文件夹层次结构
                             const dlParent = entry.closest('dl');
@@ -1557,7 +1906,7 @@
                             // 标准化URL用于去重检查
                             const normalizedUrl = normalizeUrl(url);
                             if (existingUrls.has(normalizedUrl)) {
-                                duplicateCount++;
+                                duplicateBookmarkCount++;
                                 return;
                             }
                             
@@ -1582,7 +1931,7 @@
                     
                     // 保存并重新渲染
                     renderBookmarks();
-                    showToast(`成功导入 ${importedCount} 个书签，跳过 ${duplicateCount} 个重复书签`);
+                    showToast(`成功导入 ${importedCount} 个书签，${newFolderCount} 个新文件夹，复用 ${existingFolderCount} 个现有文件夹，跳过 ${duplicateBookmarkCount} 个重复书签`);
                 } catch (error) {
                     console.error('书签导入失败:', error);
                     showToast('书签导入失败: ' + error.message, 'error');
@@ -1618,19 +1967,23 @@
 <H1>书签</H1>
 <DL><p>`;
                 
-                // 添加文件夹和书签
-                Object.keys(appData.bookmarks.folders).forEach(folderId => {
+                // 添加文件夹和书签（按层级）
+                const sortedFolderIds = getSortedFoldersByHierarchy(Object.keys(appData.bookmarks.folders));
+                sortedFolderIds.forEach(folderId => {
                     const folder = appData.bookmarks.folders[folderId];
                     if (folder.items.length === 0) return;
                     
-                    htmlContent += `<DT><H3>${folder.name}</H3>
+                    // 只导出非默认文件夹或有内容的默认文件夹
+                    if (folderId !== 'default' || folder.items.length > 0) {
+                        htmlContent += `<DT><H3>${folder.name}</H3>
 <DL><p>`;
-                    
-                    folder.items.forEach(item => {
-                        htmlContent += `<DT><A HREF="${item.url}">${item.title}</A>`;
-                    });
-                    
-                    htmlContent += `</DL><p>`;
+                        
+                        folder.items.forEach(item => {
+                            htmlContent += `<DT><A HREF="${item.url}">${item.title}</A>`;
+                        });
+                        
+                        htmlContent += `</DL><p>`;
+                    }
                 });
                 
                 // 添加快速访问
@@ -1663,6 +2016,72 @@
                 console.error('书签导出失败:', error);
                 showToast('书签导出失败: ' + error.message, 'error');
             }
+        }
+
+        // 批量删除选中的书签
+        function batchDeleteBookmarks() {
+            const selectedCheckboxes = document.querySelectorAll('.bookmark-select:checked');
+            if (selectedCheckboxes.length === 0) return;
+            
+            if (confirm(`确定要删除选中的 ${selectedCheckboxes.length} 个书签吗？`)) {
+                let deletedCount = 0;
+                
+                selectedCheckboxes.forEach(checkbox => {
+                    const id = checkbox.getAttribute('data-id');
+                    const folderId = checkbox.getAttribute('data-folder');
+                    
+                    // 从文件夹中删除
+                    if (appData.bookmarks.folders[folderId]) {
+                        const initialLength = appData.bookmarks.folders[folderId].items.length;
+                        appData.bookmarks.folders[folderId].items = appData.bookmarks.folders[folderId].items.filter(item => item.id !== id);
+                        
+                        // 如果删除成功
+                        if (appData.bookmarks.folders[folderId].items.length < initialLength) {
+                            // 同时从快速访问中删除（如果存在）
+                            appData.bookmarks.quickAccess = appData.bookmarks.quickAccess.filter(item => item.id !== id);
+                            deletedCount++;
+                        }
+                    }
+                });
+                
+                renderBookmarks();
+                showToast(`已删除 ${deletedCount} 个书签`);
+            }
+        }
+
+        // 批量移动选中的书签
+        function batchMoveBookmarks(targetFolderId) {
+            const selectedCheckboxes = document.querySelectorAll('.bookmark-select:checked');
+            if (selectedCheckboxes.length === 0 || !targetFolderId) return;
+            
+            // 检查目标文件夹是否存在
+            if (!appData.bookmarks.folders[targetFolderId]) {
+                showToast('目标文件夹不存在', 'error');
+                return;
+            }
+            
+            let movedCount = 0;
+            
+            selectedCheckboxes.forEach(checkbox => {
+                const id = checkbox.getAttribute('data-id');
+                const sourceFolderId = checkbox.getAttribute('data-folder');
+                
+                // 不移动到相同文件夹
+                if (sourceFolderId === targetFolderId) return;
+                
+                // 从源文件夹中移除并添加到目标文件夹
+                if (appData.bookmarks.folders[sourceFolderId]) {
+                    const index = appData.bookmarks.folders[sourceFolderId].items.findIndex(item => item.id === id);
+                    if (index !== -1) {
+                        const [bookmark] = appData.bookmarks.folders[sourceFolderId].items.splice(index, 1);
+                        appData.bookmarks.folders[targetFolderId].items.push(bookmark);
+                        movedCount++;
+                    }
+                }
+            });
+            
+            renderBookmarks();
+            showToast(`已移动 ${movedCount} 个书签到 "${appData.bookmarks.folders[targetFolderId].name}"`);
         }
 
         // 更新编辑功能状态
@@ -1960,7 +2379,7 @@
                 appData.ads[1].url = elements.ad2Url.value.trim();
                 appData.ads[2].url = elements.ad3Url.value.trim();
                 
-                // 保存图片数据
+                // 保存图片数据（如果已预览）
                 if (elements.ad1Preview.src && !elements.ad1Preview.classList.contains('hidden')) {
                     appData.ads[0].image = elements.ad1Preview.src;
                 }
@@ -1971,96 +2390,59 @@
                     appData.ads[2].image = elements.ad3Preview.src;
                 }
                 
-                // 保存到GitHub并刷新显示
+                // 保存到GitHub
                 const success = await saveDataToGitHub();
                 if (success) {
-                    renderAds(); // 立即更新广告显示
+                    renderAds();
                     showToast('广告设置已保存并同步到GitHub');
                 }
             });
-        }
-
-        // 渲染城市编辑列表
-        function renderCitiesEditList() {
-            elements.citiesContainer.innerHTML = '';
             
-            appData.cities.forEach(city => {
-                const cityElement = document.createElement('div');
-                cityElement.className = 'bg-space-dark p-3 rounded-lg flex justify-between items-center';
-                
-                cityElement.innerHTML = `
-                    <div class="flex-1">
-                        <div class="flex items-center">
-                            <i class="fa fa-clock-o text-space-glow mr-2"></i>
-                            <input type="text" value="${city.name}" class="bg-transparent border-b border-gray-700 focus:border-space-glow focus:outline-none city-name" data-id="${city.id}">
-                        </div>
-                        <input type="text" value="${city.timezone}" class="bg-transparent border-b border-gray-700 focus:border-space-glow focus:outline-none text-sm text-gray-400 city-timezone" data-id="${city.id}">
-                    </div>
-                    <div class="flex gap-2 ml-2">
-                        <button class="edit-city-btn p-1 text-gray-400 hover:text-space-glow" data-id="${city.id}">
-                            <i class="fa fa-pencil"></i>
-                        </button>
-                        <button class="delete-city-btn p-1 text-gray-400 hover:text-red-400" data-id="${city.id}">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                
-                elements.citiesContainer.appendChild(cityElement);
+            // 批量删除书签
+            elements.batchDelete.addEventListener('click', batchDeleteBookmarks);
+            
+            // 批量移动书签 - 显示下拉框
+            elements.batchMoveBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                elements.batchMoveFolder.classList.toggle('hidden');
             });
             
-            // 绑定城市名称和时区修改事件
-            document.querySelectorAll('.city-name').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    const city = appData.cities.find(c => c.id === id);
-                    if (city) {
-                        city.name = e.target.value.trim() || '未命名城市';
-                        renderWorldClocks();
-                    }
-                });
+            // 点击其他地方隐藏批量移动下拉框
+            document.addEventListener('click', (e) => {
+                if (!elements.batchMoveBtn.contains(e.target) && !elements.batchMoveFolder.contains(e.target)) {
+                    elements.batchMoveFolder.classList.add('hidden');
+                }
             });
             
-            document.querySelectorAll('.city-timezone').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    const city = appData.cities.find(c => c.id === id);
-                    if (city) {
-                        city.timezone = e.target.value.trim();
-                        renderWorldClocks();
-                    }
-                });
-            });
-            
-            // 绑定编辑城市事件
-            document.querySelectorAll('.edit-city-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = e.target.closest('.edit-city-btn').getAttribute('data-id');
-                    openCityForm(id);
-                });
-            });
-            
-            // 绑定删除城市事件
-            document.querySelectorAll('.delete-city-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = e.target.closest('.delete-city-btn').getAttribute('data-id');
-                    if (appData.cities.length > 1 && confirm('确定要删除这个城市吗？')) {
-                        appData.cities = appData.cities.filter(city => city.id !== id);
-                        renderCitiesEditList();
-                        renderWorldClocks();
-                        showToast('城市已删除');
-                    } else if (appData.cities.length <= 1) {
-                        showToast('至少保留一个城市', 'warning');
-                    }
-                });
+            // 批量移动书签 - 执行移动
+            elements.batchMoveFolder.addEventListener('change', (e) => {
+                const targetFolderId = e.target.value;
+                if (targetFolderId) {
+                    batchMoveBookmarks(targetFolderId);
+                    elements.batchMoveFolder.classList.add('hidden');
+                }
             });
         }
-
-        // 打开城市表单（添加或编辑）
+        
+        // 预览广告图片
+        function previewAdImage(event, previewElement, adIndex) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewElement.src = e.target.result;
+                    previewElement.classList.remove('hidden');
+                    appData.ads[adIndex].image = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // 打开城市表单
         function openCityForm(id = null) {
+            const cityIdInput = document.getElementById('city-id');
             const nameInput = document.getElementById('city-name');
             const timezoneInput = document.getElementById('city-timezone');
-            const cityIdInput = document.getElementById('city-id');
             
             // 重置表单
             nameInput.value = '';
@@ -2082,7 +2464,7 @@
             // 显示表单
             elements.cityFormModal.classList.remove('opacity-0', 'pointer-events-none');
         }
-
+        
         // 保存城市
         function saveCity() {
             const id = document.getElementById('city-id').value;
@@ -2093,7 +2475,6 @@
             if (!name) {
                 showToast('请输入城市名称', 'warning');
                 return;
-                return;
             }
             
             if (!timezone) {
@@ -2103,10 +2484,10 @@
             
             if (id) {
                 // 更新现有城市
-                const city = appData.cities.find(c => c.id === id);
-                if (city) {
-                    city.name = name;
-                    city.timezone = timezone;
+                const index = appData.cities.findIndex(c => c.id === id);
+                if (index !== -1) {
+                    appData.cities[index].name = name;
+                    appData.cities[index].timezone = timezone;
                     showToast('城市已更新');
                 }
             } else {
@@ -2120,28 +2501,68 @@
                 showToast('城市已添加');
             }
             
-            // 关闭表单并更新显示
+            // 关闭表单并重新渲染
             elements.cityFormModal.classList.add('opacity-0', 'pointer-events-none');
             renderWorldClocks();
+            renderCitiesEditList();
         }
-
-        // 预览广告图片并更新数据
-        function previewAdImage(event, previewElement, adIndex) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewElement.src = e.target.result;
-                    previewElement.classList.remove('hidden');
-                    // 立即更新数据
-                    appData.ads[adIndex].image = e.target.result;
-                };
-                reader.readAsDataURL(file);
+        
+        // 渲染城市编辑列表
+        function renderCitiesEditList() {
+            elements.citiesContainer.innerHTML = '';
+            
+            if (appData.cities.length === 0) {
+                elements.citiesContainer.innerHTML = '<p class="text-gray-400 text-center py-4">暂无城市，请添加</p>';
+                return;
             }
+            
+            appData.cities.forEach(city => {
+                const cityElement = document.createElement('div');
+                cityElement.className = 'bg-space-dark p-3 rounded-lg flex justify-between items-center';
+                
+                cityElement.innerHTML = `
+                    <div>
+                        <div class="font-medium">${city.name}</div>
+                        <div class="text-sm text-gray-400">${city.timezone}</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="edit-city-btn p-1 text-gray-400 hover:text-space-glow" data-id="${city.id}">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="delete-city-btn p-1 text-gray-400 hover:text-red-400" data-id="${city.id}">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                elements.citiesContainer.appendChild(cityElement);
+            });
+            
+            // 绑定编辑城市事件
+            document.querySelectorAll('.edit-city-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('.edit-city-btn').getAttribute('data-id');
+                    openCityForm(id);
+                });
+            });
+            
+            // 绑定删除城市事件
+            document.querySelectorAll('.delete-city-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('.delete-city-btn').getAttribute('data-id');
+                    if (confirm('确定要删除这个城市吗？')) {
+                        appData.cities = appData.cities.filter(city => city.id !== id);
+                        renderCitiesEditList();
+                        renderWorldClocks();
+                        showToast('城市已删除');
+                    }
+                });
+            });
         }
-
+        
         // 初始化应用
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
+    
