@@ -1,5 +1,111 @@
 {
-  "bookmarks": [],
-  "cities": ["北京", "纽约", "伦敦", "东京"],
-  "ads": [{}, {}, {}]
+  "bookmarks": {
+    "folders": [
+      {
+        "id": "1",
+        "name": "开发工具",
+        "icon": "code",
+        "color": "#3498db"
+      },
+      {
+        "id": "2",
+        "name": "设计资源",
+        "icon": "paint-brush",
+        "color": "#e74c3c"
+      },
+      {
+        "id": "3",
+        "name": "学习平台",
+        "icon": "graduation-cap",
+        "color": "#2ecc71"
+      }
+    ],
+    "items": [
+      {
+        "id": "101",
+        "folderId": "1",
+        "name": "GitHub",
+        "url": "https://github.com",
+        "favicon": "https://github.com/favicon.ico",
+        "added": "2023-07-15T10:30:00Z"
+      },
+      {
+        "id": "102",
+        "folderId": "1",
+        "name": "Stack Overflow",
+        "url": "https://stackoverflow.com",
+        "favicon": "https://stackoverflow.com/favicon.ico",
+        "added": "2023-07-15T10:35:00Z"
+      },
+      {
+        "id": "103",
+        "folderId": "2",
+        "name": "Dribbble",
+        "url": "https://dribbble.com",
+        "favicon": "https://dribbble.com/favicon.ico",
+        "added": "2023-07-16T09:20:00Z"
+      },
+      {
+        "id": "104",
+        "folderId": "3",
+        "name": "MDN Web Docs",
+        "url": "https://developer.mozilla.org",
+        "favicon": "https://developer.mozilla.org/favicon.ico",
+        "added": "2023-07-17T14:10:00Z"
+      }
+    ]
+  },
+  "cities": [
+    {
+      "id": "c1",
+      "name": "北京",
+      "timezone": "+8",
+      "enabled": true
+    },
+    {
+      "id": "c2",
+      "name": "伦敦",
+      "timezone": "0",
+      "enabled": true
+    },
+    {
+      "id": "c3",
+      "name": "纽约",
+      "timezone": "-4",
+      "enabled": true
+    },
+    {
+      "id": "c4",
+      "name": "东京",
+      "timezone": "+9",
+      "enabled": false
+    }
+  ],
+  "ads": {
+    "ad1": {
+      "image": "https://picsum.photos/id/237/400/200",
+      "url": "https://example.com/ad1",
+      "enabled": true
+    },
+    "ad2": {
+      "image": "",
+      "url": "",
+      "enabled": false
+    },
+    "ad3": {
+      "image": "",
+      "url": "",
+      "enabled": false
+    }
+  },
+  "settings": {
+    "theme": "dark",
+    "healthReminder": {
+      "enabled": true,
+      "interval": 60
+    },
+    "showClocks": true,
+    "showAds": true
+  }
 }
+    
