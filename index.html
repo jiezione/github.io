@@ -589,7 +589,7 @@
             // 从GitHub加载数据
             await loadDataFromGitHub();
             
-            // 初始化默认仓库信息
+            // 初始化默认仓库信息（自动注入的仓库信息）
             if (window.defaultRepoInfo) {
                 if (!appData.github.username) appData.github.username = window.defaultRepoInfo.username;
                 if (!appData.github.repo) appData.github.repo = window.defaultRepoInfo.repo;
@@ -657,9 +657,74 @@
             }
         }
 
-        // 保存数据到本地存储
-        function saveLocalData() {
-            localStorage.setItem('spaceBookmarksData', JSON.stringify(appData));
+        // 保存数据到GitHub
+        async function saveDataToGitHub() {
+            showLoader();
+            
+            try {
+                const { username, repo, token } = appData.github;
+                if (!username || !repo || !token || !appData.github.validated) {
+                    throw new Error('GitHub配置不完整或未验证');
+                }
+                
+                // 准备要保存的数据
+                const dataToSave = {
+                    bookmarks: appData.bookmarks,
+                    cities: appData.cities,
+                    ads: appData.ads,
+                    deployDate: appData.deployDate
+                };
+                
+                // 处理非Latin1字符的编码问题
+                const content = JSON.stringify(dataToSave, null, 2);
+                const base64Content = btoa(unescape(encodeURIComponent(content)));
+                
+                // 先检查文件是否存在
+                const checkUrl = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
+                const checkResponse = await fetch(checkUrl, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                let sha = null;
+                if (checkResponse.ok) {
+                    const fileData = await checkResponse.json();
+                    sha = fileData.sha; // 获取现有文件的SHA，用于更新
+                }
+                
+                // 保存文件
+                const saveUrl = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
+                const response = await fetch(saveUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Update bookmarks via 星际导航',
+                        content: base64Content,
+                        ...(sha && { sha }) // 如果存在SHA，添加到请求中
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || `保存失败 (HTTP ${response.status})`);
+                }
+                
+                // 仅在成功保存到GitHub后更新本地存储
+                localStorage.setItem('spaceBookmarksData', JSON.stringify(appData));
+                return true;
+            } catch (error) {
+                console.error('保存数据到GitHub失败:', error);
+                showToast(`保存数据到GitHub失败: ${error.message}`, 'error');
+                return false;
+            } finally {
+                hideLoader();
+            }
         }
 
         // 从GitHub加载数据
@@ -696,8 +761,8 @@
                 
                 if (!response.ok) {
                     if (response.status === 404) {
-                        // 文件不存在，使用默认数据
-                        showToast('未找到书签数据，使用默认设置', 'info');
+                        // 文件不存在，使用现有数据
+                        showToast('未找到书签数据，使用现有设置', 'info');
                         return;
                     }
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -713,7 +778,7 @@
                     data = await response.json();
                 }
                 
-                // 合并数据
+                // 新数据覆盖现有数据
                 if (data.bookmarks) appData.bookmarks = data.bookmarks;
                 if (data.cities) appData.cities = data.cities;
                 if (data.ads) appData.ads = data.ads;
@@ -787,7 +852,7 @@
         function toggleTheme() {
             appData.theme = appData.theme === 'dark' ? 'light' : 'dark';
             renderTheme();
-            saveLocalData();
+            localStorage.setItem('spaceBookmarksData', JSON.stringify(appData));
         }
 
         // 渲染书签
@@ -1407,10 +1472,6 @@
                 showToast('书签已添加');
             }
             
-            // 保存并重新渲染
-            saveLocalData();
-            renderBookmarks();
-            
             // 关闭表单
             elements.bookmarkFormModal.classList.add('opacity-0', 'pointer-events-none');
         }
@@ -1425,10 +1486,10 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(content, 'text/html');
                     
-                    // 查找所有书签条目
-                    const bookmarkEntries = doc.querySelectorAll('dt>a, dt>h3');
+                    // 查找所有书签条目和文件夹
+                    const allEntries = Array.from(doc.querySelectorAll('dt, h3'));
                     
-                    if (bookmarkEntries.length === 0) {
+                    if (allEntries.length === 0) {
                         showToast('未找到可导入的书签', 'warning');
                         return;
                     }
@@ -1437,12 +1498,23 @@
                     const folderStack = [];
                     let currentFolderId = 'default';
                     let importedCount = 0;
+                    let duplicateCount = 0;
+                    
+                    // 收集现有URL用于去重检查
+                    const existingUrls = new Set();
+                    Object.values(appData.bookmarks.folders).forEach(folder => {
+                        folder.items.forEach(item => existingUrls.add(normalizeUrl(item.url)));
+                    });
+                    appData.bookmarks.quickAccess.forEach(item => existingUrls.add(normalizeUrl(item.url)));
                     
                     // 处理每个条目
-                    bookmarkEntries.forEach(entry => {
-                        // 文件夹
-                        if (entry.tagName === 'H3') {
-                            const folderName = entry.textContent.trim() || `导入文件夹${Object.keys(appData.bookmarks.folders).length}`;
+                    allEntries.forEach(entry => {
+                        // 文件夹标题（通常在dt内或直接作为h3）
+                        if (entry.tagName === 'H3' || (entry.tagName === 'DT' && entry.querySelector('h3'))) {
+                            const folderNameEl = entry.tagName === 'H3' ? entry : entry.querySelector('h3');
+                            if (!folderNameEl) return;
+                            
+                            const folderName = folderNameEl.textContent.trim() || `导入文件夹${Object.keys(appData.bookmarks.folders).length}`;
                             const folderId = 'folder_import_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
                             
                             // 创建新文件夹
@@ -1451,23 +1523,33 @@
                                 items: []
                             };
                             
-                            // 如果有父文件夹，将当前文件夹ID推入栈
-                            if (entry.closest('dl').previousElementSibling?.tagName === 'H3') {
+                            // 处理文件夹层次结构
+                            const dlParent = entry.closest('dl');
+                            if (dlParent && dlParent.previousElementSibling?.tagName === 'H3') {
+                                // 这是一个子文件夹
                                 folderStack.push(currentFolderId);
                             } else if (folderStack.length > 0) {
-                                // 如果当前是子文件夹且栈中有元素，弹出最后一个
-                                folderStack.pop();
+                                // 返回上一级文件夹
+                                currentFolderId = folderStack.pop();
                             }
                             
                             currentFolderId = folderId;
                         } 
-                        // 书签
-                        else if (entry.tagName === 'A') {
-                            const title = entry.textContent.trim() || '未命名书签';
-                            let url = entry.getAttribute('href') || '';
+                        // 书签条目
+                        else if (entry.tagName === 'DT' && entry.querySelector('a')) {
+                            const link = entry.querySelector('a');
+                            const title = link.textContent.trim() || '未命名书签';
+                            let url = link.getAttribute('href') || '';
                             
                             // 过滤无效URL
                             if (!url || url.startsWith('javascript:') || url.startsWith('data:')) {
+                                return;
+                            }
+                            
+                            // 标准化URL用于去重检查
+                            const normalizedUrl = normalizeUrl(url);
+                            if (existingUrls.has(normalizedUrl)) {
+                                duplicateCount++;
                                 return;
                             }
                             
@@ -1484,14 +1566,15 @@
                                 url: url
                             });
                             
+                            // 添加到现有URL集合
+                            existingUrls.add(normalizedUrl);
                             importedCount++;
                         }
                     });
                     
                     // 保存并重新渲染
-                    saveLocalData();
                     renderBookmarks();
-                    showToast(`成功导入 ${importedCount} 个书签`);
+                    showToast(`成功导入 ${importedCount} 个书签，跳过 ${duplicateCount} 个重复书签`);
                 } catch (error) {
                     console.error('书签导入失败:', error);
                     showToast('书签导入失败: ' + error.message, 'error');
@@ -1503,6 +1586,18 @@
             };
             
             reader.readAsText(file);
+        }
+        
+        // 标准化URL用于去重检查
+        function normalizeUrl(url) {
+            try {
+                const parsedUrl = new URL(url);
+                // 移除协议、www前缀和尾部斜杠以进行更有效的去重
+                let host = parsedUrl.host.replace(/^www\./, '');
+                return `${host}${parsedUrl.pathname.replace(/\/$/, '')}${parsedUrl.search}`;
+            } catch (e) {
+                return url.toLowerCase();
+            }
         }
 
         // 导出书签
@@ -1576,6 +1671,23 @@
             elements.saveAdChanges.disabled = !isEnabled;
         }
 
+        // 验证GitHub Token
+        async function validateGitHubToken(token) {
+            try {
+                const response = await fetch('https://api.github.com/user', {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                return response.ok;
+            } catch (error) {
+                console.error('验证Token失败:', error);
+                return false;
+            }
+        }
+
         // 验证GitHub配置
         async function validateGitHubConfig() {
             const username = elements.githubUsername.value.trim();
@@ -1587,14 +1699,32 @@
                 return false;
             }
             
+            if (!token) {
+                showValidationStatus('请输入Personal Access Token', 'error');
+                return false;
+            }
+            
             showLoader();
             showValidationStatus('验证中...', 'info');
             
             try {
-                const url = `https://api.github.com/repos/${username}/${repo}`;
-                const headers = token ? { 'Authorization': `token ${token}` } : {};
+                // 先验证Token有效性
+                const isTokenValid = await validateGitHubToken(token);
+                if (!isTokenValid) {
+                    showValidationStatus('无效的Personal Access Token', 'error');
+                    appData.github.validated = false;
+                    updateEditFeaturesStatus();
+                    return false;
+                }
                 
-                const response = await fetch(url, { headers });
+                // 再验证仓库访问权限
+                const url = `https://api.github.com/repos/${username}/${repo}`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
                 
                 if (response.ok) {
                     appData.github.username = username;
@@ -1602,7 +1732,7 @@
                     appData.github.token = token;
                     appData.github.validated = true;
                     
-                    saveLocalData();
+                    localStorage.setItem('spaceBookmarksData', JSON.stringify(appData));
                     showValidationStatus('验证成功', 'success');
                     updateEditFeaturesStatus();
                     showToast('GitHub配置验证成功');
@@ -1653,8 +1783,9 @@
             appData.github.username = username;
             appData.github.repo = repo;
             appData.github.token = token;
+            // 保存配置但不自动验证
             
-            saveLocalData();
+            localStorage.setItem('spaceBookmarksData', JSON.stringify(appData));
             showToast('GitHub配置已保存');
         }
 
@@ -1753,10 +1884,11 @@
             elements.searchInput.addEventListener('input', handleSearch);
             
             // 保存书签更改
-            elements.saveBookmarkChanges.addEventListener('click', () => {
-                saveLocalData();
-                // 这里可以添加同步到GitHub的逻辑
-                showToast('书签更改已保存');
+            elements.saveBookmarkChanges.addEventListener('click', async () => {
+                const success = await saveDataToGitHub();
+                if (success) {
+                    showToast('书签更改已保存并同步到GitHub');
+                }
             });
             
             // 添加城市
@@ -1780,10 +1912,11 @@
             elements.saveCity.addEventListener('click', saveCity);
             
             // 保存时钟更改
-            elements.saveClockChanges.addEventListener('click', () => {
-                saveLocalData();
-                // 这里可以添加同步到GitHub的逻辑
-                showToast('时钟设置已保存');
+            elements.saveClockChanges.addEventListener('click', async () => {
+                const success = await saveDataToGitHub();
+                if (success) {
+                    showToast('时钟设置已保存并同步到GitHub');
+                }
             });
             
             // 广告图片预览
@@ -1800,7 +1933,12 @@
             });
             
             // 保存广告更改
-            elements.saveAdChanges.addEventListener('click', saveAdChanges);
+            elements.saveAdChanges.addEventListener('click', async () => {
+                const success = await saveDataToGitHub();
+                if (success) {
+                    showToast('广告设置已保存并同步到GitHub');
+                }
+            });
         }
 
         // 渲染城市编辑列表
@@ -1942,11 +2080,6 @@
                 showToast('城市已添加');
             }
             
-            // 保存并重新渲染
-            saveLocalData();
-            renderCitiesEditList();
-            renderWorldClocks();
-            
             // 关闭表单
             elements.cityFormModal.classList.add('opacity-0', 'pointer-events-none');
         }
@@ -1981,11 +2114,6 @@
             if (elements.ad3Preview.src && !elements.ad3Preview.classList.contains('hidden')) {
                 appData.ads[2].image = elements.ad3Preview.src;
             }
-            
-            // 保存并重新渲染
-            saveLocalData();
-            renderAds();
-            showToast('广告设置已保存');
         }
 
         // 初始化应用
