@@ -1198,22 +1198,22 @@
   "cities": [
     {
       "id": "1",
-      "name": "Ã¥ÂÂÃ¤ÂºÂ¬",
+      "name": "北京",
       "timezone": "Asia/Shanghai"
     },
     {
       "id": "2",
-      "name": "Ã¤Â¼Â¦Ã¦ÂÂ¦",
+      "name": "纽约",
       "timezone": "Europe/London"
     },
     {
       "id": "3",
-      "name": "Ã§ÂºÂ½Ã§ÂºÂ¦",
+      "name": "东京",
       "timezone": "America/New_York"
     },
     {
       "id": "4",
-      "name": "Ã¤Â¸ÂÃ¤ÂºÂ¬",
+      "name": "伦敦",
       "timezone": "Asia/Tokyo"
     }
   ],
