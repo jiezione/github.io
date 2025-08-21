@@ -1,4 +1,4 @@
-name: Deploy Space Bookmark Navigator
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -11,20 +11,18 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up environment variables
+    - name: Inject repo info into index.html
       run: |
-        echo "REPO_OWNER=${{ github.repository_owner }}" >> $GITHUB_ENV
-        echo "REPO_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
-    
-    - name: Inject repository info into index.html
-      run: |
-        # 使用sed命令替换占位符，注入仓库信息
-        sed -i "s|// GITHUB_REPO_INFO_INJECTION_POINT|const repoOwner = '${{ env.REPO_OWNER }}'; const repoName = '${{ env.REPO_NAME }}';|g" index.html
+        # 获取仓库信息
+        REPO_OWNER="${{ github.repository_owner }}"
+        REPO_NAME="${{ github.event.repository.name }}"
+        
+        # 注入仓库信息到index.html
+        sed -i "s|</body>|  <script>window.defaultRepoInfo = { username: '${REPO_OWNER}', repo: '${REPO_NAME}' };</script>\n</body>|" index.html
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./
-        publish_branch: gh-pages
-    
+        force_orphan: true
