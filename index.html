@@ -1,47 +1,286 @@
-name: Deploy Navigation Site
-
-# 触发条件：推送到 main 分支时执行
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星际导航 | 探索网络宇宙</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%231a1a2e'/%3E%3Ccircle cx='50' cy='50' r='25' fill='%23e2b13c'/%3E%3C/svg%3E" type="image/svg+xml">
+    <script>
+        // 由deploy.yml自动注入的仓库信息
+        const repoInfo = {
+            username: '', // 部署时自动填充
+            repoName: '', // 部署时自动填充
+            deployedAt: '' // 初始部署时间
+        };
+    </script>
+</head>
+<body class="dark-mode">
+    <!-- 星空背景容器 -->
+    <div class="stars"></div>
+    <div class="twinkling"></div>
     
-    steps:
-      # 1. 拉取仓库代码
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # 拉取完整历史，用于获取部署时间
-      
-      # 2. 注入仓库信息到 index.html
-      - name: Inject repo info into index.html
-        run: |
-          # 获取仓库用户名和仓库名
-          REPO_USERNAME="${{ github.repository_owner }}"
-          REPO_NAME="${{ github.event.repository.name }}"
-          
-          # 获取初始部署时间（第一个提交时间）
-          DEPLOYED_AT=$(git log --reverse --format=%cd --date=iso-strict | head -1)
-          
-          # 注入到 index.html 中的 repoInfo 变量
-          sed -i "s|username: ''|username: '$REPO_USERNAME'|g" index.html
-          sed -i "s|repoName: ''|repoName: '$REPO_NAME'|g" index.html
-          sed -i "s|deployedAt: ''|deployedAt: '$DEPLOYED_AT'|g" index.html
-          
-          # 输出验证信息
-          echo "注入仓库信息完成："
-          echo "Username: $REPO_USERNAME"
-          echo "RepoName: $REPO_NAME"
-          echo "DeployedAt: $DEPLOYED_AT"
-      
-      # 3. 部署到 GitHub Pages（如果需要）
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./  # 部署当前目录下的所有文件
-          publish_branch: gh-pages  # 部署到 gh-pages 分支
-          force_orphan: true  # 强制创建孤立分支（可选）
+    <!-- 导航栏 -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <button id="theme-toggle" title="切换模式">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            </button>
+            <button id="settings-btn" title="设置">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </button>
+            <button id="switch-view" class="view-btn active" data-view="home">主页</button>
+            <button id="edit-btn" class="view-btn" data-view="edit">编辑中心</button>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main>
+        <!-- 主页视图 -->
+        <section id="home-view" class="view active">
+            <!-- 顶部横向组件 -->
+            <div class="top-widgets">
+                <div class="widget" id="uptime-widget">
+                    <h3>探索时长</h3>
+                    <div id="uptime-display">0天0时0分</div>
+                </div>
+                <div class="widget" id="health-widget">
+                    <h3>健康提醒</h3>
+                    <div id="health-reminder">准备就绪</div>
+                </div>
+                <div class="widget" id="clock-widget">
+                    <h3>星际时钟</h3>
+                    <div id="world-clocks" class="clock-container">
+                        <!-- 时钟将通过JS动态添加 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 搜索框 -->
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="搜索书签...">
+            </div>
+
+            <!-- 广告位 1 -->
+            <div class="ad-slot ad-top">
+                <div class="ad-placeholder" id="ad-1">广告位 1</div>
+            </div>
+
+            <!-- 书签展示区 -->
+            <div class="bookmarks-container">
+                <h2>星际书签</h2>
+                <div id="bookmarks-folder" class="folder-root">
+                    <!-- 书签将通过JS动态加载 -->
+                    <div class="empty-state">暂无书签，前往编辑中心添加</div>
+                </div>
+            </div>
+
+            <!-- 广告位 2 和 3 -->
+            <div class="ad-slot ad-middle">
+                <div class="ad-placeholder" id="ad-2">广告位 2</div>
+            </div>
+            <div class="ad-slot ad-bottom">
+                <div class="ad-placeholder" id="ad-3">广告位 3</div>
+            </div>
+        </section>
+
+        <!-- 编辑中心视图 -->
+        <section id="edit-view" class="view">
+            <div class="edit-container">
+                <h2>编辑中心</h2>
+                
+                <!-- 未验证提示 -->
+                <div id="unverified-alert" class="alert info">
+                    <p>需完成 GitHub 验证才能使用编辑功能</p>
+                    <button id="go-to-settings">前往设置</button>
+                </div>
+
+                <!-- 书签编辑区 -->
+                <div class="edit-section" id="bookmarks-edit">
+                    <h3>书签管理</h3>
+                    <div class="edit-controls">
+                        <button id="add-bookmark-btn" class="btn primary" disabled>添加书签</button>
+                        <button id="import-bookmarks-btn" class="btn secondary" disabled>导入书签</button>
+                        <button id="export-bookmarks-btn" class="btn secondary" disabled>导出书签</button>
+                        <input type="file" id="bookmark-import-file" accept=".html" style="display: none;">
+                    </div>
+                    
+                    <div class="bookmark-edit-container">
+                        <!-- 书签编辑树形结构 -->
+                        <div id="bookmark-edit-tree">
+                            <div class="empty-state">验证后加载书签...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 广告编辑区 -->
+                <div class="edit-section" id="ads-edit">
+                    <h3>广告管理</h3>
+                    <div class="ad-edit-container">
+                        <div class="ad-edit-item">
+                            <h4>广告位 1</h4>
+                            <input type="text" class="ad-url" placeholder="广告链接" disabled>
+                            <input type="file" class="ad-image" accept="image/*" disabled>
+                            <img class="ad-preview" src="" alt="预览">
+                        </div>
+                        <div class="ad-edit-item">
+                            <h4>广告位 2</h4>
+                            <input type="text" class="ad-url" placeholder="广告链接" disabled>
+                            <input type="file" class="ad-image" accept="image/*" disabled>
+                            <img class="ad-preview" src="" alt="预览">
+                        </div>
+                        <div class="ad-edit-item">
+                            <h4>广告位 3</h4>
+                            <input type="text" class="ad-url" placeholder="广告链接" disabled>
+                            <input type="file" class="ad-image" accept="image/*" disabled>
+                            <img class="ad-preview" src="" alt="预览">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 时钟编辑区 -->
+                <div class="edit-section" id="clocks-edit">
+                    <h3>世界时钟管理</h3>
+                    <div class="clock-edit-container">
+                        <div id="cities-list">
+                            <!-- 城市列表将通过JS动态添加 -->
+                        </div>
+                        <div class="add-city-form">
+                            <input type="text" id="city-name" placeholder="城市名称" disabled>
+                            <select id="city-timezone" disabled>
+                                <option value="UTC">UTC</option>
+                                <option value="Asia/Shanghai">Asia/Shanghai (北京)</option>
+                                <option value="America/New_York">America/New_York (纽约)</option>
+                                <option value="Europe/London">Europe/London (伦敦)</option>
+                                <option value="Asia/Tokyo">Asia/Tokyo (东京)</option>
+                                <!-- 更多时区选项 -->
+                            </select>
+                            <button id="add-city-btn" class="btn primary" disabled>添加城市</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 保存按钮 -->
+                <div class="save-section">
+                    <button id="save-changes" class="btn primary large" disabled>
+                        <span>保存更改</span>
+                        <span class="loading-spinner" style="display: none;">⟳</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 底部固定区域 -->
+    <div class="dark-white bottom-bar">
+        <div>共收录<span id="total-bookmarks">0</span>个网站</div>
+        <div>Copyright © 2018-<span id="current-year">2025</span> <span id="site-hostname">星际导航</span>, All Rights Reserved</div>
+    </div>
+
+    <!-- 设置对话框 -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>GitHub 同步设置</h2>
+            <div class="settings-form">
+                <div class="form-group">
+                    <label for="github-username">仓库用户名</label>
+                    <input type="text" id="github-username" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="github-repo">仓库名称</label>
+                    <input type="text" id="github-repo" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="github-token">GitHub Token</label>
+                    <input type="password" id="github-token" placeholder="输入你的 GitHub Token">
+                    <small>Token 需要有 repo 权限以访问仓库</small>
+                </div>
+                <div class="form-status">
+                    <span id="validation-status" class="status pending">未验证</span>
+                </div>
+                <div class="form-buttons">
+                    <button id="validate-token" class="btn primary">验证 Token</button>
+                    <button id="save-settings" class="btn secondary">保存设置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑书签对话框 -->
+    <div id="bookmark-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="bookmark-modal-title">添加书签</h2>
+            <div class="bookmark-form">
+                <div class="form-group">
+                    <label for="bookmark-folder">文件夹</label>
+                    <select id="bookmark-folder"></select>
+                    <button id="add-folder-btn" class="btn tiny">+ 新建</button>
+                </div>
+                <div class="form-group">
+                    <label for="bookmark-title">标题</label>
+                    <input type="text" id="bookmark-title" placeholder="网站标题">
+                </div>
+                <div class="form-group">
+                    <label for="bookmark-url">链接</label>
+                    <input type="url" id="bookmark-url" placeholder="https://example.com">
+                </div>
+                <input type="hidden" id="bookmark-id">
+                <div class="form-buttons">
+                    <button id="cancel-bookmark" class="btn secondary">取消</button>
+                    <button id="save-bookmark" class="btn primary">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建文件夹对话框 -->
+    <div id="folder-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>新建文件夹</h2>
+            <div class="folder-form">
+                <div class="form-group">
+                    <label for="folder-name">文件夹名称</label>
+                    <input type="text" id="folder-name" placeholder="输入文件夹名称">
+                </div>
+                <div class="form-buttons">
+                    <button id="cancel-folder" class="btn secondary">取消</button>
+                    <button id="save-folder" class="btn primary">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认对话框 -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="confirm-title">确认操作</h2>
+            <p id="confirm-message">你确定要执行此操作吗？</p>
+            <div class="form-buttons">
+                <button id="cancel-confirm" class="btn secondary">取消</button>
+                <button id="confirm-action" class="btn danger">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知提示 -->
+    <div id="notification" class="notification"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
