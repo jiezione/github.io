@@ -3,15 +3,21 @@
     "folders": {
       "default": {
         "name": "默认文件夹",
-        "items": []
+        "items": [],
+        "parent": null,
+        "level": 0
       },
       "folder_1755800353190_945": {
         "name": "APK related",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_1755800353190_466": {
         "name": "DNS",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196166_989": {
         "name": "书签栏",
@@ -21,15 +27,21 @@
             "title": "abc",
             "url": "https://abc.com"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196166_478": {
         "name": "书签栏",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196166_108": {
         "name": "My files",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196166_19": {
         "name": "My files",
@@ -44,11 +56,15 @@
             "title": "Fmie导航网站",
             "url": "https://cmjlss.dpdns.org/#/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196166_3": {
         "name": "tutorial",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196166_461": {
         "name": "tutorial",
@@ -58,11 +74,15 @@
             "title": "Terser 深度混淆教程 | 结合其他技术的实现方案",
             "url": "https://tutorial.cmjwork.dpdns.org/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196166_16": {
         "name": "Time tunnel",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196166_550": {
         "name": "Time tunnel",
@@ -97,11 +117,15 @@
             "title": "Time Travel-pg_tjn",
             "url": "https://tjn.fmienbone.dpdns.org/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196166_187": {
         "name": "PaaS 平台",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_387": {
         "name": "PaaS 平台",
@@ -116,11 +140,15 @@
             "title": "sshweb - Overview – Vercel",
             "url": "https://vercel.com/fmies-projects/sshweb/settings/domains"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_2": {
         "name": "在线转换工具",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_371": {
         "name": "在线转换工具",
@@ -130,11 +158,15 @@
             "title": "主页 - 在线工具",
             "url": "https://toolonline.net/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_849": {
         "name": "Internet speed",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_103": {
         "name": "Internet speed",
@@ -164,19 +196,27 @@
             "title": "Speedtest by Ookla - The Global Broadband Speed Test",
             "url": "https://www.speedtest.net/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_11": {
         "name": "IOS Phone",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_920": {
         "name": "Internet speed",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_231": {
         "name": "接码平台",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_26": {
         "name": "接码平台",
@@ -196,11 +236,15 @@
             "title": "免费台湾手机号码:在线接收短信(+886 Taiwan) - SMSOnline",
             "url": "https://www.smsonline.cloud/zh/country/Taiwan#:~:text=%E5%9C%A8%E5%8F%B0%E6%B9%BE%EF%BC%8C%E4%BD%BF%E7%94%A8sms%E9%AA%8C"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_359": {
         "name": "地址生成",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_584": {
         "name": "地址生成",
@@ -210,11 +254,15 @@
             "title": "美国地址生成器 - 美国身份生成器 - 美国信用卡生成器",
             "url": "https://www.meiguodizhi.com/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_993": {
         "name": "优选IP和反代IP",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_806": {
         "name": "优选IP和反代IP",
@@ -249,11 +297,15 @@
             "title": "Simple Copy and Paste | Bulk IP Geolocation Lookup Tool Online",
             "url": "https://reallyfreegeoip.org/bulk"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_823": {
         "name": "在线优选IP，优选域名网站",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_742": {
         "name": "在线优选IP，优选域名网站",
@@ -278,19 +330,27 @@
             "title": "CDN节点优选IP工具",
             "url": "https://cdn.jc.ddns-ip.net/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_880": {
         "name": "Live streaming",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_385": {
         "name": "分析代码AI工具",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_390": {
         "name": "IP查询网站",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_923": {
         "name": "Airport",
@@ -305,11 +365,15 @@
             "title": "使用文档 | 漏网之鱼",
             "url": "https://ch.cukug.website/#/knowledge"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_468": {
         "name": "SMSvrelated",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_538": {
         "name": "SMSvrelated",
@@ -329,11 +393,15 @@
             "title": "短信在线SMSOnline - 完全免费的虚拟电话号码平台",
             "url": "https://www.smsonline.cloud/zh"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_311": {
         "name": "AI",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_932": {
         "name": "AI",
@@ -388,7 +456,9 @@
             "title": "通义 - 你的实用AI助手",
             "url": "https://www.tongyi.com/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_894": {
         "name": "VPS",
@@ -413,7 +483,9 @@
             "title": "Log In To Client Area - Web Host Most",
             "url": "https://client.webhostmost.com/login"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_658": {
         "name": "图像生成AI",
@@ -448,11 +520,15 @@
             "title": "免费 AI 图像生成器 - 必应图像创建器",
             "url": "https://www.bing.com/images/create"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_73": {
         "name": "视频生成AI",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_291": {
         "name": "视频生成AI",
@@ -487,11 +563,15 @@
             "title": "Make-A-Video",
             "url": "https://makeavideo.studio/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_284": {
         "name": "编程代码能力最强的AI",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_960": {
         "name": "编程代码能力最强的AI",
@@ -536,15 +616,21 @@
             "title": "Code Llama（Meta）- 专门针对代码优化的开源大语言模型 https://github.com/facebookresearch/codellama",
             "url": "https://github.com/meta-llama/codellama"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_674": {
         "name": "IP related",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_1": {
         "name": "IP related",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_300": {
         "name": "IP查询网站",
@@ -599,11 +685,15 @@
             "title": "IP泄漏检测-高精度IP地址归属地查询-全球小鸡监控平台",
             "url": "https://ping0.cc/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_657": {
         "name": "DNS",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_507": {
         "name": "DNS",
@@ -623,15 +713,21 @@
             "title": "Free DNS hosting, Cloud DNS hosting and Domain names | ClouDNS",
             "url": "https://www.cloudns.net/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_31": {
         "name": "VPS",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_494": {
         "name": "Time tunnel",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_707": {
         "name": "VPS",
@@ -706,11 +802,15 @@
             "title": "HN 用戶服務綜合系統 | HNICS",
             "url": "https://client.hnhost.net/login.php"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_547": {
         "name": "myhost",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_917": {
         "name": "myhost",
@@ -760,11 +860,15 @@
             "title": "Élan Beauty | Premium Kosmetik & Wellness",
             "url": "https://jiezione.dpdns.org/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_403": {
         "name": "Navigation Station",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_320": {
         "name": "Navigation Station",
@@ -774,11 +878,15 @@
             "title": "爱分享导航站",
             "url": "https://afengxiang.github.io/afx/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_892": {
         "name": "Bypassing",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_465": {
         "name": "Bypassing",
@@ -813,11 +921,15 @@
             "title": "Borderfree – The world's first Web3.0 AI browser",
             "url": "https://borderfree.app/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_499": {
         "name": "Development polatform",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_693": {
         "name": "Development polatform",
@@ -837,11 +949,15 @@
             "title": "louwangzhiyu001",
             "url": "https://github.com/louwangzhiyu001/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_907": {
         "name": "cloud storage",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_400": {
         "name": "cloud storage",
@@ -851,19 +967,27 @@
             "title": "【夸克网盘】夸克网盘PC网页版端入口",
             "url": "https://pan.quark.cn/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_675": {
         "name": "Airport",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_756": {
         "name": "Airport",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_740": {
         "name": "my sunpanel",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_244": {
         "name": "my sunpanel",
@@ -873,11 +997,15 @@
             "title": "YouTube",
             "url": "https://www.youtube.com/channel/UCYfdidRxbB8Qhf0Nx7ioOYw"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_329": {
         "name": "APK related",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_912": {
         "name": "APK related",
@@ -892,11 +1020,15 @@
             "title": "在APKPure使用免费在线APK下载器下载APK到安卓",
             "url": "https://apkpure.com/cn/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_430": {
         "name": "容器",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_6": {
         "name": "DNS",
@@ -906,7 +1038,9 @@
             "title": "科赋锐信息科技Cloudflare | Cloudflare",
             "url": "https://www.cloudflare-cn.com/"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_158": {
         "name": "容器",
@@ -936,267 +1070,422 @@
             "title": "银河录像局 次世代合租平台",
             "url": "https://nf.video/6US2b"
           }
-        ]
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_470": {
         "name": "My files",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_720": {
         "name": "My files",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_162": {
         "name": "Live streaming",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_961": {
         "name": "tutorial",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_340": {
         "name": "Time tunnel",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_881": {
         "name": "PaaS 平台",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_882": {
         "name": "PaaS 平台",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_83": {
         "name": "在线转换工具",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_542": {
         "name": "在线转换工具",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_418": {
         "name": "Internet speed",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_151": {
         "name": "IOS Phone",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_818": {
         "name": "IOS Phone",
-        "items": []
+        "items": [
+          {
+            "id": "bookmark_import_1755812647844_227",
+            "title": "Web & Mobile App Testing | Continuous Testing | Perfecto",
+            "url": "https://www.perfecto.io/"
+          }
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_778": {
         "name": "接码平台",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_379": {
         "name": "接码平台",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_121": {
         "name": "地址生成",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_779": {
         "name": "地址生成",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_755": {
         "name": "优选IP和反代IP",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_772": {
         "name": "优选IP和反代IP",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_754": {
         "name": "在线优选IP，优选域名网站",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_677": {
         "name": "在线优选IP，优选域名网站",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_272": {
         "name": "Live streaming",
-        "items": []
+        "items": [
+          {
+            "id": "bookmark_import_1755812647844_50",
+            "title": "Twitch",
+            "url": "https://m.twitch.tv/?desktop-redirect=true"
+          }
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_773": {
         "name": "Airport",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_216": {
         "name": "Airport",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_853": {
         "name": "SMSvrelated",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_174": {
         "name": "SMSvrelated",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_716": {
         "name": "AI",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_858": {
         "name": "AI",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_502": {
         "name": "图像生成AI",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_337": {
         "name": "图像生成AI",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_769": {
         "name": "视频生成AI",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_382": {
         "name": "视频生成AI",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_832": {
         "name": "编程代码能力最强的AI",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_189": {
         "name": "编程代码能力最强的AI",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_816": {
         "name": "分析代码AI工具",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_432": {
         "name": "分析代码AI工具",
-        "items": []
+        "items": [
+          {
+            "id": "bookmark_import_1755812647844_3",
+            "title": "CodeGeeX",
+            "url": "https://codegeex.cn/downloadGuide#vscode"
+          },
+          {
+            "id": "bookmark_import_1755812647844_840",
+            "title": "登录 - 腾讯云",
+            "url": "https://cloud.tencent.com/login?s_url=https%3A%2F%2Fconsole.cloud.tencent.com%2F"
+          }
+        ],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_165": {
         "name": "IP related",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_799": {
         "name": "IP related",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_28": {
         "name": "IP查询网站",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_667": {
         "name": "IP查询网站",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_752": {
         "name": "DNS",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_768": {
         "name": "DNS",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_325": {
         "name": "VPS",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196167_233": {
         "name": "VPS",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_173": {
         "name": "VPS",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_707": {
         "name": "VPS",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_340": {
         "name": "myhost",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_499": {
         "name": "myhost",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_58": {
         "name": "Navigation Station",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_491": {
         "name": "Navigation Station",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_140": {
         "name": "Bypassing",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_251": {
         "name": "Bypassing",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_367": {
         "name": "Development polatform",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_683": {
         "name": "Development polatform",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_889": {
         "name": "cloud storage",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_878": {
         "name": "cloud storage",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_522": {
         "name": "Airport",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_905": {
         "name": "Airport",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_936": {
         "name": "my sunpanel",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_931": {
         "name": "my sunpanel",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_447": {
         "name": "APK related",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_761": {
         "name": "APK related",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_559": {
         "name": "DNS",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_659": {
         "name": "DNS",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_163": {
         "name": "容器",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       },
       "folder_import_1755805196168_462": {
         "name": "容器",
-        "items": []
+        "items": [],
+        "parent": "default",
+        "level": 0
       }
     },
     "quickAccess": []
