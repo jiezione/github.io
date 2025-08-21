@@ -1,15 +1,5 @@
 {
   "bookmarks": [],
-  "folders": [],
-  "cities": [
-    {"name": "New York", "timezone": "America/New_York"},
-    {"name": "London", "timezone": "Europe/London"},
-    {"name": "Tokyo", "timezone": "Asia/Tokyo"},
-    {"name": "Sydney", "timezone": "Australia/Sydney"}
-  ],
-  "ads": [],
-  "settings": {
-    "theme": "dark",
-    "healthReminders": true
-  }
+  "cities": ["北京", "纽约", "伦敦", "东京"],
+  "ads": [{}, {}, {}]
 }
