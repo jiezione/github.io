@@ -3,7 +3,13 @@
     "folders": {
       "default": {
         "name": "默认文件夹",
-        "items": []
+        "items": [
+          {
+            "id": "bookmark_1755810814533",
+            "title": "abc",
+            "url": "https://abc.com"
+          }
+        ]
       },
       "folder_1755800353190_945": {
         "name": "APK related",
