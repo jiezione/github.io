@@ -1,39 +1,29 @@
-name: Deploy to GitHub Pages
+name: Deploy Space Bookmark Navigator
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Git config
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-      
-      - name: Initialize empty bookmarks.json if not exists
-        run: |
-          if [ ! -f "bookmarks.json" ]; then
-            echo '{"bookmarks": [],"cities": ["北京", "纽约", "伦敦", "东京"],"ads": [],"folders": []}' > bookmarks.json
-          fi
-      
-      - name: Inject repo info into index.html
-        run: |
-          USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)
-          REPO=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2)
-          DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          
-          # Inject repo info
-          sed -i "s|</head>|<script>window.repoInfo = { username: '$USERNAME', repo: '$REPO' }; window.appDeployDate = '$DEPLOY_DATE';</script></head>|" index.html
-      
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
-          force_orphan: true
     
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Inject repo info into index.html
+      run: |
+        # 获取当前仓库信息
+        USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)
+        REPO=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2)
+        
+        # 替换index.html中的占位符
+        sed -i "s|your-username|$USERNAME|g" index.html
+        sed -i "s|your-repo|$REPO|g" index.html
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
+        force_orphan: true
