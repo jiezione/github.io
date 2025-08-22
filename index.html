@@ -44,6 +44,40 @@
         }
     </script>
     <style type="text/tailwindcss">
+        @media (max-width: 768px) {
+    .bookmarks-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 1rem;
+    }
+    
+    .clock-container {
+        font-size: 2.5rem;
+    }
+    
+    .greeting {
+        font-size: 1.5rem;
+    }
+    
+    .search-container {
+        width: 90%;
+        max-width: none;
+    }
+    
+    .world-clocks {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    #controls button {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .modal-content {
+        width: 90%;
+        max-width: 300px;
+    }
+}
         @layer utilities {
             .content-auto {
                 content-visibility: auto;
@@ -864,33 +898,91 @@
         }
 
         // 渲染书签
-        function renderBookmarks() {
-            elements.bookmarks.innerHTML = '';
-            appData.bookmarks.forEach(bookmark => {
-        // 解析URL获取域名用于获取favicon
-              let faviconUrl = '';
-            try {
-              const url = new URL(bookmark.url);
-              faviconUrl = `${url.origin}/favicon.ico`;
-            } catch (e) {
-            faviconUrl = '';
-        }
-        
-            // 获取标题首字符作为备选图标
-            const firstChar = bookmark.title.charAt(0).toUpperCase();
-        
-            const bookmarkEl = document.createElement('a');
-                 bookmarkEl.href = bookmark.url;
-                 bookmarkEl.target = '_blank';
-                 bookmarkEl.className = 'bookmark-card bg-card/80 backdrop-blur-sm rounded-lg p-4 flex flex-col items-center justify-center text-center h-full transition-all hover:bg-card hover:scale-105';
-                 bookmarkEl.innerHTML = `
-            <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2 bg-primary/10 text-primary font-bold">
-                <img src="${faviconUrl}" alt="Favicon" class="w-6 h-6 rounded-full" onerror="this.parentElement.innerHTML='${firstChar}'">
-            </div>
-            <span class="text-sm truncate w-full">${bookmark.title}</span>
-             `;
-            elements.bookmarks.appendChild(bookmarkEl);
-           });
+        function renderBookmarks(searchQuery = '') {
+            // 清空容器
+            elements.bookmarkFolders.innerHTML = '';
+            elements.quickAccess.innerHTML = '';
+            
+            // 过滤书签
+            const filteredFolders = {};
+            const filteredQuickAccess = [];
+            
+            // 处理文件夹书签
+            Object.keys(appData.bookmarks.folders).forEach(folderId => {
+                const folder = appData.bookmarks.folders[folderId];
+                const filteredItems = searchQuery 
+                    ? folder.items.filter(item => isMatch(item, searchQuery))
+                    : [...folder.items];
+                
+                if (filteredItems.length > 0) {
+                    filteredFolders[folderId] = {
+                        ...folder,
+                        items: filteredItems
+                    };
+                }
+            });
+            
+            // 处理快速访问书签
+            if (searchQuery) {
+                appData.bookmarks.quickAccess.forEach(item => {
+                    if (isMatch(item, searchQuery)) {
+                        filteredQuickAccess.push(item);
+                    }
+                });
+            } else {
+                filteredQuickAccess.push(...appData.bookmarks.quickAccess);
+            }
+            
+            // 渲染文件夹书签
+            Object.keys(filteredFolders).forEach(folderId => {
+                const folder = filteredFolders[folderId];
+                const folderElement = document.createElement('div');
+                folderElement.className = 'bg-space-light/20 backdrop-blur-md rounded-xl p-4 border border-space-accent/20';
+                
+                folderElement.innerHTML = `
+                    <h3 class="text-lg font-semibold mb-3 text-space-glow flex items-center">
+                        <i class="fa fa-folder mr-2"></i>${folder.name}
+                        <span class="ml-2 text-xs bg-space-accent/30 px-2 py-0.5 rounded-full">${folder.items.length}</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        ${folder.items.map(item => createBookmarkElement(item)).join('')}
+                    </div>
+                `;
+                
+                elements.bookmarkFolders.appendChild(folderElement);
+            });
+            
+            // 渲染快速访问书签
+            filteredQuickAccess.forEach(item => {
+                const quickItem = document.createElement('a');
+                quickItem.href = item.url;
+                quickItem.target = '_blank';
+                quickItem.className = 'bg-space-light/30 backdrop-blur-md rounded-lg p-3 text-center card-hover flex flex-col items-center justify-center h-full';
+                
+                // 获取域名作为图标文本
+                let domain = '';
+                try {
+                    const url = new URL(item.url);
+                    domain = url.hostname.replace('www.', '').split('.')[0];
+                } catch (e) {
+                    domain = '?';
+                }
+                
+                quickItem.innerHTML = `
+                    <div class="w-10 h-10 rounded-full bg-space-accent/20 flex items-center justify-center mb-2 text-space-glow font-bold">
+                        ${domain.charAt(0).toUpperCase()}
+                    </div>
+                    <span class="text-sm truncate w-full">${item.title}</span>
+                `;
+                
+                elements.quickAccess.appendChild(quickItem);
+            });
+            
+            // 更新编辑界面的书签列表
+            renderBookmarkEditList();
+            
+            // 更新文件夹下拉选项
+            updateBookmarkFolderSelect();
         }
 
         // 创建书签元素
@@ -946,7 +1038,7 @@
             <span class="text-right">${time}<br><span class="text-xs text-gray-400">${date}</span></span>
         `;
         elements.worldClocks.appendChild(cityEl);
-         });
+            });
         }
 
         // 更新时钟显示
