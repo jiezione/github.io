@@ -1858,17 +1858,16 @@ function escapeHtml(unsafe) {
 
         // 更新编辑功能状态
         function updateEditFeaturesStatus() {
-            const isEnabled = appData.github.validated;
-            
-            elements.enterEditBtn.disabled = !isEnabled;
-            elements.importBookmarks.disabled = !isEnabled;
-            elements.exportBookmarks.disabled = !isEnabled;
-            elements.addBookmark.disabled = !isEnabled;
-            elements.saveBookmarkChanges.disabled = !isEnabled;
-            elements.addCity.disabled = !isEnabled;
-            elements.saveClockChanges.disabled = !isEnabled;
-            elements.saveAdChanges.disabled = !isEnabled;
-        }
+    const isEnabled = appData.github.validated;
+    elements.enterEditBtn.disabled = !isEnabled;
+    elements.importBookmarks.disabled = !isEnabled;
+    elements.exportBookmarks.disabled = !isEnabled; // 新增：启用导出按钮
+    elements.addBookmark.disabled = !isEnabled;
+    elements.addCity.disabled = !isEnabled;
+    elements.saveBookmarkChanges.disabled = !isEnabled;
+    elements.saveClockChanges.disabled = !isEnabled;
+    elements.saveAdChanges.disabled = !isEnabled;
+}
 
         // 验证GitHub Token
         async function validateGitHubToken(token) {
