@@ -1972,9 +1972,13 @@ function getFaviconInfo(url, title) {
                 elements.bookmarkFile.click();
             });
             
-            elements.bookmarkFile.addEventListener('change', async function(e) {
-    // 保持原有代码不变...
-    const file = e.target.files[0];
+            elements.bookmarkFile.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    importBookmarks(e.target.files[0]);
+                    // 重置输入，允许重复选择同一文件
+                    e.target.value = '';
+                };
+                const file = e.target.files[0];
     if (!file) return;
     
     const text = await file.text();
@@ -2003,7 +2007,7 @@ function getFaviconInfo(url, title) {
             // 原有书签去重代码...
         });
     });
-});
+            });
             
             // 导出书签
             elements.exportBookmarks.addEventListener('click', exportBookmarks);
