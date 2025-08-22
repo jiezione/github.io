@@ -983,7 +983,9 @@
             
             // 更新文件夹下拉选项
             updateBookmarkFolderSelect();
+        }
 
+        function renderBookmarks() {
             elements.bookmarks.innerHTML = '';
             appData.bookmarks.forEach(bookmark => {
         // 解析URL获取域名用于获取favicon
