@@ -1784,60 +1784,66 @@ function getFaviconInfo(url, title) {
 
         // 导出书签
         function exportBookmarks() {
-            try {
-                // 创建HTML书签格式
-                let htmlContent = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+    // 生成符合NETSCAPE-Bookmark-file-1标准的HTML格式
+    let htmlContent = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<!-- This is an automatically generated file.
+     It will be read and overwritten.
+     DO NOT EDIT! -->
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-<TITLE>书签导出</TITLE>
-<H1>书签</H1>
+<TITLE>星际导航书签</TITLE>
+<H1>星际导航书签</H1>
 <DL><p>`;
-                
-                // 添加文件夹和书签
-                Object.keys(appData.bookmarks.folders).forEach(folderId => {
-                    const folder = appData.bookmarks.folders[folderId];
-                    if (folder.items.length === 0) return;
-                    
-                    htmlContent += `<DT><H3>${folder.name}</H3>
-<DL><p>`;
-                    
-                    folder.items.forEach(item => {
-                        htmlContent += `<DT><A HREF="${item.url}">${item.title}</A>`;
-                    });
-                    
-                    htmlContent += `</DL><p>`;
-                });
-                
-                // 添加快速访问
-                if (appData.bookmarks.quickAccess.length > 0) {
-                    htmlContent += `<DT><H3>快速访问</H3>
-<DL><p>`;
-                    
-                    appData.bookmarks.quickAccess.forEach(item => {
-                        htmlContent += `<DT><A HREF="${item.url}">${item.title}</A>`;
-                    });
-                    
-                    htmlContent += `</DL><p>`;
-                }
-                
-                htmlContent += `</DL>`;
-                
-                // 创建下载文件
-                const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `星际导航书签_${new Date().toISOString().slice(0,10)}.html`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                showToast('书签导出成功');
-            } catch (error) {
-                console.error('书签导出失败:', error);
-                showToast('书签导出失败: ' + error.message, 'error');
+
+    // 遍历所有文件夹
+    Object.entries(appData.bookmarks.folders).forEach(([folderId, folder]) => {
+        // 添加文件夹
+        htmlContent += `
+    <DT><H3>${escapeHtml(folder.name)}</H3>
+    <DL><p>`;
+
+        // 添加文件夹内书签
+        folder.items.forEach(item => {
+            const addDate = item.addDate || Date.now(); // 使用当前时间戳或已有时间戳
+            htmlContent += `
+        <DT><A HREF="${escapeHtml(item.url)}" ADD_DATE="${addDate}">${escapeHtml(item.title)}</A>`;
+        });
+
+        htmlContent += `
+    </DL><p>`; // 文件夹结束
+    });
+
+    // 添加常用书签文件夹
+    htmlContent += `
+    <DT><H3>常用站点</H3>
+    <DL><p>`;
+
+    appData.bookmarks.quickAccess.forEach(item => {
+        const addDate = item.addDate || Date.now();
+        htmlContent += `
+        <DT><A HREF="${escapeHtml(item.url)}" ADD_DATE="${addDate}">${escapeHtml(item.title)}</A>`;
+    });
+
+    htmlContent += `
+    </DL><p>
+</DL><p>`; // 总结束
+
+    // 生成下载链接（使用text/html格式和.html扩展名）
+    const dataUri = 'data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent);
+    const exportFileDefaultName = 'space-bookmarks.html';
+    downloadFile(dataUri, exportFileDefaultName);
+}
+
+// 添加HTML转义工具函数（防止特殊字符破坏格式）
+function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
             }
-        }
+      
 
         // 更新编辑功能状态
         function updateEditFeaturesStatus() {
