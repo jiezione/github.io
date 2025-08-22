@@ -1709,30 +1709,6 @@ function getFaviconInfo(url, title) {
             };
             
             reader.readAsText(file);
-            const folders = parseBookmarks(fileContent);
-    
-    folders.forEach(folder => {
-        // 新增：检查是否已存在同名文件夹
-        const existingFolderId = Object.keys(appData.bookmarks.folders).find(
-            id => appData.bookmarks.folders[id].name === folder.name
-        );
-        
-        // 存在则复用现有ID，不存在则生成新ID
-        const folderId = existingFolderId || 'folder_' + Date.now() + Math.random().toString(36).slice(-8);
-        
-        // 仅在不存在同名文件夹时才创建新文件夹
-        if (!existingFolderId) {
-            appData.bookmarks.folders[folderId] = {
-                name: folder.name,
-                items: []
-            };
-        }
-        
-        // 原有书签处理逻辑保持不变（继续使用原有的书签去重）
-        folder.items.forEach(bookmark => {
-            // 书签去重逻辑...（不做任何修改）
-        });
-    });
         }
         
         // 标准化URL用于去重检查
@@ -2001,7 +1977,7 @@ function getFaviconInfo(url, title) {
                     importBookmarks(e.target.files[0]);
                     // 重置输入，允许重复选择同一文件
                     e.target.value = '';
-                };
+                }
             });
             
             // 导出书签
