@@ -865,32 +865,32 @@
 
         // 渲染书签
         function renderBookmarks() {
-    elements.bookmarks.innerHTML = '';
-    appData.bookmarks.forEach(bookmark => {
+            elements.bookmarks.innerHTML = '';
+            appData.bookmarks.forEach(bookmark => {
         // 解析URL获取域名用于获取favicon
-        let faviconUrl = '';
-        try {
-            const url = new URL(bookmark.url);
-            faviconUrl = `${url.origin}/favicon.ico`;
-        } catch (e) {
+              let faviconUrl = '';
+            try {
+              const url = new URL(bookmark.url);
+              faviconUrl = `${url.origin}/favicon.ico`;
+            } catch (e) {
             faviconUrl = '';
         }
         
-        // 获取标题首字符作为备选图标
-        const firstChar = bookmark.title.charAt(0).toUpperCase();
+            // 获取标题首字符作为备选图标
+            const firstChar = bookmark.title.charAt(0).toUpperCase();
         
-        const bookmarkEl = document.createElement('a');
-        bookmarkEl.href = bookmark.url;
-        bookmarkEl.target = '_blank';
-        bookmarkEl.className = 'bookmark-card bg-card/80 backdrop-blur-sm rounded-lg p-4 flex flex-col items-center justify-center text-center h-full transition-all hover:bg-card hover:scale-105';
-        bookmarkEl.innerHTML = `
+            const bookmarkEl = document.createElement('a');
+                 bookmarkEl.href = bookmark.url;
+                 bookmarkEl.target = '_blank';
+                 bookmarkEl.className = 'bookmark-card bg-card/80 backdrop-blur-sm rounded-lg p-4 flex flex-col items-center justify-center text-center h-full transition-all hover:bg-card hover:scale-105';
+                 bookmarkEl.innerHTML = `
             <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2 bg-primary/10 text-primary font-bold">
                 <img src="${faviconUrl}" alt="Favicon" class="w-6 h-6 rounded-full" onerror="this.parentElement.innerHTML='${firstChar}'">
             </div>
             <span class="text-sm truncate w-full">${bookmark.title}</span>
-        `;
-        elements.bookmarks.appendChild(bookmarkEl);
-     });
+             `;
+            elements.bookmarks.appendChild(bookmarkEl);
+           });
         }
 
         // 创建书签元素
