@@ -814,6 +814,65 @@ function getFaviconInfo(url, title) {
             }
         }
 
+                // 搜索书签功能实现
+        function searchBookmarks(query) {
+            if (!query.trim()) {
+                // 搜索为空时重新渲染所有书签
+                renderBookmarks();
+                return;
+            }
+            
+            const lowerQuery = query.toLowerCase();
+            const bookmarkFolders = document.getElementById('bookmark-folders');
+            bookmarkFolders.innerHTML = '';
+            
+            // 搜索所有文件夹中的书签
+            Object.entries(appData.bookmarks.folders).forEach(([folderId, folder]) => {
+                const filteredItems = folder.items.filter(item => 
+                    item.title.toLowerCase().includes(lowerQuery) || 
+                    item.url.toLowerCase().includes(lowerQuery)
+                );
+                
+                if (filteredItems.length > 0) {
+                    // 创建文件夹容器
+                    const folderElement = document.createElement('div');
+                    folderElement.className = 'bookmark-folder';
+                    
+                    // 文件夹标题
+                    const folderHeader = document.createElement('div');
+                    folderHeader.className = 'flex justify-between items-center mb-2';
+                    folderHeader.innerHTML = `
+                        <h3 class="font-semibold text-white">${folder.name}</h3>
+                        <span class="text-sm text-gray-400">${filteredItems.length}</span>
+                    `;
+                    folderElement.appendChild(folderHeader);
+                    
+                    // 书签网格
+                    const bookmarksGrid = document.createElement('div');
+                    bookmarksGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 bookmarks-grid';
+                    
+                    // 添加筛选后的书签
+                    filteredItems.forEach(item => {
+                        const favicon = item.favicon || getFaviconInfo(item.url, item.title);
+                        const bookmarkCard = document.createElement('a');
+                        bookmarkCard.href = item.url;
+                        bookmarkCard.target = '_blank';
+                        bookmarkCard.className = 'bg-space-dark/50 backdrop-blur-sm rounded-lg rounded-lg p-3 border border-space-accent/20 card-hover flex flex-col items-center text-center';
+                        bookmarkCard.innerHTML = `
+                            <div class="w-10 h-10 rounded-full bg-space-accent/20 flex items-center justify-center mb-2 text-space-glow font-bold">
+                                <img src="${favicon.direct}" onerror="this.onerror=null;this.src='${favicon.backup}'" onload="this.onerror=null" class="w-6 h-6 rounded-full" alt="${item.title}">
+                            </div>
+                            <span class="text-sm truncate w-full">${item.title}</span>
+                        `;
+                        bookmarksGrid.appendChild(bookmarkCard);
+                    });
+                    
+                    folderElement.appendChild(bookmarksGrid);
+                    bookmarkFolders.appendChild(folderElement);
+                }
+            });
+        }
+
         // 从GitHub加载数据
         async function loadDataFromGitHub() {
             showLoader();
@@ -2092,6 +2151,10 @@ function getFaviconInfo(url, title) {
                     renderAds(); // 立即更新广告显示
                     showToast('广告设置已保存并同步到GitHub');
                 }
+            });
+                        // 搜索框事件监听
+            elements.searchInput.addEventListener('input', (e) => {
+                searchBookmarks(e.target.value);
             });
         }
 
