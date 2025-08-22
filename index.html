@@ -2173,6 +2173,7 @@ function escapeHtml(unsafe) {
             elements.searchInput.addEventListener('input', (e) => {
                 searchBookmarks(e.target.value);
             });
+             elements.exportBookmarks.addEventListener('click', exportBookmarks);
         }
 
         // 渲染城市编辑列表
