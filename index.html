@@ -1335,8 +1335,8 @@ function renderBookmarks(searchQuery = '') {
                 });
             });
             
-            // 添加"添加文件夹"按钮（移至顶部）
-    const addFolderElement = document.createElement('div');
+            // 添加"添加文件夹"按钮
+            const addFolderElement = document.createElement('div');
     addFolderElement.className = 'mb-4 text-center';
     addFolderElement.innerHTML = `
         <button id="add-folder-btn" class="text-space-glow hover:text-space-accent transition-colors">
@@ -1420,6 +1420,63 @@ function renderBookmarks(searchQuery = '') {
             }
         });
     });
+            
+            // 绑定书签标题和URL修改事件
+            document.querySelectorAll('.bookmark-title').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    const folderId = e.target.getAttribute('data-folder');
+                    const item = appData.bookmarks.folders[folderId]?.items.find(i => i.id === id);
+                    if (item) {
+                        item.title = e.target.value.trim() || '未命名书签';
+                        renderBookmarks();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.bookmark-url').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    const folderId = e.target.getAttribute('data-folder');
+                    const item = appData.bookmarks.folders[folderId]?.items.find(i => i.id === id);
+                    if (item) {
+                        item.url = e.target.value.trim();
+                        renderBookmarks();
+                    }
+                });
+            });
+            
+            // 绑定编辑书签事件
+            document.querySelectorAll('.edit-bookmark-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('.edit-bookmark-btn').getAttribute('data-id');
+                    const folderId = e.target.closest('.edit-bookmark-btn').getAttribute('data-folder');
+                    openBookmarkForm(id, folderId);
+                });
+            });
+            
+            // 绑定删除书签事件
+            document.querySelectorAll('.delete-bookmark-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('.delete-bookmark-btn').getAttribute('data-id');
+                    const folderId = e.target.closest('.delete-bookmark-btn').getAttribute('data-folder');
+                    
+                    // 从文件夹中删除
+                    if (appData.bookmarks.folders[folderId]) {
+                        const initialLength = appData.bookmarks.folders[folderId].items.length;
+                        appData.bookmarks.folders[folderId].items = appData.bookmarks.folders[folderId].items.filter(item => item.id !== id);
+                        
+                        // 如果删除成功
+                        if (appData.bookmarks.folders[folderId].items.length < initialLength) {
+                            // 同时从快速访问中删除（如果存在）
+                            appData.bookmarks.quickAccess = appData.bookmarks.quickAccess.filter(item => item.id !== id);
+                            
+                            renderBookmarks();
+                            showToast('书签已删除');
+                        }
+                    }
+                });
+            });
         }
 
         // 添加新文件夹
