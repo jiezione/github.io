@@ -1286,6 +1286,16 @@ function renderBookmarks(searchQuery = '') {
         // 渲染书签编辑列表
         function renderBookmarkEditList() {
             elements.bookmarkEditContainer.innerHTML = '';
+
+            // 新增：在顶部添加"添加新文件夹"按钮
+            const addFolderElement = document.createElement('div');
+            addFolderElement.className = 'mb-4 text-center';
+            addFolderElement.innerHTML = `
+                <button id="add-folder-btn" class="text-space-glow hover:text-space-accent transition-colors">
+                    <i class="fa fa-plus-circle mr-1"></i>添加新文件夹
+                </button>
+            `;
+            elements.bookmarkEditContainer.appendChild(addFolderElement);
             
             // 先添加文件夹管理
             Object.keys(appData.bookmarks.folders).forEach(folderId => {
@@ -1334,16 +1344,6 @@ function renderBookmarks(searchQuery = '') {
                     elements.bookmarkEditContainer.appendChild(itemElement);
                 });
             });
-            
-            // 添加"添加文件夹"按钮
-            const addFolderElement = document.createElement('div');
-            addFolderElement.className = 'mt-4 text-center';
-            addFolderElement.innerHTML = `
-                <button id="add-folder-btn" class="text-space-glow hover:text-space-accent transition-colors">
-                    <i class="fa fa-plus-circle mr-1"></i>添加新文件夹
-                </button>
-            `;
-            elements.bookmarkEditContainer.appendChild(addFolderElement);
             
             // 绑定文件夹名称修改事件
             document.querySelectorAll('.folder-name').forEach(input => {
