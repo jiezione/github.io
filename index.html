@@ -1024,8 +1024,7 @@ function renderBookmarks(searchQuery = '') {
     }
     
     // 渲染过滤后的文件夹和书签
-    foldersToRender.forEach(folder => {
-        const folderId = folder.id;
+    Object.entries(foldersToRender).forEach(([folderId, folder]) => {
         const folderElement = document.createElement('div');
         folderElement.className = 'bookmark-folder';
         
@@ -1956,9 +1955,10 @@ function handleSearch(query) {
 
 // 过滤书签的工具函数
 function filterBookmarks(query) {
-    if (!query) return [...appData.bookmarks.folders]; // 无搜索词时返回全部
+    if (!query) return appData.bookmarks.folders; // 无搜索词时返回全部
     
-    return appData.bookmarks.folders.filter(folder => {
+    const filteredFolders = {};
+    Object.entries(appData.bookmarks.folders).forEach(([folderId, folder]) => {
         // 过滤文件夹中匹配的书签
         const filteredItems = folder.items.filter(item => 
             item.title.toLowerCase().includes(query) || 
@@ -1966,12 +1966,14 @@ function filterBookmarks(query) {
         );
         
         if (filteredItems.length > 0) {
-            folder.items = filteredItems;
-            return true;
+            filteredFolders[folderId] = {
+                ...folder,
+                items: filteredItems
+            };
         }
-        return false;
     });
-}
+    return filteredFolders;
+        }
 
         // 设置事件监听
         function setupEventListeners() {
