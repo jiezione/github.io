@@ -1335,98 +1335,91 @@ function renderBookmarks(searchQuery = '') {
                 });
             });
             
-            // 添加"添加文件夹"按钮
-            const addFolderElement = document.createElement('div');
-            addFolderElement.className = 'mt-4 text-center';
-            addFolderElement.innerHTML = `
-                <button id="add-folder-btn" class="text-space-glow hover:text-space-accent transition-colors">
-                    <i class="fa fa-plus-circle mr-1"></i>添加新文件夹
-                </button>
+            // 添加"添加文件夹"按钮（移至顶部）
+    const addFolderElement = document.createElement('div');
+    addFolderElement.className = 'mb-4 text-center';
+    addFolderElement.innerHTML = `
+        <button id="add-folder-btn" class="text-space-glow hover:text-space-accent transition-colors">
+            <i class="fa fa-plus-circle mr-1"></i>添加新文件夹
+        </button>
+    `;
+    elements.bookmarkEditContainer.appendChild(addFolderElement);
+    
+    // 先添加文件夹管理
+    Object.keys(appData.bookmarks.folders).forEach(folderId => {
+        const folder = appData.bookmarks.folders[folderId];
+        const folderElement = document.createElement('div');
+        folderElement.className = 'bg-space-dark p-4 rounded-xl';
+        
+        folderElement.innerHTML = `
+            <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                    <i class="fa fa-folder text-space-glow mr-2"></i>
+                    <input type="text" value="${folder.name}" class="bg-transparent border-b border-gray-700 focus:border-space-glow focus:outline-none folder-name" data-folder-id="${folderId}">
+                </div>
+                <div class="flex gap-1">
+                    <button class="delete-folder p-1 text-gray-400 hover:text-red-400" data-folder-id="${folderId}" ${folderId === 'default' ? 'disabled title="默认文件夹不能删除"' : ''}>
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        elements.bookmarkEditContainer.appendChild(folderElement);
+        
+        // 添加文件夹内的书签
+        folder.items.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'ml-6 mb-2 p-2 hover:bg-space-light/20 rounded-lg';
+            
+            itemElement.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div class="flex-1 min-w-0">
+                        <input type="text" value="${item.title}" class="bg-transparent border-b border-gray-700 focus:border-space-glow focus:outline-none w-full bookmark-title" data-id="${item.id}" data-folder="${folderId}">
+                        <input type="url" value="${item.url}" class="bg-transparent border-b border-gray-700 focus:border-space-glow focus:outline-none w-full text-sm text-gray-400 bookmark-url" data-id="${item.id}" data-folder="${folderId}">
+                    </div>
+                    <div class="flex gap-1 ml-2">
+                        <button class="edit-bookmark-btn p-1 text-gray-400 hover:text-space-glow" data-id="${item.id}" data-folder="${folderId}">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="delete-bookmark-btn p-1 text-gray-400 hover:text-red-400" data-id="${item.id}" data-folder="${folderId}">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
             `;
-            elements.bookmarkEditContainer.appendChild(addFolderElement);
             
-            // 绑定文件夹名称修改事件
-            document.querySelectorAll('.folder-name').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    const folderId = e.target.getAttribute('data-folder-id');
-                    if (appData.bookmarks.folders[folderId]) {
-                        appData.bookmarks.folders[folderId].name = e.target.value.trim() || `文件夹${Object.keys(appData.bookmarks.folders).length}`;
-                        renderBookmarks();
-                    }
-                });
-            });
-            
-            // 绑定添加文件夹事件
-            document.getElementById('add-folder-btn').addEventListener('click', addNewFolder);
-            
-            // 绑定删除文件夹事件
-            document.querySelectorAll('.delete-folder').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const folderId = e.target.closest('.delete-folder').getAttribute('data-folder-id');
-                    if (folderId !== 'default' && confirm(`确定要删除"${appData.bookmarks.folders[folderId].name}"吗？文件夹内的书签也会被删除。`)) {
-                        delete appData.bookmarks.folders[folderId];
-                        renderBookmarks();
-                        showToast('文件夹已删除');
-                    }
-                });
-            });
-            
-            // 绑定书签标题和URL修改事件
-            document.querySelectorAll('.bookmark-title').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    const folderId = e.target.getAttribute('data-folder');
-                    const item = appData.bookmarks.folders[folderId]?.items.find(i => i.id === id);
-                    if (item) {
-                        item.title = e.target.value.trim() || '未命名书签';
-                        renderBookmarks();
-                    }
-                });
-            });
-            
-            document.querySelectorAll('.bookmark-url').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    const folderId = e.target.getAttribute('data-folder');
-                    const item = appData.bookmarks.folders[folderId]?.items.find(i => i.id === id);
-                    if (item) {
-                        item.url = e.target.value.trim();
-                        renderBookmarks();
-                    }
-                });
-            });
-            
-            // 绑定编辑书签事件
-            document.querySelectorAll('.edit-bookmark-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = e.target.closest('.edit-bookmark-btn').getAttribute('data-id');
-                    const folderId = e.target.closest('.edit-bookmark-btn').getAttribute('data-folder');
-                    openBookmarkForm(id, folderId);
-                });
-            });
-            
-            // 绑定删除书签事件
-            document.querySelectorAll('.delete-bookmark-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = e.target.closest('.delete-bookmark-btn').getAttribute('data-id');
-                    const folderId = e.target.closest('.delete-bookmark-btn').getAttribute('data-folder');
-                    
-                    // 从文件夹中删除
-                    if (appData.bookmarks.folders[folderId]) {
-                        const initialLength = appData.bookmarks.folders[folderId].items.length;
-                        appData.bookmarks.folders[folderId].items = appData.bookmarks.folders[folderId].items.filter(item => item.id !== id);
-                        
-                        // 如果删除成功
-                        if (appData.bookmarks.folders[folderId].items.length < initialLength) {
-                            // 同时从快速访问中删除（如果存在）
-                            appData.bookmarks.quickAccess = appData.bookmarks.quickAccess.filter(item => item.id !== id);
-                            
-                            renderBookmarks();
-                            showToast('书签已删除');
-                        }
-                    }
-                });
-            });
+            elements.bookmarkEditContainer.appendChild(itemElement);
+        });
+    });
+    
+    // 移除原底部的"添加新文件夹"按钮代码
+    
+    // 绑定文件夹名称修改事件
+    document.querySelectorAll('.folder-name').forEach(input => {
+        input.addEventListener('change', (e) => {
+            const folderId = e.target.getAttribute('data-folder-id');
+            if (appData.bookmarks.folders[folderId]) {
+                appData.bookmarks.folders[folderId].name = e.target.value.trim() || `文件夹${Object.keys(appData.bookmarks.folders).length}`;
+                renderBookmarks();
+            }
+        });
+    });
+    
+    // 绑定添加文件夹事件
+    document.getElementById('add-folder-btn').addEventListener('click', addNewFolder);
+    
+    // 绑定删除文件夹事件
+    document.querySelectorAll('.delete-folder').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const folderId = e.target.closest('.delete-folder').getAttribute('data-folder-id');
+            if (folderId !== 'default' && confirm(`确定要删除"${appData.bookmarks.folders[folderId].name}"吗？文件夹内的书签也会被删除。`)) {
+                delete appData.bookmarks.folders[folderId];
+                renderBookmarks();
+                showToast('文件夹已删除');
+            }
+        });
+    });
         }
 
         // 添加新文件夹
