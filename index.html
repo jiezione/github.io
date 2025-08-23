@@ -1300,8 +1300,8 @@ function renderBookmarks(searchQuery = '') {
             elements.bookmarkEditContainer.appendChild(addFolderElement);
             
             // 先添加文件夹管理
-            appData.bookmarks.folders.forEach(folder => {
-                const folderId = folder.id;
+            Object.keys(appData.bookmarks.folders).forEach(folderId => {
+                const folder = appData.bookmarks.folders[folderId];
                 const folderElement = document.createElement('div');
                 folderElement.className = 'bg-space-dark p-4 rounded-xl';
                 
@@ -1463,8 +1463,8 @@ function renderBookmarks(searchQuery = '') {
             select.innerHTML = '';
             
             // 添加所有文件夹选项
-            appData.bookmarks.folders.forEach(folder => {
-                const folderId = folder.id;
+            Object.keys(appData.bookmarks.folders).forEach(folderId => {
+                const folder = appData.bookmarks.folders[folderId];
                 const option = document.createElement('option');
                 option.value = folderId;
                 option.textContent = folder.name;
@@ -1766,8 +1766,8 @@ function renderBookmarks(searchQuery = '') {
 <DL><p>`;
                 
                 // 添加文件夹和书签
-                appData.bookmarks.folders.forEach(folder => {
-                    const folderId = folder.id;
+                Object.keys(appData.bookmarks.folders).forEach(folderId => {
+                    const folder = appData.bookmarks.folders[folderId];
                     if (folder.items.length === 0) return;
                     
                     htmlContent += `<DT><H3>${folder.name}</H3>
