@@ -2313,6 +2313,46 @@ elements.saveBookmark.addEventListener('click', () => {
             // 搜索功能监听
              elements.searchInput.addEventListener('input', (e) => {
                 handleSearch(e.target.value);
+            });
+            // 新文件夹创建功能
+elements.bookmarkFolder.addEventListener('change', () => {
+    const newFolderInput = document.getElementById('new-folder-input');
+    if (elements.bookmarkFolder.value === '__new__') {
+        newFolderInput.classList.remove('hidden');
+        newFolderInput.querySelector('input').focus();
+    } else {
+        newFolderInput.classList.add('hidden');
+    }
+});
+
+document.getElementById('confirm-new-folder').addEventListener('click', () => {
+    const newFolderInput = document.getElementById('new-folder-input');
+    const folderName = newFolderInput.querySelector('input').value.trim();
+    
+    if (folderName) {
+        // 生成唯一文件夹ID
+        const folderId = 'folder_' + Date.now();
+        
+        // 添加到文件夹列表
+        appData.bookmarks.folders[folderId] = { name: folderName, items: [] };
+        
+        // 更新下拉列表
+        const option = document.createElement('option');
+        option.value = folderId;
+        option.textContent = folderName;
+        elements.bookmarkFolder.insertBefore(option, elements.bookmarkFolder.querySelector('option[value="__new__"]'));
+        
+        // 选中新创建的文件夹
+        elements.bookmarkFolder.value = folderId;
+        
+        // 隐藏新文件夹输入框
+        newFolderInput.classList.add('hidden');
+        newFolderInput.querySelector('input').value = '';
+        
+        // 保存数据
+        saveData();
+        showToast(`已创建文件夹: ${folderName}`);
+    }
 });
         }
 
