@@ -800,16 +800,25 @@ function getFaviconInfo(url, title) {
                     throw new Error('GitHub配置不完整或未验证');
                 }
                 
-                // 准备要保存的数据
-                const dataToSave = {
+                // 准备要保存到GitHub的数据（包含完整广告图片）
+                const dataToSaveGitHub = {
                     bookmarks: appData.bookmarks,
                     cities: appData.cities,
                     ads: appData.ads,
                     deployDate: appData.deployDate
                 };
+                // 准备要保存到本地的数据（过滤广告图片以节省空间）
+const dataToSaveLocal = {
+    bookmarks: appData.bookmarks,
+    cities: appData.cities,
+    ads: appData.ads.map(ad => ({...ad, image: ''})), // 清空图片数据
+    deployDate: appData.deployDate,
+    github: appData.github,
+    theme: appData.theme
+};
                 
                 // 处理非Latin1字符的编码问题 - 使用更可靠的编码方式
-                const content = JSON.stringify(dataToSave, null, 2);
+                const content = JSON.stringify(dataToSaveGitHub, null, 2);
                 let base64Content;
                 
                 try {
@@ -856,8 +865,8 @@ function getFaviconInfo(url, title) {
                     throw new Error(error.message || `保存失败 (HTTP ${response.status})`);
                 }
                 
-                // 仅在成功保存到GitHub后更新本地存储
-                localStorage.setItem('spaceBookmarksData', JSON.stringify(appData));
+                // 仅在成功保存到GitHub后更新本地存储（使用过滤后的数据）
+                localStorage.setItem('spaceBookmarksData', JSON.stringify(dataToSaveLocal));
                 return true;
             } catch (error) {
                 console.error('保存数据到GitHub失败:', error);
