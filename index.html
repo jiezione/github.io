@@ -1801,17 +1801,16 @@ function renderBookmarks(searchQuery = '') {
 
         // 更新编辑功能状态
         function updateEditFeaturesStatus() {
-            const isEnabled = appData.github.validated;
-            
-            elements.enterEditBtn.disabled = !isEnabled;
-            elements.importBookmarks.disabled = !isEnabled;
-            elements.exportBookmarks.disabled = !isEnabled;
-            elements.addBookmark.disabled = !isEnabled;
-            elements.saveBookmarkChanges.disabled = !isEnabled;
-            elements.addCity.disabled = !isEnabled;
-            elements.saveClockChanges.disabled = !isEnabled;
-            elements.saveAdChanges.disabled = !isEnabled;
-        }
+    const isEnabled = appData.github.validated;
+    elements.importBookmarks.disabled = !isEnabled;
+    elements.exportBookmarks.disabled = !isEnabled;
+    elements.addBookmark.disabled = !isEnabled;  // 确保此行存在并正确
+    elements.saveBookmarkChanges.disabled = !isEnabled;
+    elements.addCity.disabled = !isEnabled;
+    elements.saveClockChanges.disabled = !isEnabled;
+    elements.saveAdChanges.disabled = !isEnabled;
+    elements.enterEditBtn.disabled = !isEnabled;
+}
 
         // 验证GitHub Token
         async function validateGitHubToken(token) {
