@@ -1841,70 +1841,74 @@ function renderBookmarks(searchQuery = '') {
 
         // 验证GitHub配置
         async function validateGitHubConfig() {
-            const username = elements.githubUsername.value.trim();
-            const repo = elements.githubRepo.value.trim();
-            const token = elements.githubToken.value.trim();
-            
-            if (!username || !repo) {
-                showValidationStatus('用户名和仓库名不能为空', 'error');
-                return false;
-            }
-            
-            if (!token) {
-                showValidationStatus('请输入Personal Access Token', 'error');
-                return false;
-            }
-            
-            showLoader();
-            showValidationStatus('验证中...', 'info');
-            
-            try {
-                // 先验证Token有效性
-                const isTokenValid = await validateGitHubToken(token);
-                if (!isTokenValid) {
-                    showValidationStatus('无效的Personal Access Token', 'error');
-                    appData.github.validated = false;
-                    updateEditFeaturesStatus();
-                    return false;
-                }
-                
-                // 再验证仓库访问权限
-                const url = `https://api.github.com/repos/${username}/${repo}`;
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (response.ok) {
-                    appData.github.username = username;
-                    appData.github.repo = repo;
-                    appData.github.token = token;
-                    appData.github.validated = true;
-                    
-                    localStorage.setItem('spaceBookmarksData', JSON.stringify(appData));
-                    showValidationStatus('验证成功', 'success');
-                    updateEditFeaturesStatus();
-                    showToast('GitHub配置验证成功');
-                    return true;
-                } else {
-                    const errorData = await response.json();
-                    const message = errorData.message || `验证失败 (HTTP ${response.status})`;
-                    showValidationStatus(message, 'error');
-                    appData.github.validated = false;
-                    updateEditFeaturesStatus();
-                    return false;
-                }
-            } catch (error) {
-                showValidationStatus('验证失败: ' + error.message, 'error');
-                appData.github.validated = false;
-                updateEditFeaturesStatus();
-                return false;
-            } finally {
-                hideLoader();
-            }
+    const username = elements.githubUsername.value.trim();
+    const repo = elements.githubRepo.value.trim();
+    const token = elements.githubToken.value.trim();
+    
+    if (!username || !repo) {
+        showValidationStatus('用户名和仓库名不能为空', 'error');
+        return false;
+    }
+    
+    if (!token) {
+        showValidationStatus('请输入Personal Access Token', 'error');
+        return false;
+    }
+    
+    showLoader();
+    showValidationStatus('验证中...', 'info');
+    
+    try {
+        // 先验证Token有效性
+        const isTokenValid = await validateGitHubToken(token);
+        if (!isTokenValid) {
+            showValidationStatus('无效的Personal Access Token', 'error');
+            appData.github.validated = false;
+            updateEditFeaturesStatus();
+            return false;
         }
+        
+        // 再验证仓库访问权限
+        const url = `https://api.github.com/repos/${username}/${repo}`;
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        
+        if (response.ok) {
+            appData.github.username = username;
+            appData.github.repo = repo;
+            appData.github.token = token;
+            appData.github.validated = true;
+            
+            // 仅更新本地存储中的GitHub配置，而非完整应用数据
+            const existingData = JSON.parse(localStorage.getItem('spaceBookmarksData') || '{}');
+            existingData.github = appData.github;
+            localStorage.setItem('spaceBookmarksData', JSON.stringify(existingData));
+            
+            showValidationStatus('验证成功', 'success');
+            updateEditFeaturesStatus();
+            showToast('GitHub配置验证成功');
+            return true;
+        } else {
+            const errorData = await response.json();
+            const message = errorData.message || `验证失败 (HTTP ${response.status})`;
+            showValidationStatus(message, 'error');
+            appData.github.validated = false;
+            updateEditFeaturesStatus();
+            return false;
+        }
+    } catch (error) {
+        showValidationStatus('验证失败: ' + error.message, 'error');
+        appData.github.validated = false;
+        updateEditFeaturesStatus();
+        return false;
+    } finally {
+        hideLoader();
+    }
+}
 
         // 显示GitHub验证状态
         function showValidationStatus(message, type = 'info') {
