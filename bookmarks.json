@@ -1,6 +1,16 @@
 {
   "bookmarks": {
     "folders": {
+      "folder_1755987496812": {
+        "name": "ABC",
+        "items": [
+          {
+            "id": "bookmark_1755987557578",
+            "title": "abc",
+            "url": "https://jiezione.github.io/jznav/"
+          }
+        ]
+      },
       "my files": {
         "name": "My files",
         "items": [
