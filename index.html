@@ -430,8 +430,8 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm text-gray-300 mb-1">文件夹</label>
-                    <select id="bookmark-folder" class="w-full px-3 py-2 rounded-lg bg-space-dark border border-gray-700 focus:border-space-glow focus:outline-none">
-                        <option value="default">默认文件夹</option>
+                    <select id="bookmark-folder" disabled class="w-full px-3 py-2 rounded-lg bg-space-dark border border-gray-700 focus:border-space-glow focus:outline-none">
+                    <option value="default">默认文件夹</option>
                     </select>
                 </div>
                 <div>
@@ -1801,16 +1801,17 @@ function renderBookmarks(searchQuery = '') {
 
         // 更新编辑功能状态
         function updateEditFeaturesStatus() {
-    const isEnabled = appData.github.validated;
-    elements.importBookmarks.disabled = !isEnabled;
-    elements.exportBookmarks.disabled = !isEnabled;
-    elements.addBookmark.disabled = !isEnabled;  // 确保此行存在并正确
-    elements.saveBookmarkChanges.disabled = !isEnabled;
-    elements.addCity.disabled = !isEnabled;
-    elements.saveClockChanges.disabled = !isEnabled;
-    elements.saveAdChanges.disabled = !isEnabled;
-    elements.enterEditBtn.disabled = !isEnabled;
-}
+            const isEnabled = appData.github.validated;
+            
+            elements.enterEditBtn.disabled = !isEnabled;
+            elements.importBookmarks.disabled = !isEnabled;
+            elements.exportBookmarks.disabled = !isEnabled;
+            elements.addBookmark.disabled = !isEnabled;
+            elements.saveBookmarkChanges.disabled = !isEnabled;
+            elements.addCity.disabled = !isEnabled;
+            elements.saveClockChanges.disabled = !isEnabled;
+            elements.saveAdChanges.disabled = !isEnabled;
+        }
 
         // 验证GitHub Token
         async function validateGitHubToken(token) {
@@ -2085,13 +2086,6 @@ function filterBookmarks(query) {
         a.download = '星际导航书签.html';
         document.body.appendChild(a);
         a.click();
-        // 为书签URL输入框添加自动补全协议功能
-    elements.bookmarkUrl.addEventListener('blur', (e) => {
-    const url = e.target.value.trim();
-    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
-        e.target.value = `https://${url}`;
-    }
-    });
         
         // 清理
         setTimeout(() => {
@@ -2135,89 +2129,7 @@ function filterBookmarks(query) {
             });
             
             // 保存书签
-elements.saveBookmark.addEventListener('click', () => {
-    const folderId = elements.bookmarkFolder.value;
-    const title = elements.bookmarkTitle.value.trim();
-    const url = elements.bookmarkUrl.value.trim();
-    const isQuick = elements.bookmarkIsQuick.checked;
-    const id = elements.bookmarkId.value;
-    const originalFolder = elements.bookmarkFolderOriginal.value;
-    
-    // 表单验证
-    if (!title) {
-        showToast('请输入书签标题', 'error');
-        return;
-    }
-    
-    if (!url) {
-        showToast('请输入URL地址', 'error');
-        return;
-    }
-    
-    try {
-        new URL(url); // 验证URL格式
-    } catch (e) {
-        showToast('请输入有效的URL地址', 'error');
-        return;
-    }
-
-    if (id) {
-        // 编辑现有书签
-        if (originalFolder && originalFolder !== folderId) {
-            // 如果文件夹变更，先从原文件夹移除
-            if (appData.bookmarks.folders[originalFolder]) {
-                appData.bookmarks.folders[originalFolder].items = appData.bookmarks.folders[originalFolder].items.filter(item => item.id !== id);
-            }
-        }
-        
-        // 更新书签信息
-        if (appData.bookmarks.folders[folderId]) {
-            const index = appData.bookmarks.folders[folderId].items.findIndex(item => item.id === id);
-            if (index !== -1) {
-                appData.bookmarks.folders[folderId].items[index] = {
-                    ...appData.bookmarks.folders[folderId].items[index],
-                    title,
-                    url,
-                    isQuick
-                };
-            }
-        }
-        
-        // 更新常用书签
-        const quickIndex = appData.bookmarks.quickAccess.findIndex(item => item.id === id);
-        if (isQuick && quickIndex === -1) {
-            appData.bookmarks.quickAccess.push({ id, title, url });
-        } else if (!isQuick && quickIndex !== -1) {
-            appData.bookmarks.quickAccess.splice(quickIndex, 1);
-        }
-        
-        showToast('书签已更新');
-    } else {
-        // 添加新书签
-        const newId = Date.now().toString();
-        const newBookmark = { id: newId, title, url, isQuick };
-        
-        // 添加到文件夹
-        if (!appData.bookmarks.folders[folderId]) {
-            appData.bookmarks.folders[folderId] = { name: folderId, items: [] };
-        }
-        appData.bookmarks.folders[folderId].items.push(newBookmark);
-        
-        // 添加到常用书签（如果勾选）
-        if (isQuick) {
-            appData.bookmarks.quickAccess.push(newBookmark);
-        }
-        
-        showToast('书签已添加');
-    }
-    
-    // 保存并重新渲染
-    saveData();
-    renderBookmarks();
-    renderQuickAccess();
-    renderBookmarkEditForm();
-    elements.bookmarkFormModal.classList.add('opacity-0', 'pointer-events-none');
-});
+            elements.saveBookmark.addEventListener('click', saveBookmark);
             
             // 搜索功能
             elements.searchInput.addEventListener('input', handleSearch);
@@ -2312,46 +2224,6 @@ elements.saveBookmark.addEventListener('click', () => {
             // 搜索功能监听
              elements.searchInput.addEventListener('input', (e) => {
                 handleSearch(e.target.value);
-            });
-            // 新文件夹创建功能
-elements.bookmarkFolder.addEventListener('change', () => {
-    const newFolderInput = document.getElementById('new-folder-input');
-    if (elements.bookmarkFolder.value === '__new__') {
-        newFolderInput.classList.remove('hidden');
-        newFolderInput.querySelector('input').focus();
-    } else {
-        newFolderInput.classList.add('hidden');
-    }
-});
-
-document.getElementById('confirm-new-folder').addEventListener('click', () => {
-    const newFolderInput = document.getElementById('new-folder-input');
-    const folderName = newFolderInput.querySelector('input').value.trim();
-    
-    if (folderName) {
-        // 生成唯一文件夹ID
-        const folderId = 'folder_' + Date.now();
-        
-        // 添加到文件夹列表
-        appData.bookmarks.folders[folderId] = { name: folderName, items: [] };
-        
-        // 更新下拉列表
-        const option = document.createElement('option');
-        option.value = folderId;
-        option.textContent = folderName;
-        elements.bookmarkFolder.insertBefore(option, elements.bookmarkFolder.querySelector('option[value="__new__"]'));
-        
-        // 选中新创建的文件夹
-        elements.bookmarkFolder.value = folderId;
-        
-        // 隐藏新文件夹输入框
-        newFolderInput.classList.add('hidden');
-        newFolderInput.querySelector('input').value = '';
-        
-        // 保存数据
-        saveData();
-        showToast(`已创建文件夹: ${folderName}`);
-    }
 });
         }
 
