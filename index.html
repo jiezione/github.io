@@ -1024,8 +1024,7 @@ function renderBookmarks(searchQuery = '') {
     }
     
     // 渲染过滤后的文件夹和书签
-    foldersToRender.forEach(folder => {
-        const folderId = folder.id;
+    Object.entries(foldersToRender).forEach(([folderId, folder]) => {
         const folderElement = document.createElement('div');
         folderElement.className = 'bookmark-folder';
         
