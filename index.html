@@ -1914,7 +1914,7 @@ function getFaviconInfo(url, title) {
 
         // 设置事件监听
         function setupEventListeners() {
-            elements.exportBookmarks.addEventListener('click', exportBookmarksAsHtml);
+        
             // 主题切换
             elements.themeToggle.addEventListener('click', toggleTheme);
             
@@ -1982,8 +1982,9 @@ function getFaviconInfo(url, title) {
             });
             
             // 导出书签
-            elements.exportBookmarks.addEventListener('click', exportBookmarks);
-        function exportBookmarksAsHtml() {
+            elements.exportBookmarks.addEventListener('click', exportBookmarksAsHtml);
+        
+            function exportBookmarksAsHtml() {
     showLoader();
     
     try {
@@ -2051,7 +2052,17 @@ function getFaviconInfo(url, title) {
         showToast(`导出失败: ${error.message}`, 'error');
         console.error('书签导出错误:', error);
     }
-}    
+        }    
+
+        function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+        }
             
             // 添加书签
             elements.addBookmark.addEventListener('click', () => {
