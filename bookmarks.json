@@ -1,0 +1,56 @@
+{
+  "bookmarks": {
+    "folders": {
+      "默认文件夹": {
+        "name": "默认文件夹",
+        "items": []
+      },
+      "folder_1755983069826": {
+        "name": "新文件夹1",
+        "items": []
+      },
+      "folder_1755983073441": {
+        "name": "新文件夹2",
+        "items": []
+      }
+    },
+    "quickAccess": []
+  },
+  "cities": [
+    {
+      "id": "1",
+      "name": "北京",
+      "timezone": "Asia/Shanghai"
+    },
+    {
+      "id": "2",
+      "name": "伦敦",
+      "timezone": "Europe/London"
+    },
+    {
+      "id": "3",
+      "name": "纽约",
+      "timezone": "America/New_York"
+    },
+    {
+      "id": "4",
+      "name": "东京",
+      "timezone": "Asia/Tokyo"
+    }
+  ],
+  "ads": [
+    {
+      "image": "",
+      "url": ""
+    },
+    {
+      "image": "",
+      "url": ""
+    },
+    {
+      "image": "",
+      "url": ""
+    }
+  ],
+  "deployDate": "2025-08-23T21:03:56.736Z"
+}
