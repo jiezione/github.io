@@ -997,108 +997,72 @@ function getFaviconInfo(url, title) {
             localStorage.setItem('spaceBookmarksData', JSON.stringify(appData));
         }
 
-        // 渲染书签
-        function renderBookmarks(searchQuery = '') {
-            // 清空容器
-            elements.bookmarkFolders.innerHTML = '';
-            elements.quickAccess.innerHTML = '';
+        // 渲染书签（添加搜索关键词参数）
+function renderBookmarks(searchQuery = '') {
+    const foldersToRender = filterBookmarks(searchQuery);
+    elements.bookmarkFolders.innerHTML = '';
+    
+    // 无搜索结果时显示提示
+    if (Object.keys(foldersToRender).length === 0 && searchQuery) {
+        elements.bookmarkFolders.innerHTML = `
+            <div class="text-center py-10 text-gray-400">
+                <i class="fa fa-search-minus text-3xl mb-2"></i>
+                <p>未找到与"${searchQuery}"匹配的书签</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // 渲染过滤后的文件夹和书签
+    Object.entries(foldersToRender).forEach(([folderId, folder]) => {
+        const folderElement = document.createElement('div');
+        folderElement.className = 'bookmark-folder';
+        
+        // 文件夹标题
+        const folderHeader = document.createElement('div');
+        folderHeader.className = 'flex justify-between items-center mb-3';
+        folderHeader.innerHTML = `
+            <h3 class="text-lg font-semibold text-white flex items-center">
+                <i class="fa fa-folder-open-o mr-2 text-space-accent"></i>${folder.name}
+                <span class="ml-2 text-sm text-gray-400">(${folder.items.length})</span>
+            </h3>
+        `;
+        folderElement.appendChild(folderHeader);
+        
+        // 书签列表
+        const bookmarksGrid = document.createElement('div');
+        bookmarksGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 bookmarks-grid';
+        
+        folder.items.forEach(item => {
+            const favicon = getFaviconInfo(item.url, item.title);
+            const bookmarkCard = document.createElement('a');
+            bookmarkCard.href = item.url;
+            bookmarkCard.target = '_blank';
+            bookmarkCard.className = 'bg-space-dark/50 rounded-lg p-3 border border-gray-700 hover:border-space-glow transition-all flex flex-col items-center text-center card-hover';
             
-            // 过滤书签
-            const filteredFolders = {};
-            const filteredQuickAccess = [];
-            
-            // 处理文件夹书签
-            Object.keys(appData.bookmarks.folders).forEach(folderId => {
-                const folder = appData.bookmarks.folders[folderId];
-                const filteredItems = searchQuery 
-                    ? folder.items.filter(item => isMatch(item, searchQuery))
-                    : [...folder.items];
-                
-                if (filteredItems.length > 0) {
-                    filteredFolders[folderId] = {
-                        ...folder,
-                        items: filteredItems
-                    };
-                }
-            });
-            
-            // 处理快速访问书签
+            // 处理搜索关键词高亮
+            let displayTitle = item.title;
             if (searchQuery) {
-                appData.bookmarks.quickAccess.forEach(item => {
-                    if (isMatch(item, searchQuery)) {
-                        filteredQuickAccess.push(item);
-                    }
-                });
-            } else {
-                filteredQuickAccess.push(...appData.bookmarks.quickAccess);
+                const regex = new RegExp(`(${searchQuery})`, 'gi');
+                displayTitle = item.title.replace(regex, '<span class="text-space-glow font-bold">$1</span>');
             }
             
-            // 渲染文件夹书签
-            Object.keys(appData.bookmarks.folders).forEach(folderId => {
-    const folder = appData.bookmarks.folders[folderId];
-    if (folder.items.length === 0) return;
-    
-    const folderElement = document.createElement('div');
-    folderElement.className = 'bg-space-light/30 backdrop-blur-md rounded-xl p-5 border border-space-accent/20';
-    
-    folderElement.innerHTML = `
-        <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-white">${folder.name}</h3>
-            <span class="text-sm text-gray-400">${folder.items.length}个</span>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2" id="folder-${folderId}">
-            ${folder.items.map(item => `
-                <a href="${item.url}" target="_blank" class="flex items-center p-2 bg-space-dark/50 rounded-lg hover:bg-space-dark/80 transition-colors group">
-                    <div class="w-8 h-8 rounded bg-space-accent/20 flex items-center justify-center mr-3">
-                        <img src="${item.favicon?.direct || ''}" alt="favicon" class="w-5 h-5 object-contain"
-                             onerror="this.onerror=null; this.src='${item.favicon?.backup || ''}'; this.onerror=function(){this.style.display='none'; document.getElementById('fallback-${item.id}').style.display='flex'}">
-                        <span id="fallback-${item.id}" class="text-sm font-bold" style="display: none;">${item.favicon?.fallback || (item.title ? item.title.charAt(0).toUpperCase() : '?')}</span>
-                    </div>
-                    <span class="truncate">${item.title}</span>
-                    <button class="ml-auto opacity-0 group-hover:opacity-100 text-gray-400 hover:text-white" 
-                            onclick="event.preventDefault(); editBookmark('${folderId}', '${item.id}')">
-                        <i class="fa fa-pencil"></i>
-                    </button>
-                </a>
-            `).join('')}
-        </div>
-    `;
-    
-    elements.bookmarkFolders.appendChild(folderElement);
-});
-            
-            // 渲染快速访问书签
-            filteredQuickAccess.forEach(item => {
-                const quickItem = document.createElement('a');
-                quickItem.href = item.url;
-                quickItem.target = '_blank';
-                quickItem.className = 'bg-space-light/30 backdrop-blur-md rounded-lg p-3 text-center card-hover flex flex-col items-center justify-center h-full';
-                
-                // 获取域名作为图标文本
-                let domain = '';
-                try {
-                    const url = new URL(item.url);
-                    domain = url.hostname.replace('www.', '').split('.')[0];
-                } catch (e) {
-                    domain = '?';
-                }
-                
-                quickItem.innerHTML = `
-                    <div class="w-10 h-10 rounded-full bg-space-accent/20 flex items-center justify-center mb-2 text-space-glow font-bold">
-                        ${domain.charAt(0).toUpperCase()}
-                    </div>
-                    <span class="text-sm truncate w-full">${item.title}</span>
-                `;
-                
-                elements.quickAccess.appendChild(quickItem);
-            });
-            
-            // 更新编辑界面的书签列表
-            renderBookmarkEditList();
-            
-            // 更新文件夹下拉选项
-            updateBookmarkFolderSelect();
-        }
+            bookmarkCard.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-space-light flex items-center justify-center mb-2 text-lg font-bold">
+                    <img src="${favicon.direct}" onerror="this.onerror=null;this.src='${favicon.backup}'" 
+                         onload="this.style.display='block'" style="display:none;max-width:100%;max-height:100%" 
+                         alt="favicon">
+                    <span class="favicon-fallback" style="display:${favicon.direct ? 'none' : 'block'}">${favicon.fallback}</span>
+                </div>
+                <span class="text-sm truncate w-full" title="${item.title}">${displayTitle}</span>
+            `;
+            bookmarksGrid.appendChild(bookmarkCard);
+        });
+        
+        folderElement.appendChild(bookmarksGrid);
+        elements.bookmarkFolders.appendChild(folderElement);
+    });
+    }
 
         // 创建书签元素
         function createBookmarkElement(item) {
@@ -1967,6 +1931,34 @@ function getFaviconInfo(url, title) {
             showToast('GitHub配置已保存');
         }
 
+        // 处理搜索功能
+function handleSearch(query) {
+    const lowerQuery = query.toLowerCase().trim();
+    renderBookmarks(lowerQuery); // 传入搜索关键词重新渲染书签
+}
+
+// 过滤书签的工具函数
+function filterBookmarks(query) {
+    if (!query) return appData.bookmarks.folders; // 无搜索词时返回全部
+    
+    const filteredFolders = {};
+    Object.entries(appData.bookmarks.folders).forEach(([folderId, folder]) => {
+        // 过滤文件夹中匹配的书签
+        const filteredItems = folder.items.filter(item => 
+            item.title.toLowerCase().includes(query) || 
+            item.url.toLowerCase().includes(query)
+        );
+        
+        if (filteredItems.length > 0) {
+            filteredFolders[folderId] = {
+                ...folder,
+                items: filteredItems
+            };
+        }
+    });
+    return filteredFolders;
+        }
+
         // 设置事件监听
         function setupEventListeners() {
         
@@ -2229,6 +2221,10 @@ function getFaviconInfo(url, title) {
                     showToast('广告设置已保存并同步到GitHub');
                 }
             });
+            // 搜索功能监听
+             elements.searchInput.addEventListener('input', (e) => {
+                handleSearch(e.target.value);
+});
         }
 
         // 渲染城市编辑列表
