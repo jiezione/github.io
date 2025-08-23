@@ -636,7 +636,34 @@ function getFaviconInfo(url, title) {
             fallback: title ? title.charAt(0).toUpperCase() : '?'
         };
     }
-}
+    }
+
+    function removeDuplicateFolders() {
+    const uniqueFolders = {};
+    // 遍历所有文件夹，按名称去重
+    Object.values(appData.bookmarks.folders).forEach(folder => {
+        // 标准化文件夹名称（去除前后空格并小写，确保不区分大小写的重复也能被检测）
+        const normalizedName = folder.name.trim().toLowerCase();
+        if (!uniqueFolders[normalizedName]) {
+            // 保留第一个出现的文件夹
+            uniqueFolders[normalizedName] = { ...folder, items: [...folder.items] };
+        } else {
+            // 重复文件夹：合并书签项（保留不重复的书签）
+            const existingFolder = uniqueFolders[normalizedName];
+            folder.items.forEach(item => {
+                // 检查书签是否已存在（通过URL判断）
+                const isDuplicate = existingFolder.items.some(existingItem => 
+                    existingItem.url.trim() === item.url.trim()
+                );
+                if (!isDuplicate) {
+                    existingFolder.items.push(item);
+                }
+            });
+        }
+    });
+    // 用去重后的文件夹替换原文件夹
+    appData.bookmarks.folders = uniqueFolders;
+    }
 
         // 初始化函数
         async function init() {
@@ -733,8 +760,35 @@ function getFaviconInfo(url, title) {
                 item.favicon = getFaviconInfo(item.url, item.title);
             }
         });
+        }
     }
-}
+
+    function loadLocalData() {
+    const savedData = localStorage.getItem('spaceBookmarksData');
+    if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        Object.assign(appData, parsedData);
+        
+        // 为没有favicon信息的旧书签添加favicon数据
+        Object.values(appData.bookmarks.folders).forEach(folder => {
+            folder.items.forEach(item => {
+                if (!item.favicon) {
+                    item.favicon = getFaviconInfo(item.url, item.title);
+                }
+            });
+        });
+        
+        // 处理常用书签
+        appData.bookmarks.quickAccess.forEach(item => {
+            if (!item.favicon) {
+                item.favicon = getFaviconInfo(item.url, item.title);
+            }
+        });
+
+        // 添加文件夹去重调用
+        removeDuplicateFolders();
+        }
+    }
 
         // 保存数据到GitHub
         async function saveDataToGitHub() {
@@ -878,6 +932,7 @@ function getFaviconInfo(url, title) {
             } finally {
                 hideLoader();
             }
+            removeDuplicateFolders();
         }
 
         // 显示加载动画
