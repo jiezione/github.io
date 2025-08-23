@@ -1914,6 +1914,7 @@ function getFaviconInfo(url, title) {
 
         // 设置事件监听
         function setupEventListeners() {
+            elements.exportBookmarks.addEventListener('click', exportBookmarksAsHtml);
             // 主题切换
             elements.themeToggle.addEventListener('click', toggleTheme);
             
@@ -1982,6 +1983,75 @@ function getFaviconInfo(url, title) {
             
             // 导出书签
             elements.exportBookmarks.addEventListener('click', exportBookmarks);
+        function exportBookmarksAsHtml() {
+    showLoader();
+    
+    try {
+        // 生成符合Netscape Bookmark File Format的HTML内容
+        let htmlContent = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<!-- This is an automatically generated file.
+     It will be read and overwritten.
+     DO NOT EDIT! -->
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>星际导航书签</TITLE>
+<H1>星际导航书签</H1>
+<DL><p>`;
+        
+        // 添加文件夹和书签
+        Object.values(appData.bookmarks.folders).forEach(folder => {
+            const folderDate = new Date().getTime() / 1000 | 0;
+            htmlContent += `
+    <DT><H3 ADD_DATE="${folderDate}" LAST_MODIFIED="${folderDate}">${escapeHtml(folder.name)}</H3>
+    <DL><p>`;
+            
+            folder.items.forEach(bookmark => {
+                const bookmarkDate = new Date().getTime() / 1000 | 0;
+                htmlContent += `
+        <DT><A HREF="${escapeHtml(bookmark.url)}" ADD_DATE="${bookmarkDate}" LAST_MODIFIED="${bookmarkDate}">${escapeHtml(bookmark.title)}</A>`;
+            });
+            
+            htmlContent += `
+    </DL><p>`;
+        });
+        
+        // 添加常用书签文件夹
+        const quickAccessDate = new Date().getTime() / 1000 | 0;
+        htmlContent += `
+    <DT><H3 ADD_DATE="${quickAccessDate}" LAST_MODIFIED="${quickAccessDate}">常用站点</H3>
+    <DL><p>`;
+        
+        appData.bookmarks.quickAccess.forEach(bookmark => {
+            const bookmarkDate = new Date().getTime() / 1000 | 0;
+            htmlContent += `
+        <DT><A HREF="${escapeHtml(bookmark.url)}" ADD_DATE="${bookmarkDate}" LAST_MODIFIED="${bookmarkDate}">${escapeHtml(bookmark.title)}</A>`;
+        });
+        
+        htmlContent += `
+    </DL><p>
+</DL><p>`;
+        
+        // 创建下载链接
+        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '星际导航书签.html';
+        document.body.appendChild(a);
+        a.click();
+        
+        // 清理
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            hideLoader();
+            showToast('书签导出成功', 'success');
+        }, 100);
+    } catch (error) {
+        hideLoader();
+        showToast(`导出失败: ${error.message}`, 'error');
+        console.error('书签导出错误:', error);
+    }
+}    
             
             // 添加书签
             elements.addBookmark.addEventListener('click', () => {
