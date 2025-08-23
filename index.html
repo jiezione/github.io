@@ -515,14 +515,13 @@
     <script>
         // 应用数据结构
         const appData = {
-    bookmarks: {
-        folders: [
-            {
-                id: "default",
-                name: "默认文件夹",
-                items: []
-            }
-        ],
+            bookmarks: {
+                folders: {
+                    default: {
+                        name: "默认文件夹",
+                        items: []
+                    }
+                },
                 quickAccess: []
             },
             cities: [
