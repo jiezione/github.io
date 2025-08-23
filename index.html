@@ -2135,7 +2135,7 @@ function filterBookmarks(query) {
     folderSelect.value = defaultFolder;
     document.getElementById('bookmark-folder-original').value = defaultFolder;
     
-    openModal(elements.bookmarkFormModal);
+    elements.bookmarkFormModal.classList.remove('opacity-0', 'pointer-events-none');
 });
             
             // 关闭书签表单
