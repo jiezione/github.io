@@ -1432,22 +1432,23 @@ function renderBookmarks(searchQuery = '') {
 
         // 添加新文件夹
         function addNewFolder() {
-            // 生成唯一ID
-            const folderId = 'folder_' + Date.now();
-            // 默认名称
-            const folderName = `新文件夹${Object.keys(appData.bookmarks.folders).length}`;
-            
-            // 添加到数据中
-            appData.bookmarks.folders[folderId] = {
-                name: folderName,
-                items: []
-            };
-            
-            // 重新渲染
-            renderBookmarks();
-            renderBookmarkEditList();
-            showToast('新文件夹已创建');
-        }
+    // 生成唯一ID
+    const folderId = 'folder_' + Date.now();
+    // 默认名称
+    const folderName = `新文件夹${appData.bookmarks.folders.length}`;
+    
+    // 添加到数据中（添加到数组开头实现置顶）
+    appData.bookmarks.folders.unshift({
+        id: folderId,
+        name: folderName,
+        items: []
+    });
+    
+    // 重新渲染
+    renderBookmarks();
+    renderBookmarkEditList();
+    showToast('新文件夹已创建');
+}
 
         // 更新书签文件夹下拉选项
         function updateBookmarkFolderSelect() {
