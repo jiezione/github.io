@@ -431,7 +431,7 @@
                 <div>
                     <label class="block text-sm text-gray-300 mb-1">文件夹</label>
                     <select id="bookmark-folder" class="w-full px-3 py-2 rounded-lg bg-space-dark border border-gray-700 focus:border-space-glow focus:outline-none">
-                    <option value="default">默认文件夹</option>
+                    <!-- 选项将通过JS动态生成 -->
                     </select>
                 </div>
                 <div>
@@ -2113,8 +2113,30 @@ function filterBookmarks(query) {
             
             // 添加书签
             elements.addBookmark.addEventListener('click', () => {
-                openBookmarkForm();
-            });
+    document.getElementById('bookmark-form-title').textContent = '添加书签';
+    document.getElementById('bookmark-id').value = '';
+    document.getElementById('bookmark-title').value = '';
+    document.getElementById('bookmark-url').value = '';
+    document.getElementById('bookmark-is-quick').checked = false;
+    
+    // 动态填充文件夹选项
+    const folderSelect = document.getElementById('bookmark-folder');
+    folderSelect.innerHTML = ''; // 清空现有选项
+    // 遍历所有文件夹生成选项
+    Object.entries(appData.bookmarks.folders).forEach(([folderId, folder]) => {
+        const option = document.createElement('option');
+        option.value = folderId;
+        option.textContent = folder.name;
+        folderSelect.appendChild(option);
+    });
+    
+    // 设置默认选中第一个文件夹（保持原有默认逻辑）
+    const defaultFolder = Object.keys(appData.bookmarks.folders)[0] || 'default';
+    folderSelect.value = defaultFolder;
+    document.getElementById('bookmark-folder-original').value = defaultFolder;
+    
+    openModal(elements.bookmarkFormModal);
+});
             
             // 关闭书签表单
             elements.closeBookmarkForms.forEach(btn => {
