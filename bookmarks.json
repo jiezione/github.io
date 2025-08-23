@@ -1464,21 +1464,6 @@
             }
           }
         ]
-      },
-      "新文件夹31": {
-        "name": "新人类",
-        "items": [
-          {
-            "id": "bookmark_1755938170342",
-            "title": "baidu",
-            "url": "https://baidu.com",
-            "favicon": {
-              "direct": "https://baidu.com/favicon.ico",
-              "backup": "https://icons.duckduckgo.com/ip3/baidu.com.ico",
-              "fallback": "B"
-            }
-          }
-        ]
       }
     },
     "quickAccess": []
