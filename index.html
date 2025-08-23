@@ -2136,7 +2136,89 @@ function filterBookmarks(query) {
             });
             
             // 保存书签
-            elements.saveBookmark.addEventListener('click', saveBookmark);
+elements.saveBookmark.addEventListener('click', () => {
+    const folderId = elements.bookmarkFolder.value;
+    const title = elements.bookmarkTitle.value.trim();
+    const url = elements.bookmarkUrl.value.trim();
+    const isQuick = elements.bookmarkIsQuick.checked;
+    const id = elements.bookmarkId.value;
+    const originalFolder = elements.bookmarkFolderOriginal.value;
+    
+    // 表单验证
+    if (!title) {
+        showToast('请输入书签标题', 'error');
+        return;
+    }
+    
+    if (!url) {
+        showToast('请输入URL地址', 'error');
+        return;
+    }
+    
+    try {
+        new URL(url); // 验证URL格式
+    } catch (e) {
+        showToast('请输入有效的URL地址', 'error');
+        return;
+    }
+
+    if (id) {
+        // 编辑现有书签
+        if (originalFolder && originalFolder !== folderId) {
+            // 如果文件夹变更，先从原文件夹移除
+            if (appData.bookmarks.folders[originalFolder]) {
+                appData.bookmarks.folders[originalFolder].items = appData.bookmarks.folders[originalFolder].items.filter(item => item.id !== id);
+            }
+        }
+        
+        // 更新书签信息
+        if (appData.bookmarks.folders[folderId]) {
+            const index = appData.bookmarks.folders[folderId].items.findIndex(item => item.id === id);
+            if (index !== -1) {
+                appData.bookmarks.folders[folderId].items[index] = {
+                    ...appData.bookmarks.folders[folderId].items[index],
+                    title,
+                    url,
+                    isQuick
+                };
+            }
+        }
+        
+        // 更新常用书签
+        const quickIndex = appData.bookmarks.quickAccess.findIndex(item => item.id === id);
+        if (isQuick && quickIndex === -1) {
+            appData.bookmarks.quickAccess.push({ id, title, url });
+        } else if (!isQuick && quickIndex !== -1) {
+            appData.bookmarks.quickAccess.splice(quickIndex, 1);
+        }
+        
+        showToast('书签已更新');
+    } else {
+        // 添加新书签
+        const newId = Date.now().toString();
+        const newBookmark = { id: newId, title, url, isQuick };
+        
+        // 添加到文件夹
+        if (!appData.bookmarks.folders[folderId]) {
+            appData.bookmarks.folders[folderId] = { name: folderId, items: [] };
+        }
+        appData.bookmarks.folders[folderId].items.push(newBookmark);
+        
+        // 添加到常用书签（如果勾选）
+        if (isQuick) {
+            appData.bookmarks.quickAccess.push(newBookmark);
+        }
+        
+        showToast('书签已添加');
+    }
+    
+    // 保存并重新渲染
+    saveData();
+    renderBookmarks();
+    renderQuickAccess();
+    renderBookmarkEditForm();
+    elements.bookmarkFormModal.classList.add('opacity-0', 'pointer-events-none');
+});
             
             // 搜索功能
             elements.searchInput.addEventListener('input', handleSearch);
