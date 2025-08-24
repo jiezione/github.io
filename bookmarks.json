@@ -956,11 +956,6 @@
       "id": "3",
       "name": "纽约",
       "timezone": "America/New_York"
-    },
-    {
-      "id": "4",
-      "name": "东京",
-      "timezone": "Asia/Tokyo"
     }
   ],
   "ads": [
