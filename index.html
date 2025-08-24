@@ -28,12 +28,11 @@
                     'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     'float': 'float 6s ease-in-out infinite',
                     'twinkle': 'twinkle 3s ease-in-out infinite',
-                    // 新增动画定义 - 从此处开始添加
+                    // 新增动画定义
                     'glow': 'glow 2s ease-in-out infinite',
                     'bounce-soft': 'bounce-soft 2s ease-in-out infinite',
                     'scale': 'scale 3s ease-in-out infinite',
                     'color-shift': 'color-shift 6s ease-in-out infinite'
-                    // 新增动画定义 - 到此结束
                 },
                 keyframes: {
                     float: {
@@ -44,7 +43,7 @@
                         '0%, 100%': { opacity: 1 },
                         '50%': { opacity: 0.5 }
                     },
-                    // 新增动画关键帧 - 从此处开始添加
+                    // 新增动画关键帧
                     glow: {
                         '0%, 100%': { textShadow: '0 0 10px rgba(96, 165, 250, 0.7), 0 0 20px rgba(96, 165, 250, 0.4)' },
                         '50%': { textShadow: '0 0 15px rgba(96, 165, 250, 0.9), 0 0 30px rgba(96, 165, 250, 0.6)' }
@@ -63,7 +62,6 @@
                         '66%': { color: '#f472b6' },
                         '100%': { color: '#60a5fa' }
                     }
-                    // 新增动画关键帧 - 到此结束
                 }
             }
         }
@@ -153,22 +151,6 @@
     .pulse-animation {
         animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
-     /* 新增健康提醒动画样式类 - 从此处开始添加 */
-    .animate-glow {
-        animation: glow 2s ease-in-out infinite;
-    }
-    .animate-bounce-soft {
-        animation: bounce-soft 2s ease-in-out infinite;
-    }
-    .animate-scale {
-        animation: scale 3s ease-in-out infinite;
-    }
-    .animate-color-shift {
-        animation: color-shift 6s ease-in-out infinite;
-    }
-    .border-glow {
-        box-shadow: 0 0 5px rgba(96, 165, 250, 0.5), 0 0 10px rgba(96, 165, 250, 0.2);
-    }
             .content-auto {
                 content-visibility: auto;
             }
@@ -201,6 +183,21 @@
             .bg-gradient-space-light {
                 background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
             }
+            .animate-glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+        .animate-bounce-soft {
+            animation: bounce-soft 2s ease-in-out infinite;
+        }
+        .animate-scale {
+            animation: scale 3s ease-in-out infinite;
+        }
+        .animate-color-shift {
+            animation: color-shift 6s ease-in-out infinite;
+        }
+        .border-glow {
+            box-shadow: 0 0 5px rgba(96, 165, 250, 0.5), 0 0 10px rgba(96, 165, 250, 0.2);
+        }
         }
     </style>
 </head>
