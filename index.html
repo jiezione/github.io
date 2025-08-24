@@ -1364,12 +1364,13 @@ function renderBookmarks(searchQuery = '') {
             // 绑定删除文件夹事件
             document.querySelectorAll('.delete-folder').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const folderId = e.target.closest('.delete-folder').getAttribute('data-folder-id');
-                    if (folderId !== 'default' && confirm(`确定要删除"${appData.bookmarks.folders[folderId].name}"吗？文件夹内的书签也会被删除。`)) {
-                        delete appData.bookmarks.folders[folderId];
-                        renderBookmarks();
-                        showToast('文件夹已删除');
-                    }
+                const folderId = e.target.closest('.delete-folder').getAttribute('data-folder-id');
+                if (folderId !== 'default' && confirm(`确定要删除"${appData.bookmarks.folders[folderId].name}"吗？文件夹内的书签也会被删除。`)) {
+                delete appData.bookmarks.folders[folderId];
+                renderBookmarks();
+                renderBookmarkEditList(); // 新增：刷新编辑中心书签列表
+                showToast('文件夹已删除');
+                }
                 });
             });
             
@@ -1410,23 +1411,24 @@ function renderBookmarks(searchQuery = '') {
             // 绑定删除书签事件
             document.querySelectorAll('.delete-bookmark-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const id = e.target.closest('.delete-bookmark-btn').getAttribute('data-id');
-                    const folderId = e.target.closest('.delete-bookmark-btn').getAttribute('data-folder');
-                    
-                    // 从文件夹中删除
-                    if (appData.bookmarks.folders[folderId]) {
-                        const initialLength = appData.bookmarks.folders[folderId].items.length;
-                        appData.bookmarks.folders[folderId].items = appData.bookmarks.folders[folderId].items.filter(item => item.id !== id);
-                        
-                        // 如果删除成功
-                        if (appData.bookmarks.folders[folderId].items.length < initialLength) {
-                            // 同时从快速访问中删除（如果存在）
-                            appData.bookmarks.quickAccess = appData.bookmarks.quickAccess.filter(item => item.id !== id);
-                            
-                            renderBookmarks();
-                            showToast('书签已删除');
-                        }
-                    }
+                const id = e.target.closest('.delete-bookmark-btn').getAttribute('data-id');
+                const folderId = e.target.closest('.delete-bookmark-btn').getAttribute('data-folder');
+        
+           // 从文件夹中删除
+                if (appData.bookmarks.folders[folderId]) {
+                const initialLength = appData.bookmarks.folders[folderId].items.length;
+                appData.bookmarks.folders[folderId].items = appData.bookmarks.folders[folderId].items.filter(item => item.id !== id);
+            
+            // 如果删除成功
+                if (appData.bookmarks.folders[folderId].items.length < initialLength) {
+                // 同时从快速访问中删除（如果存在）
+                appData.bookmarks.quickAccess = appData.bookmarks.quickAccess.filter(item => item.id !== id);
+                
+                renderBookmarks();
+                renderBookmarkEditList(); // 新增：刷新编辑中心书签列表
+                showToast('书签已删除');
+                }
+                }
                 });
             });
         }
