@@ -1,0 +1,38 @@
+{
+  "bookmarks": {
+    "folders": {
+      "默认文件夹": {
+        "name": "默认文件夹",
+        "items": []
+      }
+    },
+    "quickAccess": []
+  },
+  "cities": [
+    {
+      "id": "2",
+      "name": "伦敦",
+      "timezone": "Europe/London"
+    },
+    {
+      "id": "3",
+      "name": "纽约",
+      "timezone": "America/New_York"
+    }
+  ],
+  "ads": [
+    {
+      "image": "",
+      "url": ""
+    },
+    {
+      "image": "",
+      "url": ""
+    },
+    {
+      "image": "",
+      "url": ""
+    }
+  ],
+  "deployDate": "2025-08-24T09:39:20.544Z"
+}
