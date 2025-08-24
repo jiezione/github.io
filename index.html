@@ -9,39 +9,65 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script>
         tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        space: {
-                            dark: '#0b0e1a',
-                            light: '#1a202c',
-                            accent: '#3b82f6',
-                            glow: '#60a5fa',
-                            nebula: '#8b5cf6'
-                        }
-                    },
-                    fontFamily: {
-                        space: ['Inter', 'system-ui', 'sans-serif']
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'float': 'float 6s ease-in-out infinite',
-                        'twinkle': 'twinkle 3s ease-in-out infinite'
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' }
-                        },
-                        twinkle: {
-                            '0%, 100%': { opacity: 1 },
-                            '50%': { opacity: 0.5 }
-                        }
+        darkMode: 'class',
+        theme: {
+            extend: {
+                colors: {
+                    space: {
+                        dark: '#0b0e1a',
+                        light: '#1a202c',
+                        accent: '#3b82f6',
+                        glow: '#60a5fa',
+                        nebula: '#8b5cf6'
                     }
+                },
+                fontFamily: {
+                    space: ['Inter', 'system-ui', 'sans-serif']
+                },
+                animation: {
+                    'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    'float': 'float 6s ease-in-out infinite',
+                    'twinkle': 'twinkle 3s ease-in-out infinite',
+                    // 新增动画定义 - 从此处开始添加
+                    'glow': 'glow 2s ease-in-out infinite',
+                    'bounce-soft': 'bounce-soft 2s ease-in-out infinite',
+                    'scale': 'scale 3s ease-in-out infinite',
+                    'color-shift': 'color-shift 6s ease-in-out infinite'
+                    // 新增动画定义 - 到此结束
+                },
+                keyframes: {
+                    float: {
+                        '0%, 100%': { transform: 'translateY(0)' },
+                        '50%': { transform: 'translateY(-10px)' }
+                    },
+                    twinkle: {
+                        '0%, 100%': { opacity: 1 },
+                        '50%': { opacity: 0.5 }
+                    },
+                    // 新增动画关键帧 - 从此处开始添加
+                    glow: {
+                        '0%, 100%': { textShadow: '0 0 10px rgba(96, 165, 250, 0.7), 0 0 20px rgba(96, 165, 250, 0.4)' },
+                        '50%': { textShadow: '0 0 15px rgba(96, 165, 250, 0.9), 0 0 30px rgba(96, 165, 250, 0.6)' }
+                    },
+                    'bounce-soft': {
+                        '0%, 100%': { transform: 'translateY(0)' },
+                        '50%': { transform: 'translateY(-5px)' }
+                    },
+                    scale: {
+                        '0%, 100%': { transform: 'scale(1)' },
+                        '50%': { transform: 'scale(1.05)' }
+                    },
+                    'color-shift': {
+                        '0%': { color: '#60a5fa' },
+                        '33%': { color: '#a78bfa' },
+                        '66%': { color: '#f472b6' },
+                        '100%': { color: '#60a5fa' }
+                    }
+                    // 新增动画关键帧 - 到此结束
                 }
             }
         }
+    }
     </script>
     <style type="text/tailwindcss">
         @media (max-width: 768px) {
@@ -126,6 +152,22 @@
     }
     .pulse-animation {
         animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+     /* 新增健康提醒动画样式类 - 从此处开始添加 */
+    .animate-glow {
+        animation: glow 2s ease-in-out infinite;
+    }
+    .animate-bounce-soft {
+        animation: bounce-soft 2s ease-in-out infinite;
+    }
+    .animate-scale {
+        animation: scale 3s ease-in-out infinite;
+    }
+    .animate-color-shift {
+        animation: color-shift 6s ease-in-out infinite;
+    }
+    .border-glow {
+        box-shadow: 0 0 5px rgba(96, 165, 250, 0.5), 0 0 10px rgba(96, 165, 250, 0.2);
     }
             .content-auto {
                 content-visibility: auto;
@@ -1322,9 +1364,18 @@ function renderBookmarks(searchQuery = '') {
         }
 
         // 更新健康提醒
-        function updateHealthReminder() {
-    // 清除所有样式类
-    elements.healthReminder.classList.remove('reminder-primary', 'reminder-secondary', 'reminder-accent', 'pulse-animation');
+function updateHealthReminder() {
+    // 清除所有样式类（包含新增的动画类）
+    const allClasses = [
+        'reminder-primary', 'reminder-secondary', 'reminder-accent',
+        'pulse-animation', 'animate-glow', 'animate-bounce-soft', 
+        'animate-scale', 'animate-color-shift'
+    ];
+    elements.healthReminder.classList.remove(...allClasses);
+    
+    // 获取健康提醒父容器，用于添加边框动画
+    const reminderContainer = elements.healthReminder.closest('.bg-space-light/30');
+    reminderContainer.classList.remove('border-glow');
     
     const hour = new Date().getHours();
     const reminders = {
@@ -1364,9 +1415,33 @@ function renderBookmarks(searchQuery = '') {
     const randomIndex = Math.floor(Math.random() * reminders[category].length);
     elements.healthReminder.textContent = reminders[category][randomIndex];
     
-    // 随机添加动画效果（50%概率）
-    if (Math.random() > 0.5) {
-        elements.healthReminder.classList.add('pulse-animation');
+    // 新增：多样化动画效果池
+    const animations = [
+        'pulse-animation', 
+        'animate-glow', 
+        'animate-bounce-soft', 
+        'animate-scale', 
+        'animate-color-shift'
+    ];
+    
+    // 随机选择1-2个动画效果应用
+    const animationCount = Math.random() > 0.7 ? 2 : 1; // 30%概率应用两个动画
+    const selectedAnimations = [];
+    
+    for (let i = 0; i < animationCount; i++) {
+        let animation;
+        do {
+            animation = animations[Math.floor(Math.random() * animations.length)];
+        } while (selectedAnimations.includes(animation)); // 避免重复选择同一动画
+        selectedAnimations.push(animation);
+    }
+    
+    // 应用选中的动画
+    elements.healthReminder.classList.add(...selectedAnimations);
+    
+    // 新增：随机添加容器边框发光效果（30%概率）
+    if (Math.random() > 0.7) {
+        reminderContainer.classList.add('border-glow');
     }
     
     // 添加样式类
