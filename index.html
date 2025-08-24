@@ -9,63 +9,39 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script>
         tailwind.config = {
-        darkMode: 'class',
-        theme: {
-            extend: {
-                colors: {
-                    space: {
-                        dark: '#0b0e1a',
-                        light: '#1a202c',
-                        accent: '#3b82f6',
-                        glow: '#60a5fa',
-                        nebula: '#8b5cf6'
-                    }
-                },
-                fontFamily: {
-                    space: ['Inter', 'system-ui', 'sans-serif']
-                },
-                animation: {
-                    'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    'float': 'float 6s ease-in-out infinite',
-                    'twinkle': 'twinkle 3s ease-in-out infinite',
-                    // 新增动画定义
-                    'glow': 'glow 2s ease-in-out infinite',
-                    'bounce-soft': 'bounce-soft 2s ease-in-out infinite',
-                    'scale': 'scale 3s ease-in-out infinite',
-                    'color-shift': 'color-shift 6s ease-in-out infinite'
-                },
-                keyframes: {
-                    float: {
-                        '0%, 100%': { transform: 'translateY(0)' },
-                        '50%': { transform: 'translateY(-10px)' }
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        space: {
+                            dark: '#0b0e1a',
+                            light: '#1a202c',
+                            accent: '#3b82f6',
+                            glow: '#60a5fa',
+                            nebula: '#8b5cf6'
+                        }
                     },
-                    twinkle: {
-                        '0%, 100%': { opacity: 1 },
-                        '50%': { opacity: 0.5 }
+                    fontFamily: {
+                        space: ['Inter', 'system-ui', 'sans-serif']
                     },
-                    // 新增动画关键帧
-                    glow: {
-                        '0%, 100%': { textShadow: '0 0 10px rgba(96, 165, 250, 0.7), 0 0 20px rgba(96, 165, 250, 0.4)' },
-                        '50%': { textShadow: '0 0 15px rgba(96, 165, 250, 0.9), 0 0 30px rgba(96, 165, 250, 0.6)' }
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'twinkle': 'twinkle 3s ease-in-out infinite'
                     },
-                    'bounce-soft': {
-                        '0%, 100%': { transform: 'translateY(0)' },
-                        '50%': { transform: 'translateY(-5px)' }
-                    },
-                    scale: {
-                        '0%, 100%': { transform: 'scale(1)' },
-                        '50%': { transform: 'scale(1.05)' }
-                    },
-                    'color-shift': {
-                        '0%': { color: '#60a5fa' },
-                        '33%': { color: '#a78bfa' },
-                        '66%': { color: '#f472b6' },
-                        '100%': { color: '#60a5fa' }
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        twinkle: {
+                            '0%, 100%': { opacity: 1 },
+                            '50%': { opacity: 0.5 }
+                        }
                     }
                 }
             }
         }
-    }
     </script>
     <style type="text/tailwindcss">
         @media (max-width: 768px) {
@@ -104,54 +80,6 @@
 }
         @layer utilities {
             .content-auto {
-        content-visibility: auto;
-    }
-    .star {
-        position: absolute;
-        background-color: white;
-        border-radius: 50%;
-        animation: twinkle var(--twinkle-duration, 2s) infinite ease-in-out;
-    }
-    .text-shadow {
-        text-shadow: 0 0 10px rgba(96, 165, 250, 0.7);
-    }
-    .card-hover {
-        transition: all 0.3s ease;
-    }
-    .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px -5px rgba(96, 165, 250, 0.2);
-    }
-    .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-    }
-    .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-    .bg-gradient-space {
-        background: linear-gradient(135deg, #0b0e1a 0%, #1a202c 100%);
-    }
-    .bg-gradient-space-light {
-        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-    }
-    /* 新增样式类 - 健康提醒花样显示 */
-    .reminder-primary {
-        color: #60a5fa;
-        text-shadow: 0 0 8px rgba(96, 165, 250, 0.4);
-    }
-    .reminder-secondary {
-        color: #a78bfa;
-        text-shadow: 0 0 8px rgba(167, 139, 250, 0.4);
-    }
-    .reminder-accent {
-        color: #f472b6;
-        text-shadow: 0 0 8px rgba(244, 114, 182, 0.4);
-    }
-    .pulse-animation {
-        animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-            .content-auto {
                 content-visibility: auto;
             }
             .star {
@@ -183,21 +111,68 @@
             .bg-gradient-space-light {
                 background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
             }
-            .animate-glow {
-            animation: glow 2s ease-in-out infinite;
-        }
-        .animate-bounce-soft {
-            animation: bounce-soft 2s ease-in-out infinite;
-        }
-        .animate-scale {
-            animation: scale 3s ease-in-out infinite;
-        }
-        .animate-color-shift {
-            animation: color-shift 6s ease-in-out infinite;
-        }
-        .border-glow {
-            box-shadow: 0 0 5px rgba(96, 165, 250, 0.5), 0 0 10px rgba(96, 165, 250, 0.2);
-        }
+            .content-auto {
+        content-visibility: auto;
+    }
+    .star {
+        position: absolute;
+        background-color: white;
+        border-radius: 50%;
+        animation: twinkle var(--twinkle-duration, 2s) infinite ease-in-out;
+    }
+    .text-shadow {
+        text-shadow: 0 0 10px rgba(96, 165, 250, 0.7);
+    }
+    .card-hover {
+        transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(96, 165, 250, 0.2);
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .bg-gradient-space {
+        background: linear-gradient(135deg, #0b0e1a 0%, #1a202c 100%);
+    }
+    .bg-gradient-space-light {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    }
+    
+    /* 新增动画样式 */
+    .pulse-glow {
+        animation: pulse-glow 2s infinite;
+    }
+    .float-effect {
+        animation: float 3s ease-in-out infinite;
+    }
+    .spin-slow {
+        animation: spin 8s linear infinite;
+    }
+}
+
+/* 新增关键帧动画 */
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(139, 92, 246, 0.5), 0 0 10px rgba(139, 92, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 10px rgba(139, 92, 246, 0.8), 0 0 20px rgba(139, 92, 246, 0.5);
+    }
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+            
         }
     </style>
 </head>
@@ -245,12 +220,16 @@
             </div>
 
             <!-- 健康提醒 -->
-            <div class="bg-space-light/30 backdrop-blur-md rounded-xl p-5 border border-space-accent/20 card-hover">
-                <h3 class="text-space-glow mb-2 flex items-center">
-                    <i class="fa fa-heartbeat mr-2"></i>健康提醒
-                </h3>
-                <div id="health-reminder" class="text-lg">每小时休息5分钟</div>
-            </div>
+            <div class="bg-space-light/30 backdrop-blur-md rounded-xl p-5 border border-space-accent/20 card-hover pulse-glow relative overflow-hidden">
+    <!-- 装饰元素 -->
+    <div class="absolute -top-6 -right-6 w-16 h-16 rounded-full bg-space-nebula/20 spin-slow"></div>
+    <div class="absolute -bottom-4 -left-4 w-12 h-12 rounded-full bg-space-glow/20 spin-slow" style="animation-direction: reverse;"></div>
+    
+    <h3 class="text-space-glow mb-2 flex items-center relative z-10">
+        <i class="fa fa-heartbeat mr-2 float-effect"></i>健康提醒
+    </h3>
+    <div id="health-reminder" class="text-lg relative z-10 float-effect" style="animation-delay: 0.5s;">每小时休息5分钟</div>
+</div>
 
             <!-- 世界时钟 -->
             <div class="bg-space-light/30 backdrop-blur-md rounded-xl p-5 border border-space-accent/20 card-hover">
@@ -1361,89 +1340,16 @@ function renderBookmarks(searchQuery = '') {
         }
 
         // 更新健康提醒
-function updateHealthReminder() {
-    // 清除所有样式类（包含新增的动画类）
-    const allClasses = [
-        'reminder-primary', 'reminder-secondary', 'reminder-accent',
-        'pulse-animation', 'animate-glow', 'animate-bounce-soft', 
-        'animate-scale', 'animate-color-shift'
-    ];
-    elements.healthReminder.classList.remove(...allClasses);
-    
-    // 获取健康提醒父容器，用于添加边框动画
-    const reminderContainer = elements.healthReminder.closest('.bg-space-light/30');
-    reminderContainer.classList.remove('border-glow');
-    
-    const hour = new Date().getHours();
-    const reminders = {
-        work: [
-            '每小时休息5分钟，保护视力',
-            '起身活动一下，缓解久坐疲劳',
-            '远眺放松眼睛，预防近视加深',
-            '喝口水，保持身体水分充足'
-        ],
-        night: [
-            '深夜了，注意休息哦',
-            '早点休息，熬夜伤身体',
-            '放下电子设备，准备入睡吧',
-            '熬夜对肝脏不好，该休息了'
-        ],
-        default: [
-            '每小时休息5分钟',
-            '适时放松，提高效率',
-            '注意劳逸结合，保持状态',
-            '短暂休息能让你更专注'
-        ]
-    };
-    
-    let category, styleClass;
-    if (hour >= 9 && hour < 18) {
-        category = 'work';
-        styleClass = 'reminder-primary'; // 工作时间用蓝色系
-    } else if (hour >= 0 && hour < 6) {
-        category = 'night';
-        styleClass = 'reminder-secondary'; // 深夜用紫色系
-    } else {
-        category = 'default';
-        styleClass = 'reminder-accent'; // 其他时间用粉色系
-    }
-    
-    // 随机选择一条提醒
-    const randomIndex = Math.floor(Math.random() * reminders[category].length);
-    elements.healthReminder.textContent = reminders[category][randomIndex];
-    
-    // 新增：多样化动画效果池
-    const animations = [
-        'pulse-animation', 
-        'animate-glow', 
-        'animate-bounce-soft', 
-        'animate-scale', 
-        'animate-color-shift'
-    ];
-    
-    // 随机选择1-2个动画效果应用
-    const animationCount = Math.random() > 0.7 ? 2 : 1; // 30%概率应用两个动画
-    const selectedAnimations = [];
-    
-    for (let i = 0; i < animationCount; i++) {
-        let animation;
-        do {
-            animation = animations[Math.floor(Math.random() * animations.length)];
-        } while (selectedAnimations.includes(animation)); // 避免重复选择同一动画
-        selectedAnimations.push(animation);
-    }
-    
-    // 应用选中的动画
-    elements.healthReminder.classList.add(...selectedAnimations);
-    
-    // 新增：随机添加容器边框发光效果（30%概率）
-    if (Math.random() > 0.7) {
-        reminderContainer.classList.add('border-glow');
-    }
-    
-    // 添加样式类
-    elements.healthReminder.classList.add(styleClass);
-}
+        function updateHealthReminder() {
+            const hour = new Date().getHours();
+            if (hour >= 9 && hour < 18) {
+                elements.healthReminder.textContent = '每小时休息5分钟，保护视力';
+            } else if (hour >= 0 && hour < 6) {
+                elements.healthReminder.textContent = '深夜了，注意休息哦';
+            } else {
+                elements.healthReminder.textContent = '每小时休息5分钟';
+            }
+        }
 
         // 渲染书签编辑列表
         function renderBookmarkEditList() {
