@@ -819,15 +819,17 @@ const dataToSaveLocal = {
                 
                 // 处理非Latin1字符的编码问题 - 使用更可靠的编码方式
                 const content = JSON.stringify(dataToSaveGitHub, null, 2);
-                let base64Content;
-                
-                try {
-                    // 方法1: 处理大部分非Latin1字符
-                    base64Content = btoa(unescape(encodeURIComponent(content)));
-                } catch (e) {
-                    // 方法2: 作为后备，处理特殊字符
-                    base64Content = btoa(Array.from(content).map(c => String.fromCharCode(c.charCodeAt(0) % 256)).join(''));
-                }
+let base64Content;
+
+try {
+    // 使用TextEncoder处理UTF-8字符，解决中文乱码问题
+    const encoder = new TextEncoder();
+    const data = encoder.encode(content);
+    base64Content = btoa(String.fromCharCode(...new Uint8Array(data)));
+} catch (e) {
+    // 兼容旧环境的后备方案
+    base64Content = btoa(unescape(encodeURIComponent(content)));
+}
                 
                 // 先检查文件是否存在
                 const checkUrl = `https://api.github.com/repos/${username}/${repo}/contents/bookmarks.json`;
