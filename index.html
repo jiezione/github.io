@@ -1738,6 +1738,7 @@ function renderBookmarks(searchQuery = '') {
                     
                     // 保存并重新渲染
                     renderBookmarks();
+                    renderBookmarkEditList(); // 新增：刷新编辑中心书签列表
                     showToast(`成功导入 ${importedCount} 个书签，跳过 ${duplicateCount} 个重复书签`);
                 } catch (error) {
                     console.error('书签导入失败:', error);
